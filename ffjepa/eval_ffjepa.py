@@ -160,3 +160,104 @@ def sample_long(h5, num_eval, last_n, seed):
     start_steps = [int(ep_len[e] - 1 - last_n) for e in eps]
     return episodes_idx, start_steps
 
+
+def main():
+    args = parse_args()
+    if args.subgoal == "gdm":
+        raise NotImplementedError("gdm subgoal source is Task C; not wired yet")
+
+    lewm_io._ensure_swm_importable(args.swm_src)
+    import stable_worldmodel as swm
+    from stable_worldmodel.envs.pusht.env import PushT
+
+    goal_offset = 25 if args.mode == "short" else 75
+    eval_budget = args.eval_budget or (50 if args.mode == "short" else 150)
+    cem_seed = args.cem_seed if args.cem_seed is not None else args.seed  # == eval.py ${seed}
+
+    # -- frozen model + cost model
+    model = lewm_io.load_lewm(source=args.source, encoder_id=args.encoder_id,
+                              local_dir=args.local_dir, swm_src=args.swm_src,
+                              device=args.device)
+    is_baseline = args.subgoal == "baseline"
+    # baseline mode = raw LeWM + goal image (== eval.py), to isolate harness vs injection
+    cost_model = model if is_baseline else SubgoalCostModel(model)
+    print(f"[model] frozen LeWM ({sum(p.numel() for p in model.parameters())/1e6:.2f}M), "
+          f"device={args.device}, training={model.training}, subgoal={args.subgoal}")
+
+    # -- dataset (use local path so it works on CPU and box)
+    from stable_worldmodel.data.formats.hdf5 import HDF5Dataset
+    keys = ["action", "proprio", "state"]
+    dataset = HDF5Dataset(path=args.h5, keys_to_cache=keys)
+
+    # -- transform + process (mirror eval.py)
+    try:
+        tf = img_transform()
+    except Exception:
+        tf = img_transform_fallback()
+    transform = {"pixels": tf, "goal": tf}
+    process = build_process(dataset, keys)
+
+    # -- episode sampling
+    if args.mode == "short":
+        episodes_idx, start_steps = sample_short(args.h5, args.num_eval, goal_offset, args.seed)
+    else:
+        episodes_idx, start_steps = sample_long(args.h5, args.num_eval, goal_offset, args.seed)
+    print(f"[eval] mode={args.mode} num_eval={args.num_eval} goal_offset={goal_offset} "
+          f"budget={eval_budget}")
+    print(f"[eval] episodes_idx[:5]={episodes_idx[:5]} start_steps[:5]={start_steps[:5]}")
+
+    # -- subgoal source (oracle); skipped for baseline mode
+    table = None
+    if not is_baseline:
+        table = build_oracle_table(args.h5, model, episodes_idx, start_steps, goal_offset,
+                                   stride=args.stride, device=args.device)
+        print(f"[oracle] built {len(table)} per-env subgoal tables; "
+              f"K (subgoals/ep) = {table[0].shape[0]}")
+
+    config = swm.PlanConfig(horizon=args.horizon, receding_horizon=args.receding_horizon,
+                            action_block=args.action_block)
+    callables = [
+        {"method": "_set_state", "args": {"state": {"value": "state", "in_dataset": True}}},
+        {"method": "_set_goal_state", "args": {"goal_state": {"value": "goal_state", "in_dataset": True}}},
+    ]
+
+    PolicyCls = make_ffjepa_policy(swm.policy.WorldModelPolicy)
+
+    score_modes = ["env", "block"] if args.score == "both" else [args.score]
+    results = {}
+    for score_mode in score_modes:
+        for angle in args.angles:
+            patch_eval_state(PushT, angle, score_mode)
+            world = swm.World(env_name="swm/PushT-v1", num_envs=args.num_eval,
+                              max_episode_steps=2 * eval_budget, image_shape=(224, 224))
+            solver = swm.solver.CEMSolver(model=cost_model, batch_size=1,
+                                          num_samples=args.num_samples, var_scale=args.var_scale,
+                                          n_steps=args.n_steps, topk=args.topk,
+                                          device=args.device, seed=cem_seed)
+            if is_baseline:
+                policy = swm.policy.WorldModelPolicy(
+                    solver=solver, config=config, process=process, transform=transform)
+            else:
+                source = OracleSubgoalSource(table, device=args.device)
+                policy = PolicyCls(cost_model=cost_model, subgoal_source=source,
+                                   solver=solver, config=config, process=process, transform=transform)
+            world.set_policy(policy)
+            metrics = world.evaluate(
+                dataset=dataset, start_steps=list(start_steps), goal_offset=goal_offset,
+                eval_budget=eval_budget, episodes_idx=list(episodes_idx), callables=callables,
+            )
+            sr = metrics["success_rate"]
+            n_succ = int(metrics["episode_successes"].sum())
+            results[(score_mode, angle)] = (sr, n_succ)
+            print(f"[RESULT] score={score_mode} angle={angle:g}deg  SR={sr:.2f}%  ({n_succ}/{args.num_eval})")
+            world.close()
+
+    print("\n==== FF-JEPA eval summary ====")
+    print(f"mode={args.mode} subgoal={args.subgoal} num_eval={args.num_eval} "
+          f"seed={args.seed} cem_seed={cem_seed}")
+    for (sm, angle), (sr, n) in results.items():
+        print(f"  score={sm:5s} {angle:>4g}deg : {sr:6.2f}%  ({n}/{args.num_eval})")
+
+
+if __name__ == "__main__":
+    main()
