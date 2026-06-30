@@ -151,3 +151,50 @@ def build_oracle_table(h5_path, model, episodes_idx, start_steps, goal_offset,
         table.append(lat[j:j + len(rows)].clone())
         j += len(rows)
     return table
+
+
+# Policy: advance subgoal at each replan boundary, inject into info_dict
+class FFJEPAPolicy:
+    """Mixin-style wrapper requiring WorldModelPolicy as base. Constructed by
+    `make_ffjepa_policy` so the swm base class is resolved at call time (the box
+    has it pip-installed; CPU uses the source checkout)."""
+
+
+def make_ffjepa_policy(base_cls):
+    """Return an FFJEPAPolicy class subclassing `base_cls` (WorldModelPolicy)."""
+
+    class _FFJEPAPolicy(base_cls):
+        def __init__(self, *, cost_model, subgoal_source, **wmp_kwargs):
+            # base WorldModelPolicy.__init__(solver, config, process, transform, ...)
+            super().__init__(**wmp_kwargs)
+            self.type = "ffjepa"
+            self.cost_model = cost_model
+            self.subgoal_source = subgoal_source
+            self._sg_step = None  # per-env subgoal index, init in set_env
+
+        def set_env(self, env):
+            super().set_env(env)
+            n = getattr(env, "num_envs", 1)
+            self._sg_step = np.zeros(n, dtype=np.int64)
+
+        def reset_subgoals(self):
+            if self._sg_step is not None:
+                self._sg_step[:] = 0
+
+        def get_action(self, info_dict, **kwargs):
+            assert hasattr(self, "env"), "Environment not set for the policy"
+            n = self.env.num_envs
+            # mirror base replan detection (dataset eval: mode='wait', no needs_flush)
+            terminated = info_dict.get("terminated")
+            dead = (np.asarray(terminated, dtype=bool)
+                    if terminated is not None else np.zeros(n, dtype=bool))
+            replan = [i for i in range(n)
+                      if len(self._action_buffer[i]) == 0 and not dead[i]]
+            for i in replan:
+                self._sg_step[i] += 1  # 0 -> 1 on first replan => target subgoal[1]
+
+            z = self.subgoal_source.current(self._sg_step)  # (n,192)
+            info_dict = {**info_dict, SubgoalCostModel.SUBGOAL_KEY: z}
+            return super().get_action(info_dict, **kwargs)
+
+    return _FFJEPAPolicy
