@@ -1,4 +1,4 @@
-"""Box parity diagnostic (NO CEM) — locate the oracle-vs-baseline SR gap.
+"""Box parity diagnostic (NO CEM): locate the oracle-vs-baseline SR gap.
 
 (1) LATENT parity: oracle encode path (lewm_io.encode_frames) vs the harness goal
     encode path (img_transform + LeWM.encode) on each eval goal frame. If these

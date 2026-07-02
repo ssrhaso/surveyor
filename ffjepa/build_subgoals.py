@@ -135,17 +135,27 @@ def main():
         print(f"[subsample] stride={args.stride}: {int(all_rows.size)} subgoal frames to encode; "
               f"n_sg/episode min={lengths.min()} max={lengths.max()} mean={lengths.mean():.2f}")
 
-        # Pass 2: encode kept stride-H frames in chunks
+        # Pass 2: encode kept stride-H frames. Read each episode as a CONTIGUOUS
+        # h5 slice (hyperslab) and subsample in RAM, instead of fancy-indexing
+        # scattered rows (pixels[row_list]): h5py point-selection over a list is
+        # dramatically slower than a slice, especially on a network filesystem,
+        # and dominates wall-clock for the dense (stride=1) build. Episode order
+        # is preserved (kept_rows_per_ep is in kept-episode order), so lengths/
+        # offsets stay valid.
         lat_chunks = []
         bs = args.batch_size
-        n = all_rows.size
-        for i in range(0, n, bs):
-            chunk_rows = all_rows[i:i + bs]
-            frames = pixels[chunk_rows]  # (c,224,224,3) uint8, increasing rows
-            z = lewm_io.encode_frames(model, frames, device=args.device, batch_size=bs)
+        n_total_rows = int(all_rows.size)
+        done = 0
+        for ep_i, rows in enumerate(kept_rows_per_ep):
+            lo, hi = int(rows[0]), int(rows[-1]) + 1
+            span = pixels[lo:hi]                       # one contiguous read (fast)
+            sel = span[rows - lo]                      # stride-H subsample in RAM
+            z = lewm_io.encode_frames(model, sel, device=args.device, batch_size=bs)
             lat_chunks.append(z)
-            if (i // bs) % 20 == 0:
-                print(f"  encoded {min(i+bs, n)}/{n} frames  ({time.time()-t0:.0f}s)")
+            done += len(rows)
+            if ep_i % 200 == 0:
+                print(f"  encoded {done}/{n_total_rows} frames over {ep_i+1} eps "
+                      f"({time.time()-t0:.0f}s)")
         latents = torch.cat(lat_chunks, 0).contiguous().float()  # (total_nsg, 192)
         assert latents.shape[0] == int(lengths.sum())
 

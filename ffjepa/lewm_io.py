@@ -4,9 +4,9 @@ the env's success criterion.
 
 Two model-load paths, producing the *identical* frozen LeWM either way:
   * source="pretrained": stable_worldmodel.wm.utils.load_pretrained(encoder_id)
-        — the box path (hydra instantiates from the HF config.json).
+        the box path (hydra instantiates from the HF config.json).
   * source="local":      reconstruct from a dir with config.json + weights.pt
-        — the CPU/Windows path (no hydra). Mirrors the validated drift_probe
+        the CPU/Windows path (no hydra). Mirrors the validated drift_probe
         reconstruction; arch is identical, weights load strict=True.
 
 Nothing here ever trains or unfreezes the encoder/predictor.
@@ -22,7 +22,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-# Canonical PushT target (the green T) — fixed across the dataset because the
+# Canonical PushT target (the green T), fixed across the dataset because the
 # `goal` variation is NOT in DEFAULT_VARIATIONS, so reset() never randomizes it.
 # Verified against env.goal_pose == [256, 256, pi/4]. State layout (7-d), from
 # PushT._get_obs: [agent_x, agent_y, block_x, block_y, block_angle, vx, vy].
