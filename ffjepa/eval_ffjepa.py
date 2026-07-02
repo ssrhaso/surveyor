@@ -7,12 +7,18 @@ the same eval_state pin as the baseline run_eval.py.
 Subgoal source:
   --subgoal oracle : the TRUE demo latents at start, start+25, ..., goal frame
                      (subgoal[1] == the baseline's goal latent in short-horizon).
-  --subgoal gdm    : (Task C) a trained latent planner G. Not yet wired.
+  --subgoal gdm    : goal-FREE trained latent diffusion planner (--gdm-ckpt). At
+                     each replan it encodes the current frame with E and samples
+                     the next subgoal; no goal image is used.
 
-Horizon modes (short reproduces the baseline's episode sampling so the oracle is
-directly comparable):
-  short : goal_offset 25, budget 50, eval.py-style random valid starts.
-  long  : goal_offset 75, budget 150, per-episode start = ep_len-1-75 (last 75).
+Horizon modes (paper FF-JEPA protocol by default: final-N window, goal = last
+frame = the task target -- same scheme for short and long; this is what makes the
+goal-free planner's subgoals align with the eval goal):
+  short : goal_offset 25, budget 50,  start = ep_len-1-25 (final 25 steps).
+  long  : goal_offset 75, budget 150, start = ep_len-1-75 (final 75 steps).
+  --start random : eval.py/[13,5] common setting (random valid start, goal =
+                   start+goal_offset) -- baseline-comparable, NOT the FF-JEPA
+                   short protocol. Applies to short only.
 
 CPU smoke (tiny CEM, local model, 2 envs):
   SDL_VIDEODRIVER=dummy python -m ffjepa.eval_ffjepa --source local \
@@ -37,7 +43,8 @@ import torch
 
 from ffjepa import lewm_io
 from ffjepa.subgoal_planner import (SubgoalCostModel, OracleSubgoalSource,
-                                    build_oracle_table, make_ffjepa_policy)
+                                    GDMSubgoalSource, build_oracle_table,
+                                    make_ffjepa_policy)
 
 
 # success-criterion pin (mirrors run_eval.py): pos<20 AND angle<ANGLE_DEG
@@ -71,7 +78,34 @@ def parse_args():
     # what to evaluate
     p.add_argument("--subgoal", choices=["oracle", "gdm", "baseline"], default="oracle")
     p.add_argument("--gdm-ckpt", default=None, help="(Task C) trained planner checkpoint")
-    p.add_argument("--mode", choices=["short", "long"], default="short")
+    p.add_argument("--gdm-steps", type=int, default=50, help="DDIM sampling steps for GDM")
+    p.add_argument("--mode", choices=["short", "long", "random_init"], default="short",
+                   help="random_init: paper's most extreme test (III-A col 3). Fully "
+                        "synthetic random start (PushT's own reset() default variation "
+                        "sampling, not tied to any recorded episode) scored against the "
+                        "fixed canonical block target. --subgoal gdm only for now (oracle "
+                        "has no natural subgoal chain for a synthetic start; baseline needs "
+                        "a goal image from a cross-episode source not yet implemented).")
+    p.add_argument("--goal-offset", type=int, default=None,
+                   help="override the mode-derived goal_offset (25 short / 75 long), e.g. "
+                        "--mode long --goal-offset 150 for a beyond-paper long-long horizon. "
+                        "eval-budget still defaults off --mode; pass --eval-budget explicitly too.")
+    p.add_argument("--start", choices=["final", "random"], default="final",
+                   help="episode sampling. final = paper FF-JEPA protocol: the LAST "
+                        "goal_offset steps, goal = last frame (the task target). "
+                        "random = eval.py/[13,5] common setting: random valid start, "
+                        "goal = start+goal_offset. long mode is always 'final'.")
+    p.add_argument("--episodes-file", default=None,
+                   help="JSON file from ffjepa.extract_subset (produces a small subset --h5 "
+                        "plus this file). Bypasses sample_long/short entirely and uses the "
+                        "exact precomputed (episode, start_step) pairs -- for running against "
+                        "a transferred subset h5 on a box without the full dataset.")
+    p.add_argument("--eval-filter", choices=["none", "success20", "success5"], default="none",
+                   help="restrict eval episodes to demos whose FINAL frame reaches the "
+                        "canonical target (paper III-A: 'the last frame -- where the "
+                        "T-piece reaches its target position -- serves as the goal "
+                        "state'). none = current behavior: ALL episodes, of which ~34%% "
+                        "are FAILED demos whose goal a goal-free planner cannot target.")
     p.add_argument("--num-eval", type=int, default=32)
     p.add_argument("--eval-budget", type=int, default=None, help="override mode default")
     p.add_argument("--seed", type=int, default=42)
@@ -130,8 +164,25 @@ def build_process(dataset, keys):
     return process
 
 
-def sample_short(h5, num_eval, goal_offset, seed):
-    """Replicate eval.py's random-valid-start sampling (baseline-comparable)."""
+def success_mask(h5, angle_deg):
+    """Per-episode success flags under the Task-A canonical block-only filter
+    (same math as build_subgoals: block within 20px AND angle < angle_deg of the
+    canonical target, agent term neutralized)."""
+    import h5py
+    with h5py.File(h5, "r") as f:
+        ep_off = f["ep_offset"][:]
+        ep_len = f["ep_len"][:]
+        rows = ep_off + ep_len - 1
+        order = np.argsort(rows)
+        finals = np.empty((len(rows), f["state"].shape[1]), dtype=np.float64)
+        finals[order] = f["state"][np.sort(rows)]
+    return np.array([lewm_io.eval_state_tol(lewm_io.canonical_target_for(s), s, angle_deg)
+                     for s in finals], dtype=bool)
+
+
+def sample_short(h5, num_eval, goal_offset, seed, ep_mask=None):
+    """Replicate eval.py's random-valid-start sampling (baseline-comparable).
+    ep_mask (per-episode bool) optionally restricts to successful demos."""
     import h5py
     with h5py.File(h5, "r") as f:
         episode_idx = f["episode_idx"][:]
@@ -139,7 +190,10 @@ def sample_short(h5, num_eval, goal_offset, seed):
         ep_len = f["ep_len"][:]
     ep_len_per_row = ep_len[episode_idx]
     max_start_per_row = ep_len_per_row - goal_offset - 1
-    valid_indices = np.nonzero(step_idx <= max_start_per_row)[0]
+    valid = step_idx <= max_start_per_row
+    if ep_mask is not None:
+        valid &= ep_mask[episode_idx]
+    valid_indices = np.nonzero(valid)[0]
     g = np.random.default_rng(seed)
     chosen = g.choice(len(valid_indices) - 1, size=num_eval, replace=False)
     rows = np.sort(valid_indices[chosen])
@@ -148,12 +202,16 @@ def sample_short(h5, num_eval, goal_offset, seed):
     return episodes_idx, start_steps
 
 
-def sample_long(h5, num_eval, last_n, seed):
-    """Per-episode start = ep_len-1-last_n (the 'last last_n steps'); goal=last frame."""
+def sample_long(h5, num_eval, last_n, seed, ep_mask=None):
+    """Per-episode start = ep_len-1-last_n (the 'last last_n steps'); goal=last frame.
+    ep_mask (per-episode bool) optionally restricts to successful demos."""
     import h5py
     with h5py.File(h5, "r") as f:
         ep_len = f["ep_len"][:]
-    valid_eps = np.nonzero(ep_len > last_n + 1)[0]
+    valid = ep_len > last_n + 1
+    if ep_mask is not None:
+        valid &= ep_mask
+    valid_eps = np.nonzero(valid)[0]
     g = np.random.default_rng(seed)
     eps = np.sort(g.choice(valid_eps, size=num_eval, replace=False))
     episodes_idx = eps.tolist()
@@ -163,15 +221,17 @@ def sample_long(h5, num_eval, last_n, seed):
 
 def main():
     args = parse_args()
-    if args.subgoal == "gdm":
-        raise NotImplementedError("gdm subgoal source is Task C; not wired yet")
+    if args.subgoal == "gdm" and not args.gdm_ckpt:
+        raise ValueError("--subgoal gdm requires --gdm-ckpt <trained planner checkpoint>")
+    if args.mode == "random_init" and args.subgoal != "gdm":
+        raise ValueError("--mode random_init only supports --subgoal gdm for now (see --mode help)")
 
     lewm_io._ensure_swm_importable(args.swm_src)
     import stable_worldmodel as swm
     from stable_worldmodel.envs.pusht.env import PushT
 
-    goal_offset = 25 if args.mode == "short" else 75
-    eval_budget = args.eval_budget or (50 if args.mode == "short" else 150)
+    goal_offset = args.goal_offset if args.goal_offset is not None else (25 if args.mode == "short" else 75)
+    eval_budget = args.eval_budget or (50 if args.mode == "short" else (150 if args.mode == "long" else 300))
     cem_seed = args.cem_seed if args.cem_seed is not None else args.seed  # == eval.py ${seed}
 
     # -- frozen model + cost model
@@ -183,6 +243,21 @@ def main():
     cost_model = model if is_baseline else SubgoalCostModel(model)
     print(f"[model] frozen LeWM ({sum(p.numel() for p in model.parameters())/1e6:.2f}M), "
           f"device={args.device}, training={model.training}, subgoal={args.subgoal}")
+
+    # GDM planner (goal-free) loaded once; the per-env source is rebuilt per run
+    gdm_planner = None
+    if args.subgoal == "gdm":
+        from ffjepa.gdm_model import load_gdm_planner, count_params
+        gdm_planner = load_gdm_planner(args.gdm_ckpt, device=args.device)
+        d = gdm_planner.diffusion
+        # report the sampler that ACTUALLY runs (GDMPlanner branches on the ckpt's
+        # sampler field): ddpm ancestral visits all T steps and ignores --gdm-steps
+        samp = (f"ddpm_ancestral/all-{d.timesteps}-steps (--gdm-steps ignored)"
+                if d.sampler == "ddpm" else f"ddim/{args.gdm_steps}-steps")
+        print(f"[gdm] planner from {args.gdm_ckpt}: head={count_params(gdm_planner.model)/1e6:.2f}M, "
+              f"N={gdm_planner.cfg.n_future} WG={gdm_planner.cfg.wg} "
+              f"T={d.timesteps} sampler={samp} param={d.parameterization} "
+              f"schedule={d.schedule} norm={gdm_planner.normalization}")
 
     # -- dataset (use local path so it works on CPU and box)
     from stable_worldmodel.data.formats.hdf5 import HDF5Dataset
@@ -198,17 +273,50 @@ def main():
     process = build_process(dataset, keys)
 
     # -- episode sampling
-    if args.mode == "short":
-        episodes_idx, start_steps = sample_short(args.h5, args.num_eval, goal_offset, args.seed)
+    #   paper FF-JEPA protocol (default): the final `goal_offset` steps of each
+    #   episode, with the LAST frame (T at the target) as the goal -- same for
+    #   short (25) and long (75). `--start random` falls back to eval.py's
+    #   common 25-step setting (random valid start, goal = start+goal_offset).
+    #   random_init mode skips this whole block entirely -- no episode is sampled
+    #   from the dataset at all, see the world.evaluate(episodes=...) branch below.
+    use_final = (args.mode == "long") or (args.start == "final")
+    episodes_idx = start_steps = None
+    if args.mode == "random_init":
+        print(f"[eval] mode=random_init subgoal={args.subgoal} num_eval={args.num_eval} "
+              f"budget={eval_budget} -- synthetic random start (PushT's own reset() "
+              f"default variation sampling), no dataset episode involved")
+    elif args.episodes_file:
+        import json
+        with open(args.episodes_file) as f:
+            payload = json.load(f)
+        pairs = payload["episodes"]
+        episodes_idx = [p[0] for p in pairs]
+        start_steps = [p[1] for p in pairs]
+        print(f"[episodes-file] {args.episodes_file}: {len(pairs)} precomputed pairs "
+              f"(goal_offset={payload.get('goal_offset')}, seed={payload.get('seed')}, "
+              f"eval_filter={payload.get('eval_filter')}) -- sample_long/short bypassed")
     else:
-        episodes_idx, start_steps = sample_long(args.h5, args.num_eval, goal_offset, args.seed)
-    print(f"[eval] mode={args.mode} num_eval={args.num_eval} goal_offset={goal_offset} "
-          f"budget={eval_budget}")
-    print(f"[eval] episodes_idx[:5]={episodes_idx[:5]} start_steps[:5]={start_steps[:5]}")
+        ep_mask = None
+        if args.eval_filter != "none":
+            ang = 20.0 if args.eval_filter == "success20" else 5.0
+            ep_mask = success_mask(args.h5, ang)
+            print(f"[eval-filter] success@{ang:g}deg: {int(ep_mask.sum())}/{len(ep_mask)} "
+                  f"episodes eligible (goal frame reaches the canonical target)")
+        if use_final:
+            episodes_idx, start_steps = sample_long(args.h5, args.num_eval, goal_offset, args.seed,
+                                                    ep_mask=ep_mask)
+        else:
+            episodes_idx, start_steps = sample_short(args.h5, args.num_eval, goal_offset, args.seed,
+                                                     ep_mask=ep_mask)
+    if args.mode != "random_init":
+        print(f"[eval] mode={args.mode} start={'final' if use_final else 'random'} "
+              f"num_eval={args.num_eval} goal_offset={goal_offset} budget={eval_budget} "
+              f"eval_filter={args.eval_filter}")
+        print(f"[eval] episodes_idx[:5]={episodes_idx[:5]} start_steps[:5]={start_steps[:5]}")
 
-    # -- subgoal source (oracle); skipped for baseline mode
+    # -- oracle subgoal table (oracle mode only; gdm samples closed-loop, baseline uses goal image)
     table = None
-    if not is_baseline:
+    if args.subgoal == "oracle":
         table = build_oracle_table(args.h5, model, episodes_idx, start_steps, goal_offset,
                                    stride=args.stride, device=args.device)
         print(f"[oracle] built {len(table)} per-env subgoal tables; "
@@ -238,14 +346,34 @@ def main():
                 policy = swm.policy.WorldModelPolicy(
                     solver=solver, config=config, process=process, transform=transform)
             else:
-                source = OracleSubgoalSource(table, device=args.device)
+                if args.subgoal == "gdm":
+                    # fresh source per run: resets per-env cache + reseeds the
+                    # sampling generator so each run is deterministic at cem_seed
+                    source = GDMSubgoalSource(gdm_planner, n_envs=args.num_eval,
+                                              dim=gdm_planner.cfg.latent_dim,
+                                              device=args.device, n_steps=args.gdm_steps,
+                                              seed=cem_seed)
+                else:
+                    source = OracleSubgoalSource(table, device=args.device)
                 policy = PolicyCls(cost_model=cost_model, subgoal_source=source,
                                    solver=solver, config=config, process=process, transform=transform)
             world.set_policy(policy)
-            metrics = world.evaluate(
-                dataset=dataset, start_steps=list(start_steps), goal_offset=goal_offset,
-                eval_budget=eval_budget, episodes_idx=list(episodes_idx), callables=callables,
-            )
+            if args.mode == "random_init":
+                # fully synthetic start: PushT's own reset() default variation sampling
+                # (agent/block start position, block angle) -- not tied to any recorded
+                # episode. goal_state is forced to the fixed canonical block target so
+                # eval_state() (patched above) scores against the real task target, not
+                # the env's own internally-randomized goal. score=block ignores the
+                # agent portion of goal_state, so it's set to 0 (irrelevant).
+                goal_vec = np.array([0.0, 0.0, lewm_io.TARGET_BLOCK_XY[0], lewm_io.TARGET_BLOCK_XY[1],
+                                     lewm_io.TARGET_BLOCK_ANGLE, 0.0, 0.0])
+                metrics = world.evaluate(episodes=args.num_eval, seed=cem_seed,
+                                         options={"goal_state": goal_vec})
+            else:
+                metrics = world.evaluate(
+                    dataset=dataset, start_steps=list(start_steps), goal_offset=goal_offset,
+                    eval_budget=eval_budget, episodes_idx=list(episodes_idx), callables=callables,
+                )
             sr = metrics["success_rate"]
             n_succ = int(metrics["episode_successes"].sum())
             results[(score_mode, angle)] = (sr, n_succ)
@@ -254,7 +382,7 @@ def main():
 
     print("\n==== FF-JEPA eval summary ====")
     print(f"mode={args.mode} subgoal={args.subgoal} num_eval={args.num_eval} "
-          f"seed={args.seed} cem_seed={cem_seed}")
+          f"seed={args.seed} cem_seed={cem_seed} eval_filter={args.eval_filter}")
     for (sm, angle), (sr, n) in results.items():
         print(f"  score={sm:5s} {angle:>4g}deg : {sr:6.2f}%  ({n}/{args.num_eval})")
 

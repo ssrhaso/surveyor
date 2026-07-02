@@ -94,9 +94,15 @@ class SubgoalCostModel(nn.Module):
 
 
 # Subgoal sources (pluggable)
+# Common API: current(sg_steps, obs_latent=None, replan_idx=None) -> (n_envs, 192).
+# `needs_obs` tells FFJEPAPolicy whether to encode the current frame at replan and
+# pass it as obs_latent (closed-loop). The oracle ignores obs_latent (precomputed).
 class OracleSubgoalSource:
     """Per-env table of TRUE demo subgoal latents. `current(sg_steps)` returns
     (n_envs, 192) where row i = subgoal[clamp(sg_steps[i], 0, K_i-1)]."""
+
+    needs_obs = False
+    needs_goal = False
 
     def __init__(self, table: list[torch.Tensor], device="cpu"):
         # table[i]: (K_i, 192) latents at start, start+H, ..., goal frame
@@ -105,12 +111,54 @@ class OracleSubgoalSource:
         self.n_envs = len(table)
         self.dim = table[0].shape[1]
 
-    def current(self, sg_steps) -> torch.Tensor:
+    def current(self, sg_steps, obs_latent=None, replan_idx=None, goal_latent=None) -> torch.Tensor:
         rows = []
         for i in range(self.n_envs):
             k = int(np.clip(sg_steps[i], 0, self.table[i].shape[0] - 1))
             rows.append(self.table[i][k])
         return torch.stack(rows, dim=0)  # (n_envs, 192)
+
+
+class GDMSubgoalSource:
+    """GOAL-FREE subgoal source: a trained GDM latent diffusion planner.
+
+    At each replan boundary the policy encodes the CURRENT env frame (the achieved
+    state) with the frozen E and hands it here as `obs_latent`. We condition the
+    DM on it, sample, and select the IMMEDIATELY NEXT subgoal z_{m+1} (paper
+    fig.1 / SS9.5). The result is in native E-space (||z||~13.9; the planner
+    inverts its standardization), so it drops straight into SubgoalCostModel.
+
+    Subgoals are sampled only at replan and cached per-env; `current` returns the
+    cache between replans (the cost model is only queried at replan anyway).
+    Sampling is deterministic given a seeded generator.
+    """
+
+    needs_obs = True
+
+    def __init__(self, planner, n_envs, dim=192, device="cpu", n_steps=50, seed=42):
+        self.planner = planner
+        self.device = device
+        self.n_envs = n_envs
+        self.dim = dim
+        self.n_steps = n_steps
+        self.needs_goal = getattr(planner, "goal_cond", False)  # ablation: goal-cond GDM
+        self._cache = torch.zeros(n_envs, dim, device=device)
+        self._gen = torch.Generator(device=planner.device)
+        self._gen.manual_seed(int(seed))
+
+    @torch.no_grad()
+    def current(self, sg_steps, obs_latent=None, replan_idx=None, goal_latent=None) -> torch.Tensor:
+        if replan_idx is not None and len(replan_idx) > 0 and obs_latent is not None:
+            z_cond = obs_latent.to(self.planner.device)            # (R, dim) native E-space
+            z_goal = (goal_latent.to(self.planner.device)
+                      if (self.needs_goal and goal_latent is not None) else None)
+            z_next = self.planner.sample_next(z_cond, n_steps=self.n_steps,
+                                              generator=self._gen,
+                                              z_goal_native=z_goal)  # (R, dim) native E-space
+            z_next = z_next.to(self.device)
+            for r, i in enumerate(replan_idx):
+                self._cache[i] = z_next[r]
+        return self._cache.clone()
 
 
 @torch.no_grad()
@@ -193,7 +241,27 @@ def make_ffjepa_policy(base_cls):
             for i in replan:
                 self._sg_step[i] += 1  # 0 -> 1 on first replan => target subgoal[1]
 
-            z = self.subgoal_source.current(self._sg_step)  # (n,192)
+            # closed-loop sources (GDM) need the CURRENT achieved frame latent at
+            # replan: encode the raw env frame with the frozen E (== goal-encode
+            # path, native E-space). Oracle sources set needs_obs=False.
+            obs_latent = None
+            goal_latent = None
+            if getattr(self.subgoal_source, "needs_obs", False) and replan:
+                frames = np.asarray(info_dict["pixels"])[replan]  # (R,[T,]H,W,3) uint8
+                if frames.ndim == 5:                              # history dim -> take latest
+                    frames = frames[:, -1]
+                obs_latent = lewm_io.encode_frames(
+                    self.cost_model.lewm, frames, device=self.cost_model.device)
+                # goal-cond ablation: also encode the raw goal image (same E-path)
+                if getattr(self.subgoal_source, "needs_goal", False) and "goal" in info_dict:
+                    gframes = np.asarray(info_dict["goal"])[replan]
+                    if gframes.ndim == 5:
+                        gframes = gframes[:, -1]
+                    goal_latent = lewm_io.encode_frames(
+                        self.cost_model.lewm, gframes, device=self.cost_model.device)
+
+            z = self.subgoal_source.current(self._sg_step, obs_latent=obs_latent,
+                                            replan_idx=replan, goal_latent=goal_latent)  # (n,192)
             info_dict = {**info_dict, SubgoalCostModel.SUBGOAL_KEY: z}
             return super().get_action(info_dict, **kwargs)
 
