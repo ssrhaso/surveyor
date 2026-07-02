@@ -1,3 +1,4 @@
 archive/
 pycache/
 cld/
+__pycache__/
