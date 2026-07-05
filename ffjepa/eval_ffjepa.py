@@ -219,6 +219,28 @@ def sample_long(h5, num_eval, last_n, seed, ep_mask=None):
     return episodes_idx, start_steps
 
 
+def sample_random_init_goals(h5, num_eval, seed, angle_deg=20.0):
+    """Per-episode-random goal states for --mode random_init (paper III-A: goal =
+    final position of a random successful episode, not one fixed canonical target).
+    Draws num_eval goal states with replacement from episodes whose own final
+    frame passes the success filter; goal = that episode's final block pose
+    (agent zeroed, since score=block ignores the agent term)."""
+    import h5py
+    mask = success_mask(h5, angle_deg)
+    eligible = np.nonzero(mask)[0]
+    with h5py.File(h5, "r") as f:
+        ep_off = f["ep_offset"][:]
+        ep_len = f["ep_len"][:]
+        rows = (ep_off + ep_len - 1)[eligible]
+        order = np.argsort(rows)
+        finals = np.empty((len(rows), f["state"].shape[1]), dtype=np.float64)
+        finals[order] = f["state"][np.sort(rows)]
+    g = np.random.default_rng(seed)
+    chosen = g.integers(0, len(eligible), size=num_eval)
+    return [np.array([0.0, 0.0, finals[i, 2], finals[i, 3], finals[i, 4], 0.0, 0.0])
+            for i in chosen]
+
+
 def main():
     args = parse_args()
     if args.subgoal == "gdm" and not args.gdm_ckpt:
@@ -281,10 +303,14 @@ def main():
     #   from the dataset at all, see the world.evaluate(episodes=...) branch below.
     use_final = (args.mode == "long") or (args.start == "final")
     episodes_idx = start_steps = None
+    random_init_goals = None
     if args.mode == "random_init":
+        # sampled once so every score_mode x angle iteration below scores the
+        # same (random start, random goal) pairs.
+        random_init_goals = sample_random_init_goals(args.h5, args.num_eval, args.seed,
+                                                      angle_deg=20.0)
         print(f"[eval] mode=random_init subgoal={args.subgoal} num_eval={args.num_eval} "
-              f"budget={eval_budget} -- synthetic random start (PushT's own reset() "
-              f"default variation sampling), no dataset episode involved")
+              f"budget={eval_budget}, per-episode random goal (paper III-A protocol)")
     elif args.episodes_file:
         import json
         with open(args.episodes_file) as f:
@@ -336,8 +362,12 @@ def main():
     for score_mode in score_modes:
         for angle in args.angles:
             patch_eval_state(PushT, angle, score_mode)
+            # random_init has no separate eval_budget in world.evaluate(); its
+            # max_episode_steps is the real cap, so don't double it like the
+            # dataset-driven modes (whose 2x is just a loose outer safety net).
+            ep_max_steps = eval_budget if args.mode == "random_init" else 2 * eval_budget
             world = swm.World(env_name="swm/PushT-v1", num_envs=args.num_eval,
-                              max_episode_steps=2 * eval_budget, image_shape=(224, 224))
+                              max_episode_steps=ep_max_steps, image_shape=(224, 224))
             solver = swm.solver.CEMSolver(model=cost_model, batch_size=1,
                                           num_samples=args.num_samples, var_scale=args.var_scale,
                                           n_steps=args.n_steps, topk=args.topk,
@@ -359,16 +389,11 @@ def main():
                                    solver=solver, config=config, process=process, transform=transform)
             world.set_policy(policy)
             if args.mode == "random_init":
-                # fully synthetic start: PushT's own reset() default variation sampling
-                # (agent/block start position, block angle) -- not tied to any recorded
-                # episode. goal_state is forced to the fixed canonical block target so
-                # eval_state() (patched above) scores against the real task target, not
-                # the env's own internally-randomized goal. score=block ignores the
-                # agent portion of goal_state, so it's set to 0 (irrelevant).
-                goal_vec = np.array([0.0, 0.0, lewm_io.TARGET_BLOCK_XY[0], lewm_io.TARGET_BLOCK_XY[1],
-                                     lewm_io.TARGET_BLOCK_ANGLE, 0.0, 0.0])
+                # synthetic random start (PushT's own reset() sampling); goal_state
+                # is per-env (random_init_goals), not one fixed canonical target.
+                options = [{"goal_state": gv} for gv in random_init_goals]
                 metrics = world.evaluate(episodes=args.num_eval, seed=cem_seed,
-                                         options={"goal_state": goal_vec})
+                                         options=options)
             else:
                 metrics = world.evaluate(
                     dataset=dataset, start_steps=list(start_steps), goal_offset=goal_offset,
