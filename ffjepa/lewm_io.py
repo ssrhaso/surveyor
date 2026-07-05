@@ -31,6 +31,19 @@ TARGET_BLOCK_ANGLE = float(np.pi / 4)
 POS_THRESH = 20.0  # env-native positional tolerance (pixels, 4-D agent+block)
 
 
+# TwoRoom (stable_worldmodel/envs/two_room/env.py). Unlike PushT the target is
+# sampled per episode and already recorded in the h5 (state=agent xy,
+# goal_state=target xy, distance_to_target=precomputed dist), so no
+# canonical-target reconstruction is needed. Matches env.py step(): terminated
+# = dist(agent, target) < 16.0 (no angle).
+TWOROOM_POS_THRESH = 16.0
+
+
+def tworoom_success(dist_to_target: float, pos_thresh: float = TWOROOM_POS_THRESH) -> bool:
+    """TwoRoomEnv.step's success rule, applied to a recorded distance_to_target."""
+    return bool(float(dist_to_target) < pos_thresh)
+
+
 def eval_state_tol(goal_state, cur_state, angle_deg, pos_thresh: float = POS_THRESH):
     """Tolerance-parameterized copy of PushT.eval_state (env.py:347).
 
