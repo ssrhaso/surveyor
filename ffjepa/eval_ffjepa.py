@@ -43,8 +43,8 @@ import torch
 
 from ffjepa import lewm_io
 from ffjepa.subgoal_planner import (SubgoalCostModel, OracleSubgoalSource,
-                                    GDMSubgoalSource, build_oracle_table,
-                                    make_ffjepa_policy)
+                                    GDMSubgoalSource,
+                                    build_oracle_table, make_ffjepa_policy)
 
 
 # success-criterion pin (mirrors run_eval.py): pos<20 AND angle<ANGLE_DEG
@@ -123,6 +123,11 @@ def parse_args():
     p.add_argument("--cem-seed", type=int, default=None,
                    help="CEM seed; defaults to --seed (matches eval.py cem.yaml seed=${seed})")
     p.add_argument("--stride", type=int, default=25)
+    p.add_argument("--dump-traces", default=None,
+                   help="path (.pt): save per-episode success flags plus, for the gdm "
+                        "source, every replan's (z_cond, drafted subgoal) pair -- the "
+                        "raw material for failure anatomy (unreachable-subgoal vs "
+                        "drift vs budget) without re-running the eval")
     return p.parse_args()
 
 
@@ -359,6 +364,7 @@ def main():
 
     score_modes = ["env", "block"] if args.score == "both" else [args.score]
     results = {}
+    trace_dump = {}
     for score_mode in score_modes:
         for angle in args.angles:
             patch_eval_state(PushT, angle, score_mode)
@@ -382,7 +388,8 @@ def main():
                     source = GDMSubgoalSource(gdm_planner, n_envs=args.num_eval,
                                               dim=gdm_planner.cfg.latent_dim,
                                               device=args.device, n_steps=args.gdm_steps,
-                                              seed=cem_seed)
+                                              seed=cem_seed,
+                                              record=bool(args.dump_traces))
                 else:
                     source = OracleSubgoalSource(table, device=args.device)
                 policy = PolicyCls(cost_model=cost_model, subgoal_source=source,
@@ -403,7 +410,22 @@ def main():
             n_succ = int(metrics["episode_successes"].sum())
             results[(score_mode, angle)] = (sr, n_succ)
             print(f"[RESULT] score={score_mode} angle={angle:g}deg  SR={sr:.2f}%  ({n_succ}/{args.num_eval})")
+            if args.dump_traces:
+                rec = {"score": score_mode, "angle": float(angle), "sr": float(sr),
+                       "successes": np.asarray(metrics["episode_successes"]).astype(bool).tolist()}
+                if args.mode != "random_init":
+                    rec["episodes_idx"] = list(episodes_idx)
+                    rec["start_steps"] = list(start_steps)
+                if not is_baseline and getattr(source, "record", False):
+                    rec["trace"] = source.trace  # list of {replan_idx, z_cond, z_next}
+                trace_dump[f"{score_mode}_{angle:g}"] = rec
             world.close()
+
+    if args.dump_traces:
+        from pathlib import Path
+        Path(args.dump_traces).parent.mkdir(parents=True, exist_ok=True)
+        torch.save({"args": vars(args), "records": trace_dump}, args.dump_traces)
+        print(f"[traces] saved {args.dump_traces}")
 
     print("\n==== FF-JEPA eval summary ====")
     print(f"mode={args.mode} subgoal={args.subgoal} num_eval={args.num_eval} "
