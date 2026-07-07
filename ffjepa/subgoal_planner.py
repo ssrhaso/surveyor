@@ -135,7 +135,8 @@ class GDMSubgoalSource:
 
     needs_obs = True
 
-    def __init__(self, planner, n_envs, dim=192, device="cpu", n_steps=50, seed=42):
+    def __init__(self, planner, n_envs, dim=192, device="cpu", n_steps=50, seed=42,
+                 record=False):
         self.planner = planner
         self.device = device
         self.n_envs = n_envs
@@ -145,6 +146,8 @@ class GDMSubgoalSource:
         self._cache = torch.zeros(n_envs, dim, device=device)
         self._gen = torch.Generator(device=planner.device)
         self._gen.manual_seed(int(seed))
+        self.record = record   # keep per-replan (z_cond, z_next) for failure anatomy
+        self.trace = []
 
     @torch.no_grad()
     def current(self, sg_steps, obs_latent=None, replan_idx=None, goal_latent=None) -> torch.Tensor:
@@ -156,6 +159,10 @@ class GDMSubgoalSource:
                                               generator=self._gen,
                                               z_goal_native=z_goal)  # (R, dim) native E-space
             z_next = z_next.to(self.device)
+            if self.record:
+                self.trace.append({"replan_idx": np.asarray(replan_idx),
+                                   "z_cond": z_cond.detach().float().cpu(),
+                                   "z_next": z_next.detach().float().cpu()})
             for r, i in enumerate(replan_idx):
                 self._cache[i] = z_next[r]
         return self._cache.clone()
