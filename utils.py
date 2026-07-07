@@ -11,7 +11,7 @@ def get_img_preprocessor(source: str, target: str, img_size: int = 224):
 
 
 class ZScoreNormalizer:
-    """Picklable z-score normalizer — uses a class instead of a closure so it
+    """Picklable z-score normalizer, uses a class instead of a closure so it
     survives pickle when DataLoader workers are spawned (required by LanceDataset)."""
 
     def __init__(self, mean, std):

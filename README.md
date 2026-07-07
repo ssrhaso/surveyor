@@ -103,10 +103,10 @@ is available on [Google Drive](https://drive.google.com/drive/folders/1r31os0d4-
 |:---:|:---:|:---:|:---:|:---:|
 | pldm | ✓ | ✓ | ✓ | ✓ |
 | lejepa | ✓ | ✓ | ✓ | ✓ |
-| ivl | ✓ | ✓ | ✓ | — |
-| iql | ✓ | ✓ | ✓ | — |
-| gcbc | ✓ | ✓ | ✓ | — |
-| dinowm | ✓ | ✓ | — | — |
+| ivl | ✓ | ✓ | ✓ | - |
+| iql | ✓ | ✓ | ✓ | - |
+| gcbc | ✓ | ✓ | ✓ | - |
+| dinowm | ✓ | ✓ | - | - |
 | dinowm_noprop | ✓ | ✓ | ✓ | ✓ |
 
 </div>
@@ -116,8 +116,8 @@ is available on [Google Drive](https://drive.google.com/drive/folders/1r31os0d4-
 ### From the Drive archive
 
 Each tar archive contains two files per checkpoint:
-- `<name>_object.ckpt` — a serialized Python object for convenient loading; this is what `eval.py` and the `stable_worldmodel` API use
-- `<name>_weight.ckpt` — a weights-only checkpoint (`state_dict`) for cases where you want to load weights into your own model instance
+- `<name>_object.ckpt`: a serialized Python object for convenient loading; this is what `eval.py` and the `stable_worldmodel` API use
+- `<name>_weight.ckpt`: a weights-only checkpoint (`state_dict`) for cases where you want to load weights into your own model instance
 
 Place the extracted files under `$STABLEWM_HOME/` and load via:
 
@@ -129,8 +129,8 @@ cost = swm.policy.AutoCostModel('pusht/lewm')
 ```
 
 `AutoCostModel` accepts:
-- `run_name` — checkpoint path **relative to `$STABLEWM_HOME`**, without the `_object.ckpt` suffix
-- `cache_dir` — optional override for the checkpoint root (defaults to `$STABLEWM_HOME`)
+- `run_name`: checkpoint path **relative to `$STABLEWM_HOME`**, without the `_object.ckpt` suffix
+- `cache_dir`: optional override for the checkpoint root (defaults to `$STABLEWM_HOME`)
 
 The returned module is in `eval` mode with its PyTorch weights accessible via `.state_dict()`.
 

@@ -53,7 +53,19 @@ def parse_args():
                    help="limit #episodes considered PER FILE")
     p.add_argument("--sample-mode", choices=["head", "spread", "random"], default="head")
     p.add_argument("--sample-seed", type=int, default=0)
+    p.add_argument("--require-cross-room", action="store_true", default=True,
+                   help="drop episodes where agent and target start in the SAME room "
+                        "(no door-crossing needed) - the env's own target-sampling "
+                        "constraint that enforces this is disabled by default, so "
+                        "~48%% of collected episodes are a trivial same-room task, "
+                        "not the intended door-crossing one")
+    p.add_argument("--no-require-cross-room", dest="require_cross_room", action="store_false")
+    p.add_argument("--wall-center", type=float, default=112.0)
     return p.parse_args()
+
+
+def is_cross_room(state, goal_state, wall_center):
+    return (state[0] < wall_center) != (goal_state[0] < wall_center)
 
 
 def select_episodes(n_total, max_episodes, mode, seed):
@@ -93,17 +105,26 @@ def main():
             ep_off = f["ep_offset"][:]
             ep_len = f["ep_len"][:]
             dist_to_target = f["distance_to_target"]
+            state = f["state"]
+            goal_state = f["goal_state"]
             pixels = f["pixels"]
             n_total = len(ep_off)
             ep_ids = select_episodes(n_total, args.max_episodes, args.sample_mode, args.sample_seed)
             print(f"[data] {h5_path}: {n_total} episodes total; considering {len(ep_ids)} "
                   f"(mode={args.sample_mode})")
 
-            # Pass 1: success filter on FINAL distance-to-target (no pixel reads)
+            # Pass 1: success filter (final distance-to-target) + optional
+            # cross-room filter (agent/target start in different rooms - the
+            # intended task; see --require-cross-room help)
             kept_rows_per_ep = []
             n_drop = 0
+            n_drop_same_room = 0
             for e in ep_ids:
                 off, L = int(ep_off[e]), int(ep_len[e])
+                if args.require_cross_room and not is_cross_room(
+                        state[off], goal_state[off], args.wall_center):
+                    n_drop_same_room += 1
+                    continue
                 final_dist = float(dist_to_target[off + L - 1])
                 if not lewm_io.tworoom_success(final_dist, args.pos_thresh):
                     n_drop += 1
@@ -120,7 +141,8 @@ def main():
             n_kept_total += n_kept_file
             n_drop_total += n_drop
             n_considered_total += len(ep_ids)
-            print(f"[filter] {h5_path}: kept={n_kept_file} dropped={n_drop} "
+            print(f"[filter] {h5_path}: kept={n_kept_file} dropped_same_room={n_drop_same_room} "
+                  f"dropped_unsuccessful={n_drop} "
                   f"({100*n_kept_file/max(len(ep_ids),1):.1f}% kept)")
 
             # Pass 2: encode kept stride-H frames, one contiguous h5 slice per
@@ -173,6 +195,8 @@ def main():
         "criterion": {
             "pos_thresh": args.pos_thresh,
             "mode": "tworoom_native_dist_to_target",
+            "require_cross_room": args.require_cross_room,
+            "wall_center": args.wall_center,
         },
         "encoder": {"source": args.source, "encoder_id": args.encoder_id,
                     "local_dir": args.local_dir},
