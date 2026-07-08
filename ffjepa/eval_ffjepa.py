@@ -43,7 +43,8 @@ import torch
 
 from ffjepa import lewm_io
 from ffjepa.subgoal_planner import (SubgoalCostModel, OracleSubgoalSource,
-                                    GDMSubgoalSource,
+                                    GDMSubgoalSource, DSparkSubgoalSource,
+                                    SpecAcceptSubgoalSource, RegressorSubgoalSource,
                                     build_oracle_table, make_ffjepa_policy)
 
 
@@ -76,9 +77,30 @@ def parse_args():
     p.add_argument("--dataset-name", default="pusht_expert_train",
                    help="swm dataset name (box: resolved under STABLEWM_HOME); --h5 used for oracle/state")
     # what to evaluate
-    p.add_argument("--subgoal", choices=["oracle", "gdm", "baseline"], default="oracle")
+    p.add_argument("--subgoal", choices=["oracle", "gdm", "baseline", "dspark", "specaccept",
+                                         "regressor"],
+                   default="oracle")
+    p.add_argument("--regressor-ckpt", default=None,
+                   help="train_regressor.py checkpoint (--subgoal regressor)")
+    p.add_argument("--accept-tau", type=float, default=0.2,
+                   help="specaccept: relative-L2 tolerance for the reality verifier "
+                        "(accept the next drafted position iff the achieved latent is "
+                        "within tau of the subgoal just driven toward)")
     p.add_argument("--gdm-ckpt", default=None, help="(Task C) trained planner checkpoint")
     p.add_argument("--gdm-steps", type=int, default=50, help="DDIM sampling steps for GDM")
+    # DSpark mechanism (--subgoal dspark): frozen GDM drafter + trained refiner/confidence
+    p.add_argument("--dspark-ckpt", default=None, help="train_dspark_head.py checkpoint")
+    p.add_argument("--commit", choices=["adaptive", "fixed"], default="adaptive",
+                   help="commit-depth policy: adaptive (confidence k*=max{k:Pi c_i>theta}) or fixed")
+    p.add_argument("--commit-theta", type=float, default=0.5, help="adaptive commit threshold")
+    p.add_argument("--commit-k", type=int, default=None, help="fixed commit depth (<=N)")
+    p.add_argument("--no-sts", action="store_true", help="disable sequential temperature scaling")
+    p.add_argument("--chain-n", type=int, default=None,
+                   help="AR-chain the native-N drafter to this block length (e.g. 6) for a "
+                        "longer subgoal chain; default = drafter's native N")
+    p.add_argument("--no-refine", action="store_true",
+                   help="skip the DSparkHead: use the RAW (AR-chained) draft block. Requires "
+                        "--commit fixed. Isolates the longer-chain claim from refinement.")
     p.add_argument("--mode", choices=["short", "long", "random_init"], default="short",
                    help="random_init: paper's most extreme test (III-A col 3). Fully "
                         "synthetic random start (PushT's own reset() default variation "
@@ -248,8 +270,16 @@ def sample_random_init_goals(h5, num_eval, seed, angle_deg=20.0):
 
 def main():
     args = parse_args()
-    if args.subgoal == "gdm" and not args.gdm_ckpt:
-        raise ValueError("--subgoal gdm requires --gdm-ckpt <trained planner checkpoint>")
+    if args.subgoal in ("gdm", "specaccept") and not args.gdm_ckpt:
+        raise ValueError(f"--subgoal {args.subgoal} requires --gdm-ckpt <trained planner checkpoint>")
+    if args.subgoal == "regressor" and not args.regressor_ckpt:
+        raise ValueError("--subgoal regressor requires --regressor-ckpt (train_regressor.py)")
+    if args.subgoal == "dspark":
+        if not args.gdm_ckpt:
+            raise ValueError("--subgoal dspark requires --gdm-ckpt (frozen drafter)")
+        if not args.no_refine and not args.dspark_ckpt:
+            raise ValueError("--subgoal dspark requires --dspark-ckpt (refiner/confidence); "
+                             "or pass --no-refine to use the raw draft block")
     if args.mode == "random_init" and args.subgoal != "gdm":
         raise ValueError("--mode random_init only supports --subgoal gdm for now (see --mode help)")
 
@@ -273,7 +303,7 @@ def main():
 
     # GDM planner (goal-free) loaded once; the per-env source is rebuilt per run
     gdm_planner = None
-    if args.subgoal == "gdm":
+    if args.subgoal in ("gdm", "dspark", "specaccept"):
         from ffjepa.gdm_model import load_gdm_planner, count_params
         gdm_planner = load_gdm_planner(args.gdm_ckpt, device=args.device)
         d = gdm_planner.diffusion
@@ -390,6 +420,24 @@ def main():
                                               device=args.device, n_steps=args.gdm_steps,
                                               seed=cem_seed,
                                               record=bool(args.dump_traces))
+                elif args.subgoal == "regressor":
+                    source = RegressorSubgoalSource(args.regressor_ckpt,
+                                                    n_envs=args.num_eval,
+                                                    device=args.device,
+                                                    record=bool(args.dump_traces))
+                elif args.subgoal == "specaccept":
+                    source = SpecAcceptSubgoalSource(gdm_planner, n_envs=args.num_eval,
+                                                     device=args.device,
+                                                     n_steps=args.gdm_steps, seed=cem_seed,
+                                                     tau=args.accept_tau,
+                                                     record=bool(args.dump_traces))
+                elif args.subgoal == "dspark":
+                    source = DSparkSubgoalSource(gdm_planner, args.dspark_ckpt,
+                                                 n_envs=args.num_eval, device=args.device,
+                                                 n_steps=args.gdm_steps, seed=cem_seed,
+                                                 commit=args.commit, theta=args.commit_theta,
+                                                 fixed_k=args.commit_k, use_sts=not args.no_sts,
+                                                 chain_n=args.chain_n, refine=not args.no_refine)
                 else:
                     source = OracleSubgoalSource(table, device=args.device)
                 policy = PolicyCls(cost_model=cost_model, subgoal_source=source,
@@ -419,6 +467,20 @@ def main():
                 if not is_baseline and getattr(source, "record", False):
                     rec["trace"] = source.trace  # list of {replan_idx, z_cond, z_next}
                 trace_dump[f"{score_mode}_{angle:g}"] = rec
+            if args.subgoal == "specaccept":
+                total = source.n_redraft + source.n_advance
+                print(f"[specaccept] tau={args.accept_tau} gdm_steps={args.gdm_steps} "
+                      f"re-drafts={source.n_redraft} advances={source.n_advance} "
+                      f"rejects={source.n_reject} "
+                      f"call_ratio={source.n_redraft / max(total, 1):.3f} "
+                      f"(every-step=1.000; lower = fewer diffusion calls)")
+            if args.subgoal == "dspark":
+                cd = source.commit_depths
+                ratio = source.n_redraft / max(source.n_advance, 1)
+                print(f"[dspark] commit={args.commit} theta={args.commit_theta} "
+                      f"re-drafts={source.n_redraft} advances={source.n_advance} "
+                      f"mean_commit_depth={np.mean(cd) if cd else 0:.2f} "
+                      f"redraft/advance={ratio:.3f} (GDM=1.000; lower=fewer diffusion calls)")
             world.close()
 
     if args.dump_traces:
