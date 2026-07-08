@@ -13,7 +13,7 @@ Reuses an existing episodes-file (episode_idx, start_step pairs); any file
 whose episodes satisfy ep_len > start + N*stride works.
 
 Run (Isambard):
-    python -m ffjepa.probe_suffix_decay --gdm-ckpt gdm_faithful.pt \
+    python -m ffjepa.probes.probe_suffix_decay --gdm-ckpt gdm_faithful.pt \
         --source local --local-dir encoder_local \
         --h5 subset_longeval.h5 --episodes-file subset_longeval.episodes150.json \
         --device cuda --n-probe 256 --stride 25
