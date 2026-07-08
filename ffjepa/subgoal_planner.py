@@ -168,6 +168,124 @@ class GDMSubgoalSource:
         return self._cache.clone()
 
 
+def load_dspark_heads(path, device):
+    """Load a train_dspark_head.py checkpoint -> (DSparkHead, ConfidenceHead, ckpt)."""
+    from ffjepa.dspark_head import DSparkHead, ConfidenceHead
+    ck = torch.load(path, map_location="cpu", weights_only=False)
+    D = ck["dim"]
+    head = DSparkHead(D, ck["mean"], ck["std"], mode=ck.get("mode", "causal"))
+    head.load_state_dict(ck["head_state"]); head.to(device).eval()
+    conf = ConfidenceHead(D, ck["mean"], ck["std"])
+    conf.load_state_dict(ck["conf_state"]); conf.to(device).eval()
+    return head, conf, ck
+
+
+class DSparkSubgoalSource:
+    """The DSpark mechanism for FF-JEPA: confidence-scheduled speculative decoding
+    with semi-autoregressive refinement, over the frozen GDM's drafted subgoal block.
+
+    At a replan boundary, if the per-env committed block is exhausted, it RE-DRAFTS:
+    the frozen GDM samples the N-block from the CURRENT achieved latent (re-anchor),
+    the DSparkHead refines it (semi-AR residual), the ConfidenceHead scores each
+    refined position, and the commit depth is set speculatively to
+    k* = max{k : Π_{i<=k} c_i > theta} (adaptive) or a fixed k. Those k* subgoals are
+    committed to a per-env queue and consumed one per replan (every `stride` steps),
+    so the expensive diffusion re-draft runs only every k* replans instead of every
+    replan -- decoupling subgoal-resample cadence from CEM's action-replan cadence
+    (the "fewer replans at equal fidelity" systems win). Reduces to GDMSubgoalSource
+    when commit='fixed' with fixed_k=1.
+
+    Same `current(...)` contract as GDMSubgoalSource; standalone apart from the frozen
+    GDM planner + the loaded heads (no coupling to CEM internals).
+    """
+
+    needs_obs = True
+    needs_goal = False
+
+    def __init__(self, gdm_planner, dspark_path, n_envs, device="cpu", n_steps=50,
+                 seed=42, commit="adaptive", theta=0.5, fixed_k=None, use_sts=True,
+                 chain_n=None, refine=True):
+        from ffjepa.dspark_head import commit_depth
+        self._commit_depth = commit_depth
+        self.planner = gdm_planner
+        self.native_n = gdm_planner.cfg.n_future
+        # block_n = length of the (possibly AR-chained) drafted block to work on
+        self.block_n = int(chain_n) if chain_n else self.native_n
+        self.refine = refine
+        if refine:
+            self.head, self.conf, ck = load_dspark_heads(dspark_path, device)
+            self.sts_temp = ck["sts_temp"].to(device) if (use_sts and "sts_temp" in ck) else None
+        else:  # raw open-loop: no refinement, no confidence (commit must be 'fixed')
+            self.head = self.conf = self.sts_temp = None
+            assert commit == "fixed", "refine=False requires commit='fixed' (no confidence head)"
+        self.N = self.block_n
+        self.dim = gdm_planner.cfg.latent_dim
+        self.device = device
+        self.n_steps = n_steps
+        self.commit = commit                        # 'adaptive' | 'fixed'
+        self.theta = float(theta)
+        self.max_commit = self.block_n
+        self.fixed_k = min(fixed_k or self.block_n, self.block_n)
+        self.n_envs = n_envs
+        self._queue = [None] * n_envs               # per-env (k*, dim) committed refined subgoals
+        self._ptr = np.zeros(n_envs, dtype=int)
+        self._cache = torch.zeros(n_envs, self.dim, device=device)
+        self._gen = torch.Generator(device=gdm_planner.device)
+        self._gen.manual_seed(int(seed))
+        # telemetry
+        self.n_redraft = 0
+        self.n_advance = 0
+        self.commit_depths = []
+
+    @torch.no_grad()
+    def _draft_block(self, zc):
+        """Draft a length-block_n block, AR-chaining the native-N drafter (re-condition
+        on its own last latent each hop) when block_n > native_n."""
+        if self.block_n <= self.native_n:
+            return self.planner.sample_sequence(zc, n_steps=self.n_steps,
+                                                generator=self._gen)[:, :self.block_n]
+        hops = (self.block_n + self.native_n - 1) // self.native_n
+        blocks, cond = [], zc
+        for _ in range(hops):
+            blk = self.planner.sample_sequence(cond, n_steps=self.n_steps, generator=self._gen)
+            blocks.append(blk); cond = blk[:, -1]
+        return torch.cat(blocks, dim=1)[:, :self.block_n]
+
+    @torch.no_grad()
+    def current(self, sg_steps, obs_latent=None, replan_idx=None, goal_latent=None) -> torch.Tensor:
+        if replan_idx is not None and len(replan_idx) > 0 and obs_latent is not None:
+            replan_idx = list(replan_idx)
+            # replan envs whose committed block is empty/exhausted -> need a re-draft
+            need = [r for r, i in enumerate(replan_idx)
+                    if self._queue[i] is None or self._ptr[i] >= self._queue[i].shape[0]]
+            if need:
+                zc = obs_latent[need].to(self.planner.device)                  # (Rn, D) native
+                block = self._draft_block(zc)                                  # (Rn, block_n, D)
+                if self.refine:
+                    refined = self.head(block, zc)                             # (Rn, block_n, D)
+                    cvals = self.conf(refined, block, zc, temperature=self.sts_temp)
+                else:
+                    refined, cvals = block, None                              # raw block, no confidence
+                for j, r in enumerate(need):
+                    i = replan_idx[r]
+                    if self.commit == "adaptive":
+                        k = self._commit_depth(cvals[j], self.theta, self.max_commit)
+                    else:
+                        k = self.fixed_k
+                    self._queue[i] = refined[j, :k].to(self.device).clone()
+                    self._ptr[i] = 0
+                    self.n_redraft += 1
+                    self.commit_depths.append(int(k))
+            # consume one committed subgoal per replan env (clamp at last if exhausted)
+            for r, i in enumerate(replan_idx):
+                q = self._queue[i]
+                k = min(self._ptr[i], q.shape[0] - 1)
+                self._cache[i] = q[k]
+                self._ptr[i] += 1
+                self.n_advance += 1
+        return self._cache.clone()
+
+
 @torch.no_grad()
 def build_oracle_table(h5_path, model, episodes_idx, start_steps, goal_offset,
                        stride=25, device="cpu", batch_size=256):
