@@ -168,6 +168,49 @@ class GDMSubgoalSource:
         return self._cache.clone()
 
 
+class RegressorSubgoalSource:
+    """Deterministic z_cond -> m+1 subgoal source (train_regressor.py ckpt).
+
+    The diffusion-vs-regression closed-loop arm: offline this architecture
+    dominated the diffusion drafter on latent fidelity; the spread thesis
+    (validated on the refiner, -11pp) predicts its zero conditional spread
+    makes a WORSE CEM target. Same current() contract as GDMSubgoalSource;
+    re-anchors every replan."""
+
+    needs_obs = True
+    needs_goal = False
+
+    def __init__(self, ckpt_path, n_envs, device="cpu", record=False):
+        from ffjepa.train_regressor import BlockRegressor
+        ck = torch.load(ckpt_path, map_location="cpu", weights_only=False)
+        self.model = BlockRegressor(ck["dim"], ck["n_future"], ck["hid"])
+        self.model.load_state_dict(ck["state"])
+        self.model.to(device).eval()
+        self.mean = ck["mean"].to(device)
+        self.std = ck["std"].to(device)
+        self.dim = int(ck["dim"])
+        self.device = device
+        self.n_envs = n_envs
+        self._cache = torch.zeros(n_envs, self.dim, device=device)
+        self.record = record
+        self.trace = []
+
+    @torch.no_grad()
+    def current(self, sg_steps, obs_latent=None, replan_idx=None, goal_latent=None) -> torch.Tensor:
+        if replan_idx is not None and len(replan_idx) > 0 and obs_latent is not None:
+            z_cond = obs_latent.to(self.device)
+            z_std = (z_cond - self.mean) / self.std
+            block = self.model(z_std)                       # (R, N, D) standardized
+            z_next = block[:, 0] * self.std + self.mean     # m+1, native E-space
+            if self.record:
+                self.trace.append({"replan_idx": np.asarray(replan_idx),
+                                   "z_cond": z_cond.detach().float().cpu(),
+                                   "z_next": z_next.detach().float().cpu()})
+            for r, i in enumerate(replan_idx):
+                self._cache[i] = z_next[r]
+        return self._cache.clone()
+
+
 class SpecAcceptSubgoalSource:
     """Speculative subgoal consumption with REALITY as the verifier (the DSpark
     draft-verify-accept skeleton with the learned confidence head replaced by
