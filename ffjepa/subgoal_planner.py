@@ -168,6 +168,86 @@ class GDMSubgoalSource:
         return self._cache.clone()
 
 
+class SpecAcceptSubgoalSource:
+    """Speculative subgoal consumption with REALITY as the verifier (the DSpark
+    draft-verify-accept skeleton with the learned confidence head replaced by
+    the achieved latent; DIRECTION_dspark_gdm.md Phase B).
+
+    At each replan boundary the policy hands over the CURRENT achieved latent.
+    Verify it against the subgoal we were just driving toward: within `tau`
+    (relative L2) -> consume the NEXT position of the block drafted at the last
+    re-anchor (no diffusion call); outside `tau`, or block exhausted -> re-draft
+    the whole N-block from the achieved state. Re-anchoring is never sacrificed
+    when reality diverges; diffusion is only skipped while reality confirms the
+    plan. Offline calibration (probe_dspark_gates A2): s5 tau=0.20 / s25
+    tau=0.40 give ~1.9x fewer diffusion calls at ~zero staleness penalty."""
+
+    needs_obs = True
+    needs_goal = False
+
+    def __init__(self, planner, n_envs, device="cpu", n_steps=50, seed=42,
+                 tau=0.2, record=False):
+        self.planner = planner
+        self.N = int(planner.cfg.n_future)
+        self.dim = int(planner.cfg.latent_dim)
+        self.device = device
+        self.n_envs = n_envs
+        self.n_steps = n_steps
+        self.tau = float(tau)
+        self._queue = [None] * n_envs           # (N, dim) block from the last re-anchor
+        self._ptr = np.zeros(n_envs, dtype=int)  # next block position to serve
+        self._target = [None] * n_envs           # latent currently being driven toward
+        self._cache = torch.zeros(n_envs, self.dim, device=device)
+        self._gen = torch.Generator(device=planner.device)
+        self._gen.manual_seed(int(seed))
+        self.record = record
+        self.trace = []
+        self.n_redraft = 0   # diffusion calls
+        self.n_advance = 0   # positions served from the queue (calls skipped)
+        self.n_reject = 0    # verification failures (subset of redrafts)
+
+    @torch.no_grad()
+    def current(self, sg_steps, obs_latent=None, replan_idx=None, goal_latent=None) -> torch.Tensor:
+        if replan_idx is not None and len(replan_idx) > 0 and obs_latent is not None:
+            z_now = obs_latent.to(self.device)               # (R, dim) achieved latents
+            need_rows, need_envs = [], []
+            for r, i in enumerate(replan_idx):
+                q, tgt = self._queue[i], self._target[i]
+                accept = False
+                if q is not None and tgt is not None:
+                    rel = float((z_now[r] - tgt).norm()
+                                / z_now[r].norm().clamp_min(1e-8))
+                    verified = rel <= self.tau
+                    if not verified:
+                        self.n_reject += 1
+                    accept = verified and self._ptr[i] < self.N
+                if accept:
+                    nxt = self._queue[i][self._ptr[i]]
+                    self._ptr[i] += 1
+                    self._target[i] = nxt
+                    self._cache[i] = nxt
+                    self.n_advance += 1
+                else:
+                    need_rows.append(r)
+                    need_envs.append(i)
+            if need_rows:
+                z_cond = z_now[need_rows].to(self.planner.device)
+                blocks = self.planner.sample_sequence(z_cond, n_steps=self.n_steps,
+                                                      generator=self._gen)  # (R', N, dim)
+                blocks = blocks.to(self.device)
+                if self.record:
+                    self.trace.append({"replan_idx": np.asarray(need_envs),
+                                       "z_cond": z_cond.detach().float().cpu(),
+                                       "block": blocks.detach().float().cpu()})
+                for j, i in enumerate(need_envs):
+                    self._queue[i] = blocks[j]
+                    self._target[i] = blocks[j][0]
+                    self._cache[i] = blocks[j][0]
+                    self._ptr[i] = 1
+                    self.n_redraft += 1
+        return self._cache.clone()
+
+
 def load_dspark_heads(path, device):
     """Load a train_dspark_head.py checkpoint -> (DSparkHead, ConfidenceHead, ckpt)."""
     from ffjepa.dspark_head import DSparkHead, ConfidenceHead
