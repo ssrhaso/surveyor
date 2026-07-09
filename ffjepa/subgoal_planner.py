@@ -24,6 +24,8 @@ harness goal-encode path to ~1e-6.
 
 from __future__ import annotations
 
+import time
+
 import numpy as np
 import torch
 from torch import nn
@@ -223,14 +225,19 @@ class SpecAcceptSubgoalSource:
     the whole N-block from the achieved state. Re-anchoring is never sacrificed
     when reality diverges; diffusion is only skipped while reality confirms the
     plan. Offline calibration (probe_dspark_gates A2): s5 tau=0.20 / s25
-    tau=0.40 give ~1.9x fewer diffusion calls at ~zero staleness penalty."""
+    tau=0.40 give ~1.9x fewer diffusion calls at ~zero staleness penalty.
+
+    Goal-conditioned drafters (Reacher: planner.goal_cond=True) are supported:
+    needs_goal mirrors the planner flag and re-drafts pass the per-env goal
+    latent through to sample_sequence. Verification itself stays goal-free -
+    reality is compared against the subgoal just pursued, same as ever."""
 
     needs_obs = True
-    needs_goal = False
 
     def __init__(self, planner, n_envs, device="cpu", n_steps=50, seed=42,
                  tau=0.2, record=False):
         self.planner = planner
+        self.needs_goal = getattr(planner, "goal_cond", False)
         self.N = int(planner.cfg.n_future)
         self.dim = int(planner.cfg.latent_dim)
         self.device = device
@@ -275,8 +282,11 @@ class SpecAcceptSubgoalSource:
                     need_envs.append(i)
             if need_rows:
                 z_cond = z_now[need_rows].to(self.planner.device)
+                z_goal = (goal_latent[need_rows].to(self.planner.device)
+                          if (self.needs_goal and goal_latent is not None) else None)
                 blocks = self.planner.sample_sequence(z_cond, n_steps=self.n_steps,
-                                                      generator=self._gen)  # (R', N, dim)
+                                                      generator=self._gen,
+                                                      z_goal_native=z_goal)  # (R', N, dim)
                 blocks = blocks.to(self.device)
                 if self.record:
                     self.trace.append({"replan_idx": np.asarray(need_envs),
@@ -460,18 +470,44 @@ def make_ffjepa_policy(base_cls):
     """Return an FFJEPAPolicy class subclassing `base_cls` (WorldModelPolicy)."""
 
     class _FFJEPAPolicy(base_cls):
-        def __init__(self, *, cost_model, subgoal_source, **wmp_kwargs):
+        def __init__(self, *, cost_model, subgoal_source, time_instrument=False,
+                    dump_frames=False, **wmp_kwargs):
             # base WorldModelPolicy.__init__(solver, config, process, transform, ...)
             super().__init__(**wmp_kwargs)
             self.type = "ffjepa"
             self.cost_model = cost_model
             self.subgoal_source = subgoal_source
             self._sg_step = None  # per-env subgoal index, init in set_env
+            # optional wall-clock instrumentation (additive; zero overhead when off):
+            # t_drafter = frame-encode + subgoal_source.current(...); t_cem = the CEM
+            # solve inside super().get_action(...). CUDA ops are async, so each
+            # boundary is torch.cuda.synchronize()'d before the timestamp is taken.
+            self.time_instrument = time_instrument
+            self.t_drafter = 0.0
+            self.t_cem = 0.0
+            self._timed_steps = 0
+            # optional per-env frame capture for the random-init visual sanity
+            # check (additive; a few numpy copies/step, only when opted in): the
+            # FIRST info_dict['pixels']/['goal'] this policy ever sees per env is
+            # the raw reset frame (get_action is called BEFORE env.step at t=0),
+            # and _frame_last is refreshed every call so the final overwrite --
+            # the call where info_dict['terminated'][i] first flips True -- holds
+            # the true terminal frame (env freezes afterward under reset_mode='wait').
+            self.dump_frames = dump_frames
+            self._frame_start = None
+            self._frame_goal = None
+            self._frame_last = None
+            self._captured_start = None
 
         def set_env(self, env):
             super().set_env(env)
             n = getattr(env, "num_envs", 1)
             self._sg_step = np.zeros(n, dtype=np.int64)
+            if self.dump_frames:
+                self._frame_start = [None] * n
+                self._frame_goal = [None] * n
+                self._frame_last = [None] * n
+                self._captured_start = np.zeros(n, dtype=bool)
 
         def reset_subgoals(self):
             if self._sg_step is not None:
@@ -489,18 +525,62 @@ def make_ffjepa_policy(base_cls):
             for i in replan:
                 self._sg_step[i] += 1  # 0 -> 1 on first replan => target subgoal[1]
 
+            if self.dump_frames:
+                pixels_all = np.asarray(info_dict["pixels"])
+                goal_all = np.asarray(info_dict["goal"]) if "goal" in info_dict else None
+                for i in range(n):
+                    frame = pixels_all[i]
+                    if frame.ndim == 4:  # history dim -> take latest
+                        frame = frame[-1]
+                    self._frame_last[i] = np.array(frame, copy=True)
+                    if not self._captured_start[i]:
+                        self._frame_start[i] = np.array(frame, copy=True)
+                        if goal_all is not None:
+                            g = goal_all[i]
+                            if g.ndim == 4:
+                                g = g[-1]
+                            self._frame_goal[i] = np.array(g, copy=True)
+                        self._captured_start[i] = True
+
             # closed-loop sources (GDM) need the CURRENT achieved frame latent at
             # replan: encode the raw env frame with the frozen E (== goal-encode
             # path, native E-space). Oracle sources set needs_obs=False.
+            if not self.time_instrument:
+                obs_latent = None
+                goal_latent = None
+                if getattr(self.subgoal_source, "needs_obs", False) and replan:
+                    frames = np.asarray(info_dict["pixels"])[replan]  # (R,[T,]H,W,3) uint8
+                    if frames.ndim == 5:                              # history dim -> take latest
+                        frames = frames[:, -1]
+                    obs_latent = lewm_io.encode_frames(
+                        self.cost_model.lewm, frames, device=self.cost_model.device)
+                    # goal-cond ablation: also encode the raw goal image (same E-path)
+                    if getattr(self.subgoal_source, "needs_goal", False) and "goal" in info_dict:
+                        gframes = np.asarray(info_dict["goal"])[replan]
+                        if gframes.ndim == 5:
+                            gframes = gframes[:, -1]
+                        goal_latent = lewm_io.encode_frames(
+                            self.cost_model.lewm, gframes, device=self.cost_model.device)
+
+                z = self.subgoal_source.current(self._sg_step, obs_latent=obs_latent,
+                                                replan_idx=replan, goal_latent=goal_latent)  # (n,192)
+                info_dict = {**info_dict, SubgoalCostModel.SUBGOAL_KEY: z}
+                return super().get_action(info_dict, **kwargs)
+
+            # timed path (--time-instrument): identical logic, wrapped with
+            # perf_counter() at the drafter/CEM boundary, CUDA-synced first.
+            if torch.cuda.is_available():
+                torch.cuda.synchronize()
+            _t0 = time.perf_counter()
+
             obs_latent = None
             goal_latent = None
             if getattr(self.subgoal_source, "needs_obs", False) and replan:
-                frames = np.asarray(info_dict["pixels"])[replan]  # (R,[T,]H,W,3) uint8
-                if frames.ndim == 5:                              # history dim -> take latest
+                frames = np.asarray(info_dict["pixels"])[replan]
+                if frames.ndim == 5:
                     frames = frames[:, -1]
                 obs_latent = lewm_io.encode_frames(
                     self.cost_model.lewm, frames, device=self.cost_model.device)
-                # goal-cond ablation: also encode the raw goal image (same E-path)
                 if getattr(self.subgoal_source, "needs_goal", False) and "goal" in info_dict:
                     gframes = np.asarray(info_dict["goal"])[replan]
                     if gframes.ndim == 5:
@@ -509,8 +589,21 @@ def make_ffjepa_policy(base_cls):
                         self.cost_model.lewm, gframes, device=self.cost_model.device)
 
             z = self.subgoal_source.current(self._sg_step, obs_latent=obs_latent,
-                                            replan_idx=replan, goal_latent=goal_latent)  # (n,192)
+                                            replan_idx=replan, goal_latent=goal_latent)
             info_dict = {**info_dict, SubgoalCostModel.SUBGOAL_KEY: z}
-            return super().get_action(info_dict, **kwargs)
+
+            if torch.cuda.is_available():
+                torch.cuda.synchronize()
+            _t1 = time.perf_counter()
+            self.t_drafter += _t1 - _t0
+
+            result = super().get_action(info_dict, **kwargs)
+
+            if torch.cuda.is_available():
+                torch.cuda.synchronize()
+            _t2 = time.perf_counter()
+            self.t_cem += _t2 - _t1
+            self._timed_steps += 1
+            return result
 
     return _FFJEPAPolicy
