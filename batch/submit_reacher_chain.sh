@@ -38,9 +38,13 @@ DENSE=$(sbatch --parsable $DL_DEP batch/run_reacher_dense_build.sbatch)
 echo "[chain] dense build: $DENSE"
 
 TRAIN=$(sbatch --parsable --dependency=afterok:$DENSE batch/run_reacher_train_array.sbatch)
-echo "[chain] train array (S=5,10,25): $TRAIN"
+echo "[chain] train array (S=5,10,15,25): $TRAIN"
 
 ARMS=$(sbatch --parsable --dependency=afterok:$TRAIN batch/run_reacher_eval_arms.sbatch)
-echo "[chain] eval arms (6 configs x 4 seeds): $ARMS"
+echo "[chain] eval arms (9 configs x 4 seeds): $ARMS"
+
+SWEEP=$(sbatch --parsable --dependency=afterok:$TRAIN batch/run_reacher_horizon_sweep.sbatch)
+echo "[chain] horizon sweep (3 arms x 4 offsets x 2 seeds, 2t + vlwm-50 regimes): $SWEEP"
 
 echo "[chain] submitted. squeue --me to watch; results land in logs/reacher_arms_*.log"
+echo "[chain] and logs/reacher_horizon_*.log"
