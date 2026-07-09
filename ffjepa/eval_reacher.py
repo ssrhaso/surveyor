@@ -70,6 +70,13 @@ def parse_args():
                         "drafter trains on episodes < 8000, eval draws from >= 8000)")
     p.add_argument("--episode-max", type=int, default=None,
                    help="restrict eval to episode indices < this (exclusive)")
+    p.add_argument("--episodes-file", default=None,
+                   help="JSON from batch/build_reacher_horizon_episodes.py with "
+                        "precomputed [episode, start] pairs. Bypasses sampling entirely "
+                        "-- the fixed-population horizon sweep reuses ONE file at every "
+                        "--goal-offset (starts are valid for the largest offset), so the "
+                        "start states are byte-identical across the curve and horizon is "
+                        "the only variable (the t75-vs-t150 sampling-artifact lesson).")
     p.add_argument("--qpos-threshold", type=float, default=None,
                    help="override the qpos_match success tolerance (rad/joint; env "
                         "default 0.05 = the official criterion)")
@@ -175,23 +182,38 @@ def main():
     transform = {"pixels": tf, "goal": tf}
     process = build_process(dataset, keys)
 
-    ep_mask = None
-    if args.episode_min is not None or args.episode_max is not None:
-        import h5py
-        with h5py.File(args.h5, "r") as f:
-            n_eps = len(f["ep_len"])
-        lo = args.episode_min or 0
-        hi = args.episode_max if args.episode_max is not None else n_eps
-        ep_mask = np.zeros(n_eps, dtype=bool)
-        ep_mask[lo:hi] = True
-        print(f"[holdout] eval restricted to episodes [{lo}, {hi}) "
-              f"({int(ep_mask.sum())}/{n_eps} eligible)")
-    if args.start == "final":
-        episodes_idx, start_steps = sample_long(args.h5, args.num_eval, goal_offset, args.seed,
-                                                ep_mask=ep_mask)
+    if args.episodes_file:
+        import json
+        with open(args.episodes_file) as f:
+            payload = json.load(f)
+        pairs = payload["episodes"]
+        episodes_idx = [p[0] for p in pairs]
+        start_steps = [p[1] for p in pairs]
+        if args.num_eval != len(pairs):
+            raise ValueError(f"--num-eval {args.num_eval} != {len(pairs)} pairs in "
+                             f"{args.episodes_file} (pass --num-eval {len(pairs)})")
+        print(f"[episodes-file] {args.episodes_file}: {len(pairs)} precomputed pairs "
+              f"(built for max_offset={payload.get('max_offset')}, seed={payload.get('seed')}, "
+              f"episode_min={payload.get('episode_min')}) -- sampling bypassed; "
+              f"running at goal_offset={goal_offset}")
     else:
-        episodes_idx, start_steps = sample_short(args.h5, args.num_eval, goal_offset, args.seed,
-                                                 ep_mask=ep_mask)
+        ep_mask = None
+        if args.episode_min is not None or args.episode_max is not None:
+            import h5py
+            with h5py.File(args.h5, "r") as f:
+                n_eps = len(f["ep_len"])
+            lo = args.episode_min or 0
+            hi = args.episode_max if args.episode_max is not None else n_eps
+            ep_mask = np.zeros(n_eps, dtype=bool)
+            ep_mask[lo:hi] = True
+            print(f"[holdout] eval restricted to episodes [{lo}, {hi}) "
+                  f"({int(ep_mask.sum())}/{n_eps} eligible)")
+        if args.start == "final":
+            episodes_idx, start_steps = sample_long(args.h5, args.num_eval, goal_offset,
+                                                    args.seed, ep_mask=ep_mask)
+        else:
+            episodes_idx, start_steps = sample_short(args.h5, args.num_eval, goal_offset,
+                                                     args.seed, ep_mask=ep_mask)
     print(f"[eval] start={args.start} num_eval={args.num_eval} goal_offset={goal_offset} "
           f"budget={eval_budget} qpos_threshold={args.qpos_threshold or 0.05:g} rad/joint")
     print(f"[eval] episodes_idx[:5]={episodes_idx[:5]} start_steps[:5]={start_steps[:5]}")
