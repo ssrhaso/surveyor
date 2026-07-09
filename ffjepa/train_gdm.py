@@ -86,6 +86,19 @@ def parse_args():
     p.add_argument("--goal-cond", action="store_true",
                    help="ABLATION: also condition the GDM on the episode goal latent "
                         "(NOT FF-JEPA, which is goal-free). Goal = episode's last subgoal.")
+    p.add_argument("--goal-rule", choices=["final", "window"], default="final",
+                   help="goal_cond only. final = episode's last subgoal (PushT/TwoRoom "
+                        "expert demos, which END at the task target). window = hindsight "
+                        "relabeling for RANDOM-policy data (Reacher): goal = z[min(m+G, "
+                        "last)] with G = --goal-gap, and the target indices are CLAMPED "
+                        "at the goal index, so the drafted block terminates at (and then "
+                        "repeats) the goal - the same clamp semantics the PushT drafter "
+                        "gets from expert episodes ending at the target.")
+    p.add_argument("--goal-gap", type=int, default=None,
+                   help="G for --goal-rule window, in FILE-INDEX units (= frames for a "
+                        "dense stride-1 file). Match the eval protocol's goal_offset "
+                        "(Reacher paper protocol: 25). Default = n_future * subgoal_step "
+                        "(the drafted window's end).")
     p.add_argument("--timesteps", type=int, default=1000)
     # diffusion parameterization / schedule / loss weighting (flag-gated A/B levers;
     # defaults reproduce gdm_faithful.pt exactly: eps / linear / no Min-SNR)
@@ -123,7 +136,8 @@ def parse_args():
     return p.parse_args()
 
 
-def build_pairs(latents, lengths, offsets, mask, n_future, window_rule, step=1):
+def build_pairs(latents, lengths, offsets, mask, n_future, window_rule, step=1,
+                goal_rule="final", goal_gap=None):
     """Build (condition, target) index pairs across all masked episodes.
 
     condition = z[m]; target = [z[m+1*step], ..., z[m+N*step]]. With step=1 on a
@@ -132,9 +146,17 @@ def build_pairs(latents, lengths, offsets, mask, n_future, window_rule, step=1):
     are the subgoals 25/50/75 frames ahead -> sliding conditions, full phase
     coverage (what the closed-loop eval actually feeds).
 
+    goal_rule (used only when the caller trains goal_cond):
+      final  = per-episode goal = z[last] (expert demos ending at the target).
+      window = hindsight window goal for random-policy data: goal index
+               gi = min(m + goal_gap, last), and target indices are clamped at
+               gi, so the block runs TO the goal and then repeats it (the clamp
+               semantics PushT gets for free from demos ending at the target).
+
     Returns conds (M,D), targets (M,N,D) as float32 tensors (native E-space).
     """
     D = latents.shape[1]
+    gap = goal_gap if goal_gap is not None else n_future * step
     conds, targets, goals = [], [], []
     n_eps_used = 0
     for i in range(len(lengths)):
@@ -151,9 +173,14 @@ def build_pairs(latents, lengths, offsets, mask, n_future, window_rule, step=1):
             m_max = L - 2                               # need at least one future frame
         for m in range(0, m_max + 1):
             conds.append(z[m])
-            idx = [min(m + k * step, last) for k in range(1, n_future + 1)]
+            if goal_rule == "window":
+                gi = min(m + gap, last)
+                idx = [min(m + k * step, gi) for k in range(1, n_future + 1)]
+                goals.append(z[gi])
+            else:
+                idx = [min(m + k * step, last) for k in range(1, n_future + 1)]
+                goals.append(z_goal)                    # (D,), used only if goal_cond
             targets.append(z[idx])                      # (N, D)
-            goals.append(z_goal)                        # (D,), used only if goal_cond
     if not conds:
         raise RuntimeError("no (condition,target) pairs built - check mask/window-rule/step")
     conds = torch.stack(conds).float()                  # (M, D)
@@ -188,13 +215,14 @@ def main():
         mask = in_5deg if args.mask == "5" else np.ones(len(lengths), dtype=bool)
     file_stride = int(blob.get("stride", 25))
     conds, targets, goals, n_eps = build_pairs(latents, lengths, offsets, mask,
-                                        args.n_future, args.window_rule, step=args.subgoal_step)
+                                        args.n_future, args.window_rule, step=args.subgoal_step,
+                                        goal_rule=args.goal_rule, goal_gap=args.goal_gap)
     M = conds.shape[0]
     print(f"[data] mask={args.mask}deg: {int(mask.sum())} episodes used; "
           f"{M} (cond,target) pairs; window_rule={args.window_rule}; "
           f"file_stride={file_stride} subgoal_step={args.subgoal_step} "
           f"=> subgoal horizon = {file_stride * args.subgoal_step} frames"
-          f"{'  [GOAL-COND ablation]' if args.goal_cond else ''}")
+          f"{f'  [GOAL-COND ablation, goal_rule={args.goal_rule} gap={args.goal_gap}]' if args.goal_cond else ''}")
 
     # normalization stats over the pool of training latents actually used
     # (conditions + targets together - same subgoal distribution). stat_a/stat_b
@@ -326,6 +354,7 @@ def main():
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     save_gdm(args.out, model, diffusion, stat_a, stat_b, normalization=args.normalization, extra={
         "mask": args.mask, "window_rule": args.window_rule,
+        "goal_rule": args.goal_rule, "goal_gap": args.goal_gap,
         "file_stride": file_stride, "subgoal_step": args.subgoal_step,
         "subgoal_horizon_frames": file_stride * args.subgoal_step,
         "n_episodes": int(n_eps), "n_pairs": int(M), "n_iter": int(n_iter),
