@@ -35,8 +35,8 @@ import torch
 from ffjepa import lewm_io
 from ffjepa.eval_ffjepa import sample_short, sample_long
 from ffjepa.subgoal_planner import (SubgoalCostModel, OracleSubgoalSource,
-                                    GDMSubgoalSource, build_oracle_table,
-                                    make_ffjepa_policy)
+                                    GDMSubgoalSource, SpecAcceptSubgoalSource,
+                                    build_oracle_table, make_ffjepa_policy)
 
 
 def parse_args():
@@ -48,9 +48,12 @@ def parse_args():
     p.add_argument("--swm-src", default=None)
     p.add_argument("--device", default="cuda")
     # what to evaluate
-    p.add_argument("--subgoal", choices=["oracle", "gdm", "baseline"], default="oracle")
+    p.add_argument("--subgoal", choices=["oracle", "gdm", "baseline", "specaccept"],
+                   default="oracle")
     p.add_argument("--gdm-ckpt", default=None, help="(Task C) trained planner checkpoint")
     p.add_argument("--gdm-steps", type=int, default=50, help="DDIM sampling steps for GDM")
+    p.add_argument("--accept-tau", type=float, default=0.2,
+                   help="specaccept: relative-L2 tolerance for the reality verifier")
     p.add_argument("--mode", choices=["short", "long"], default="short")
     p.add_argument("--goal-offset", type=int, default=None,
                    help="override the mode-derived goal_offset (25 short / 75 long)")
@@ -62,6 +65,19 @@ def parse_args():
                         "within --pos-thresh of their OWN target (TwoRoom's own "
                         "success rule) - the TwoRoom analog of PushT's success20/5.")
     p.add_argument("--pos-thresh", type=float, default=lewm_io.TWOROOM_POS_THRESH)
+    p.add_argument("--require-cross-room", action="store_true",
+                   help="restrict eval episodes to ones whose agent and target START in "
+                        "different rooms (the intended door-crossing task; ~48%% of "
+                        "collected episodes are trivially same-room -- see "
+                        "build_subgoals_tworoom's matching training-side filter)")
+    p.add_argument("--wall-center", type=float, default=112.0)
+    p.add_argument("--episode-min", type=int, default=None,
+                   help="restrict eval to episode indices >= this (holdout guard "
+                        "against training episodes; drafters train on < 4000)")
+    p.add_argument("--episode-max", type=int, default=None,
+                   help="restrict eval to episode indices < this (exclusive)")
+    p.add_argument("--dump-traces", default=None,
+                   help="path (.pt): per-episode success flags + per-replan latents")
     p.add_argument("--num-eval", type=int, default=32)
     p.add_argument("--eval-budget", type=int, default=None, help="override mode default")
     p.add_argument("--seed", type=int, default=42)
@@ -129,10 +145,25 @@ def tworoom_success_mask(h5, pos_thresh=lewm_io.TWOROOM_POS_THRESH):
     return np.array([lewm_io.tworoom_success(v, pos_thresh) for v in d], dtype=bool)
 
 
+def cross_room_mask(h5, wall_center=112.0):
+    """Per-episode flags: agent and target START in different rooms (the
+    intended door-crossing task; mirrors build_subgoals_tworoom's filter)."""
+    import h5py
+    with h5py.File(h5, "r") as f:
+        rows = f["ep_offset"][:]
+        order = np.argsort(rows)
+        srt = np.sort(rows)
+        agent_x = np.empty(len(rows))
+        agent_x[order] = f["state"][srt][:, 0]
+        target_x = np.empty(len(rows))
+        target_x[order] = f["goal_state"][srt][:, 0]
+    return (agent_x < wall_center) != (target_x < wall_center)
+
+
 def main():
     args = parse_args()
-    if args.subgoal == "gdm" and not args.gdm_ckpt:
-        raise ValueError("--subgoal gdm requires --gdm-ckpt <trained planner checkpoint>")
+    if args.subgoal in ("gdm", "specaccept") and not args.gdm_ckpt:
+        raise ValueError(f"--subgoal {args.subgoal} requires --gdm-ckpt <trained planner checkpoint>")
 
     lewm_io._ensure_swm_importable(args.swm_src)
     import stable_worldmodel as swm
@@ -150,7 +181,7 @@ def main():
           f"device={args.device}, training={model.training}, subgoal={args.subgoal}")
 
     gdm_planner = None
-    if args.subgoal == "gdm":
+    if args.subgoal in ("gdm", "specaccept"):
         from ffjepa.gdm_model import load_gdm_planner, count_params
         gdm_planner = load_gdm_planner(args.gdm_ckpt, device=args.device)
         d = gdm_planner.diffusion
@@ -158,6 +189,7 @@ def main():
                 if d.sampler == "ddpm" else f"ddim/{args.gdm_steps}-steps")
         print(f"[gdm] planner from {args.gdm_ckpt}: head={count_params(gdm_planner.model)/1e6:.2f}M, "
               f"N={gdm_planner.cfg.n_future} WG={gdm_planner.cfg.wg} "
+              f"goal_cond={gdm_planner.goal_cond} "
               f"T={d.timesteps} sampler={samp} param={d.parameterization} "
               f"schedule={d.schedule} norm={gdm_planner.normalization}")
 
@@ -178,6 +210,21 @@ def main():
         ep_mask = tworoom_success_mask(args.h5, args.pos_thresh)
         print(f"[eval-filter] success@{args.pos_thresh:g}px: {int(ep_mask.sum())}/{len(ep_mask)} "
               f"episodes eligible (goal frame reaches within threshold of its own target)")
+    if args.require_cross_room:
+        cr = cross_room_mask(args.h5, args.wall_center)
+        ep_mask = cr if ep_mask is None else (ep_mask & cr)
+        print(f"[eval-filter] cross-room: {int(ep_mask.sum())} episodes remain eligible")
+    if args.episode_min is not None or args.episode_max is not None:
+        import h5py
+        with h5py.File(args.h5, "r") as f:
+            n_eps = len(f["ep_len"])
+        lo = args.episode_min or 0
+        hi = args.episode_max if args.episode_max is not None else n_eps
+        rng_mask = np.zeros(n_eps, dtype=bool)
+        rng_mask[lo:hi] = True
+        ep_mask = rng_mask if ep_mask is None else (ep_mask & rng_mask)
+        print(f"[holdout] eval restricted to episodes [{lo}, {hi}); "
+              f"{int(ep_mask.sum())} episodes remain eligible")
     if use_final:
         episodes_idx, start_steps = sample_long(args.h5, args.num_eval, goal_offset, args.seed,
                                                 ep_mask=ep_mask)
@@ -219,7 +266,13 @@ def main():
             source = GDMSubgoalSource(gdm_planner, n_envs=args.num_eval,
                                       dim=gdm_planner.cfg.latent_dim,
                                       device=args.device, n_steps=args.gdm_steps,
-                                      seed=cem_seed)
+                                      seed=cem_seed, record=bool(args.dump_traces))
+        elif args.subgoal == "specaccept":
+            source = SpecAcceptSubgoalSource(gdm_planner, n_envs=args.num_eval,
+                                             device=args.device,
+                                             n_steps=args.gdm_steps, seed=cem_seed,
+                                             tau=args.accept_tau,
+                                             record=bool(args.dump_traces))
         else:
             source = OracleSubgoalSource(table, device=args.device)
         policy = PolicyCls(cost_model=cost_model, subgoal_source=source,
@@ -232,6 +285,25 @@ def main():
     sr = metrics["success_rate"]
     n_succ = int(metrics["episode_successes"].sum())
     world.close()
+
+    if args.subgoal == "specaccept":
+        total = source.n_redraft + source.n_advance
+        print(f"[specaccept] tau={args.accept_tau} gdm_steps={args.gdm_steps} "
+              f"re-drafts={source.n_redraft} advances={source.n_advance} "
+              f"rejects={source.n_reject} "
+              f"call_ratio={source.n_redraft / max(total, 1):.3f} "
+              f"(every-step=1.000; lower = fewer diffusion calls)")
+
+    if args.dump_traces:
+        from pathlib import Path
+        rec = {"args": vars(args), "sr": float(sr),
+               "successes": np.asarray(metrics["episode_successes"]).astype(bool).tolist(),
+               "episodes_idx": list(episodes_idx), "start_steps": list(start_steps)}
+        if not is_baseline and getattr(source, "record", False):
+            rec["trace"] = source.trace
+        Path(args.dump_traces).parent.mkdir(parents=True, exist_ok=True)
+        torch.save(rec, args.dump_traces)
+        print(f"[traces] saved {args.dump_traces}")
 
     print("\n==== FF-JEPA eval summary (TwoRoom) ====")
     print(f"mode={args.mode} subgoal={args.subgoal} num_eval={args.num_eval} "
