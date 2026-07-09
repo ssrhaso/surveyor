@@ -99,6 +99,14 @@ def parse_args():
                         "dense stride-1 file). Match the eval protocol's goal_offset "
                         "(Reacher paper protocol: 25). Default = n_future * subgoal_step "
                         "(the drafted window's end).")
+    p.add_argument("--goal-gap-max", type=int, default=None,
+                   help="if set, G is SAMPLED per pair, uniform in [goal_gap, "
+                        "goal_gap_max]. Closed loop conditions on the FINAL goal image "
+                        "at every replan, so the remaining gap shrinks from goal_offset "
+                        "to 0 within an episode - and the horizon sweep evaluates "
+                        "offsets 25..100. Sampled gaps cover that whole range with one "
+                        "drafter; a fixed G=25 matches only the first replan of the "
+                        "native protocol.")
     p.add_argument("--timesteps", type=int, default=1000)
     # diffusion parameterization / schedule / loss weighting (flag-gated A/B levers;
     # defaults reproduce gdm_faithful.pt exactly: eps / linear / no Min-SNR)
@@ -137,7 +145,7 @@ def parse_args():
 
 
 def build_pairs(latents, lengths, offsets, mask, n_future, window_rule, step=1,
-                goal_rule="final", goal_gap=None):
+                goal_rule="final", goal_gap=None, goal_gap_max=None):
     """Build (condition, target) index pairs across all masked episodes.
 
     condition = z[m]; target = [z[m+1*step], ..., z[m+N*step]]. With step=1 on a
@@ -152,6 +160,9 @@ def build_pairs(latents, lengths, offsets, mask, n_future, window_rule, step=1,
                gi = min(m + goal_gap, last), and target indices are clamped at
                gi, so the block runs TO the goal and then repeats it (the clamp
                semantics PushT gets for free from demos ending at the target).
+               With goal_gap_max set, the gap is sampled per pair, uniform in
+               [goal_gap, goal_gap_max] (uses the global numpy RNG - seeded in
+               main - so pair construction stays deterministic per --seed).
 
     Returns conds (M,D), targets (M,N,D) as float32 tensors (native E-space).
     """
@@ -174,7 +185,9 @@ def build_pairs(latents, lengths, offsets, mask, n_future, window_rule, step=1,
         for m in range(0, m_max + 1):
             conds.append(z[m])
             if goal_rule == "window":
-                gi = min(m + gap, last)
+                g_m = (int(np.random.randint(gap, goal_gap_max + 1))
+                       if goal_gap_max is not None else gap)
+                gi = min(m + g_m, last)
                 idx = [min(m + k * step, gi) for k in range(1, n_future + 1)]
                 goals.append(z[gi])
             else:
@@ -216,7 +229,8 @@ def main():
     file_stride = int(blob.get("stride", 25))
     conds, targets, goals, n_eps = build_pairs(latents, lengths, offsets, mask,
                                         args.n_future, args.window_rule, step=args.subgoal_step,
-                                        goal_rule=args.goal_rule, goal_gap=args.goal_gap)
+                                        goal_rule=args.goal_rule, goal_gap=args.goal_gap,
+                                        goal_gap_max=args.goal_gap_max)
     M = conds.shape[0]
     print(f"[data] mask={args.mask}deg: {int(mask.sum())} episodes used; "
           f"{M} (cond,target) pairs; window_rule={args.window_rule}; "
@@ -355,6 +369,7 @@ def main():
     save_gdm(args.out, model, diffusion, stat_a, stat_b, normalization=args.normalization, extra={
         "mask": args.mask, "window_rule": args.window_rule,
         "goal_rule": args.goal_rule, "goal_gap": args.goal_gap,
+        "goal_gap_max": args.goal_gap_max,
         "file_stride": file_stride, "subgoal_step": args.subgoal_step,
         "subgoal_horizon_frames": file_stride * args.subgoal_step,
         "n_episodes": int(n_eps), "n_pairs": int(M), "n_iter": int(n_iter),
