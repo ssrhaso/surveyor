@@ -145,6 +145,15 @@ def parse_args():
     p.add_argument("--cem-seed", type=int, default=None,
                    help="CEM seed; defaults to --seed (matches eval.py cem.yaml seed=${seed})")
     p.add_argument("--stride", type=int, default=25)
+    p.add_argument("--dump-frames-dir", default=None,
+                   help="save per-env start/goal/last PNG frames (visual sanity check; "
+                        "e.g. for --mode random_init). Additive/opt-in: forces "
+                        "reset_mode='wait' for the random_init eval call so each env "
+                        "slot runs exactly one episode (frame<->success stays aligned).")
+    p.add_argument("--time-instrument", action="store_true",
+                   help="wall-clock CEM-vs-drafter split (additive; zero overhead when "
+                        "unset). Prints a [timing] line per (score_mode, angle) run. "
+                        "Non-baseline subgoal sources only.")
     p.add_argument("--dump-traces", default=None,
                    help="path (.pt): save per-episode success flags plus, for the gdm "
                         "source, every replan's (z_cond, drafted subgoal) pair -- the "
@@ -441,14 +450,26 @@ def main():
                 else:
                     source = OracleSubgoalSource(table, device=args.device)
                 policy = PolicyCls(cost_model=cost_model, subgoal_source=source,
+                                   time_instrument=args.time_instrument,
+                                   dump_frames=bool(args.dump_frames_dir),
                                    solver=solver, config=config, process=process, transform=transform)
             world.set_policy(policy)
             if args.mode == "random_init":
                 # synthetic random start (PushT's own reset() sampling); goal_state
                 # is per-env (random_init_goals), not one fixed canonical target.
                 options = [{"goal_state": gv} for gv in random_init_goals]
+                eval_kwargs = {}
+                if args.dump_frames_dir:
+                    # default reset_mode for episodic eval is 'auto' (finished envs
+                    # are immediately reset to start a NEW episode so the run keeps
+                    # going until `episodes` total complete) -- that can reuse an env
+                    # slot for a 2nd, DIFFERENT episode before the run ends, which
+                    # would desync the frame capture (start frame from episode 1,
+                    # last frame from episode 2). 'wait' freezes each env after its
+                    # own first episode, guaranteeing one episode per env slot.
+                    eval_kwargs["reset_mode"] = "wait"
                 metrics = world.evaluate(episodes=args.num_eval, seed=cem_seed,
-                                         options=options)
+                                         options=options, **eval_kwargs)
             else:
                 metrics = world.evaluate(
                     dataset=dataset, start_steps=list(start_steps), goal_offset=goal_offset,
@@ -458,6 +479,33 @@ def main():
             n_succ = int(metrics["episode_successes"].sum())
             results[(score_mode, angle)] = (sr, n_succ)
             print(f"[RESULT] score={score_mode} angle={angle:g}deg  SR={sr:.2f}%  ({n_succ}/{args.num_eval})")
+            if args.dump_frames_dir and not is_baseline and getattr(policy, "dump_frames", False):
+                import json
+                from pathlib import Path
+                from PIL import Image
+                outdir = Path(args.dump_frames_dir) / f"{score_mode}_{angle:g}"
+                outdir.mkdir(parents=True, exist_ok=True)
+                # world.terminateds is per-env-slot (env_idx order); with
+                # reset_mode='wait' every env terminates exactly once by the time
+                # evaluate() returns, so this is the per-episode success flag
+                # aligned with the frames captured under the SAME env index
+                # (metrics['episode_successes'] is ordered by COMPLETION order,
+                # not env_idx, so it is NOT used here).
+                term = np.asarray(world.terminateds).astype(bool)
+                manifest = []
+                for i in range(args.num_eval):
+                    for tag, frame in (("start", policy._frame_start[i]),
+                                       ("goal", policy._frame_goal[i]),
+                                       ("last", policy._frame_last[i])):
+                        if frame is None:
+                            continue
+                        Image.fromarray(np.asarray(frame).astype(np.uint8)).save(
+                            outdir / f"ep{i:02d}_{tag}.png")
+                    manifest.append({"env": i, "success": bool(term[i])})
+                with open(outdir / "manifest.json", "w") as f:
+                    json.dump(manifest, f, indent=2)
+                print(f"[frames] saved {sum(m['success'] for m in manifest)}/{len(manifest)} "
+                      f"episode frame-sets (start/goal/last PNG) to {outdir}")
             if args.dump_traces:
                 rec = {"score": score_mode, "angle": float(angle), "sr": float(sr),
                        "successes": np.asarray(metrics["episode_successes"]).astype(bool).tolist()}
@@ -481,6 +529,19 @@ def main():
                       f"re-drafts={source.n_redraft} advances={source.n_advance} "
                       f"mean_commit_depth={np.mean(cd) if cd else 0:.2f} "
                       f"redraft/advance={ratio:.3f} (GDM=1.000; lower=fewer diffusion calls)")
+            if args.time_instrument and not is_baseline:
+                t_d, t_c = policy.t_drafter, policy.t_cem
+                t_tot = t_d + t_c
+                frac = 100.0 * t_d / t_tot if t_tot > 0 else 0.0
+                per_ep = {
+                    "drafter_ms": 1000.0 * t_d / max(args.num_eval, 1),
+                    "cem_ms": 1000.0 * t_c / max(args.num_eval, 1),
+                    "total_ms": 1000.0 * t_tot / max(args.num_eval, 1),
+                }
+                print(f"[timing] score={score_mode} angle={angle:g}deg "
+                      f"drafter={t_d:.3f}s cem={t_c:.3f}s total={t_tot:.3f}s "
+                      f"drafter_frac={frac:.2f}% per_episode_ms={per_ep} "
+                      f"timed_steps={policy._timed_steps}")
             world.close()
 
     if args.dump_traces:
