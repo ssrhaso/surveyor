@@ -4,29 +4,29 @@
 #SBATCH --gpus=1
 #SBATCH --cpus-per-task=16
 #SBATCH --time=04:00:00
-#SBATCH --array=0-23
+#SBATCH --array=0-35
 #SBATCH --output=/home/u6ko/hasoshu.u6ko/le-wm/logs/reacher_arms_%A_%a.log
-# Reacher closed loop: the PushT winner battery transplanted. 6 configs x
-# seeds 42-45, n=128 held-out episodes (>=8000), LeWM reacher protocol
-# (goal_offset 25, budget 50, qpos_match 0.05 rad), S = RH * action_block(5):
-#   c0 baseline   flat LeWM, goal image      (RH 5)  -- the LeWM reference
-#   c1 s25 gdm    every-step, native scale   (RH 5)  -- FF-JEPA-native config
-#   c2 s10 gdm    every-step                 (RH 2)  -- PushT scale-law winner
-#   c3 s5  gdm    every-step                 (RH 1)
-#   c4 s10 spec   tau=0.20 k=8               (RH 2)  -- PushT headline system
-#   c5 s5  spec   tau=0.20 k=8               (RH 1)  -- PushT 8-seed best cell
-# Success criteria: (i) scale law reproduces (s10/s5 >= s25), (ii) spec-accept
-# SR within noise of its every-step reference at call_ratio < 1 ([specaccept]
-# telemetry line), (iii) gdm arms >= baseline.
+# Reacher closed loop: the PushT winner battery transplanted, extended to the
+# FULL scale curve (writeup Sec. Reacher: SR vs subgoal scale + spec-accept
+# NFE). 9 configs x seeds 42-45, n=128 held-out episodes (>=8000), LeWM
+# reacher protocol (goal_offset 25, budget 50, qpos_match 0.05 rad),
+# S = RH * action_block(5):
+#   c0 baseline  flat LeWM, goal image       (RH 5)  -- the LeWM reference
+#   c1-c4 every-step gdm at S=25/15/10/5     (RH 5/3/2/1) -- the scale curve
+#   c5-c8 spec-accept tau=0.20 k=8 at same   (RH 5/3/2/1) -- efficiency arms
+#     (s10 spec = PushT headline system; s5 spec = PushT 8-seed best cell)
+# Success criteria: (i) scale law reproduces (interior optimum over S=25),
+# (ii) spec-accept SR within noise of its every-step reference at
+# call_ratio < 1 ([specaccept] telemetry line), (iii) gdm arms >= baseline.
 set -eu
 SIF=/scratch/u6ko/hasoshu.u6ko/containers/pytorch_2412.sif
 VENV=/scratch/u6ko/hasoshu.u6ko/venv3
 H5=$(find /scratch/u6ko/hasoshu.u6ko/data/reacher \( -name '*.h5' -o -name '*.hdf5' \) | head -1)
-NAMES=(baseline s25gdm s10gdm s5gdm s10spec s5spec)
-SUBGOALS=(baseline gdm gdm gdm specaccept specaccept)
-CKPTS=(none gdm_reacher_s25.pt gdm_reacher_s10.pt gdm_reacher_s5.pt gdm_reacher_s10.pt gdm_reacher_s5.pt)
-RHS=(5 5 2 1 2 1)
-KS=(50 50 50 50 8 8)
+NAMES=(baseline s25gdm s15gdm s10gdm s5gdm s25spec s15spec s10spec s5spec)
+SUBGOALS=(baseline gdm gdm gdm gdm specaccept specaccept specaccept specaccept)
+CKPTS=(none gdm_reacher_s25.pt gdm_reacher_s15.pt gdm_reacher_s10.pt gdm_reacher_s5.pt gdm_reacher_s25.pt gdm_reacher_s15.pt gdm_reacher_s10.pt gdm_reacher_s5.pt)
+RHS=(5 5 3 2 1 5 3 2 1)
+KS=(50 50 50 50 50 8 8 8 8)
 SEEDS=(42 43 44 45)
 C=$((SLURM_ARRAY_TASK_ID / 4))
 SEED=${SEEDS[$((SLURM_ARRAY_TASK_ID % 4))]}
