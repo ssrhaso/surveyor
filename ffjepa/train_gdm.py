@@ -168,12 +168,33 @@ def build_pairs(latents, lengths, offsets, mask, n_future, window_rule, step=1,
     """
     D = latents.shape[1]
     gap = goal_gap if goal_gap is not None else n_future * step
-    conds, targets, goals = [], [], []
+    # Two-pass, preallocated build. The original append-and-stack version held
+    # ~1.5M small tensors plus full-size stacks simultaneously, which blew the
+    # 20GB per-session cgroup cap on shared boxes when trainers ran in
+    # parallel. Pass 1 counts pairs (consuming NO RNG, so the per-pair sampled
+    # gaps in pass 2 replay in exactly the order the original produced);
+    # pass 2 fills preallocated tensors in place. Identical outputs.
     n_eps_used = 0
+    M = 0
     for i in range(len(lengths)):
         if not mask[i]:
             continue
         n_eps_used += 1
+        L = int(lengths[i])
+        if window_rule == "full":
+            m_max = (L - 1) - n_future * step           # need z[m+N*step] to exist
+        else:  # clamp future indices to the last subgoal (the goal)
+            m_max = L - 2                               # need at least one future frame
+        M += max(0, m_max + 1)
+    if M == 0:
+        raise RuntimeError("no (condition,target) pairs built - check mask/window-rule/step")
+    conds = torch.empty((M, D), dtype=torch.float32)
+    targets = torch.empty((M, n_future, D), dtype=torch.float32)
+    goals = torch.empty((M, D), dtype=torch.float32)
+    p = 0
+    for i in range(len(lengths)):
+        if not mask[i]:
+            continue
         off, L = int(offsets[i]), int(lengths[i])
         z = latents[off:off + L]                       # (L, D)
         last = L - 1
@@ -183,22 +204,19 @@ def build_pairs(latents, lengths, offsets, mask, n_future, window_rule, step=1,
         else:  # clamp future indices to the last subgoal (the goal)
             m_max = L - 2                               # need at least one future frame
         for m in range(0, m_max + 1):
-            conds.append(z[m])
+            conds[p] = z[m]
             if goal_rule == "window":
                 g_m = (int(np.random.randint(gap, goal_gap_max + 1))
                        if goal_gap_max is not None else gap)
                 gi = min(m + g_m, last)
                 idx = [min(m + k * step, gi) for k in range(1, n_future + 1)]
-                goals.append(z[gi])
+                goals[p] = z[gi]
             else:
                 idx = [min(m + k * step, last) for k in range(1, n_future + 1)]
-                goals.append(z_goal)                    # (D,), used only if goal_cond
-            targets.append(z[idx])                      # (N, D)
-    if not conds:
-        raise RuntimeError("no (condition,target) pairs built - check mask/window-rule/step")
-    conds = torch.stack(conds).float()                  # (M, D)
-    targets = torch.stack(targets).float()              # (M, N, D)
-    goals = torch.stack(goals).float()                  # (M, D)
+                goals[p] = z_goal                       # (D,), used only if goal_cond
+            targets[p] = z[idx]                         # (N, D)
+            p += 1
+    assert p == M
     assert conds.shape[1] == D and targets.shape[1] == n_future
     return conds, targets, goals, n_eps_used
 
@@ -260,9 +278,16 @@ def main():
               f"(sqrt(D)={np.sqrt(D):.2f}); minmax->[-1,1] per-dim "
               f"(range mean={rng.mean():.3f})")
 
-    conds_s = _norm(conds)
-    targets_s = _norm(targets)
-    goals_s = _norm(goals)
+    # free the stats pool and normalize IN PLACE -- the native tensors are not
+    # referenced again, and _norm()'s full-size copies (plus the pool cat) were
+    # the other big contributors to the 20GB cgroup-cap OOM on shared boxes.
+    del pool
+    for _t in (conds, targets, goals):
+        if args.normalization == "standardize":
+            _t.sub_(stat_a).div_(stat_b)
+        else:
+            _t.sub_(stat_a).div_((stat_b - stat_a).clamp_min(1e-6)).mul_(2.0).sub_(1.0)
+    conds_s, targets_s, goals_s = conds, targets, goals
 
     device = args.device
     # keep the whole (small) training set resident on-device and index it with a
