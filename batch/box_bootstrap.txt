@@ -1,0 +1,412 @@
+# ============================================================
+# BOX BOOTSTRAP -- paste this whole block into a terminal on the
+# GPU box, from inside the cloned repo dir. It writes the 4
+# files that are not on GitHub, then you run setup + the chain.
+# ============================================================
+
+cat > batch/setup_local_env.sh <<'BOOTSTRAP_EOF_setup_local_env_sh'
+#!/usr/bin/env bash
+# One-time env setup for a bare GPU box (no SLURM, no apptainer) -- the local
+# equivalent of install_deps.sbatch. Run once from ~/le-wm:
+#   bash batch/setup_local_env.sh
+#
+# Assumes: a working NVIDIA driver (`nvidia-smi` succeeds) and python3 with venv.
+# Does NOT assume a specific CUDA version -- pip installs the CUDA-bundled
+# torch wheel (cu121 by default). If `nvidia-smi` reports a driver too old for
+# that wheel, override: TORCH_INDEX=https://download.pytorch.org/whl/cu118
+set -eu
+cd "$(dirname "$0")/.."
+VENV=.venv
+TORCH_INDEX=${TORCH_INDEX:-https://download.pytorch.org/whl/cu121}
+
+echo "=== [0/4] GPU check ==="
+nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv
+
+echo "=== [1/4] venv ==="
+python3 -m venv "$VENV"
+source "$VENV/bin/activate"
+pip install --no-cache-dir --upgrade pip
+
+echo "=== [2/4] torch (CUDA wheel: $TORCH_INDEX) ==="
+pip install --no-cache-dir torch torchvision --index-url "$TORCH_INDEX"
+
+echo "=== [3/4] project deps (Reacher boxes: NO [env] extra -- its box2d-py dep"
+echo "    cannot build under pip's isolation on these boxes, and box2d is"
+echo "    PushT-only physics; Reacher needs dm_control/mujoco, added explicitly) ==="
+# transformers MUST stay on the 4.x naming scheme: the LeWM encoder checkpoints
+# were saved with HF ViT's old internal names (encoder.layer.N.attention.attention
+# .query); transformers 5.x renamed them (layers.N.attention.q_proj) and the
+# strict state_dict load fails. 4.57.1 = the exact version proven on the PushT box.
+pip install --no-cache-dir 'stable-worldmodel[train]' stable-pretraining h5py hdf5plugin scikit-learn dm_control mujoco imageio imageio-ffmpeg 'transformers==4.57.1'
+pip uninstall -y opencv-python || true
+pip install --no-cache-dir --force-reinstall opencv-python-headless
+
+echo "=== [4/4] sanity ==="
+python -c 'import torch; print("torch", torch.__version__, "cuda:", torch.cuda.is_available(), torch.cuda.get_device_name(0) if torch.cuda.is_available() else "NO GPU")'
+python -c 'import stable_worldmodel; print("stable_worldmodel OK")'
+python -c 'import h5py, hdf5plugin, sklearn, stable_pretraining; print("h5py/hdf5plugin/sklearn/stable_pretraining OK")'
+python -c 'import dm_control, mujoco; print("dm_control/mujoco OK (reacher env)")'
+echo '=== SETUP DONE -- source .venv/bin/activate before running batch/run_reacher_local.sh ==='
+BOOTSTRAP_EOF_setup_local_env_sh
+
+cat > batch/dispatch_pool.sh <<'BOOTSTRAP_EOF_dispatch_pool_sh'
+#!/usr/bin/env bash
+# Dynamic worker pool across MIG slices (or plain GPU indices). Reads shell
+# commands from stdin, one per line; each is dispatched to a free device via
+# CUDA_VISIBLE_DEVICES the moment one becomes free (not static round-robin --
+# a fast job's slice is reused immediately, not left idle until a batch ends).
+#
+# Usage:
+#   printf '%s\n' "${cmds[@]}" | bash batch/dispatch_pool.sh MIG-xxx MIG-yyy ...
+set -eu
+DEVICES=("$@")
+[ "${#DEVICES[@]}" -gt 0 ] || { echo "usage: dispatch_pool.sh <device> [<device> ...] < commands.txt" >&2; exit 1; }
+
+FIFO=$(mktemp -u)
+mkfifo "$FIFO"
+exec 3<>"$FIFO"
+rm -f "$FIFO"
+for d in "${DEVICES[@]}"; do echo "$d" >&3; done
+
+PIDS=()
+while IFS= read -r cmd; do
+  [ -z "$cmd" ] && continue
+  read -u 3 dev
+  (
+    echo "[dispatch] device=$dev :: $cmd"
+    CUDA_VISIBLE_DEVICES="$dev" bash -c "$cmd"
+    status=$?
+    echo "$dev" >&3
+    exit $status
+  ) &
+  PIDS+=("$!")
+done
+
+fail=0
+for pid in "${PIDS[@]}"; do
+  wait "$pid" || fail=1
+done
+exec 3>&-
+[ "$fail" -eq 0 ] || { echo "[dispatch_pool] one or more jobs failed -- check logs" >&2; exit 1; }
+BOOTSTRAP_EOF_dispatch_pool_sh
+
+cat > batch/run_reacher_local.sh <<'BOOTSTRAP_EOF_run_reacher_local_sh'
+#!/usr/bin/env bash
+# Reacher generalization chain for a bare GPU box (no SLURM, no apptainer) --
+# local equivalent of submit_reacher_chain.sh + the run_reacher_*.sbatch files.
+# Run from ~/le-wm after `source .venv/bin/activate` (batch/setup_local_env.sh):
+#   bash batch/run_reacher_local.sh all
+#   bash batch/run_reacher_local.sh download   # or: smoke | dense | train | arms | horizon
+#
+# Parallelism across MIG slices: set REACHER_GPU_DEVICES to a space-separated
+# list of MIG UUIDs (from `nvidia-smi -L`) to fan the train/arms/horizon loops
+# out across a dynamic worker pool (batch/dispatch_pool.sh) instead of running
+# sequentially. Example (ofs-v03, 7 slices):
+#   export REACHER_GPU_DEVICES="MIG-7b9f2944-027d-5890-a58a-09498dd3460f MIG-df629108-7b55-5f68-b2e7-984e62cd1b39 MIG-d8c24702-a6e6-57b6-bc9b-2d4d05c2568b MIG-4664404a-cf41-5dc4-a5ea-4bbbaa629971 MIG-b5cecf95-26f8-5318-b5a3-6195272b4eab MIG-59de5b88-d4e8-5159-bfcf-1d6eb0533555 MIG-548012f7-55c8-53cd-9af5-e55dddd140c4"
+# Unset (default): falls back to plain sequential --device cuda, single slice.
+# Whole stack is small (DiT hidden=512/depth=11, latent dim 192, CEM
+# num_samples=300) -- a 10GB slice has plenty of headroom per job; the win
+# from parallelism is wall-clock, not memory pressure.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+STAGE=${1:-all}
+DATA_DIR=${REACHER_DATA_DIR:-data/reacher}
+export REACHER_DATA_DIR="$DATA_DIR"
+# MIG slices are compute-only (no graphics APIs) -- EGL may fail there. If the
+# smoke stage dies with an EGL/display error, rerun with MUJOCO_GL=osmesa
+# (CPU software rendering; slower but MIG-safe).
+export MUJOCO_GL=${MUJOCO_GL:-egl}
+export SDL_VIDEODRIVER=${SDL_VIDEODRIVER:-dummy}
+mkdir -p logs runs/reacher "$DATA_DIR"
+
+H5() { find "$DATA_DIR" \( -name '*.h5' -o -name '*.hdf5' \) 2>/dev/null | head -1; }
+
+# Hard prerequisite checks -- a missing dep or dataset must STOP the chain,
+# not cascade tracebacks into the next stage (which is what happens when
+# failures hide behind `| tee` without pipefail).
+require_env() {
+  python -c 'import stable_worldmodel, h5py, hdf5plugin' 2>/dev/null || {
+    echo "[FATAL] python deps missing (stable_worldmodel/h5py) -- setup_local_env.sh did not finish."
+    echo "        Rerun: bash batch/setup_local_env.sh   and read its output for the first error."
+    exit 1
+  }
+}
+require_h5() {
+  [ -n "$(H5)" ] || {
+    echo "[FATAL] no .h5 dataset found under $DATA_DIR -- run the download stage first (and check it COMPLETED)."
+    exit 1
+  }
+}
+
+# ${REACHER_GPU_DEVICES:-} left unset/empty is intentional (see fan_out below).
+DEVICES=(${REACHER_GPU_DEVICES:-})
+
+# Runs a list of commands (one per line on stdin) either through the MIG
+# worker pool (if DEVICES is non-empty) or plain sequential bash -c.
+# REACHER_SHARD="k/N" (e.g. 0/2, 1/2) keeps only every N-th job starting at k
+# -- lets two/three boxes with a SHARED home split one stage's job list
+# without any coordination beyond agreeing on k. Job list order is
+# deterministic, so shards are disjoint and complete by construction.
+fan_out_pool() {
+  if [ "${#DEVICES[@]}" -gt 0 ]; then
+    bash batch/dispatch_pool.sh "${DEVICES[@]}"
+  else
+    while IFS= read -r cmd; do
+      [ -z "$cmd" ] && continue
+      bash -c "$cmd"
+    done
+  fi
+}
+
+fan_out() {
+  if [ -n "${REACHER_SHARD:-}" ]; then
+    local k=${REACHER_SHARD%%/*} n=${REACHER_SHARD##*/}
+    echo "[shard] running shard $k of $n (every ${n}th job starting at index $k)"
+    awk -v k="$k" -v n="$n" '(NR-1)%n==k' | fan_out_pool
+  else
+    fan_out_pool
+  fi
+}
+
+# fetch <url> <outfile> -- resumable download; curl > wget > pure python
+# (some of these boxes ship with NEITHER curl nor wget; python always exists).
+fetch() {
+  if command -v curl >/dev/null 2>&1; then
+    curl -L -C - --retry 10 --retry-delay 15 -o "$2" "$1"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -c -O "$2" "$1"
+  else
+    local i
+    for i in $(seq 1 10); do
+      python - "$1" "$2" <<'PY' && return 0
+import os, sys, urllib.request
+url, out = sys.argv[1], sys.argv[2]
+pos = os.path.getsize(out) if os.path.exists(out) else 0
+req = urllib.request.Request(url, headers={"User-Agent": "fetch/1.0"})
+if pos:
+    req.add_header("Range", f"bytes={pos}-")
+r = urllib.request.urlopen(req, timeout=60)
+mode = "ab" if pos and getattr(r, "status", 200) == 206 else "wb"
+if mode == "wb":
+    pos = 0
+done = 0
+with open(out, mode) as f:
+    while True:
+        chunk = r.read(1 << 22)
+        if not chunk:
+            break
+        f.write(chunk)
+        done += len(chunk)
+        print(f"\r  {(pos + done) / 1e9:.2f} GB", end="", flush=True)
+print()
+PY
+      echo "[fetch] attempt $i failed; retrying in 15s (resumes from partial file)"; sleep 15
+    done
+    return 1
+  fi
+}
+
+run_download() {
+  require_env
+  if [ -n "$(H5)" ] && [ -f encoder_reacher/weights.pt ]; then
+    echo "[download] dataset + encoder already present, skipping"
+    return
+  fi
+  echo "=== downloading reacher.tar.zst (23.8GB, resumable -- reruns continue where they left off) ==="
+  ( cd "$DATA_DIR" && \
+    fetch https://huggingface.co/datasets/quentinll/lewm-reacher/resolve/main/reacher.tar.zst reacher.tar.zst && \
+    echo "=== download complete, extracting ===" && \
+    tar --zstd -xf reacher.tar.zst && \
+    rm reacher.tar.zst && ls -la )
+  mkdir -p encoder_reacher
+  ( cd encoder_reacher && \
+    fetch https://huggingface.co/quentinll/lewm-reacher/resolve/main/config.json config.json && \
+    fetch https://huggingface.co/quentinll/lewm-reacher/resolve/main/weights.pt weights.pt )
+  echo "=== inspect ==="
+  python batch/inspect_reacher.py 2>&1 | tee logs/inspect_reacher.log
+  echo "[download] check logs/inspect_reacher.log BEFORE trusting anything downstream"
+  echo "           (schema: qpos/qvel/pixels/action + ep_offset/ep_len/episode_idx/step_idx)"
+}
+
+run_smoke() {
+  require_env; require_h5
+  local h5; h5=$(H5)
+  echo "=== [1/2] ORACLE n=32 (harness + encoder + injection sanity) ==="
+  python -m ffjepa.eval_reacher --subgoal oracle \
+    --source local --local-dir encoder_reacher --h5 "$h5" --device cuda \
+    --num-eval 32 --seed 42 --episode-min 8000 2>&1 | tee logs/reacher_smoke_oracle.log
+  echo "=== [2/2] BASELINE n=32 (flat LeWM, goal image == LeWM protocol) ==="
+  python -m ffjepa.eval_reacher --subgoal baseline \
+    --source local --local-dir encoder_reacher --h5 "$h5" --device cuda \
+    --num-eval 32 --seed 42 --episode-min 8000 2>&1 | tee logs/reacher_smoke_baseline.log
+  echo "[smoke] check both logs: baseline SR well above 0, oracle >= baseline, before spending training compute"
+}
+
+run_dense() {
+  require_env; require_h5
+  local h5; h5=$(H5)
+  echo "=== dense build from $h5 ==="
+  python -m ffjepa.build_subgoals_reacher --source local --local-dir encoder_reacher \
+    --h5 "$h5" --out subgoals_reacher_dense.pt --stride 1 --device cuda --batch-size 256
+}
+
+run_train() {
+  require_env
+  [ -f subgoals_reacher_dense.pt ] || { echo "[FATAL] subgoals_reacher_dense.pt missing -- run the dense stage first."; exit 1; }
+  python - <<'PY'
+import torch, numpy as np
+blob = torch.load('subgoals_reacher_dense.pt', map_location='cpu', weights_only=False)
+ep = blob['episode_idx'].numpy()
+mask = ep < 8000
+np.save('reacher_train_mask.npy', mask)
+print(f'[mask] train episodes: {mask.sum()}/{len(mask)} (holdout = {int((~mask).sum())})')
+PY
+  local cmds=()
+  for S in 5 10 15 25; do
+    cmds+=("echo '=== train gdm_reacher_s${S}.pt ==='; python -m ffjepa.train_gdm --subgoals subgoals_reacher_dense.pt --out gdm_reacher_s${S}.pt --device cuda --mask custom --custom-mask-file reacher_train_mask.npy --subgoal-step ${S} --goal-cond --goal-rule window --goal-gap 1 --goal-gap-max 100 --batch-size 128 --lr 5e-5 --weight-decay 1e-3 --grad-clip 1.0 --lr-schedule warmup_cosine --epochs 20 --ema-decay 0 --amp 2>&1 | tee logs/reacher_train_s${S}.log")
+  done
+  printf '%s\n' "${cmds[@]}" | fan_out
+}
+
+run_arms() {
+  require_env; require_h5
+  for c in gdm_reacher_s5.pt gdm_reacher_s10.pt gdm_reacher_s15.pt gdm_reacher_s25.pt; do
+    [ -f "$c" ] || { echo "[FATAL] $c missing -- run the train stage first (or scp checkpoints from the training box)."; exit 1; }
+  done
+  local h5; h5=$(H5)
+  local NAMES=(baseline s25gdm s15gdm s10gdm s5gdm s25spec s15spec s10spec s5spec)
+  local SUBGOALS=(baseline gdm gdm gdm gdm specaccept specaccept specaccept specaccept)
+  local CKPTS=(none gdm_reacher_s25.pt gdm_reacher_s15.pt gdm_reacher_s10.pt gdm_reacher_s5.pt gdm_reacher_s25.pt gdm_reacher_s15.pt gdm_reacher_s10.pt gdm_reacher_s5.pt)
+  local RHS=(5 5 3 2 1 5 3 2 1)
+  local KS=(50 50 50 50 50 8 8 8 8)
+  local SEEDS=(42 43 44 45)
+  local cmds=()
+  for c in "${!NAMES[@]}"; do
+    local NAME=${NAMES[$c]} SG=${SUBGOALS[$c]} CKPT=${CKPTS[$c]} RH=${RHS[$c]} K=${KS[$c]}
+    local CKPT_ARG=""
+    [ "$CKPT" != "none" ] && CKPT_ARG="--gdm-ckpt $CKPT"
+    for SEED in "${SEEDS[@]}"; do
+      cmds+=("echo '=== arm=$NAME seed=$SEED ==='; python -m ffjepa.eval_reacher --subgoal ${SG} ${CKPT_ARG} --accept-tau 0.20 --gdm-steps ${K} --source local --local-dir encoder_reacher --h5 $h5 --device cuda --num-eval 128 --seed ${SEED} --episode-min 8000 --goal-offset 25 --eval-budget 50 --horizon ${RH} --receding-horizon ${RH} --dump-traces runs/reacher/traces_${NAME}_seed${SEED}.pt 2>&1 | tee logs/reacher_arms_${NAME}_seed${SEED}.log")
+    done
+  done
+  printf '%s\n' "${cmds[@]}" | fan_out
+}
+
+run_horizon() {
+  require_env; require_h5
+  for c in gdm_reacher_s10.pt gdm_reacher_s25.pt; do
+    [ -f "$c" ] || { echo "[FATAL] $c missing -- run the train stage first (or scp checkpoints from the training box)."; exit 1; }
+  done
+  local h5; h5=$(H5)
+  local ARMS=(s25gdm s10gdm s10spec)
+  local SUBGOALS=(gdm gdm specaccept)
+  local CKPTS=(gdm_reacher_s25.pt gdm_reacher_s10.pt gdm_reacher_s10.pt)
+  local RHS=(5 2 2)
+  local KS=(50 50 8)
+  local OFFSETS=(25 50 75 100)
+  local SEEDS=(42 43)
+  # Pre-generate all (arm,offset) episode files sequentially FIRST -- avoids a
+  # write race if two parallel seed-jobs for the same (arm,offset) both try to
+  # (re)generate the same EPFILE at once. Content is deterministic (seed 42)
+  # so this is a pure dedup, not a correctness fix beyond race-avoidance.
+  for a in "${!ARMS[@]}"; do
+    for OFF in "${OFFSETS[@]}"; do
+      local EPFILE="reacher_horizon.ep.${ARMS[$a]}_t${OFF}.json"
+      python batch/build_reacher_horizon_episodes.py --h5 "$h5" --out "$EPFILE" \
+        --n 128 --max-offset 100 --episode-min 8000 --seed 42
+    done
+  done
+  local cmds=()
+  for a in "${!ARMS[@]}"; do
+    local NAME=${ARMS[$a]} SG=${SUBGOALS[$a]} CKPT=${CKPTS[$a]} RH=${RHS[$a]} K=${KS[$a]}
+    for OFF in "${OFFSETS[@]}"; do
+      local EPFILE="reacher_horizon.ep.${NAME}_t${OFF}.json"
+      for SEED in "${SEEDS[@]}"; do
+        local cmd="echo '=== arm=$NAME offset=$OFF seed=$SEED (budgets: 2t=$((2*OFF)), vlwm=50) ==='"
+        cmd+="; echo '--- FF-JEPA regime: budget 2t ---'"
+        cmd+="; python -m ffjepa.eval_reacher --subgoal ${SG} --gdm-ckpt ${CKPT} --accept-tau 0.20 --gdm-steps ${K} --source local --local-dir encoder_reacher --h5 $h5 --device cuda --num-eval 128 --seed ${SEED} --episodes-file ${EPFILE} --goal-offset ${OFF} --eval-budget $((2*OFF)) --horizon ${RH} --receding-horizon ${RH} --dump-traces runs/reacher/traces_hz_${NAME}_t${OFF}_2t_seed${SEED}.pt 2>&1 | tee logs/reacher_horizon_${NAME}_t${OFF}_seed${SEED}.log"
+        if [ "${OFF}" -ne 25 ]; then
+          cmd+="; echo '--- VLWM regime: budget 50 fixed ---'"
+          cmd+="; python -m ffjepa.eval_reacher --subgoal ${SG} --gdm-ckpt ${CKPT} --accept-tau 0.20 --gdm-steps ${K} --source local --local-dir encoder_reacher --h5 $h5 --device cuda --num-eval 128 --seed ${SEED} --episodes-file ${EPFILE} --goal-offset ${OFF} --eval-budget 50 --horizon ${RH} --receding-horizon ${RH} --dump-traces runs/reacher/traces_hz_${NAME}_t${OFF}_b50_seed${SEED}.pt 2>&1 | tee -a logs/reacher_horizon_${NAME}_t${OFF}_seed${SEED}.log"
+        fi
+        cmds+=("$cmd")
+      done
+    done
+  done
+  printf '%s\n' "${cmds[@]}" | fan_out
+}
+
+case "$STAGE" in
+  download) run_download ;;
+  smoke)    run_smoke ;;
+  dense)    run_dense ;;
+  train)    run_train ;;
+  arms)     run_arms ;;
+  horizon)  run_horizon ;;
+  all)
+    run_download
+    run_smoke
+    run_dense
+    run_train
+    run_arms
+    run_horizon
+    ;;
+  *) echo "unknown stage: $STAGE (want: download|smoke|dense|train|arms|horizon|all)"; exit 1 ;;
+esac
+echo "=== stage '$STAGE' done ==="
+BOOTSTRAP_EOF_run_reacher_local_sh
+
+cat > batch/inspect_reacher.py <<'BOOTSTRAP_EOF_inspect_reacher_py'
+"""Generic inspection of the decompressed Reacher dataset -- schema/format
+unknown ahead of time (unlike TwoRoom, no prior exploration done), so this
+lists whatever's actually there and adapts rather than assuming column names.
+"""
+import glob
+import os
+
+DATA_DIR = os.environ.get("REACHER_DATA_DIR", "/scratch/u6ko/hasoshu.u6ko/data/reacher")
+
+print("=== files in", DATA_DIR, "===")
+for root, dirs, files in os.walk(DATA_DIR):
+    for f in files:
+        p = os.path.join(root, f)
+        try:
+            size = os.path.getsize(p)
+        except OSError:
+            size = -1
+        print(f"  {p}  ({size/1e9:.2f} GB)" if size > 1e6 else f"  {p}  ({size} B)")
+
+h5_candidates = glob.glob(os.path.join(DATA_DIR, "**", "*.h5"), recursive=True) + \
+    glob.glob(os.path.join(DATA_DIR, "**", "*.hdf5"), recursive=True)
+lance_candidates = glob.glob(os.path.join(DATA_DIR, "**", "*.lance"), recursive=True)
+
+print("\nh5 candidates:", h5_candidates)
+print("lance candidates:", lance_candidates)
+
+if h5_candidates:
+    import hdf5plugin  # noqa: F401
+    import h5py
+    import numpy as np
+    path = h5_candidates[0]
+    print(f"\n=== inspecting {path} ===")
+    with h5py.File(path, "r") as f:
+        keys = list(f.keys())
+        print("keys:", keys)
+        if "ep_len" in keys:
+            ep_len = f["ep_len"][:]
+            print("n episodes:", len(ep_len), "mean:", ep_len.mean(),
+                  "median:", np.median(ep_len), "min:", ep_len.min(), "max:", ep_len.max())
+            maxlen = ep_len.max()
+            print(f"frac at max ep_len ({maxlen}):", (ep_len == maxlen).mean())
+        for candidate in ["distance_to_target", "reward", "terminated", "truncated", "success"]:
+            if candidate in keys:
+                print(f"'{candidate}' column present, shape:", f[candidate].shape)
+elif lance_candidates:
+    print(f"\n=== Lance format found at {lance_candidates[0]} -- needs a different reader, "
+          f"not inspected here (h5py won't open this) ===")
+else:
+    print("\n=== no recognized dataset format found -- manual inspection needed ===")
+BOOTSTRAP_EOF_inspect_reacher_py
+
+chmod +x batch/setup_local_env.sh batch/dispatch_pool.sh batch/run_reacher_local.sh
+echo "=== bootstrap files written OK ==="

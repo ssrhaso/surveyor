@@ -221,7 +221,8 @@ def sample_short(h5, num_eval, goal_offset, seed, ep_mask=None):
     ep_mask (per-episode bool) optionally restricts to successful demos."""
     import h5py
     with h5py.File(h5, "r") as f:
-        episode_idx = f["episode_idx"][:]
+        # PushT names this column "episode_idx"; the reacher dump names it "ep_idx"
+        episode_idx = f["episode_idx"][:] if "episode_idx" in f else f["ep_idx"][:]
         step_idx = f["step_idx"][:]
         ep_len = f["ep_len"][:]
     ep_len_per_row = ep_len[episode_idx]

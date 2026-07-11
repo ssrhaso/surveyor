@@ -5,7 +5,7 @@ lists whatever's actually there and adapts rather than assuming column names.
 import glob
 import os
 
-DATA_DIR = "/scratch/u6ko/hasoshu.u6ko/data/reacher"
+DATA_DIR = os.environ.get("REACHER_DATA_DIR", "/scratch/u6ko/hasoshu.u6ko/data/reacher")
 
 print("=== files in", DATA_DIR, "===")
 for root, dirs, files in os.walk(DATA_DIR):
