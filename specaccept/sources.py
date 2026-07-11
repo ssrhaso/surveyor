@@ -303,7 +303,7 @@ class SpecAcceptSubgoalSource:
 
 def load_dspark_heads(path, device):
     """Load a train_dspark_head.py checkpoint -> (DSparkHead, ConfidenceHead, ckpt)."""
-    from ffjepa.dspark_head import DSparkHead, ConfidenceHead
+    from specaccept.dspark.dspark_head import DSparkHead, ConfidenceHead
     ck = torch.load(path, map_location="cpu", weights_only=False)
     D = ck["dim"]
     head = DSparkHead(D, ck["mean"], ck["std"], mode=ck.get("mode", "causal"))
@@ -338,7 +338,7 @@ class DSparkSubgoalSource:
     def __init__(self, gdm_planner, dspark_path, n_envs, device="cpu", n_steps=50,
                  seed=42, commit="adaptive", theta=0.5, fixed_k=None, use_sts=True,
                  chain_n=None, refine=True):
-        from ffjepa.dspark_head import commit_depth
+        from specaccept.dspark.dspark_head import commit_depth
         self._commit_depth = commit_depth
         self.planner = gdm_planner
         self.native_n = gdm_planner.cfg.n_future

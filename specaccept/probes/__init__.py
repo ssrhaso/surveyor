@@ -1,6 +1,6 @@
-"""Offline measurement probes (no closed-loop env rollouts; see eval_ffjepa for those).
+"""Offline measurement probes (no closed-loop env rollouts; see the env eval drivers for those).
 
-Run as modules, e.g. `python -m ffjepa.probes.probe_suffix_decay ...`. Each file's
+Run as modules, e.g. `python -m specaccept.probes.probe_suffix_decay ...`. Each file's
 docstring carries its exact invocation and the results doc it feeds.
 
   probe_suffix_decay        the anchor protocol: drafter rel_err by block position

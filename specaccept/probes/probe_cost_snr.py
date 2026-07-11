@@ -37,7 +37,7 @@ S=5 ranks the true block as well as S=25 does, the degeneracy concern is dead
 in-model and Stage 3 measures control, not cost noise.
 
 CPU-friendly (predictor is small); runs on the laptop against the local full h5:
-    python -m ffjepa.probes.probe_cost_snr \
+    python -m specaccept.probes.probe_cost_snr \
         --h5 ../drift_probe/expert/pusht_expert_train.h5 \
         --source local --local-dir ../drift_probe/model \
         --swm-src ../lewm-investigation/stable-worldmodel \

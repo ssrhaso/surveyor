@@ -30,7 +30,7 @@ A3  m+1 posterior multimodality (closes the K-wide-CEM-target question).
     Expected per existing evidence (JointMLP ~ oracle floor): unimodal.
 
 Run (Isambard):
-    python -m ffjepa.probes.probe_dspark_gates --gdm-ckpt gdm_faithful.pt --stride 25 \
+    python -m specaccept.probes.probe_dspark_gates --gdm-ckpt gdm_faithful.pt --stride 25 \
         --source local --local-dir encoder_local \
         --h5 subset_longeval.h5 --episodes-file subset_longeval.episodes150.json \
         --device cuda --n-probe 256 --json-out runs/dspark2/gates_s25.json

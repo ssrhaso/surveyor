@@ -23,7 +23,7 @@ floor and are directionally structured.
 No model training, no CEM, no GDM checkpoint: h5 + frozen encoder only. CPU ok.
 
 Run (Windows laptop, local model, full h5):
-    python -m ffjepa.probes.probe_stride_displacement \
+    python -m specaccept.probes.probe_stride_displacement \
         --h5 ../drift_probe/expert/pusht_expert_train.h5 \
         --source local --local-dir ../drift_probe/model \
         --swm-src ../lewm-investigation/stable-worldmodel \

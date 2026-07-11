@@ -19,7 +19,7 @@ subgoals is 'stuck', etc.). Also prints the same stats for successful episodes
 as the reference distribution.
 
 Local run (traces scp'd from Isambard):
-    python -m ffjepa.probes.probe_failure_anatomy --traces runs/stride/traces_s10_seed42.pt ... \
+    python -m specaccept.probes.probe_failure_anatomy --traces runs/stride/traces_s10_seed42.pt ... \
         --h5 subset_longeval.h5 --source local --local-dir ../drift_probe/model \
         --swm-src ../lewm-investigation/stable-worldmodel --device cpu
 """

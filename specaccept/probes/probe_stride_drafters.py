@@ -17,7 +17,7 @@ runway windows, e.g. subset_longeval.episodes150.json) so S=25 numbers are
 directly comparable to the recorded anchor triplet.
 
 Run (Isambard):
-    python -m ffjepa.probes.probe_stride_drafters --gdm-ckpt gdm_stride5.pt --stride 5 \
+    python -m specaccept.probes.probe_stride_drafters --gdm-ckpt gdm_stride5.pt --stride 5 \
         --source local --local-dir encoder_local \
         --h5 subset_longeval.h5 --episodes-file subset_longeval.episodes150.json \
         --device cuda --n-probe 256 --n-seeds 8
