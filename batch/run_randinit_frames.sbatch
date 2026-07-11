@@ -22,7 +22,7 @@ echo "=== random_init frame capture arm=s10 seed=42 n=8 ==="
 
 apptainer exec --nv --bind /scratch:/scratch,/home:/home "$SIF" bash -c "
   source $VENV/bin/activate
-  python -m ffjepa.eval_ffjepa --subgoal gdm --gdm-ckpt gdm_stride10.pt \
+  python -m specaccept.envs.pusht.eval --subgoal gdm --gdm-ckpt gdm_stride10.pt \
     --source local --local-dir $ENC \
     --h5 subset_longeval.h5 --device cuda \
     --mode random_init --score block --angles 20 5 --num-eval 8 \

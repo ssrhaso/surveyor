@@ -1,7 +1,8 @@
 # ============================================================
 # BOX BOOTSTRAP -- paste this whole block into a terminal on the
-# GPU box, from inside the cloned repo dir. It writes the 4
-# files that are not on GitHub, then you run setup + the chain.
+# GPU box, from inside the cloned repo dir. It rewrites the 4
+# toolchain files (also committed on main; paste refreshes a stale
+# clone without git access), then you run setup + the chain.
 # ============================================================
 
 cat > batch/setup_local_env.sh <<'BOOTSTRAP_EOF_setup_local_env_sh'
@@ -232,11 +233,11 @@ run_smoke() {
   require_env; require_h5
   local h5; h5=$(H5)
   echo "=== [1/2] ORACLE n=32 (harness + encoder + injection sanity) ==="
-  python -m ffjepa.eval_reacher --subgoal oracle \
+  python -m specaccept.envs.reacher.eval --subgoal oracle \
     --source local --local-dir encoder_reacher --h5 "$h5" --device cuda \
     --num-eval 32 --seed 42 --episode-min 8000 2>&1 | tee logs/reacher_smoke_oracle.log
   echo "=== [2/2] BASELINE n=32 (flat LeWM, goal image == LeWM protocol) ==="
-  python -m ffjepa.eval_reacher --subgoal baseline \
+  python -m specaccept.envs.reacher.eval --subgoal baseline \
     --source local --local-dir encoder_reacher --h5 "$h5" --device cuda \
     --num-eval 32 --seed 42 --episode-min 8000 2>&1 | tee logs/reacher_smoke_baseline.log
   echo "[smoke] check both logs: baseline SR well above 0, oracle >= baseline, before spending training compute"
@@ -246,7 +247,7 @@ run_dense() {
   require_env; require_h5
   local h5; h5=$(H5)
   echo "=== dense build from $h5 ==="
-  python -m ffjepa.build_subgoals_reacher --source local --local-dir encoder_reacher \
+  python -m specaccept.envs.reacher.build_subgoals --source local --local-dir encoder_reacher \
     --h5 "$h5" --out subgoals_reacher_dense.pt --stride 1 --device cuda --batch-size 256
 }
 
@@ -263,7 +264,7 @@ print(f'[mask] train episodes: {mask.sum()}/{len(mask)} (holdout = {int((~mask).
 PY
   local cmds=()
   for S in 5 10 15 25; do
-    cmds+=("echo '=== train gdm_reacher_s${S}.pt ==='; python -m ffjepa.train_gdm --subgoals subgoals_reacher_dense.pt --out gdm_reacher_s${S}.pt --device cuda --mask custom --custom-mask-file reacher_train_mask.npy --subgoal-step ${S} --goal-cond --goal-rule window --goal-gap 1 --goal-gap-max 100 --batch-size 128 --lr 5e-5 --weight-decay 1e-3 --grad-clip 1.0 --lr-schedule warmup_cosine --epochs 20 --ema-decay 0 --amp 2>&1 | tee logs/reacher_train_s${S}.log")
+    cmds+=("echo '=== train gdm_reacher_s${S}.pt ==='; python -m specaccept.train_drafter --subgoals subgoals_reacher_dense.pt --out gdm_reacher_s${S}.pt --device cuda --mask custom --custom-mask-file reacher_train_mask.npy --subgoal-step ${S} --goal-cond --goal-rule window --goal-gap 1 --goal-gap-max 100 --batch-size 128 --lr 5e-5 --weight-decay 1e-3 --grad-clip 1.0 --lr-schedule warmup_cosine --epochs 20 --ema-decay 0 --amp 2>&1 | tee logs/reacher_train_s${S}.log")
   done
   printf '%s\n' "${cmds[@]}" | fan_out
 }
@@ -286,7 +287,7 @@ run_arms() {
     local CKPT_ARG=""
     [ "$CKPT" != "none" ] && CKPT_ARG="--gdm-ckpt $CKPT"
     for SEED in "${SEEDS[@]}"; do
-      cmds+=("echo '=== arm=$NAME seed=$SEED ==='; python -m ffjepa.eval_reacher --subgoal ${SG} ${CKPT_ARG} --accept-tau 0.20 --gdm-steps ${K} --source local --local-dir encoder_reacher --h5 $h5 --device cuda --num-eval 128 --seed ${SEED} --episode-min 8000 --goal-offset 25 --eval-budget 50 --horizon ${RH} --receding-horizon ${RH} --dump-traces runs/reacher/traces_${NAME}_seed${SEED}.pt 2>&1 | tee logs/reacher_arms_${NAME}_seed${SEED}.log")
+      cmds+=("echo '=== arm=$NAME seed=$SEED ==='; python -m specaccept.envs.reacher.eval --subgoal ${SG} ${CKPT_ARG} --accept-tau 0.20 --gdm-steps ${K} --source local --local-dir encoder_reacher --h5 $h5 --device cuda --num-eval 128 --seed ${SEED} --episode-min 8000 --goal-offset 25 --eval-budget 50 --horizon ${RH} --receding-horizon ${RH} --dump-traces runs/reacher/traces_${NAME}_seed${SEED}.pt 2>&1 | tee logs/reacher_arms_${NAME}_seed${SEED}.log")
     done
   done
   printf '%s\n' "${cmds[@]}" | fan_out
@@ -324,10 +325,10 @@ run_horizon() {
       for SEED in "${SEEDS[@]}"; do
         local cmd="echo '=== arm=$NAME offset=$OFF seed=$SEED (budgets: 2t=$((2*OFF)), vlwm=50) ==='"
         cmd+="; echo '--- FF-JEPA regime: budget 2t ---'"
-        cmd+="; python -m ffjepa.eval_reacher --subgoal ${SG} --gdm-ckpt ${CKPT} --accept-tau 0.20 --gdm-steps ${K} --source local --local-dir encoder_reacher --h5 $h5 --device cuda --num-eval 128 --seed ${SEED} --episodes-file ${EPFILE} --goal-offset ${OFF} --eval-budget $((2*OFF)) --horizon ${RH} --receding-horizon ${RH} --dump-traces runs/reacher/traces_hz_${NAME}_t${OFF}_2t_seed${SEED}.pt 2>&1 | tee logs/reacher_horizon_${NAME}_t${OFF}_seed${SEED}.log"
+        cmd+="; python -m specaccept.envs.reacher.eval --subgoal ${SG} --gdm-ckpt ${CKPT} --accept-tau 0.20 --gdm-steps ${K} --source local --local-dir encoder_reacher --h5 $h5 --device cuda --num-eval 128 --seed ${SEED} --episodes-file ${EPFILE} --goal-offset ${OFF} --eval-budget $((2*OFF)) --horizon ${RH} --receding-horizon ${RH} --dump-traces runs/reacher/traces_hz_${NAME}_t${OFF}_2t_seed${SEED}.pt 2>&1 | tee logs/reacher_horizon_${NAME}_t${OFF}_seed${SEED}.log"
         if [ "${OFF}" -ne 25 ]; then
           cmd+="; echo '--- VLWM regime: budget 50 fixed ---'"
-          cmd+="; python -m ffjepa.eval_reacher --subgoal ${SG} --gdm-ckpt ${CKPT} --accept-tau 0.20 --gdm-steps ${K} --source local --local-dir encoder_reacher --h5 $h5 --device cuda --num-eval 128 --seed ${SEED} --episodes-file ${EPFILE} --goal-offset ${OFF} --eval-budget 50 --horizon ${RH} --receding-horizon ${RH} --dump-traces runs/reacher/traces_hz_${NAME}_t${OFF}_b50_seed${SEED}.pt 2>&1 | tee -a logs/reacher_horizon_${NAME}_t${OFF}_seed${SEED}.log"
+          cmd+="; python -m specaccept.envs.reacher.eval --subgoal ${SG} --gdm-ckpt ${CKPT} --accept-tau 0.20 --gdm-steps ${K} --source local --local-dir encoder_reacher --h5 $h5 --device cuda --num-eval 128 --seed ${SEED} --episodes-file ${EPFILE} --goal-offset ${OFF} --eval-budget 50 --horizon ${RH} --receding-horizon ${RH} --dump-traces runs/reacher/traces_hz_${NAME}_t${OFF}_b50_seed${SEED}.pt 2>&1 | tee -a logs/reacher_horizon_${NAME}_t${OFF}_seed${SEED}.log"
         fi
         cmds+=("$cmd")
       done

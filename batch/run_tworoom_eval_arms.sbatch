@@ -40,7 +40,7 @@ apptainer exec --nv --bind /scratch:/scratch,/home:/home "$SIF" bash -c "
   export SDL_VIDEODRIVER=dummy
   EVAL_H5=\$(python -c \"import torch; print(torch.load('$DENSE', map_location='cpu', weights_only=False)['source_files'][0])\")
   echo \"[arm] eval h5 = \$EVAL_H5\"
-  python -m ffjepa.eval_tworoom --subgoal ${SG} ${CKPT_ARG} \
+  python -m specaccept.envs.tworoom.eval --subgoal ${SG} ${CKPT_ARG} \
     --accept-tau 0.20 --gdm-steps ${K} \
     --source local --local-dir encoder_tworoom --h5 \$EVAL_H5 --device cuda \
     --num-eval 128 --seed ${SEED} --mode short \

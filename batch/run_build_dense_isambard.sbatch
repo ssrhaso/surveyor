@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#SBATCH --job-name=ffjepa-densebuild
+#SBATCH --job-name=specaccept-densebuild
 #SBATCH --nodes=1
 #SBATCH --gpus=1
 #SBATCH --cpus-per-task=16
@@ -19,6 +19,6 @@ cd /home/u6ko/hasoshu.u6ko/le-wm
 
 apptainer exec --nv --bind /scratch:/scratch,/home:/home "$SIF" bash -c "
   source $VENV/bin/activate
-  python -m ffjepa.build_subgoals --source local --local-dir encoder_local \
+  python -m specaccept.envs.pusht.build_subgoals --source local --local-dir encoder_local \
     --h5 $H5 --out subgoals_dense_full.pt --stride 1 --device cuda --batch-size 256
 "

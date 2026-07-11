@@ -24,7 +24,7 @@ echo "=== commit2 s10 seed=$SEED n=$NEV ==="
 
 apptainer exec --nv --bind /scratch:/scratch,/home:/home "$SIF" bash -c "
   source $VENV/bin/activate
-  python -m ffjepa.eval_ffjepa --subgoal dspark --gdm-ckpt gdm_stride10.pt \
+  python -m specaccept.envs.pusht.eval --subgoal dspark --gdm-ckpt gdm_stride10.pt \
     --no-refine --commit fixed --commit-k 2 \
     --source local --local-dir $ENC --h5 subset_longeval.h5 \
     --episodes-file dspark_val.episodes.json --device cuda \

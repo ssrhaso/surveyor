@@ -47,5 +47,5 @@ echo "=== timing arm=$NAME n=$NEV ==="
 
 apptainer exec --nv --bind /scratch:/scratch,/home:/home "$SIF" bash -c "
   source $VENV/bin/activate
-  python -m ffjepa.eval_ffjepa $ARGS $COMMON
+  python -m specaccept.envs.pusht.eval $ARGS $COMMON
 " 2>&1 | tee logs/timing_inst_${NAME}.log

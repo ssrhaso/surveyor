@@ -39,7 +39,7 @@ print(f'[mask] train episodes: {mask.sum()}/{len(mask)} '
       f\"eval h5 = {blob.get('source_files', ['?'])[0]}\")
 PY
   echo '=== train gdm_tworoom_s${S}.pt (faithful recipe, goal-cond final rule, eps<4000) ==='
-  python -m ffjepa.train_gdm --subgoals $DENSE --out gdm_tworoom_s${S}.pt \
+  python -m specaccept.train_drafter --subgoals $DENSE --out gdm_tworoom_s${S}.pt \
     --device cuda --mask custom --custom-mask-file tworoom_train_mask.npy \
     --subgoal-step ${S} --goal-cond \
     --batch-size 128 --lr 5e-5 --weight-decay 1e-3 --grad-clip 1.0 \

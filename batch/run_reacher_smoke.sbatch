@@ -24,11 +24,11 @@ apptainer exec --nv --bind /scratch:/scratch,/home:/home "$SIF" bash -c "
   source $VENV/bin/activate
   export MUJOCO_GL=egl
   echo '=== [1/2] ORACLE n=32 (harness + encoder + injection sanity) ==='
-  python -m ffjepa.eval_reacher --subgoal oracle \
+  python -m specaccept.envs.reacher.eval --subgoal oracle \
     --source local --local-dir encoder_reacher --h5 $H5 --device cuda \
     --num-eval 32 --seed 42 --episode-min 8000
   echo '=== [2/2] BASELINE n=32 (flat LeWM, goal image == LeWM protocol) ==='
-  python -m ffjepa.eval_reacher --subgoal baseline \
+  python -m specaccept.envs.reacher.eval --subgoal baseline \
     --source local --local-dir encoder_reacher --h5 $H5 --device cuda \
     --num-eval 32 --seed 42 --episode-min 8000
 " 2>&1 | tee logs/reacher_smoke.log

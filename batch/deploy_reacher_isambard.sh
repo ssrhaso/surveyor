@@ -15,16 +15,11 @@ CFG='C:\Users\hasaa\.ssh\config_clifton'
 HOST=u6ko.aip2.isambard
 LOCAL="$(cd "$(dirname "$0")/.." && pwd)"
 
-echo "=== [1/3] sync ffjepa modules + batch scripts ==="
-"$SCP" -F "$CFG" -o BatchMode=yes \
-  "$LOCAL/ffjepa/build_subgoals_reacher.py" \
-  "$LOCAL/ffjepa/eval_reacher.py" \
-  "$LOCAL/ffjepa/build_subgoals_tworoom.py" \
-  "$LOCAL/ffjepa/eval_tworoom.py" \
-  "$LOCAL/ffjepa/train_gdm.py" \
-  "$LOCAL/ffjepa/subgoal_planner.py" \
-  "$LOCAL/ffjepa/eval_ffjepa.py" \
-  "$HOST":le-wm/ffjepa/
+echo "=== [1/3] sync specaccept package + batch scripts ==="
+# ship the whole package tree (nested envs/ layout) and drop the retired
+# ffjepa/ dir on the box so stale module paths cannot resolve
+tar -C "$LOCAL" --exclude='__pycache__' -cf - specaccept \
+  | "$SSH" -F "$CFG" -o BatchMode=yes "$HOST" 'rm -rf le-wm/ffjepa le-wm/specaccept && tar -C le-wm -xf -'
 "$SCP" -F "$CFG" -o BatchMode=yes \
   "$LOCAL/batch/run_reacher_download_inspect.sbatch" \
   "$LOCAL/batch/download_inspect_reacher.sh" \

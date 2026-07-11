@@ -37,7 +37,7 @@ np.save('reacher_train_mask.npy', mask)
 print(f'[mask] train episodes: {mask.sum()}/{len(mask)} (holdout = {int((~mask).sum())})')
 PY
   echo '=== train gdm_reacher_s${S}.pt (faithful recipe, goal-cond sampled gap 1..100, eps<8000) ==='
-  python -m ffjepa.train_gdm --subgoals subgoals_reacher_dense.pt --out gdm_reacher_s${S}.pt \
+  python -m specaccept.train_drafter --subgoals subgoals_reacher_dense.pt --out gdm_reacher_s${S}.pt \
     --device cuda --mask custom --custom-mask-file reacher_train_mask.npy \
     --subgoal-step ${S} --goal-cond --goal-rule window --goal-gap 1 --goal-gap-max 100 \
     --batch-size 128 --lr 5e-5 --weight-decay 1e-3 --grad-clip 1.0 \

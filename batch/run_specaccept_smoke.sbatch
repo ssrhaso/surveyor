@@ -22,7 +22,7 @@ print('smoke episodes:', p['episodes'])
 "
 apptainer exec --nv --bind /scratch:/scratch,/home:/home "$SIF" bash -c "
   source $VENV/bin/activate
-  python -m ffjepa.eval_ffjepa --subgoal specaccept --gdm-ckpt gdm_stride10.pt \
+  python -m specaccept.envs.pusht.eval --subgoal specaccept --gdm-ckpt gdm_stride10.pt \
     --accept-tau 0.20 --gdm-steps 8 \
     --source local --local-dir $ENC --h5 subset_longeval.h5 \
     --episodes-file dspark_val_smoke.json --device cuda \

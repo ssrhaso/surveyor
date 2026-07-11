@@ -44,7 +44,7 @@ apptainer exec --nv --bind /scratch:/scratch,/home:/home "$SIF" bash -c "
   python batch/build_reacher_horizon_episodes.py --h5 $H5 --out $EPFILE \
     --n 128 --max-offset 100 --episode-min 8000 --seed 42
   echo '--- FF-JEPA regime: budget 2t ---'
-  python -m ffjepa.eval_reacher --subgoal ${SG} --gdm-ckpt ${CKPT} \
+  python -m specaccept.envs.reacher.eval --subgoal ${SG} --gdm-ckpt ${CKPT} \
     --accept-tau 0.20 --gdm-steps ${K} \
     --source local --local-dir encoder_reacher --h5 $H5 --device cuda \
     --num-eval 128 --seed ${SEED} --episodes-file $EPFILE \
@@ -53,7 +53,7 @@ apptainer exec --nv --bind /scratch:/scratch,/home:/home "$SIF" bash -c "
     --dump-traces runs/reacher/traces_hz_${NAME}_t${OFF}_2t_seed${SEED}.pt
   if [ ${OFF} -ne 25 ]; then
     echo '--- VLWM regime: budget 50 fixed ---'
-    python -m ffjepa.eval_reacher --subgoal ${SG} --gdm-ckpt ${CKPT} \
+    python -m specaccept.envs.reacher.eval --subgoal ${SG} --gdm-ckpt ${CKPT} \
       --accept-tau 0.20 --gdm-steps ${K} \
       --source local --local-dir encoder_reacher --h5 $H5 --device cuda \
       --num-eval 128 --seed ${SEED} --episodes-file $EPFILE \

@@ -19,6 +19,6 @@ echo "=== dense build from $H5 ==="
 
 apptainer exec --nv --bind /scratch:/scratch,/home:/home "$SIF" bash -c "
   source $VENV/bin/activate
-  python -m ffjepa.build_subgoals_reacher --source local --local-dir encoder_reacher \
+  python -m specaccept.envs.reacher.build_subgoals --source local --local-dir encoder_reacher \
     --h5 $H5 --out subgoals_reacher_dense.pt --stride 1 --device cuda --batch-size 256
 "

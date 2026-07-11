@@ -42,7 +42,7 @@ echo "=== paper-protocol cfg=$CFG proto=$PROTO seed=$SEED ==="
 
 apptainer exec --nv --bind /scratch:/scratch,/home:/home "$SIF" bash -c "
   source $VENV/bin/activate
-  python -m ffjepa.eval_ffjepa $SUBGOAL_ARGS --gdm-ckpt gdm_stride10.pt \
+  python -m specaccept.envs.pusht.eval $SUBGOAL_ARGS --gdm-ckpt gdm_stride10.pt \
     --source local --local-dir $ENC --h5 subset_longeval.h5 --device cuda \
     $PROTO_ARGS --score block --angles 20 5 --seed ${SEED} --cem-seed ${SEED} \
     --horizon 2 --receding-horizon 2

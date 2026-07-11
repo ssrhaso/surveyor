@@ -25,10 +25,10 @@ cd /home/u6ko/hasoshu.u6ko/le-wm
 apptainer exec --nv --bind /scratch:/scratch,/home:/home "$SIF" bash -c "
   source $VENV/bin/activate
   echo '=== [1/2] diag_gdm on gdm_faithful.pt (identical settings to stride-25 arm) ==='
-  python -m ffjepa.diag_gdm --gdm-ckpt gdm_faithful.pt --subgoals subgoals_dense_full.pt \
+  python -m specaccept.diag_gdm --gdm-ckpt gdm_faithful.pt --subgoals subgoals_dense_full.pt \
     --subgoal-step 25 --stride 25 --h5 $H5 --device cuda --source local --local-dir $ENC
   echo '=== [2/2] probe_suffix_decay on gdm_stride25.pt (anchor protocol; expect ~0.159/0.229/0.318) ==='
-  python -m ffjepa.probes.probe_suffix_decay --gdm-ckpt gdm_stride25.pt \
+  python -m specaccept.probes.probe_suffix_decay --gdm-ckpt gdm_stride25.pt \
     --source local --local-dir $ENC \
     --h5 subset_longeval.h5 --episodes-file subset_longeval.episodes150.json \
     --device cuda --n-probe 256 --stride 25 --seed 42

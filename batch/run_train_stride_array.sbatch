@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#SBATCH --job-name=ffjepa-stride
+#SBATCH --job-name=specaccept-stride
 #SBATCH --nodes=1
 #SBATCH --gpus=1
 #SBATCH --cpus-per-task=16
@@ -27,11 +27,11 @@ cd /home/u6ko/hasoshu.u6ko/le-wm
 apptainer exec --nv --bind /scratch:/scratch,/home:/home "$SIF" bash -c "
   source $VENV/bin/activate
   echo '=== train gdm_stride${S}.pt (faithful recipe, subgoal-step ${S}) ==='
-  python -m ffjepa.train_gdm --subgoals subgoals_dense_full.pt --out gdm_stride${S}.pt \
+  python -m specaccept.train_drafter --subgoals subgoals_dense_full.pt --out gdm_stride${S}.pt \
     --device cuda --mask 5 --subgoal-step ${S} \
     --batch-size 128 --lr 5e-5 --weight-decay 1e-3 --grad-clip 1.0 \
     --lr-schedule warmup_cosine --epochs 20 --ema-decay 0 --amp
   echo '=== Stage 2 offline gate: diag at subgoal-step ${S} ==='
-  python -m ffjepa.diag_gdm --gdm-ckpt gdm_stride${S}.pt --subgoals subgoals_dense_full.pt \
+  python -m specaccept.diag_gdm --gdm-ckpt gdm_stride${S}.pt --subgoals subgoals_dense_full.pt \
     --subgoal-step ${S} --stride ${S} --h5 $H5 --device cuda --source local --local-dir $ENC
 "

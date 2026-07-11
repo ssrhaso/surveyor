@@ -34,7 +34,7 @@ echo "=== arm=$NAME ckpt=$CKPT tau=$TAU k=$K horizon=receding=$RH seed=$SEED n=$
 
 apptainer exec --nv --bind /scratch:/scratch,/home:/home "$SIF" bash -c "
   source $VENV/bin/activate
-  python -m ffjepa.eval_ffjepa --subgoal specaccept --gdm-ckpt ${CKPT} \
+  python -m specaccept.envs.pusht.eval --subgoal specaccept --gdm-ckpt ${CKPT} \
     --accept-tau ${TAU} --gdm-steps ${K} \
     --source local --local-dir $ENC --h5 subset_longeval.h5 \
     --episodes-file dspark_val.episodes.json --device cuda \

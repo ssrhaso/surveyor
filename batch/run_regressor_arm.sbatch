@@ -33,7 +33,7 @@ NEV=$(python3 -c "import json;print(len(json.load(open('dspark_val.episodes.json
 if [ $((SLURM_ARRAY_TASK_ID % 4)) -eq 0 ]; then
   apptainer exec --nv --bind /scratch:/scratch,/home:/home "$SIF" bash -c "
     source $VENV/bin/activate
-    python -m ffjepa.train_regressor --subgoals subgoals_dense_full.pt \
+    python -m specaccept.train_regressor --subgoals subgoals_dense_full.pt \
       --subgoal-step ${S} --out ${CKPT} --device cuda
   "
   touch ${CKPT}.done
@@ -45,7 +45,7 @@ fi
 echo "=== regressor arm S=$S seed=$SEED horizon=receding=$RH n=$NEV ==="
 apptainer exec --nv --bind /scratch:/scratch,/home:/home "$SIF" bash -c "
   source $VENV/bin/activate
-  python -m ffjepa.eval_ffjepa --subgoal regressor --regressor-ckpt ${CKPT} \
+  python -m specaccept.envs.pusht.eval --subgoal regressor --regressor-ckpt ${CKPT} \
     --source local --local-dir $ENC --h5 subset_longeval.h5 \
     --episodes-file dspark_val.episodes.json --device cuda \
     --mode long --goal-offset 150 --eval-budget 300 \

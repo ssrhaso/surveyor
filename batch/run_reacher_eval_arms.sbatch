@@ -40,7 +40,7 @@ echo "=== arm=$NAME subgoal=$SG ckpt=$CKPT horizon=receding=$RH k=$K seed=$SEED 
 apptainer exec --nv --bind /scratch:/scratch,/home:/home "$SIF" bash -c "
   source $VENV/bin/activate
   export MUJOCO_GL=egl
-  python -m ffjepa.eval_reacher --subgoal ${SG} ${CKPT_ARG} \
+  python -m specaccept.envs.reacher.eval --subgoal ${SG} ${CKPT_ARG} \
     --accept-tau 0.20 --gdm-steps ${K} \
     --source local --local-dir encoder_reacher --h5 $H5 --device cuda \
     --num-eval 128 --seed ${SEED} --episode-min 8000 \

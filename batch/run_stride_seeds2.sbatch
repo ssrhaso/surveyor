@@ -27,7 +27,7 @@ echo "=== arm=$NAME seed=$SEED horizon=receding=$RH n=$NEV ==="
 
 apptainer exec --nv --bind /scratch:/scratch,/home:/home "$SIF" bash -c "
   source $VENV/bin/activate
-  python -m ffjepa.eval_ffjepa --subgoal gdm --gdm-ckpt ${CKPT} \
+  python -m specaccept.envs.pusht.eval --subgoal gdm --gdm-ckpt ${CKPT} \
     --source local --local-dir $ENC --h5 subset_longeval.h5 \
     --episodes-file dspark_val.episodes.json --device cuda \
     --mode long --goal-offset 150 --eval-budget 300 \

@@ -17,7 +17,7 @@ mkdir -p runs/dspark2
 
 apptainer exec --nv --bind /scratch:/scratch,/home:/home "$SIF" bash -c "
   source $VENV/bin/activate
-  python -m ffjepa.probes.probe_dspark_gates --gdm-ckpt gdm_stride10.pt --stride 10 \
+  python -m specaccept.probes.probe_dspark_gates --gdm-ckpt gdm_stride10.pt --stride 10 \
     --source local --local-dir $ENC \
     --h5 subset_longeval.h5 --episodes-file subset_longeval.episodes150.json \
     --device cuda --n-probe 256 --seed 42 \

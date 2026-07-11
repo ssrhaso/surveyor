@@ -23,7 +23,7 @@ mkdir -p runs/stride
 
 apptainer exec --nv --bind /scratch:/scratch,/home:/home "$SIF" bash -c "
   source $VENV/bin/activate
-  python -m ffjepa.probes.probe_stride_drafters --gdm-ckpt gdm_stride${S}.pt --stride ${S} \
+  python -m specaccept.probes.probe_stride_drafters --gdm-ckpt gdm_stride${S}.pt --stride ${S} \
     --source local --local-dir $ENC \
     --h5 subset_longeval.h5 --episodes-file subset_longeval.episodes150.json \
     --device cuda --n-probe 256 --n-seeds 8 --seed 42 \

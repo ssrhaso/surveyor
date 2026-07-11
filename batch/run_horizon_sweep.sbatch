@@ -38,7 +38,7 @@ echo "=== horizon-sweep cfg=$CFG offset=$OFF budget=$BUDGET seed=$SEED epfile=$E
 
 apptainer exec --nv --bind /scratch:/scratch,/home:/home "$SIF" bash -c "
   source $VENV/bin/activate
-  python -m ffjepa.eval_ffjepa $ARM_ARGS \
+  python -m specaccept.envs.pusht.eval $ARM_ARGS \
     --source local --local-dir $ENC \
     --h5 subset_longeval.h5 --episodes-file $EPFILE --device cuda \
     --mode long --goal-offset $OFF --eval-budget $BUDGET \
