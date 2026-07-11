@@ -1,0 +1,594 @@
+% ============================================================
+% Subgoal Scale & Reality-Verified Speculative Consumption
+% Preliminary internal draft -- PushT results only, cross-environment
+% generalization pending. Structured to convert to a conference template
+% (ICLR/NeurIPS-style) later; using a plain article class for now so it
+% compiles standalone without an external .sty (the ICLR template folder
+% is not vendored in this repo -- fetch github.com/ICLR/Master-Template
+% and swap the preamble below for the real submission pass).
+% ============================================================
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{times}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage[colorlinks=true, linkcolor=blue, citecolor=blue]{hyperref}
+\usepackage{cleveref}
+\usepackage{natbib}
+
+% ---- house macros ----
+\newcommand{\ours}[1]{\textbf{#1}}          % highlight our winning cells
+\newcommand{\degc}[1]{$#1^\circ$}
+\newcommand{\gdm}{\text{GDM}}
+% Future-experiment placeholder: renders a red TBD marker.
+\newcommand{\TBD}{\textcolor{red}{\textbf{TBD}}}
+% A framed red placeholder block standing in for a not-yet-run table.
+\newcommand{\tbdblock}[1]{%
+  \begin{center}\fcolorbox{red}{red!5}{%
+    \parbox{0.9\linewidth}{\centering\color{red}\textbf{[TBD --- #1]}}}%
+  \end{center}}
+
+\title{Subgoal Scale and Reality-Verified Speculative Consumption\\
+in Hierarchical Latent World-Model Planning\\
+\large Preliminary draft --- PushT results only}
+\author{}
+\date{Draft status: 2026-07-10}
+
+\begin{document}
+\maketitle
+
+\begin{center}
+\fcolorbox{gray}{gray!8}{\parbox{0.92\linewidth}{\small
+\textbf{Status: preliminary draft, PushT-only.} All PushT results below (\Cref{sec:repro}--\Cref{sec:horizon}) are measured and cross-checked against raw logs. \Cref{sec:generalize} (Reacher, TwoRoom, OGBench-Cube) is not yet run --- placeholders only. \Cref{sec:intro} (contributions framing), \Cref{sec:related} (related work), \Cref{sec:method} (formal method description), and \Cref{sec:discussion}--\Cref{sec:conclusion} (discussion/conclusion) are lightly written and will be rewritten once the generalization results land; treat them as scaffolding, not final claims. One open data gap: the random-initialization table (\Cref{sec:randinit}) reports only the seeds we could directly verify against logs --- see the note there.}}
+\end{center}
+
+% ============================================================
+\begin{abstract}
+We study the FF-JEPA hierarchical latent planner --- a frozen LeWM JEPA encoder, a
+diffusion subgoal drafter (``GDM''), and a CEM controller --- on PushT, and identify
+\emph{subgoal scale}, the spacing $S$ between drafted subgoals with the control loop
+matched to it, as the dominant unexplored lever. Success rate over stride is
+non-monotone with a clear interior optimum at $S{=}10$: \ours{$97.2\%/96.4\%$}
+(\degc{20}/\degc{5} criteria) versus $91.1\%/86.3\%$ for the paper's native $S{=}25$
+under an identical protocol. On the paper's own published protocols the winning
+configuration \ours{exceeds the published numbers} at both horizons ($96.1{\to}98.4$
+at $t{=}25$, $91.8{\to}97.9$ at $t{=}75$, \degc{20}, $n{=}256$); on random
+initialization (its hardest setting, published $82.4\%$) it records \ours{zero
+failures in every verified episode measured so far} (512/512 across two seeds at
+$S{=}10$; a third arm and criterion cell are queued but unconfirmed, see
+\Cref{sec:randinit}); and on a fixed-population horizon sweep
+the baseline decays monotonically while $S{=}10$ stays flat --- \ours{the gap widens
+from $+3.3$ to $+11.9$pp}. A cadence-isolation control shows the mechanism is
+\emph{scale matching}, not re-planning frequency. Separately, the one component of
+DSpark-style speculative decoding that survives measurement --- a draft--verify--accept
+skeleton with the learned verifier replaced by the \emph{achieved environment state}
+--- cuts diffusion compute ${\sim}11\times$ versus every-step drafting while remaining
+success-rate-neutral at the official criterion. Refinement heads, learned confidence
+scheduling, blind multi-step commitment, and a deterministic regressor that dominates
+the drafter \emph{offline} each measurably \emph{hurt} in closed loop; we report them
+as negative results that causally implicate drafter stochasticity.
+\end{abstract}
+
+% ============================================================
+\section{Introduction}
+\label{sec:intro}
+
+Hierarchical latent world models promise long-horizon planning by decomposing a goal
+into a chain of reachable subgoals. FF-JEPA \citep{ffjepa} instantiates this on top of
+the LeWM JEPA world model \citep{lewm}: a diffusion model drafts future subgoal latents
+and a flat CEM controller \citep{cem} steers toward each in turn, re-planning on a fixed
+stride. It reports that hierarchy beats flat CEM on long horizons --- but under an
+underspecified pipeline (no released code; unstated diffusion configuration; unstated
+evaluation population), and with a subgoal stride fixed at a single value.
+
+We take FF-JEPA as a substrate and ask what actually governs its closed-loop success.
+Our contributions:
+
+\begin{enumerate}[itemsep=2pt,topsep=2pt]
+\item \textbf{Faithful reproduction and audit} (\Cref{sec:repro}). We rebuild the
+pipeline to the episode and iteration, reproduce the paper's headline numbers, and
+establish that the benchmark's \emph{coded} success criterion is \degc{20} angular
+tolerance (its \degc{5} appears in prose only); we report both throughout.
+\item \textbf{The subgoal-scale law} (\Cref{sec:scale}). Retraining the drafter at
+$S\in\{5,10,15,25\}$ with the control loop matched to the stride reveals an interior
+optimum at $S{=}10$ that beats the paper configuration by $+6.1/+10.1$pp and, on the
+paper's own protocols, exceeds its published numbers. A cadence-isolation control
+identifies \emph{scale matching}, not re-planning frequency, as the mechanism.
+\item \textbf{Reality-verified speculative consumption} (\Cref{sec:spec}). Replacing
+DSpark's learned verifier with the achieved environment state yields an
+${\sim}11\times$ reduction in diffusion compute at neutral success rate.
+\item \textbf{Negative results} (\Cref{sec:neg}, \Cref{sec:regress}). Refinement heads,
+blind commitment, learned confidence, and a deterministic regressor all hurt in closed
+loop despite matched-or-better \emph{offline} fidelity --- causally implicating the
+drafter's conditional \emph{spread} as load-bearing.
+\end{enumerate}
+
+% ============================================================
+\section{Related Work}
+\label{sec:related}
+\tbdblock{Related work. Placeholder pointers only --- full positioning pending a
+literature-occupancy pass (flagged as an open thread, see \Cref{sec:discussion}).
+Axes to cover: (i) hierarchical / subgoal-conditioned latent planning (FF-JEPA
+\citep{ffjepa}, LeWM \citep{lewm}, and other JEPA-style world models); (ii)
+re-planning cadence and receding-horizon MPC in learned-model control, including
+CEM-based planners \citep{cem}; (iii) speculative decoding, both in language
+models (the DSpark composition we port, \citep{dspark}) and prior applications
+of draft--verify--accept outside text generation; (iv) subgoal/waypoint spacing
+and hierarchical RL more broadly; (v) budget-controlled evaluation protocols for
+long-horizon manipulation, contrasting our fixed-population sweep with VLWM's
+fixed-budget-50 regime \citep{vlwm} and OGBench's benchmark suite \citep{ogbench}.}
+
+% ============================================================
+\section{Method}
+\label{sec:method}
+
+We modify only three things about the FF-JEPA system (\Cref{sec:repro}): the subgoal
+spacing the drafter is trained and queried at, the loop geometry that consumes its
+output, and the policy that decides when to re-invoke it. Encoder, drafter
+architecture, training objective, and CEM itself are untouched.
+
+\paragraph{Scale-matched retraining.} We retrain the GDM drafter at stride
+$S \in \{5,10,15,25\}$ with an identical recipe to the paper's $S{=}25$ configuration
+(loss, batch size, learning rate, schedule, epochs --- \Cref{sec:repro}); only the
+subgoal spacing used to build training pairs changes, so pair counts are
+construction-identical across arms and any SR delta is attributable to spacing alone.
+Because the CEM terminal cost is only well-posed when its rollout length is
+comparable to the target's distance, the control loop is scaled with the stride:
+CEM horizon $=$ replan cadence $=S$ (holding the action-repeat block, sample count,
+and top-$k$ fixed). This coupling is definitional, not a second free variable --- see
+the cadence-isolation control in \Cref{sec:scale}, which holds targets fixed at
+25-step spacing while re-anchoring every 5 steps, and isolates loop cadence from
+target spacing as separate mechanisms.
+
+\paragraph{Reality-verified speculative consumption.} \Cref{sec:spec} details the
+mechanism; briefly, the drafter proposes an $N$-block once, the policy executes
+toward the first position, and after each hop compares the \emph{achieved} latent to
+the subgoal just pursued: within tolerance $\tau$, the next drafted position is
+consumed with no diffusion call; otherwise the planner re-drafts from the achieved
+state. This differs from DSpark's original scheme only in the verifier: DSpark scores
+acceptance with a learned confidence head trained on drafter self-consistency; we use
+the environment's realized state directly, which is unbiased by construction and
+requires no additional training.
+
+\tbdblock{Formal algorithm box / pseudocode for both procedures, and the CEM cost
+functional definition, are pending --- currently described in prose above and in
+\Cref{sec:scale,sec:spec}.}
+
+% ============================================================
+\section{Setting and Faithful Reproduction}
+\label{sec:repro}
+
+\paragraph{The FF-JEPA planner.} Observations are encoded by a frozen LeWM JEPA encoder,
+$z_t=\mathrm{enc}(o_t)$. A diffusion model $G$ (``GDM'': a 3-block DiT with adaLN-Zero
+conditioning, $N{=}3$ future subgoals, $\epsilon$-prediction, trained on
+success-filtered expert demonstrations) proposes the next subgoal latent
+$\hat z_{sg,m+1}$ from the current encoded observation. CEM then optimizes an action
+sequence against a terminal-$L_2$ cost to that subgoal, re-planning every $H$
+environment steps. The paper fixes the stride to $H{=}25$.
+
+\paragraph{Reproduction (audit closed).} Our faithful retraining reproduces the paper:
+short-horizon $95.31\%$ (paper $96.09\%$; same-set oracle $93.36\%$; $n{=}256$),
+long-horizon $t{=}75$ multiseed mean $90.0\%$ (paper $91.80\%$), random-init
+$96.5\%/78.1\%$ at \degc{20}/\degc{5} (paper $82.42\%$). Pipeline faithfulness is
+over-determined: a from-scratch rebuild of the dense training set reproduces the
+original training population to the episode ($9{,}094$) and iteration ($171{,}940$),
+and the retrained $S{=}25$ drafter reproduces the reference offline fidelity anchor to
+four decimals ($0.1593$ vs.\ $0.1593$ at $m{+}1$).
+
+\paragraph{The \degc{20}/\degc{5} criterion.} FF-JEPA's prose states a \degc{5} angular
+tolerance, but the environment's shipped evaluation code enforces \degc{20}; the oracle
+(true goal, exact pipeline) reaches only ${\sim}84$--$86\%$ at literal \degc{5} even
+under matched-population filtering, making a genuine $96\%$ at \degc{5} for a
+\emph{sampled}-subgoal method implausible. We therefore treat \degc{20} as the operative
+criterion and \degc{5} as a strict \emph{precision} criterion, reporting both throughout.
+
+\paragraph{Protocols.} Two protocols recur below. \emph{Paper protocol}: $n{=}256$,
+paper-matched sampling (reproduction and random-init). \emph{Controlled protocol}:
+$n{=}62$ fixed held-out episodes, goal offset $150$, budget $300$ steps, block-only
+criterion, CEM seeds 42--45 (curve: 42--49); every arm sees byte-identical episodes and
+seeds, so within-table deltas are exact treatment effects. Per-arm
+$\mathrm{SE}\approx1.7$pp (4 seeds) / $0.9$pp (8 seeds).
+
+% ============================================================
+\section{The Subgoal-Scale Law}
+\label{sec:scale}
+
+We retrain the drafter at $S\in\{5,10,15,25\}$ with an identical recipe --- only the
+target spacing changes, and pair counts are construction-identical --- and scale the
+control loop with the stride (CEM horizon $=$ re-plan cadence $=S$). Offline pre-gates
+confirmed fine-stride targets are well-posed (displacement $4.7\times$ the encoder noise
+floor at $S{=}5$) and that the fine-scale CEM cost landscape \emph{sharpens} (true-plan
+ranking percentile $0.93$ at $S{=}5$ vs.\ $0.82$ at $S{=}25$; cost dynamic range
+$3\times$ larger).
+
+\begin{table}[h]
+\centering
+\caption{Success rate vs.\ subgoal scale (controlled protocol). A clear interior optimum
+at $S{=}10$: $+6.1/+10.1$pp over the paper configuration ($+8.7$pp at \degc{5} with 8
+seeds, $\mathrm{SE}\approx0.9$pp, positive in every seed). $S{=}10$ pays almost no
+penalty between the loose and strict criteria; $S{=}25$ drops ${\sim}5$pp.}
+\label{tab:scale}
+\begin{tabular}{lcccc}
+\toprule
+& $S{=}5$ & $S{=}10$ & $S{=}15$ & $S{=}25$ (paper config) \\
+\midrule
+SR \degc{20} (seeds 42--45)  & 92.3 & \ours{97.2} & 96.8 & 91.1 \\
+SR \degc{5} (seeds 42--45)   & 91.9 & \ours{96.4} & 94.4 & 86.3 \\
+SR \degc{5} (8 seeds, 42--49)& 92.9 & \ours{96.4} & 94.4 & 87.7 \\
+Diffusion calls / episode    & 60   & 30          & 20   & 12   \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Mechanism: scale matching, not cadence.} A cadence-isolation control ---
+re-anchor every 5 steps against \emph{unchanged} 25-step targets --- \emph{collapses} to
+$78.6\%/77.8\%$ ($-12.5$pp below baseline): each re-draft re-samples a distant subgoal
+from a wide conditional posterior, and CEM chases a churning target. Together with the
+monotone commitment losses of \Cref{sec:neg}, the correct statement is: \textbf{closed-loop
+success is governed by matching the control loop to the subgoal scale; finer matched
+scales win, to an interior optimum} --- not ``re-plan more,'' not ``re-plan less.''
+
+\paragraph{Prediction error is horizon-intrinsic.} Across all four drafters, offline
+prediction error collapses onto the \emph{absolute} look-ahead horizon, independent of
+block position ($+10$ steps: $0.105$ vs.\ $0.112$; $+15$: $0.132$ vs.\ $0.140$), and the
+$S{=}5$ drafter's \emph{third} block position ($+15$, $0.140$) outpredicts the $S{=}25$
+drafter's \emph{first} ($+25$, $0.159$). ``Suffix decay'' is task-future uncertainty, not
+an architectural defect --- retiring intra-block architecture work.
+
+% ============================================================
+\section{Negative Results: The DSpark Port}
+\label{sec:neg}
+
+We implemented the published DSpark \citep{dspark} speculative-decoding composition on the GDM and
+evaluated each component in the closed loop (controlled protocol, $S{=}25$).
+
+\begin{table}[h]
+\centering
+\caption{DSpark components ported literally. Lower latent error does not mean better
+control: the refiner \emph{halved} offline prediction error while losing 11pp SR ---
+offline fidelity anti-correlates with closed-loop SR. The mechanism is conditional-spread
+collapse: pulling drafts toward the conditional mean produces less-reachable targets.
+This closes refinement, learned-confidence scheduling, and blind commitment as directions.}
+\label{tab:dspark-neg}
+\begin{tabular}{lccl}
+\toprule
+Arm & SR \degc{20} & SR \degc{5} & Verdict \\
+\midrule
+GDM, re-draft every step (reference)          & 91.9 & 83.1 & --- \\
++ refinement head (fixed-1, same cadence)     & 81.1 & 72.2 & refinement $-11$pp \\
++ blind commit-3                              & 73.8 & 50.0 & commitment $-18$pp \\
++ learned-confidence adaptive commit          & 64.5 & 52.0 & worse than blind \\
+raw open-loop chain (commit-6)                & 72.6 & 63.7 & healthy chain still loses \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ============================================================
+\section{Random Initialization: The Paper's Hardest Setting}
+\label{sec:randinit}
+
+\begin{table}[h]
+\centering
+\caption{Random initialization, per-episode random goals (paper III-A protocol). The
+protocol bug that once produced a spurious $100\%$ was fixed \emph{before} these runs;
+the reproduced baseline scoring $78.1\%$ on the identical code path is the control.
+$S{=}10$: \ours{$512/512$ episodes over two independent seeds, zero failures at both
+tolerances}. The paper's criterion mapping is ambiguous for this cell (its $82.42$ aligns
+with our strict-criterion baseline); under either reading, fine scale moves it to $100\%$
+on every seed measured so far.}
+\label{tab:randinit}
+\begin{tabular}{lcc}
+\toprule
+& SR \degc{20} & SR \degc{5} \\
+\midrule
+LeWM (flat, goal image; paper)              & \multicolumn{2}{c}{0.00} \\
+FF-JEPA Det (paper)                         & \multicolumn{2}{c}{81.25} \\
+FF-JEPA GDM (paper)                         & \multicolumn{2}{c}{82.42} \\
+FF-JEPA GDM (our faithful repro, $n{=}256$, seed 42) & 96.5 & 78.1 \\
+Ours, $S{=}5$ ($n{=}256$, seed 42)          & 100.0 & 94.5 \\
+Ours, $S{=}10$ ($n{=}256\times2$ seeds, 42--43) & \ours{100.0} & \ours{100.0} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Data-completeness note.} A second $S{=}5$ seed and a third/fourth $S{=}10$
+seed were queued (Isambard job 5578762) to extend this table to $n{=}256\times2$ ($S{=}5$)
+and $n{=}256\times4$ ($S{=}10$) — matching the power of the rest of the paper's tables.
+We could not locate a result for that job in any local log, results file, or the remote
+cluster (unreachable at the time of writing) and do not report it. \emph{Every number
+in this table is a directly verified success rate}; do not cite figures beyond what is
+tabulated here (in particular, not ``1024 episodes'' or ``four seeds'') until the queued
+arm is confirmed and this note is removed.
+
+% ============================================================
+\section{Reality-Verified Speculative Consumption}
+\label{sec:spec}
+
+The surviving DSpark idea is its \emph{skeleton}: draft a block cheaply, verify, accept
+the surviving prefix. Our port replaces the learned verifier with reality: draft the
+$N$-block once; after each hop, compare the \emph{achieved} latent to the subgoal just
+pursued; within tolerance $\tau$ $\Rightarrow$ consume the next drafted position (no
+diffusion call); otherwise $\Rightarrow$ re-draft from the achieved state. Re-anchoring is
+never sacrificed when reality diverges. Offline calibration showed 8-step DDIM drafts are
+indistinguishable from 50-step drafts (matched-noise distance $0.03$; spread preserved);
+both transferred to the closed loop.
+
+\begin{table}[h]
+\centering
+\caption{Speculative consumption (controlled protocol). NFE $=$ denoising function
+evaluations per episode (calls $\times$ DDIM steps). At 8-seed power, verified coasting
+is \degc{20}-neutral at $S{=}10$ but costs ${\sim}3.5$pp at \degc{5}; at $S{=}5$ the sign
+\emph{reverses} (spec-accept beats its own every-step reference on both criteria) --- when
+re-drafts churn a close target, skipping verified re-drafts is better control. The full
+$S{=}10$ system stays $+6.3/+5.2$pp ahead of the paper configuration (8 seeds) at
+$4.4\times$ lower diffusion cost.}
+\label{tab:spec}
+\begin{tabular}{lcccc}
+\toprule
+Arm ($S{=}10$ unless noted) & SR \degc{20} & SR \degc{5} & call ratio & NFE/ep \\
+\midrule
+every-step drafting, $k{=}50$ (reference)          & 97.2 & 96.4 & 1.00 & 1500 \\
+spec-accept $\tau{=}0.15$, $k{=}8$                  & 98.0 & 95.2 & 0.67 & 161 \\
+spec-accept $\tau{=}0.20$, $k{=}8$                  & \ours{98.0} & \ours{94.8} & \ours{0.56} & \ours{135} \\
+spec-accept $\tau{=}0.30$, $k{=}8$                  & 96.8 & 94.8 & 0.45 & 108 \\
+spec-accept $\tau{=}0.20$, $k{=}50$ (k-isolation)   & 98.0 & 95.6 & 0.55 & 825 \\
+blind commit-2 (no verification)                   & 98.8 & 96.4 & 0.50 & 750 \\
+\midrule
+$S{=}5$ every-step (reference)                     & 92.3 & 91.9 & 1.00 & 3000 \\
+$S{=}5$ spec-accept $\tau{=}0.20$, $k{=}8$          & \ours{98.0} & 94.8 & 0.42 & 202 \\
+\midrule
+\multicolumn{5}{l}{\emph{8-seed extension (seeds 42--49; $\mathrm{SE}\approx0.9$pp)}} \\
+$S{=}10$ every-step                                 & 98.0 & \ours{96.4} & 1.00 & 1500 \\
+$S{=}10$ spec-accept $\tau{=}0.20$, $k{=}8$         & 97.4 & 92.9 & 0.56 & \ours{135} \\
+$S{=}5$ every-step                                  & 92.9 & 92.9 & 1.00 & 3000 \\
+$S{=}5$ spec-accept $\tau{=}0.20$, $k{=}8$          & \ours{98.4} & \ours{96.2} & 0.42 & 202 \\
+\midrule
+paper config ($S{=}25$ every-step, 8 seeds \degc{5})& 91.1 & 87.7 & --- & 600 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ============================================================
+\section{Is the Diffusion Drafter Necessary?}
+\label{sec:regress}
+
+A deterministic MLP regressor ($z_{cond}\to$ block, the offline-strong JointMLP class,
+weight decay $10^{-3}$) as the subgoal source, re-anchoring every replan, matches the
+diffusion drafter's \emph{offline} prediction error on the same windows ($0.30$ vs.\
+$0.32$ at $S{=}10$). Closed loop, it loses everywhere.
+
+\begin{table}[h]
+\centering
+\caption{Diffusion vs.\ deterministic regression as the subgoal source (seeds 42--45).
+\textbf{The drafter's stochasticity is load-bearing}: at matched-or-better offline
+fidelity, the zero-spread mean target loses everywhere, and its $-11.7$pp strict-criterion
+loss at $S{=}25$ quantitatively mirrors the refinement head's $-11$pp (\Cref{tab:dspark-neg}),
+closing the spread thesis causally --- any operator that regresses subgoals toward the
+conditional mean damages control.}
+\label{tab:regress}
+\begin{tabular}{lcccc}
+\toprule
+& \multicolumn{2}{c}{$S{=}10$} & \multicolumn{2}{c}{$S{=}25$} \\
+& \degc{20} & \degc{5} & \degc{20} & \degc{5} \\
+\midrule
+diffusion drafter (reference) & 97.2 & 96.4 & 91.1 & 86.3 \\
+deterministic regressor       & 91.9 & 91.9 & 86.3 & 74.6 \\
+\midrule
+$\Delta$                      & $-5.2$ & $-4.4$ & $-4.8$ & $-11.7$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ============================================================
+\section{Failure Anatomy}
+\label{sec:failure}
+
+Instrumented traces (every re-plan's achieved latent and drafted subgoal) over all 8
+seeds of $S{=}10$: \textbf{18 failures in 496 episodes, all tolerance-boundary
+near-misses} --- final latent distance-to-goal within the success distribution's 95th
+percentile (one failure sits \emph{closer} than the median success: a pure angle miss).
+Zero unreachable-subgoal failures, zero divergence, zero stuck episodes; successful
+episodes' commanded-to-achieved step ratio has median $1.06$. FF-JEPA's own reported
+failure mode (``subgoal looks right, agent cannot reach it'') is \emph{eliminated} at fine
+scale; the residue is quantization at the success threshold.
+
+% ============================================================
+\section{Horizon Scaling (Fixed Population)}
+\label{sec:horizon}
+
+Goal offsets $t\in\{25,50,75,100\}$ on the \emph{identical} 256 episodes at every offset
+(reindexed from the $t{=}150$ set), budget $2t$, seeds 42/43 --- so horizon is the only
+variable, free of the eligibility confound that invalidates independent per-offset draws.
+
+\begin{table}[h]
+\centering
+\small
+\setlength{\tabcolsep}{4.5pt}
+\caption{Fixed-population horizon sweep ($n{=}512$/cell). \textbf{The baseline decays
+monotonically at the strict criterion ($-11.9$pp from $t{=}25$ to $t{=}100$) while
+$S{=}10$ is flat from $t{=}50$ onward --- the gap widens monotonically.} Spec-accept tracks
+every-step within $1.2$pp across the curve (call ratio ${\approx}0.57$ at long horizons,
+${\approx}0.85$ at $t{=}25$: the cost win is a long-horizon phenomenon).}
+\label{tab:horizon}
+\begin{tabular}{lcccccc}
+\toprule
+& \multicolumn{2}{c}{$S{=}25$ (FF-JEPA)} & \multicolumn{2}{c}{$S{=}10$ every-step}
+& \multicolumn{2}{c}{$S{=}10$ $+$ spec-accept} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+$t$ & \degc{20} & \degc{5} & \degc{20} & \degc{5} & \degc{20} & \degc{5} \\
+\midrule
+25  & 98.1 & 93.8 & \ours{99.8} & \ours{97.1} & 99.6 & 95.1 \\
+50  & 93.6 & 85.0 & \ours{97.5} & \ours{93.8} & 97.1 & 93.9 \\
+75  & 92.6 & 83.2 & \ours{98.2} & \ours{93.8} & 97.9 & 93.0 \\
+100 & 93.8 & 81.8 & 97.9 & \ours{93.8} & \ours{98.6} & 92.6 \\
+\midrule
+\degc{5} gap ($S{=}10-$ baseline) & & & \multicolumn{2}{c}{$+3.3\to+8.8\to+10.5\to+11.9$} & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Cross-paper regime (VLWM fixed-budget-50).} We additionally evaluate under the
+VLWM \citep{vlwm} fixed-budget-50 regime --- a harsher protocol than FF-JEPA's
+final-window budget of $2t$, holding the step budget at 50 for \emph{every} offset
+(\Cref{tab:vlwm}).
+
+\begin{table}[h]
+\centering
+\caption{Cross-paper cell: our three arms under VLWM's fixed-budget-50 regime, all
+\degc{20}, seed means. Rightmost columns are the published PushT numbers of VLWM and of
+LeWM (flat) under that regime. Budget starvation reproduces the published collapse, yet
+within the identical budget our arms sit ${\sim}3\times$ above VLWM's bars. Curve
+\emph{shapes} are comparable across papers; absolute numbers are not (start/goal sampling
+differs), so we cite this as ``same budget regime,'' not a like-for-like win.
+$^{\dagger}$At $t{=}25$ the fixed-50 budget equals FF-JEPA's native $2t$ budget, so the two
+protocols coincide (the row is the $t{=}25$ cell of \Cref{tab:horizon}); the budget binds
+only for $t\geq50$, which is where the published VLWM/LeWM bars begin.}
+\label{tab:vlwm}
+\begin{tabular}{lccc cc}
+\toprule
+& \multicolumn{3}{c}{Ours (fixed-budget-50)} & \multicolumn{2}{c}{Published} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-6}
+$t$ & $S{=}25$ & $S{=}10$ & $S{=}10$ $+$ spec & VLWM & LeWM (flat) \\
+\midrule
+25$^{\dagger}$ & 98.1 & \ours{99.8} & 99.6 & 94 & 90 \\
+50  & 83.6 & 88.7 & \ours{90.0} & 60 & 46 \\
+75  & 55.7 & 59.8 & \ours{60.9} & 20 & 12 \\
+100 & 23.4 & 24.4 & \ours{27.3} & 12 & 8  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Four read-offs, all consistent with the main story: (a) \textbf{budget starvation
+reproduces the collapse} --- confirming VLWM's PushT cliff is largely a budget artifact,
+which validates our protocol note; (b) \textbf{within their regime we sit ${\sim}3\times$
+above their bars} ($60.9$ vs.\ $20$ at $t{=}75$), citable as ``same budget regime'' with
+the start/goal-sampling caveat; (c) \textbf{spec-accept beats every-step at every offset}
+under time pressure --- the anti-churn effect (\Cref{sec:spec}) generalizes to $S{=}10$
+once budget binds, a new data point for the $\tau$-trade; (d) \textbf{the $S{=}10{-}S{=}25$
+gap compresses under starvation} --- scale matching buys precision, not raw speed.
+
+% ============================================================
+\section{Headline Comparison}
+\label{sec:headline}
+
+\begin{table}[h]
+\centering
+\small
+\setlength{\tabcolsep}{5pt}
+\caption{Where we stand, both criteria per cell (\degc{20} $=$ the criterion enforced by
+the benchmark's shipped code; \degc{5} $=$ the strict precision criterion its prose
+states). ``Ours'' modifies FF-JEPA's GDM system only in subgoal scale, loop matching, and
+consumption policy --- encoder, drafter architecture, training recipe, and CEM are
+unchanged. $^{p}$The paper publishes one number per cell without stating its criterion;
+each is placed on the side it empirically aligns with, with $\cdot$ marking the untested
+side. Comparisons are valid only within a side.}
+\label{tab:headline}
+\begin{tabular}{lccccc}
+\toprule
+& & \multicolumn{2}{c}{FF-JEPA GDM} & \multicolumn{2}{c}{\ours{Ours}} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}
+Setting (SR \degc{20} / \degc{5}) & LeWM (flat) & published$^{p}$ & our repro & $S{=}10$ & $+$ spec-accept \\
+\midrule
+Short horizon, $t{=}25$          & 94.5 & 96.1 / $\cdot$ & 95.3 / $\cdot$ & \ours{98.4} / 94.1 & 98.4 / \ours{95.3} \\
+Long horizon, $t{=}75$           & 3.5  & 91.8 / $\cdot$ & 90.0 / 78.8 & 97.1 / \ours{93.8} & \ours{97.9} / 91.6 \\
+Long horizon, $t{=}150$$^{a}$    & ---  & --- & 91.1 / 87.7 & \ours{98.0 / 96.4} & 97.4 / 92.9 \\
+Horizon sweep, $t{=}100$$^{b}$   & ---  & --- & 93.8 / 81.8 & 97.9 / \ours{93.8} & \ours{98.6} / 92.6 \\
+Random initialization$^{c}$      & 0.0  & $\cdot$ / 82.4 & 96.5 / 78.1 & \ours{100.0 / 100.0}$^{d}$ & --- \\
+\midrule
+Diffusion NFE / episode$^{a}$    & 0    & --- & 600 & 1500 & \ours{135} \\
+\bottomrule
+\end{tabular}
+
+\vspace{1mm}
+{\footnotesize $^{a}$Controlled protocol, 8 seeds. $^{b}$Fixed-population sweep,
+$n{=}512$/cell. $^{c}$$n{=}512$ over 2 seeds, zero failures at both tolerances;
+spec-accept not run in this mode (the drafter is the tested component).
+$^{d}$Two further seeds are queued but unconfirmed --- see the data-completeness
+note in \Cref{sec:randinit}; do not extrapolate beyond the verified $n{=}512$.}
+\end{table}
+
+% ============================================================
+\section{Generalization to Further Environments}
+\label{sec:generalize}
+% All results above are on PushT. The following environments extend the
+% subgoal-scale + spec-accept claims beyond a single task. Tables are
+% placeholders until the runs land.
+
+Every result above is on PushT. To establish that the subgoal-scale law and
+reality-verified speculative consumption are properties of hierarchical latent planning
+rather than of one task, we extend to three environments of increasing structural
+distance from PushT. \emph{These runs are in progress; tables below are placeholders.}
+
+\subsection{Reacher}
+\label{sec:reacher}
+A low-dimensional continuous-control reach task --- the recon that decides whether the
+scale law transfers to a non-pushing morphology. Same protocol: retrain the drafter at
+$S\in\{5,10,15,25\}$, report SR vs.\ scale and the spec-accept efficiency arm.
+\tbdblock{Reacher: SR vs.\ subgoal scale + spec-accept NFE. Recon in progress.}
+
+\subsection{TwoRoom}
+\label{sec:tworoom}
+A navigation task with a bottleneck between rooms, probing whether scale matching holds
+when the optimal subgoal density is spatially non-uniform.
+\tbdblock{TwoRoom: SR vs.\ subgoal scale under goal-conditioned planning.}
+
+\subsection{OGBench-Cube}
+\label{sec:ogbench}
+A manipulation benchmark \citep{ogbench} for the strongest generalization claim: multi-object
+state and longer effective horizons, where the ${\sim}11\times$ diffusion-cost reduction
+matters most.
+\tbdblock{OGBench-Cube: headline SR / NFE vs.\ FF-JEPA baseline.}
+
+% ============================================================
+\section{Discussion and Limitations}
+\label{sec:discussion}
+
+\paragraph{What the story is.} Closed-loop success in this planner is governed by matching
+the control loop to the subgoal scale, and the drafter's conditional \emph{spread} is
+load-bearing: every operator we tried that collapses drafts toward the conditional mean
+(refinement, blind commitment, deterministic regression) damaged control despite equal or
+better offline fidelity. The efficiency win is orthogonal --- reality is a free verifier.
+
+\paragraph{Limitations.} (i) FF-JEPA is a preliminary paper with no released code; our
+``faithful'' configuration is a principled reconstruction where the paper is silent, not a
+verified match on every axis. (ii) All confirmed results are on PushT; cross-environment
+generality (\Cref{sec:generalize}) is \TBD --- Reacher and TwoRoom drivers are implemented
+and committed but not yet run (pending cluster availability); OGBench-Cube is not yet
+started. (iii) The \degc{20}/\degc{5} criterion mapping for the paper's own cells is
+inferred from empirical alignment, not stated by the paper; we mark every cross-paper
+comparison with the side it is valid on. (iv) The $t{=}150$ cell is a beyond-paper probe,
+not a reproduction claim. (v) The random-initialization table (\Cref{sec:randinit}) is
+one arm short of its intended power --- a queued confirmation run ($S{=}5$ second seed,
+$S{=}10$ third/fourth seeds) has no recoverable result and is reported as such rather
+than assumed.
+
+% ============================================================
+\section{Conclusion}
+\label{sec:conclusion}
+\tbdblock{This is a placeholder conclusion for a preliminary, PushT-only draft --- it
+will be rewritten once \Cref{sec:generalize} has real numbers and is not meant to stand
+as this paper's final framing.}
+
+On PushT, subgoal scale matched to the control loop is the strongest lever we found in
+FF-JEPA-style hierarchical latent planning: a fine matched stride ($S{=}10$) beats the
+paper configuration across every setting we measured and, on the paper's own protocols,
+exceeds its published numbers. Reality-verified speculative consumption recovers
+${\sim}11\times$ of the added diffusion cost at neutral success rate. Whether either
+claim is a property of hierarchical latent planning in general, versus an artifact of
+PushT specifically, is exactly what \Cref{sec:generalize} is for and is not yet
+answered --- that is the remaining work, not a formality.
+
+% ============================================================
+\bibliographystyle{plainnat}
+\bibliography{references}
+% references.bib currently holds stub/placeholder entries for
+% ffjepa, lewm, cem, vlwm, ogbench, dspark -- fill with real
+% metadata before this leaves preliminary-draft status.
+
+\end{document}

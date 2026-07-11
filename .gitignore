@@ -2,3 +2,23 @@ archive/
 pycache/
 cld/
 __pycache__/
+
+# large box-local artifacts -- never fit under GitHub's 100MB/file limit;
+# reproducible via batch/run_recipe.sh or the stride/reacher train arrays,
+# or downloaded fresh per box (data/, encoder_reacher/)
+*.pt
+*.h5
+runs/
+data/
+encoder_reacher/
+encoder_tworoom/
+gdm_*.pt
+regressor_*.pt
+subset_longeval.h5
+
+# latex build artifacts
+writeup/*.aux
+writeup/*.log
+writeup/*.out
+writeup/*.blg
+writeup/*.synctex.gz
