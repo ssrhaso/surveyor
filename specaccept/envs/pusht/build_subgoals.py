@@ -18,14 +18,14 @@ CPU (Windows, local model) develop/test on a sample; full encode runs on the box
 
 Examples:
   # CPU smoke test (random sample, local model):
-  python -m ffjepa.build_subgoals --source local \
+  python -m specaccept.envs.pusht.build_subgoals --source local \
       --local-dir ../drift_probe/model --swm-src ../lewm-investigation/stable-worldmodel \
       --h5 ../drift_probe/expert/pusht_expert_train.h5 \
       --out ../drift_probe/subgoals_pusht_smoke.pt \
       --max-episodes 60 --sample-mode random --device cpu
 
   # Box full run (pretrained model, A100):
-  STABLEWM_HOME=$HOME/.stable-wm python -m ffjepa.build_subgoals \
+  STABLEWM_HOME=$HOME/.stable-wm python -m specaccept.envs.pusht.build_subgoals \
       --source pretrained --encoder-id quentinll/lewm-pusht \
       --h5 $HOME/.stable-wm/datasets/pusht_expert_train.h5 \
       --out subgoals_pusht.pt --device cuda

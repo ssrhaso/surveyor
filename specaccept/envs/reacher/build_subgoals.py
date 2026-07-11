@@ -15,7 +15,7 @@ time, so this builder just encodes EVERY frame (--stride 1) of every episode.
 
 Examples:
   # GH200 full run (frozen reacher encoder downloaded from HF):
-  python -m ffjepa.build_subgoals_reacher --source local --local-dir encoder_reacher \
+  python -m specaccept.envs.reacher.build_subgoals --source local --local-dir encoder_reacher \
       --h5 /scratch/u6ko/hasoshu.u6ko/data/reacher/reacher.h5 \
       --out subgoals_reacher_dense.pt --stride 1 --device cuda
 """

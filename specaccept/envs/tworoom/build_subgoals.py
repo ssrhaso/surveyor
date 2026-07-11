@@ -11,13 +11,13 @@ isca/ofs-v01, seed43 on Isambard), concatenated with per-episode source tags.
 
 Examples:
   # CPU smoke test:
-  python -m ffjepa.build_subgoals_tworoom --source local \
+  python -m specaccept.envs.tworoom.build_subgoals --source local \
       --local-dir encoder_tworoom --swm-src ../lewm-investigation/stable-worldmodel \
       --h5 /path/to/trial_300.h5 \
       --out /tmp/subgoals_tworoom_smoke.pt --max-episodes 60 --device cpu
 
   # Box full run (both batches):
-  python -m ffjepa.build_subgoals_tworoom --source local --local-dir encoder_tworoom \
+  python -m specaccept.envs.tworoom.build_subgoals --source local --local-dir encoder_tworoom \
       --h5 /scratch/u6ko/hasoshu.u6ko/data/tworoom/tworoom_expert_300_seed42_isca.h5 \
            /scratch/u6ko/hasoshu.u6ko/data/tworoom/tworoom_expert_300_seed43.h5 \
       --out subgoals_tworoom.pt --device cuda

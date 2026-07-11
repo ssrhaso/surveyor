@@ -21,14 +21,14 @@ goal-free planner's subgoals align with the eval goal):
                    short protocol. Applies to short only.
 
 CPU smoke (tiny CEM, local model, 2 envs):
-  SDL_VIDEODRIVER=dummy python -m ffjepa.eval_ffjepa --source local \
+  SDL_VIDEODRIVER=dummy python -m specaccept.envs.pusht.eval --source local \
     --local-dir ../drift_probe/model --swm-src ../lewm-investigation/stable-worldmodel \
     --h5 ../drift_probe/expert/pusht_expert_train.h5 --device cpu \
     --num-eval 2 --num-samples 8 --n-steps 2 --mode short --angles 20
 
 Box (A100), short, n=32, matches baseline episode set (seed 42):
   cd ~/le-wm && STABLEWM_HOME=$HOME/.stable-wm SDL_VIDEODRIVER=dummy \
-    python -m ffjepa.eval_ffjepa --source pretrained --encoder-id quentinll/lewm-pusht \
+    python -m specaccept.envs.pusht.eval --source pretrained --encoder-id quentinll/lewm-pusht \
     --h5 $HOME/.stable-wm/datasets/pusht_expert_train.h5 --device cuda \
     --num-eval 32 --mode short --angles 20 5
 """
@@ -118,7 +118,7 @@ def parse_args():
                         "random = eval.py/[13,5] common setting: random valid start, "
                         "goal = start+goal_offset. long mode is always 'final'.")
     p.add_argument("--episodes-file", default=None,
-                   help="JSON file from ffjepa.extract_subset (produces a small subset --h5 "
+                   help="JSON file from specaccept.envs.pusht.extract_subset (produces a small subset --h5 "
                         "plus this file). Bypasses sample_long/short entirely and uses the "
                         "exact precomputed (episode, start_step) pairs -- for running against "
                         "a transferred subset h5 on a box without the full dataset.")

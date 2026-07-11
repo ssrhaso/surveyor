@@ -13,7 +13,7 @@ Validates the logic on tiny tensors before any box run (handoff SS9.7):
 No frozen LeWM, no h5, no swm needed - pure latent-space logic on synthetic data
 at the native ||z||~sqrt(192) scale.
 
-Run:  python -m ffjepa.test_gdm_cpu
+Run:  python -m specaccept.test_gdm_cpu
 """
 
 from __future__ import annotations

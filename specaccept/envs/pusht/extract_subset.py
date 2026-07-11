@@ -13,13 +13,13 @@ and works as a drop-in --h5 replacement.
 
 Run on ofs-v01 (where the real h5 works):
     cd ~/le-wm
-    python -m ffjepa.extract_subset --h5 ~/.stable-wm/datasets/pusht_expert_train.h5 \
+    python -m specaccept.envs.pusht.extract_subset --h5 ~/.stable-wm/datasets/pusht_expert_train.h5 \
         --out subset_longeval.h5 --seed 42 --eval-filter success5 \
         --goal-offsets 75 150 --num-eval 256
 
 Produces subset_longeval.h5 plus one episodes-file per goal-offset
 (subset_longeval.episodes75.json, subset_longeval.episodes150.json), each a
-list of [new_episode_idx, start_step] pairs -- pass to eval_ffjepa.py via
+list of [new_episode_idx, start_step] pairs -- pass to the pusht eval driver via
 --episodes-file to bypass sample_long/short and use this exact, reproducible
 episode set.
 """
@@ -38,7 +38,7 @@ import hdf5plugin  # noqa: F401 -- registers the dynamically-loaded filter plugi
 import h5py
 import numpy as np
 
-from ffjepa.eval_ffjepa import sample_long, success_mask
+from specaccept.envs.pusht.eval import sample_long, success_mask
 
 
 def parse_args():

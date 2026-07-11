@@ -1,6 +1,6 @@
 """FF-JEPA evaluation driver - Reacher (DMControl qpos_match) variant.
 
-Reacher analog of eval_ffjepa.py / eval_tworoom.py. Reuses FFJEPAPolicy /
+Reacher analog of the pusht/tworoom eval drivers. Reuses FFJEPAPolicy /
 SubgoalCostModel / OracleSubgoalSource / GDMSubgoalSource /
 SpecAcceptSubgoalSource and sample_short/sample_long UNMODIFIED.
 
@@ -22,7 +22,7 @@ Env specifics vs the PushT driver:
     image at each replan and the sources pass it through to the sampler.
 
 Smoke (GPU box, no drafter needed - oracle + baseline validate the harness):
-  cd ~/le-wm && SDL_VIDEODRIVER=dummy python -m ffjepa.eval_reacher \
+  cd ~/le-wm && SDL_VIDEODRIVER=dummy python -m specaccept.envs.reacher.eval \
     --source local --local-dir encoder_reacher --device cuda \
     --h5 /scratch/u6ko/hasoshu.u6ko/data/reacher/reacher.h5 \
     --num-eval 16 --subgoal oracle
@@ -36,7 +36,7 @@ import numpy as np
 import torch
 
 from specaccept import encoder
-from ffjepa.eval_ffjepa import sample_short, sample_long
+from specaccept.envs.pusht.eval import sample_short, sample_long
 from specaccept.sources import (SubgoalCostModel, OracleSubgoalSource,
                                     GDMSubgoalSource, SpecAcceptSubgoalSource,
                                     build_oracle_table, make_ffjepa_policy)

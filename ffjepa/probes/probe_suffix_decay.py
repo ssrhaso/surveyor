@@ -28,7 +28,7 @@ import numpy as np
 import torch
 
 from specaccept import encoder
-from ffjepa.diag_gdm import metrics, show
+from specaccept.diag_gdm import metrics, show
 from specaccept.drafter import load_gdm_planner
 
 

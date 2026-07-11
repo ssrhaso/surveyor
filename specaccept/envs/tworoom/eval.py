@@ -1,9 +1,9 @@
 """FF-JEPA evaluation driver - TwoRoom variant.
 
-TwoRoom analog of eval_ffjepa.py. Reuses FFJEPAPolicy / SubgoalCostModel /
+TwoRoom analog of the pusht eval driver. Reuses FFJEPAPolicy / SubgoalCostModel /
 OracleSubgoalSource / GDMSubgoalSource / build_oracle_table and
 sample_short/sample_long UNMODIFIED - all env-agnostic (see subgoal_planner.py
-and eval_ffjepa.py).
+and the pusht eval driver).
 
 Simpler than the PushT driver: no eval_state monkeypatch or --angles/--score
 sweep needed. TwoRoom's env.step() already sets `terminated = dist(agent,
@@ -13,13 +13,13 @@ same shape as PushT's too: TwoRoomEnv has matching `_set_state`/`_set_goal_state
 methods and the h5 has matching `state`/`goal_state` columns.
 
 CPU smoke (tiny CEM, local model, 2 envs):
-  SDL_VIDEODRIVER=dummy python -m ffjepa.eval_tworoom --source local \
+  SDL_VIDEODRIVER=dummy python -m specaccept.envs.tworoom.eval --source local \
     --local-dir encoder_tworoom --swm-src ../lewm-investigation/stable-worldmodel \
     --h5 /path/to/trial_300.h5 --device cpu \
     --num-eval 2 --num-samples 8 --n-steps 2 --mode short
 
 Box (GPU), short, n=32:
-  cd ~/le-wm && SDL_VIDEODRIVER=dummy python -m ffjepa.eval_tworoom \
+  cd ~/le-wm && SDL_VIDEODRIVER=dummy python -m specaccept.envs.tworoom.eval \
     --source local --local-dir encoder_tworoom --device cuda \
     --h5 /scratch/u6ko/hasoshu.u6ko/data/tworoom/tworoom_expert_300_seed43.h5 \
     --num-eval 32 --mode short --subgoal baseline
@@ -33,7 +33,7 @@ import numpy as np
 import torch
 
 from specaccept import encoder
-from ffjepa.eval_ffjepa import sample_short, sample_long
+from specaccept.envs.pusht.eval import sample_short, sample_long
 from specaccept.sources import (SubgoalCostModel, OracleSubgoalSource,
                                     GDMSubgoalSource, SpecAcceptSubgoalSource,
                                     build_oracle_table, make_ffjepa_policy)

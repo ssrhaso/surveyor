@@ -17,7 +17,7 @@ import torch
 
 from specaccept import encoder
 from specaccept.sources import SubgoalCostModel
-from ffjepa.eval_ffjepa import img_transform, img_transform_fallback, sample_short
+from specaccept.envs.pusht.eval import img_transform, img_transform_fallback, sample_short
 
 
 def main():

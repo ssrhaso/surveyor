@@ -29,7 +29,7 @@ Read-off:
   * collapse << 1            -> model predicts ~the mean subgoal regardless of input.
 
 Run on the box:
-  STABLEWM_HOME=$HOME/.stable-wm SDL_VIDEODRIVER=dummy python -m ffjepa.diag_gdm \
+  STABLEWM_HOME=$HOME/.stable-wm SDL_VIDEODRIVER=dummy python -m specaccept.diag_gdm \
     --gdm-ckpt gdm_pusht.pt --subgoals subgoals_pusht.pt \
     --h5 $HOME/.stable-wm/datasets/pusht_expert_train.h5 --device cuda
 """
