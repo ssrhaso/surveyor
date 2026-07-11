@@ -52,7 +52,7 @@ import json
 import numpy as np
 import torch
 
-from ffjepa import lewm_io
+from specaccept import encoder
 
 ACTION_BLOCK = 5
 STRIDES = (5, 25)
@@ -103,7 +103,7 @@ def main():
         pass
     import h5py
 
-    model = lewm_io.load_lewm(source=args.source, encoder_id=args.encoder_id,
+    model = encoder.load_lewm(source=args.source, encoder_id=args.encoder_id,
                               local_dir=args.local_dir, swm_src=args.swm_src,
                               device=args.device)
 
@@ -122,8 +122,8 @@ def main():
             if L < RUNWAY + 2:
                 continue
             final = state[off + L - 1].astype(np.float64)
-            target = lewm_io.canonical_target_for(final)
-            if lewm_io.eval_state_tol(target, final, args.angle_headline):
+            target = encoder.canonical_target_for(final)
+            if encoder.eval_state_tol(target, final, args.angle_headline):
                 kept.append((int(e), off, L))
             if len(kept) >= args.n_windows + 64:  # extra eps for the decoy pool
                 break
@@ -141,7 +141,7 @@ def main():
             rows += [t, t + 5, t + 25]
         rows = np.array(rows)
         order = np.argsort(rows, kind="stable")
-        lat = lewm_io.encode_frames(model, pixels[rows[order]], device=args.device)
+        lat = encoder.encode_frames(model, pixels[rows[order]], device=args.device)
         out = torch.empty_like(lat)
         out[order] = lat
         z_cond = out[0::3].to(args.device)

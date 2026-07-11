@@ -41,8 +41,8 @@ import os
 import numpy as np
 import torch
 
-from ffjepa import lewm_io
-from ffjepa.subgoal_planner import (SubgoalCostModel, OracleSubgoalSource,
+from specaccept import encoder
+from specaccept.sources import (SubgoalCostModel, OracleSubgoalSource,
                                     GDMSubgoalSource, DSparkSubgoalSource,
                                     SpecAcceptSubgoalSource, RegressorSubgoalSource,
                                     build_oracle_table, make_ffjepa_policy)
@@ -212,7 +212,7 @@ def success_mask(h5, angle_deg):
         order = np.argsort(rows)
         finals = np.empty((len(rows), f["state"].shape[1]), dtype=np.float64)
         finals[order] = f["state"][np.sort(rows)]
-    return np.array([lewm_io.eval_state_tol(lewm_io.canonical_target_for(s), s, angle_deg)
+    return np.array([encoder.eval_state_tol(encoder.canonical_target_for(s), s, angle_deg)
                      for s in finals], dtype=bool)
 
 
@@ -293,7 +293,7 @@ def main():
     if args.mode == "random_init" and args.subgoal != "gdm":
         raise ValueError("--mode random_init only supports --subgoal gdm for now (see --mode help)")
 
-    lewm_io._ensure_swm_importable(args.swm_src)
+    encoder._ensure_swm_importable(args.swm_src)
     import stable_worldmodel as swm
     from stable_worldmodel.envs.pusht.env import PushT
 
@@ -302,7 +302,7 @@ def main():
     cem_seed = args.cem_seed if args.cem_seed is not None else args.seed  # == eval.py ${seed}
 
     # -- frozen model + cost model
-    model = lewm_io.load_lewm(source=args.source, encoder_id=args.encoder_id,
+    model = encoder.load_lewm(source=args.source, encoder_id=args.encoder_id,
                               local_dir=args.local_dir, swm_src=args.swm_src,
                               device=args.device)
     is_baseline = args.subgoal == "baseline"
@@ -314,7 +314,7 @@ def main():
     # GDM planner (goal-free) loaded once; the per-env source is rebuilt per run
     gdm_planner = None
     if args.subgoal in ("gdm", "dspark", "specaccept"):
-        from ffjepa.gdm_model import load_gdm_planner, count_params
+        from specaccept.drafter import load_gdm_planner, count_params
         gdm_planner = load_gdm_planner(args.gdm_ckpt, device=args.device)
         d = gdm_planner.diffusion
         # report the sampler that ACTUALLY runs (GDMPlanner branches on the ckpt's

@@ -31,7 +31,7 @@ import argparse
 import numpy as np
 import torch
 
-from ffjepa import lewm_io
+from specaccept import encoder
 
 
 def parse_args():
@@ -69,7 +69,7 @@ def main():
         pass
     import h5py
 
-    model = lewm_io.load_lewm(source=args.source, encoder_id=args.encoder_id,
+    model = encoder.load_lewm(source=args.source, encoder_id=args.encoder_id,
                               local_dir=args.local_dir, swm_src=args.swm_src,
                               device=args.device)
 
@@ -100,7 +100,7 @@ def main():
                     rws.append(min(int(ep_off[e]) + s + args.goal_offset, last))
                 rws = np.array(rws)
                 order = np.argsort(rws, kind="stable")
-                lat = lewm_io.encode_frames(model, px[rws[order]], device=args.device)
+                lat = encoder.encode_frames(model, px[rws[order]], device=args.device)
                 out = torch.empty_like(lat)
                 out[order] = lat
             for (key, g) in zip(need, out):

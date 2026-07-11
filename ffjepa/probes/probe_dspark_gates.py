@@ -44,8 +44,8 @@ import json
 import numpy as np
 import torch
 
-from ffjepa import lewm_io
-from ffjepa.gdm_model import load_gdm_planner
+from specaccept import encoder
+from specaccept.drafter import load_gdm_planner
 
 RUNWAY = 150  # episodes150 guarantee: start + 150 <= last frame
 
@@ -118,7 +118,7 @@ def main():
     pairs = payload["episodes"][:args.n_probe]
     print(f"[episodes-file] {args.episodes_file}: {len(pairs)} windows")
 
-    model = lewm_io.load_lewm(source=args.source, encoder_id=args.encoder_id,
+    model = encoder.load_lewm(source=args.source, encoder_id=args.encoder_id,
                               local_dir=args.local_dir, swm_src=args.swm_src, device=dev)
 
     # encode Z: (B, H+1, D) latents at start + h*stride, h = 0..H
@@ -141,7 +141,7 @@ def main():
         # (n,3,224,224) float32 up front; the stride-5 config has ~8k frames
         chunks = []
         for i in range(0, len(sorted_rows), 512):
-            chunks.append(lewm_io.encode_frames(model, pixels[sorted_rows[i:i + 512]],
+            chunks.append(encoder.encode_frames(model, pixels[sorted_rows[i:i + 512]],
                                                 device=dev))
         lat = torch.cat(chunks, 0)
         out = torch.empty_like(lat)

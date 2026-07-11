@@ -41,8 +41,8 @@ import argparse
 import numpy as np
 import torch
 
-from ffjepa import lewm_io
-from ffjepa.gdm_model import load_gdm_planner
+from specaccept import encoder
+from specaccept.drafter import load_gdm_planner
 
 
 def parse_args():
@@ -206,7 +206,7 @@ def main():
 
     # ---- Probe B: eval-distribution (arbitrary-phase condition from h5) ----
     import h5py
-    model = lewm_io.load_lewm(source=args.source, encoder_id=args.encoder_id,
+    model = encoder.load_lewm(source=args.source, encoder_id=args.encoder_id,
                               local_dir=args.local_dir, swm_src=args.swm_src, device=args.device)
     episodes_idx, start_steps = sample_short(args.h5, args.n_probe, args.stride, args.seed)
     with h5py.File(args.h5, "r") as f:
@@ -219,7 +219,7 @@ def main():
             fin_rows.append(last)
         allr = np.array(cond_rows + true_rows)
         order = np.argsort(allr, kind="stable")
-        lat = lewm_io.encode_frames(model, pixels[allr[order]], device=args.device)
+        lat = encoder.encode_frames(model, pixels[allr[order]], device=args.device)
         out = torch.empty_like(lat); out[order] = lat
         # h5py fancy indexing needs STRICTLY increasing rows; fin_rows has
         # duplicates when the same episode is drawn twice (different starts).
@@ -237,7 +237,7 @@ def main():
     # NOT predict, so the mixed mean conflates off-manifold phase with episode mix.
     # If B-success ~= Probe A and B-failed << it, the plateau is CONTAMINATION,
     # not a diffusion/phase problem (H8) -- fix the EVAL set, not the model.
-    ok = np.array([lewm_io.eval_state_tol(lewm_io.canonical_target_for(s), s, 20.0)
+    ok = np.array([encoder.eval_state_tol(encoder.canonical_target_for(s), s, 20.0)
                    for s in finals], dtype=bool)
     okt = torch.from_numpy(ok)
     if ok.any():

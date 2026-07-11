@@ -38,7 +38,7 @@ import json
 import numpy as np
 import torch
 
-from ffjepa import lewm_io
+from specaccept import encoder
 
 STRIDES = (1, 5, 10, 15, 25)
 MAX_OFFSET = 50  # need t+2S for cos_succ at S=25
@@ -56,7 +56,7 @@ def parse_args():
     p.add_argument("--n-episodes", type=int, default=128)
     p.add_argument("--anchors-per-ep", type=int, default=4)
     p.add_argument("--angle-headline", type=float, default=20.0)
-    p.add_argument("--pos-thresh", type=float, default=lewm_io.POS_THRESH)
+    p.add_argument("--pos-thresh", type=float, default=encoder.POS_THRESH)
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--json-out", default=None, help="optional path for raw stats dump")
     return p.parse_args()
@@ -83,7 +83,7 @@ def main():
         pass
     import h5py
 
-    model = lewm_io.load_lewm(source=args.source, encoder_id=args.encoder_id,
+    model = encoder.load_lewm(source=args.source, encoder_id=args.encoder_id,
                               local_dir=args.local_dir, swm_src=args.swm_src,
                               device=args.device)
 
@@ -104,8 +104,8 @@ def main():
             if L <= MAX_OFFSET + 1:
                 continue
             final = state[off + L - 1].astype(np.float64)
-            target = lewm_io.canonical_target_for(final)
-            if lewm_io.eval_state_tol(target, final, args.angle_headline, args.pos_thresh):
+            target = encoder.canonical_target_for(final)
+            if encoder.eval_state_tol(target, final, args.angle_headline, args.pos_thresh):
                 kept.append((int(e), off, L))
             if len(kept) >= args.n_episodes:
                 break
@@ -133,7 +133,7 @@ def main():
         sorted_rows = rows_arr[order]
         chunks = []
         for i in range(0, len(sorted_rows), 512):
-            chunks.append(lewm_io.encode_frames(model, pixels[sorted_rows[i:i + 512]],
+            chunks.append(encoder.encode_frames(model, pixels[sorted_rows[i:i + 512]],
                                                 device=args.device,
                                                 batch_size=args.batch_size))
             print(f"  encoded {min(i + 512, len(sorted_rows))}/{len(sorted_rows)}", flush=True)

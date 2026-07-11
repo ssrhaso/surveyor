@@ -13,7 +13,7 @@ pair construction as train_gdm (build_pairs reused), so the only differences
 vs the GDM are architecture + objective.
 
 Run (Isambard):
-    python -m ffjepa.train_regressor --subgoals subgoals_dense_full.pt \
+    python -m specaccept.train_regressor --subgoals subgoals_dense_full.pt \
         --subgoal-step 10 --out regressor_stride10.pt --device cuda
 """
 
@@ -26,7 +26,7 @@ import numpy as np
 import torch
 from torch import nn
 
-from ffjepa.train_gdm import build_pairs
+from specaccept.train_drafter import build_pairs
 
 
 def parse_args():

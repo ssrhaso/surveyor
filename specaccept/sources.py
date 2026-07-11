@@ -18,7 +18,7 @@ Three pieces that sit on top of the FROZEN LeWM + the existing swm planning stac
 
 Representation contract: the injected latent must be the IDENTICAL object E(goal_image)
 produces (same encode path, dtype, device, native ||z||~13.9). No renorm/projection.
-build_oracle_table uses ffjepa.lewm_io.encode_frames, which is verified to match the
+build_oracle_table uses specaccept.encoder.encode_frames, which is verified to match the
 harness goal-encode path to ~1e-6.
 """
 
@@ -30,7 +30,7 @@ import numpy as np
 import torch
 from torch import nn
 
-from ffjepa import lewm_io
+from specaccept import encoder
 
 
 # Cost model: swap the goal-latent source, keep LeWM's rollout + criterion math
@@ -183,7 +183,7 @@ class RegressorSubgoalSource:
     needs_goal = False
 
     def __init__(self, ckpt_path, n_envs, device="cpu", record=False):
-        from ffjepa.train_regressor import BlockRegressor
+        from specaccept.train_regressor import BlockRegressor
         ck = torch.load(ckpt_path, map_location="cpu", weights_only=False)
         self.model = BlockRegressor(ck["dim"], ck["n_future"], ck["hid"])
         self.model.load_state_dict(ck["state"])
@@ -426,7 +426,7 @@ def build_oracle_table(h5_path, model, episodes_idx, start_steps, goal_offset,
     start, start+stride, ..., start+goal_offset (the goal frame), per env.
 
     Returns list of (K_i, 192) tensors with K_i = goal_offset//stride + 1.
-    Uses lewm_io.encode_frames (matches the harness goal-encode path).
+    Uses encoder.encode_frames (matches the harness goal-encode path).
     """
     import h5py
 
@@ -447,7 +447,7 @@ def build_oracle_table(h5_path, model, episodes_idx, start_steps, goal_offset,
         # h5 fancy indexing needs increasing order -> sort, encode, scatter back
         order = np.argsort(flat_rows, kind="stable")
         sorted_rows = flat_rows[order]
-        lat_sorted = lewm_io.encode_frames(model, pixels[sorted_rows], device=device,
+        lat_sorted = encoder.encode_frames(model, pixels[sorted_rows], device=device,
                                            batch_size=batch_size)
         lat = torch.empty_like(lat_sorted)
         lat[order] = lat_sorted  # undo the sort
@@ -552,14 +552,14 @@ def make_ffjepa_policy(base_cls):
                     frames = np.asarray(info_dict["pixels"])[replan]  # (R,[T,]H,W,3) uint8
                     if frames.ndim == 5:                              # history dim -> take latest
                         frames = frames[:, -1]
-                    obs_latent = lewm_io.encode_frames(
+                    obs_latent = encoder.encode_frames(
                         self.cost_model.lewm, frames, device=self.cost_model.device)
                     # goal-cond ablation: also encode the raw goal image (same E-path)
                     if getattr(self.subgoal_source, "needs_goal", False) and "goal" in info_dict:
                         gframes = np.asarray(info_dict["goal"])[replan]
                         if gframes.ndim == 5:
                             gframes = gframes[:, -1]
-                        goal_latent = lewm_io.encode_frames(
+                        goal_latent = encoder.encode_frames(
                             self.cost_model.lewm, gframes, device=self.cost_model.device)
 
                 z = self.subgoal_source.current(self._sg_step, obs_latent=obs_latent,
@@ -579,13 +579,13 @@ def make_ffjepa_policy(base_cls):
                 frames = np.asarray(info_dict["pixels"])[replan]
                 if frames.ndim == 5:
                     frames = frames[:, -1]
-                obs_latent = lewm_io.encode_frames(
+                obs_latent = encoder.encode_frames(
                     self.cost_model.lewm, frames, device=self.cost_model.device)
                 if getattr(self.subgoal_source, "needs_goal", False) and "goal" in info_dict:
                     gframes = np.asarray(info_dict["goal"])[replan]
                     if gframes.ndim == 5:
                         gframes = gframes[:, -1]
-                    goal_latent = lewm_io.encode_frames(
+                    goal_latent = encoder.encode_frames(
                         self.cost_model.lewm, gframes, device=self.cost_model.device)
 
             z = self.subgoal_source.current(self._sg_step, obs_latent=obs_latent,

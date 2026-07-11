@@ -35,9 +35,9 @@ import argparse
 import numpy as np
 import torch
 
-from ffjepa import lewm_io
+from specaccept import encoder
 from ffjepa.eval_ffjepa import sample_short, sample_long
-from ffjepa.subgoal_planner import (SubgoalCostModel, OracleSubgoalSource,
+from specaccept.sources import (SubgoalCostModel, OracleSubgoalSource,
                                     GDMSubgoalSource, SpecAcceptSubgoalSource,
                                     build_oracle_table, make_ffjepa_policy)
 
@@ -140,14 +140,14 @@ def main():
     if args.subgoal in ("gdm", "specaccept") and not args.gdm_ckpt:
         raise ValueError(f"--subgoal {args.subgoal} requires --gdm-ckpt")
 
-    lewm_io._ensure_swm_importable(args.swm_src)
+    encoder._ensure_swm_importable(args.swm_src)
     import stable_worldmodel as swm
 
     goal_offset = args.goal_offset
     eval_budget = args.eval_budget
     cem_seed = args.cem_seed if args.cem_seed is not None else args.seed
 
-    model = lewm_io.load_lewm(source=args.source, encoder_id=args.encoder_id,
+    model = encoder.load_lewm(source=args.source, encoder_id=args.encoder_id,
                               local_dir=args.local_dir, swm_src=args.swm_src,
                               device=args.device)
     is_baseline = args.subgoal == "baseline"
@@ -157,7 +157,7 @@ def main():
 
     gdm_planner = None
     if args.subgoal in ("gdm", "specaccept"):
-        from ffjepa.gdm_model import load_gdm_planner, count_params
+        from specaccept.drafter import load_gdm_planner, count_params
         gdm_planner = load_gdm_planner(args.gdm_ckpt, device=args.device)
         d = gdm_planner.diffusion
         samp = (f"ddpm_ancestral/all-{d.timesteps}-steps (--gdm-steps ignored)"

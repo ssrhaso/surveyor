@@ -14,8 +14,8 @@ STANDARDIZED latents (z -> (z-mean)/std); the standardization is inverted on
 sampled outputs so injected subgoals return to native E-space. The per-dim
 mean/std are computed once over the training set and stored in the checkpoint.
 
-This module is imported by both train_gdm.py (training) and eval_ffjepa.py /
-subgoal_planner.py (inference via GDMPlanner); it never touches the frozen LeWM.
+This module is imported by both train_drafter.py (training) and the env eval drivers /
+sources.py (inference via GDMPlanner); it never touches the frozen LeWM.
 """
 
 from __future__ import annotations

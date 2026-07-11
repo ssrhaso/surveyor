@@ -4,7 +4,7 @@ TwoRoom analog of build_subgoals.py: same pipeline shape (success filter ->
 stride subsample -> encode -> pack), different success filter. PushT needs a
 fixed canonical target + 4-D pos/angle criterion; TwoRoom's target is sampled
 per episode and already recorded in the h5 (`goal_state`, `distance_to_target`),
-so success is just `distance_to_target[final_row] < 16` (see lewm_io.tworoom_success).
+so success is just `distance_to_target[final_row] < 16` (see encoder.tworoom_success).
 
 Accepts multiple --h5 files (the two independent 5,000-ep batches: seed42 on
 isca/ofs-v01, seed43 on Isambard), concatenated with per-episode source tags.
@@ -33,7 +33,7 @@ import numpy as np
 import torch
 import h5py
 
-from ffjepa import lewm_io
+from specaccept import encoder
 
 
 def parse_args():
@@ -48,7 +48,7 @@ def parse_args():
     p.add_argument("--device", default="cpu")
     p.add_argument("--batch-size", type=int, default=256)
     p.add_argument("--stride", type=int, default=25, help="H: subgoal stride (env steps)")
-    p.add_argument("--pos-thresh", type=float, default=lewm_io.TWOROOM_POS_THRESH)
+    p.add_argument("--pos-thresh", type=float, default=encoder.TWOROOM_POS_THRESH)
     p.add_argument("--max-episodes", type=int, default=None,
                    help="limit #episodes considered PER FILE")
     p.add_argument("--sample-mode", choices=["head", "spread", "random"], default="head")
@@ -86,7 +86,7 @@ def main():
     t0 = time.time()
     print(f"[cfg] {vars(args)}")
 
-    model = lewm_io.load_lewm(
+    model = encoder.load_lewm(
         source=args.source, encoder_id=args.encoder_id,
         local_dir=args.local_dir, swm_src=args.swm_src, device=args.device,
     )
@@ -126,7 +126,7 @@ def main():
                     n_drop_same_room += 1
                     continue
                 final_dist = float(dist_to_target[off + L - 1])
-                if not lewm_io.tworoom_success(final_dist, args.pos_thresh):
+                if not encoder.tworoom_success(final_dist, args.pos_thresh):
                     n_drop += 1
                     continue
                 rows = np.arange(off, off + L, args.stride)
@@ -153,7 +153,7 @@ def main():
                 lo, hi = int(rows[0]), int(rows[-1]) + 1
                 span = pixels[lo:hi]
                 sel = span[rows - lo]
-                z = lewm_io.encode_frames(model, sel, device=args.device, batch_size=args.batch_size)
+                z = encoder.encode_frames(model, sel, device=args.device, batch_size=args.batch_size)
                 lat_chunks.append(z)
                 lengths_all.append(len(rows))
                 done += len(rows)

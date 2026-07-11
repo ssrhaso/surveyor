@@ -41,7 +41,7 @@ import numpy as np
 import torch
 import h5py
 
-from ffjepa import lewm_io
+from specaccept import encoder
 
 
 def parse_args():
@@ -60,7 +60,7 @@ def parse_args():
     p.add_argument("--stride", type=int, default=25, help="H: subgoal stride (env steps)")
     p.add_argument("--angle-headline", type=float, default=20.0, help="keep tolerance (deg)")
     p.add_argument("--angle-strict", type=float, default=5.0, help="recorded subset tolerance (deg)")
-    p.add_argument("--pos-thresh", type=float, default=lewm_io.POS_THRESH)
+    p.add_argument("--pos-thresh", type=float, default=encoder.POS_THRESH)
     # sampling (for CPU testing on a handful of episodes)
     p.add_argument("--max-episodes", type=int, default=None, help="limit #episodes considered")
     p.add_argument("--sample-mode", choices=["head", "spread", "random"], default="head")
@@ -86,7 +86,7 @@ def main():
     t0 = time.time()
 
     print(f"[cfg] {vars(args)}")
-    model = lewm_io.load_lewm(
+    model = encoder.load_lewm(
         source=args.source, encoder_id=args.encoder_id,
         local_dir=args.local_dir, swm_src=args.swm_src, device=args.device,
     )
@@ -111,12 +111,12 @@ def main():
         for e in ep_ids:
             off, L = int(ep_off[e]), int(ep_len[e])
             final = state[off + L - 1].astype(np.float64)
-            target = lewm_io.canonical_target_for(final)
-            ok20 = lewm_io.eval_state_tol(target, final, args.angle_headline, args.pos_thresh)
+            target = encoder.canonical_target_for(final)
+            ok20 = encoder.eval_state_tol(target, final, args.angle_headline, args.pos_thresh)
             if not ok20:
                 n_drop += 1
                 continue
-            ok5 = lewm_io.eval_state_tol(target, final, args.angle_strict, args.pos_thresh)
+            ok5 = encoder.eval_state_tol(target, final, args.angle_strict, args.pos_thresh)
             rows = np.arange(off, off + L, args.stride)
             kept_ids.append(int(e))
             kept_len.append(L)
@@ -150,7 +150,7 @@ def main():
             lo, hi = int(rows[0]), int(rows[-1]) + 1
             span = pixels[lo:hi]                       # one contiguous read (fast)
             sel = span[rows - lo]                      # stride-H subsample in RAM
-            z = lewm_io.encode_frames(model, sel, device=args.device, batch_size=bs)
+            z = encoder.encode_frames(model, sel, device=args.device, batch_size=bs)
             lat_chunks.append(z)
             done += len(rows)
             if ep_i % 200 == 0:
@@ -180,8 +180,8 @@ def main():
             "angle_deg_headline": args.angle_headline,
             "angle_deg_strict": args.angle_strict,
             "mode": "block_only_canonical",
-            "target_block_xy": lewm_io.TARGET_BLOCK_XY.tolist(),
-            "target_block_angle": lewm_io.TARGET_BLOCK_ANGLE,
+            "target_block_xy": encoder.TARGET_BLOCK_XY.tolist(),
+            "target_block_angle": encoder.TARGET_BLOCK_ANGLE,
         },
         "encoder": {"source": args.source, "encoder_id": args.encoder_id,
                     "local_dir": args.local_dir},

@@ -25,10 +25,10 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from ffjepa.gdm_model import (GDM, GDMConfig, GaussianDiffusion, GDMPlanner,
+from specaccept.drafter import (GDM, GDMConfig, GaussianDiffusion, GDMPlanner,
                               timestep_embedding, save_gdm, load_gdm_planner,
                               count_params)
-from ffjepa.subgoal_planner import GDMSubgoalSource
+from specaccept.sources import GDMSubgoalSource
 
 D = 192
 N = 3

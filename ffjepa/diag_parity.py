@@ -1,6 +1,6 @@
 """Box parity diagnostic (NO CEM): locate the oracle-vs-baseline SR gap.
 
-(1) LATENT parity: oracle encode path (lewm_io.encode_frames) vs the harness goal
+(1) LATENT parity: oracle encode path (encoder.encode_frames) vs the harness goal
     encode path (img_transform + LeWM.encode) on each eval goal frame. If these
     diverge on the box, the injected subgoal != the baseline's goal latent.
 (2) COST parity: SubgoalCostModel's terminal-L2^2 vs the box's LeWM.get_cost on the
@@ -15,8 +15,8 @@ import argparse
 import numpy as np
 import torch
 
-from ffjepa import lewm_io
-from ffjepa.subgoal_planner import SubgoalCostModel
+from specaccept import encoder
+from specaccept.sources import SubgoalCostModel
 from ffjepa.eval_ffjepa import img_transform, img_transform_fallback, sample_short
 
 
@@ -32,12 +32,12 @@ def main():
     ap.add_argument("--seed", type=int, default=42)
     args = ap.parse_args()
 
-    lewm_io._ensure_swm_importable(args.swm_src)
+    encoder._ensure_swm_importable(args.swm_src)
     import h5py
     from torchvision import tv_tensors
 
     dev = args.device
-    model = lewm_io.load_lewm(source=args.source, encoder_id=args.encoder_id,
+    model = encoder.load_lewm(source=args.source, encoder_id=args.encoder_id,
                               local_dir=args.local_dir, swm_src=args.swm_src, device=dev)
     try:
         tf = img_transform(); print("[tf] stable_pretraining ImageNet stats")
@@ -45,8 +45,8 @@ def main():
         tf = img_transform_fallback(); print("[tf] fallback ImageNet stats")
 
     # decisive: do the harness (spt) stats match encode_frames' hardcoded stats?
-    print(f"[stats] encode_frames mean={lewm_io._IMAGENET_MEAN.flatten().tolist()} "
-          f"std={lewm_io._IMAGENET_STD.flatten().tolist()}")
+    print(f"[stats] encode_frames mean={encoder._IMAGENET_MEAN.flatten().tolist()} "
+          f"std={encoder._IMAGENET_STD.flatten().tolist()}")
     try:
         import stable_pretraining as spt
         print(f"[stats] spt ImageNet = {spt.data.dataset_stats.ImageNet}")
@@ -83,7 +83,7 @@ def main():
         first = {}
         for i, (ep, st) in enumerate(zip(eps, starts)):
             gf = pixels[int(ep_off[ep]) + st + 25]
-            z_oracle = lewm_io.encode_frames(model, gf[None], device=dev)[0]  # (192,)
+            z_oracle = encoder.encode_frames(model, gf[None], device=dev)[0]  # (192,)
             z_harness = harness_encode(gf)[0]                                  # (192,)
             diffs.append((z_oracle - z_harness).abs().max().item())
             if i == 0:

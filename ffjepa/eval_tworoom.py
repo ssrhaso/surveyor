@@ -32,9 +32,9 @@ import argparse
 import numpy as np
 import torch
 
-from ffjepa import lewm_io
+from specaccept import encoder
 from ffjepa.eval_ffjepa import sample_short, sample_long
-from ffjepa.subgoal_planner import (SubgoalCostModel, OracleSubgoalSource,
+from specaccept.sources import (SubgoalCostModel, OracleSubgoalSource,
                                     GDMSubgoalSource, SpecAcceptSubgoalSource,
                                     build_oracle_table, make_ffjepa_policy)
 
@@ -64,7 +64,7 @@ def parse_args():
                    help="restrict eval episodes to demos whose final frame reaches "
                         "within --pos-thresh of their OWN target (TwoRoom's own "
                         "success rule) - the TwoRoom analog of PushT's success20/5.")
-    p.add_argument("--pos-thresh", type=float, default=lewm_io.TWOROOM_POS_THRESH)
+    p.add_argument("--pos-thresh", type=float, default=encoder.TWOROOM_POS_THRESH)
     p.add_argument("--require-cross-room", action="store_true",
                    help="restrict eval episodes to ones whose agent and target START in "
                         "different rooms (the intended door-crossing task; ~48%% of "
@@ -132,7 +132,7 @@ def build_process(dataset, keys):
     return process
 
 
-def tworoom_success_mask(h5, pos_thresh=lewm_io.TWOROOM_POS_THRESH):
+def tworoom_success_mask(h5, pos_thresh=encoder.TWOROOM_POS_THRESH):
     """Per-episode success flags: final-frame distance_to_target < pos_thresh."""
     import h5py
     with h5py.File(h5, "r") as f:
@@ -142,7 +142,7 @@ def tworoom_success_mask(h5, pos_thresh=lewm_io.TWOROOM_POS_THRESH):
         order = np.argsort(rows)
         d = np.empty(len(rows))
         d[order] = f["distance_to_target"][np.sort(rows)]
-    return np.array([lewm_io.tworoom_success(v, pos_thresh) for v in d], dtype=bool)
+    return np.array([encoder.tworoom_success(v, pos_thresh) for v in d], dtype=bool)
 
 
 def cross_room_mask(h5, wall_center=112.0):
@@ -165,14 +165,14 @@ def main():
     if args.subgoal in ("gdm", "specaccept") and not args.gdm_ckpt:
         raise ValueError(f"--subgoal {args.subgoal} requires --gdm-ckpt <trained planner checkpoint>")
 
-    lewm_io._ensure_swm_importable(args.swm_src)
+    encoder._ensure_swm_importable(args.swm_src)
     import stable_worldmodel as swm
 
     goal_offset = args.goal_offset if args.goal_offset is not None else (25 if args.mode == "short" else 75)
     eval_budget = args.eval_budget or (50 if args.mode == "short" else 150)
     cem_seed = args.cem_seed if args.cem_seed is not None else args.seed
 
-    model = lewm_io.load_lewm(source=args.source, encoder_id=args.encoder_id,
+    model = encoder.load_lewm(source=args.source, encoder_id=args.encoder_id,
                               local_dir=args.local_dir, swm_src=args.swm_src,
                               device=args.device)
     is_baseline = args.subgoal == "baseline"
@@ -182,7 +182,7 @@ def main():
 
     gdm_planner = None
     if args.subgoal in ("gdm", "specaccept"):
-        from ffjepa.gdm_model import load_gdm_planner, count_params
+        from specaccept.drafter import load_gdm_planner, count_params
         gdm_planner = load_gdm_planner(args.gdm_ckpt, device=args.device)
         d = gdm_planner.diffusion
         samp = (f"ddpm_ancestral/all-{d.timesteps}-steps (--gdm-steps ignored)"

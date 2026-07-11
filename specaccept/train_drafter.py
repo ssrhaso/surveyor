@@ -24,11 +24,11 @@ Train set: --mask 5 (default, in_5deg subset ~ 9,094 eps ~ paper's 8,318) or
 --mask 20 (all 12,042 kept episodes).
 
 CPU smoke (tiny model, 1 epoch - logic only; real train on the box):
-  python -m ffjepa.train_gdm --subgoals subgoals_pusht.pt --out /tmp/gdm_smoke.pt \
+  python -m specaccept.train_drafter --subgoals subgoals_pusht.pt --out /tmp/gdm_smoke.pt \
       --device cpu --epochs 1 --hidden 64 --depth 2 --heads 4 --timesteps 50
 
 Box (A100), full training (~20 epochs, ~50M-param DiT):
-  cd ~/le-wm && python -m ffjepa.train_gdm --subgoals subgoals_pusht.pt \
+  cd ~/le-wm && python -m specaccept.train_drafter --subgoals subgoals_pusht.pt \
       --out gdm_pusht.pt --device cuda --mask 5 --epochs 20
 
 WARNING - the argparse DEFAULTS here (lr 1e-4, batch 256, no grad-clip, no
@@ -52,7 +52,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from ffjepa.gdm_model import (GDM, GDMConfig, GaussianDiffusion, save_gdm,
+from specaccept.drafter import (GDM, GDMConfig, GaussianDiffusion, save_gdm,
                               count_params)
 
 

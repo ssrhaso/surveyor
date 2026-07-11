@@ -27,9 +27,9 @@ import json
 import numpy as np
 import torch
 
-from ffjepa import lewm_io
+from specaccept import encoder
 from ffjepa.diag_gdm import metrics, show
-from ffjepa.gdm_model import load_gdm_planner
+from specaccept.drafter import load_gdm_planner
 
 
 def parse_args():
@@ -66,7 +66,7 @@ def main():
     print(f"[episodes-file] {args.episodes_file}: using {len(pairs)} pairs "
           f"(goal_offset={payload.get('goal_offset')}, note={payload.get('note', '-')})")
 
-    model = lewm_io.load_lewm(source=args.source, encoder_id=args.encoder_id,
+    model = encoder.load_lewm(source=args.source, encoder_id=args.encoder_id,
                               local_dir=args.local_dir, swm_src=args.swm_src, device=args.device)
 
     import h5py
@@ -87,7 +87,7 @@ def main():
 
         all_rows = np.array(cond_rows + [r for tk in target_rows for r in tk])
         order = np.argsort(all_rows, kind="stable")
-        lat = lewm_io.encode_frames(model, pixels[all_rows[order]], device=args.device)
+        lat = encoder.encode_frames(model, pixels[all_rows[order]], device=args.device)
         out = torch.empty_like(lat)
         out[order] = lat
 

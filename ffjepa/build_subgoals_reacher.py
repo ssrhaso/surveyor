@@ -30,7 +30,7 @@ import numpy as np
 import torch
 import h5py
 
-from ffjepa import lewm_io
+from specaccept import encoder
 
 
 def parse_args():
@@ -71,7 +71,7 @@ def main():
     t0 = time.time()
     print(f"[cfg] {vars(args)}")
 
-    model = lewm_io.load_lewm(
+    model = encoder.load_lewm(
         source=args.source, encoder_id=args.encoder_id,
         local_dir=args.local_dir, swm_src=args.swm_src, device=args.device,
     )
@@ -112,7 +112,7 @@ def main():
             lo, hi = int(rows[0]), int(rows[-1]) + 1
             span = pixels[lo:hi]
             sel = span[rows - lo]
-            z = lewm_io.encode_frames(model, sel, device=args.device, batch_size=args.batch_size)
+            z = encoder.encode_frames(model, sel, device=args.device, batch_size=args.batch_size)
             lat_chunks.append(z)
             done += len(rows)
             if ep_i % 200 == 0:
