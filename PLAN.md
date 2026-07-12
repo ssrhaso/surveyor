@@ -1,6 +1,7 @@
 # PLAN (tick sheet)
 
-Paper: `writeup/main.tex`. Rule: update the paper ONCE per completed block, not per job.
+Paper: `paper/paper (1).tex` (ICLR draft; writeup/main.tex = older interim doc).
+Rule: update the paper ONCE per completed block, not per job.
 Method = spec-accept; "DSpark" = the ported negative-result baseline only.
 
 ---
@@ -25,8 +26,11 @@ Method = spec-accept; "DSpark" = the ported negative-result baseline only.
 - [ ] terminology sweep: spec-accept vs DSpark usage
 
 ## DECIDE - scope (anytime before WRITE 2)
-- [ ] sec 11.2 TwoRoom: un-park (chain exists, Isambard-only) or CUT + one line in Limitations
-- [ ] sec 11.3 OGBench-Cube: build (zero code exists today) or CUT
+- [x] sec 11.2 TwoRoom: DECIDED 2026-07-12 — boundary-case paragraph written into
+      the paper (unobservable goal = sharpest form of the data/observability
+      condition); no full battery, not pursued further
+- [ ] sec 11.3 OGBench-Cube: build (dataset exists on HF; port = reacher pattern;
+      needs reacher.h5 shrink for disk) or CUT — decide after WRITE 1
 
 ---
 
@@ -99,11 +103,22 @@ gated ->
       (s25 offline diag 0.43 vs 0.16 anchor = cross-rebuild probe incomparability;
       closed loop is the certification. gc-drafter diag crash was cosmetic — diag_gdm
       can't feed goals; ckpt fine.)
-- [ ] TONIGHT'S GATES (all queued, ETA ~02:00; see CONFIG FREEZE below):
-      horizon spine x40 (~19:00) | reacher audit2+slong x40 (~19:30) |
-      k-grids both anchors x24 (~21:30, k FREEZE decision) | tau-on-val + timing
-      (~22:00) | s15/s5 train+eval x18 (~00:30, PushT interior optimum) |
-      gamma dose-response x40 (~02:00, mechanism thesis + gamma=0 confound gate)
+- [x] AUDIT ROUND 2 LANDED (2026-07-12 evening):
+      * lerp oracle at t100: 33/44/55 (frac .25/.5/.75) vs drafter 94.5 —
+        THE LEARNED DRAFTER IS NECESSARY (geometric interpolation fails at horizon)
+      * every-step k=4 at t100 (Reacher): 96.1 — k-curve monotone 50->8->4;
+        spec-accept honest marginal = ~1.5x NFE at SR-parity (2.6 vs 4.0)
+- [x] PUSHT SPINE LANDED (unfiltered population): baseline 95.5->13.7 vs drafters
+      ~87->59 over t25->150 — crossover +45pp at t150, in-population. CAVEAT
+      DISCOVERED: regenerated population lacked the success filter (includes
+      failed demos), so absolutes sit below box-era table; success5-filtered
+      respin queued (2271135) for box-era comparability; unfiltered spine kept
+      as harder-population robustness row. NEVER merge the two populations.
+- [ ] OVERNIGHT GATES (queued, ETA ~04:00): gamma dose-response x40 (running;
+      gamma=0 confound gate + mechanism curve) | k-grids both anchors + k-cliff
+      k{1,2} x32 (k FREEZE decision) | tau-on-val + off-axis separability |
+      timing x4 | reacher S-long x24 | s15/s5 train+eval (PushT interior
+      optimum at t150) | success5 spine x40
 
 ### CONFIG FREEZE POLICY (adopted 2026-07-12)
 - tau = 0.20 FROZEN globally. Provenance disclosed in paper sec 6: selected on
@@ -116,11 +131,11 @@ gated ->
   4-point + t150 4-point (tonight); Reacher native 4-point + long-horizon 3-scale
   (tonight). Populations: t<=100 grid vs max-offset-150 grid NEVER spliced.
 - gamma = mechanism experiment, not a knob (pre-registered gates in the sbatch).
-- [ ] PushT tau/k frontier + strong-baseline RH sweep + wall-clock timing
-      (LeWM's Fig.3 planning-speed pitch x our NFE cut = the money figure)
-- [ ] SPACE: 500GB quota — shrink reacher.h5 to holdout subset
-      (batch/make_holdout_subset.py, v05-proven byte-identical) BEFORE the
-      pusht download; verify subset smoke passes before deleting the full h5
+- [x] PushT strong-baseline RH sweep DONE (short: RH5 already strongest at 93.4;
+      horizon: collapse at every RH). tau/k grids + timing queued overnight.
+- [x] SPACE: resolved without the shrink — pusht h5.zst was only 13GB (46GB
+      unpacked), fits quota at ~440/500GB. Reacher-h5 shrink deferred to BEFORE
+      the Cube download (46GB compressed, ~150GB+ unpacked — will need it).
 
 ### EXP 2d - third env: OGBench-Cube                  [biggest accept lever]
 - [x] recon: datasets/quentinll/lewm-cube EXISTS on HF (2026-07-12)
@@ -137,11 +152,16 @@ gated ->
 - One k everywhere. One tau everywhere. S varies and says why.
 
 ## WRITE 1 - Reacher section, one pass                [gated by: EXP 2 + 2b]
-- [ ] fill sec 11.1 tbdblock: SR vs scale table + spec-accept NFE column
-- [ ] add horizon table/figure if the sweep is clean
-- [ ] 1-2 paragraphs of prose: does the scale law transfer, does spec-accept stay neutral
-- [ ] update Table 8 (headline) if a Reacher row belongs there
-- [ ] recompile, confirm sec 11.1 tbdblock gone
+- [x] sec 11.1 DRAFTED 2026-07-12 (paper (1).tex): setup, native table, strong-
+      baseline control, horizon table, frontier, transfers/does-not-transfer;
+      TwoRoom boundary note; sec 9 replan-rate para; sec 6 denominators +
+      selection defence; limitations/conclusion/abstract updated
+- [ ] FINAL-NUMBER PASS after overnight gates (needs: k frozen, goal-free row
+      swapped in for its TBD, k-mirror haircut applied per WRITE RULES, lerp +
+      oracle numbers into the t25 paragraph, gamma verdict sentence)
+- [ ] update headline table (Table 8) if a Reacher row belongs there
+- [ ] compile check (needs iclr2026_conference.sty dropped into paper/ — not on
+      this machine; structural checks pass)
 
 gated ->
 
