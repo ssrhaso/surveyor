@@ -1,0 +1,44 @@
+=== arm=baseline offset=50 seed=43 (budgets: 2t=100, vlwm=50) ===
+wrote reacher_horizon.ep.base.t3.json: 128 pairs (episodes >= 8000, start <= ep_len-1-100), sample [[8014, 73], [8074, 52], [8087, 58]]
+--- FF-JEPA regime: budget 2t ---
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+[model] frozen LeWM (18.03M), device=cuda, training=False, subgoal=baseline
+09:11:53 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+[episodes-file] reacher_horizon.ep.base.t3.json: 128 precomputed pairs (built for max_offset=100, seed=42, episode_min=8000) -- sampling bypassed; running at goal_offset=50
+[eval] start=random num_eval=128 goal_offset=50 budget=100 qpos_threshold=0.05 rad/joint
+[eval] episodes_idx[:5]=[8014, 8074, 8087, 8127, 8135] start_steps[:5]=[73, 52, 58, 58, 79]
+09:11:54 | INFO  | __init__.py | MUJOCO_GL=egl, attempting to import specified OpenGL backend.
+09:11:54 | INFO  | __init__.py | No OpenGL_accelerate module loaded: No module named 'OpenGL_accelerate'
+09:11:56 | INFO  | __init__.py | MuJoCo library version is: 3.10.0
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/envs/registration.py:729: UserWarning: [33mWARN: The environment is being initialised with render_mode='rgb_array' that is not in the possible render_modes ([]).[0m
+  logger.warn(
+CEM solve time: 79.0084 seconds
+CEM solve time: 43.7829 seconds
+CEM solve time: 15.3807 seconds
+CEM solve time: 10.0624 seconds
+[traces] saved runs/reacher/traces_hz_baseline_t50_2t_seed43.pt
+
+==== FF-JEPA eval summary (Reacher qpos_match) ====
+subgoal=baseline num_eval=128 goal_offset=50 budget=100 seed=43 cem_seed=43 S=25
+  SR = 91.41%  (117/128)
+--- VLWM regime: budget 50 fixed ---
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+[model] frozen LeWM (18.03M), device=cuda, training=False, subgoal=baseline
+09:16:15 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+[episodes-file] reacher_horizon.ep.base.t3.json: 128 precomputed pairs (built for max_offset=100, seed=42, episode_min=8000) -- sampling bypassed; running at goal_offset=50
+[eval] start=random num_eval=128 goal_offset=50 budget=50 qpos_threshold=0.05 rad/joint
+[eval] episodes_idx[:5]=[8014, 8074, 8087, 8127, 8135] start_steps[:5]=[73, 52, 58, 58, 79]
+09:16:15 | INFO  | __init__.py | MUJOCO_GL=egl, attempting to import specified OpenGL backend.
+09:16:15 | INFO  | __init__.py | No OpenGL_accelerate module loaded: No module named 'OpenGL_accelerate'
+09:16:15 | INFO  | __init__.py | MuJoCo library version is: 3.10.0
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/envs/registration.py:729: UserWarning: [33mWARN: The environment is being initialised with render_mode='rgb_array' that is not in the possible render_modes ([]).[0m
+  logger.warn(
+CEM solve time: 75.8751 seconds
+CEM solve time: 43.6989 seconds
+[traces] saved runs/reacher/traces_hz_baseline_t50_b50_seed43.pt
+
+==== FF-JEPA eval summary (Reacher qpos_match) ====
+subgoal=baseline num_eval=128 goal_offset=50 budget=50 seed=43 cem_seed=43 S=25
+  SR = 79.69%  (102/128)

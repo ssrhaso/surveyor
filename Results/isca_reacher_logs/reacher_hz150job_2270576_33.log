@@ -1,0 +1,51 @@
+=== arm=s10spec offset=150 seed=43 (2t budget=300, pop=max150) ===
+wrote reacher_horizon150.ep.t33.json: 128 pairs (episodes >= 8000, start <= ep_len-1-150), sample [[8014, 36], [8074, 26], [8087, 27]]
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+[model] frozen LeWM (18.03M), device=cuda, training=False, subgoal=specaccept
+[gdm] planner from gdm_reacher_s10.pt: head=53.44M, N=3 WG=1 goal_cond=True T=1000 sampler=ddim/8-steps param=eps schedule=linear norm=standardize
+10:07:46 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+[episodes-file] reacher_horizon150.ep.t33.json: 128 precomputed pairs (built for max_offset=150, seed=42, episode_min=8000) -- sampling bypassed; running at goal_offset=150
+[eval] start=random num_eval=128 goal_offset=150 budget=300 qpos_threshold=0.05 rad/joint
+[eval] episodes_idx[:5]=[8014, 8074, 8087, 8127, 8135] start_steps[:5]=[36, 26, 27, 26, 37]
+10:07:46 | INFO  | __init__.py | MUJOCO_GL=egl, attempting to import specified OpenGL backend.
+10:07:46 | INFO  | __init__.py | No OpenGL_accelerate module loaded: No module named 'OpenGL_accelerate'
+10:07:46 | INFO  | __init__.py | MuJoCo library version is: 3.10.0
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/envs/registration.py:729: UserWarning: [33mWARN: The environment is being initialised with render_mode='rgb_array' that is not in the possible render_modes ([]).[0m
+  logger.warn(
+CEM solve time: 27.6577 seconds
+CEM solve time: 26.2458 seconds
+CEM solve time: 24.5296 seconds
+CEM solve time: 23.4454 seconds
+CEM solve time: 21.0938 seconds
+CEM solve time: 19.3647 seconds
+CEM solve time: 17.8491 seconds
+CEM solve time: 16.3517 seconds
+CEM solve time: 14.8406 seconds
+CEM solve time: 12.0487 seconds
+CEM solve time: 9.4642 seconds
+CEM solve time: 8.1781 seconds
+CEM solve time: 7.1043 seconds
+CEM solve time: 5.8124 seconds
+CEM solve time: 4.7358 seconds
+CEM solve time: 3.8769 seconds
+CEM solve time: 3.0201 seconds
+CEM solve time: 3.0153 seconds
+CEM solve time: 2.7987 seconds
+CEM solve time: 2.3665 seconds
+CEM solve time: 2.3667 seconds
+CEM solve time: 2.3668 seconds
+CEM solve time: 2.1527 seconds
+CEM solve time: 2.1529 seconds
+CEM solve time: 1.9388 seconds
+CEM solve time: 1.9396 seconds
+CEM solve time: 1.9398 seconds
+CEM solve time: 1.7222 seconds
+CEM solve time: 1.5068 seconds
+CEM solve time: 1.5087 seconds
+[specaccept] tau=0.2 gdm_steps=8 re-drafts=783 advances=487 rejects=565 call_ratio=0.617 (every-step=1.000; lower = fewer diffusion calls)
+[traces] saved runs/reacher/traces_hz150_s10spec_t150_seed43.pt
+
+==== FF-JEPA eval summary (Reacher qpos_match) ====
+subgoal=specaccept num_eval=128 goal_offset=150 budget=300 seed=43 cem_seed=43 S=10
+  SR = 95.31%  (122/128)

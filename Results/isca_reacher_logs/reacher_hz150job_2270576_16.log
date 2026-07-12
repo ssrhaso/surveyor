@@ -1,0 +1,45 @@
+=== arm=s10gdm offset=125 seed=42 (2t budget=250, pop=max150) ===
+wrote reacher_horizon150.ep.t16.json: 128 pairs (episodes >= 8000, start <= ep_len-1-150), sample [[8014, 36], [8074, 26], [8087, 27]]
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+[model] frozen LeWM (18.03M), device=cuda, training=False, subgoal=gdm
+[gdm] planner from gdm_reacher_s10.pt: head=53.44M, N=3 WG=1 goal_cond=True T=1000 sampler=ddim/50-steps param=eps schedule=linear norm=standardize
+09:59:31 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+[episodes-file] reacher_horizon150.ep.t16.json: 128 precomputed pairs (built for max_offset=150, seed=42, episode_min=8000) -- sampling bypassed; running at goal_offset=125
+[eval] start=random num_eval=128 goal_offset=125 budget=250 qpos_threshold=0.05 rad/joint
+[eval] episodes_idx[:5]=[8014, 8074, 8087, 8127, 8135] start_steps[:5]=[36, 26, 27, 26, 37]
+09:59:31 | INFO  | __init__.py | MUJOCO_GL=egl, attempting to import specified OpenGL backend.
+09:59:31 | INFO  | __init__.py | No OpenGL_accelerate module loaded: No module named 'OpenGL_accelerate'
+09:59:31 | INFO  | __init__.py | MuJoCo library version is: 3.10.0
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/envs/registration.py:729: UserWarning: [33mWARN: The environment is being initialised with render_mode='rgb_array' that is not in the possible render_modes ([]).[0m
+  logger.warn(
+CEM solve time: 27.8316 seconds
+CEM solve time: 26.4492 seconds
+CEM solve time: 24.0847 seconds
+CEM solve time: 20.8594 seconds
+CEM solve time: 18.9292 seconds
+CEM solve time: 16.7753 seconds
+CEM solve time: 14.4078 seconds
+CEM solve time: 11.3956 seconds
+CEM solve time: 9.2491 seconds
+CEM solve time: 8.3890 seconds
+CEM solve time: 7.3124 seconds
+CEM solve time: 6.6669 seconds
+CEM solve time: 6.0229 seconds
+CEM solve time: 5.1646 seconds
+CEM solve time: 4.5204 seconds
+CEM solve time: 4.5202 seconds
+CEM solve time: 4.3045 seconds
+CEM solve time: 3.8741 seconds
+CEM solve time: 3.6584 seconds
+CEM solve time: 3.0138 seconds
+CEM solve time: 2.5827 seconds
+CEM solve time: 2.5834 seconds
+CEM solve time: 2.5830 seconds
+CEM solve time: 2.3685 seconds
+CEM solve time: 2.3691 seconds
+[traces] saved runs/reacher/traces_hz150_s10gdm_t125_seed42.pt
+
+==== FF-JEPA eval summary (Reacher qpos_match) ====
+subgoal=gdm num_eval=128 goal_offset=125 budget=250 seed=42 cem_seed=42 S=10
+  SR = 91.41%  (117/128)

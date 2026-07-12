@@ -1,0 +1,8 @@
+host: gpu16.cluster.local
+name, memory.total [MiB], driver_version
+NVIDIA A100 80GB PCIe, 81920 MiB, 560.35.03
+=== internet from compute node ===
+pypi:200
+=== /local ===
+Filesystem                Size  Used Avail Use% Mounted on
+/dev/mapper/system-local  158G   28K  150G   1% /local

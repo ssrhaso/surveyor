@@ -1,0 +1,24 @@
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+[model] frozen LeWM (18.03M), device=cuda, training=False, subgoal=specaccept
+[gdm] planner from gdm_reacher_s10.pt: head=53.44M, N=3 WG=1 goal_cond=True T=1000 sampler=ddim/8-steps param=eps schedule=linear norm=standardize
+05:21:50 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+[holdout] eval restricted to episodes [8000, 10000) (2000/10000 eligible)
+[eval] start=random num_eval=128 goal_offset=25 budget=50 qpos_threshold=0.05 rad/joint
+[eval] episodes_idx[:5]=[8027, 8035, 8063, 8070, 8088] start_steps[:5]=[24, 142, 134, 153, 23]
+05:21:50 | INFO  | __init__.py | MUJOCO_GL=egl, attempting to import specified OpenGL backend.
+05:21:50 | INFO  | __init__.py | No OpenGL_accelerate module loaded: No module named 'OpenGL_accelerate'
+05:21:50 | INFO  | __init__.py | MuJoCo library version is: 3.10.0
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/envs/registration.py:729: UserWarning: [33mWARN: The environment is being initialised with render_mode='rgb_array' that is not in the possible render_modes ([]).[0m
+  logger.warn(
+CEM solve time: 27.5243 seconds
+CEM solve time: 25.5083 seconds
+CEM solve time: 18.2112 seconds
+CEM solve time: 16.0677 seconds
+CEM solve time: 13.2889 seconds
+[specaccept] tau=0.2 gdm_steps=8 re-drafts=311 advances=158 rejects=166 call_ratio=0.663 (every-step=1.000; lower = fewer diffusion calls)
+[traces] saved runs/reacher/traces_s10spec_seed45.pt
+
+==== FF-JEPA eval summary (Reacher qpos_match) ====
+subgoal=specaccept num_eval=128 goal_offset=25 budget=50 seed=45 cem_seed=45 S=10
+  SR = 60.16%  (77/128)
