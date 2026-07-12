@@ -230,14 +230,26 @@ class SpecAcceptSubgoalSource:
     Goal-conditioned drafters (Reacher: planner.goal_cond=True) are supported:
     needs_goal mirrors the planner flag and re-drafts pass the per-env goal
     latent through to sample_sequence. Verification itself stays goal-free -
-    reality is compared against the subgoal just pursued, same as ever."""
+    reality is compared against the subgoal just pursued, same as ever.
+
+    goal_gate=True adds a second, goal-progress verifier at serve time: a
+    waypoint is only served if it reduces latent distance to the goal
+    (||wp - g|| < ||z_now - g||, the same metric CEM plans on). A waypoint
+    that fails is consumed-and-discarded and the GOAL latent is served
+    instead (locally = flat-LeWM behavior, zero diffusion); a fresh draft
+    happens only once the block exhausts. Motivation: on Reacher the drafter
+    (trained on SAC-wander data) pays a ~24pp detour tax on the native task
+    where the goal is already inside the planning window - the gate filters
+    detour waypoints exactly there while leaving long-horizon behavior
+    (where waypoints do progress) untouched."""
 
     needs_obs = True
 
     def __init__(self, planner, n_envs, device="cpu", n_steps=50, seed=42,
-                 tau=0.2, record=False):
+                 tau=0.2, record=False, goal_gate=False):
         self.planner = planner
-        self.needs_goal = getattr(planner, "goal_cond", False)
+        self.goal_gate = bool(goal_gate)
+        self.needs_goal = getattr(planner, "goal_cond", False) or self.goal_gate
         self.N = int(planner.cfg.n_future)
         self.dim = int(planner.cfg.latent_dim)
         self.device = device
@@ -252,17 +264,47 @@ class SpecAcceptSubgoalSource:
         self._gen.manual_seed(int(seed))
         self.record = record
         self.trace = []
+        self._gated = np.zeros(n_envs, dtype=bool)  # env is serving the goal, not a waypoint
         self.n_redraft = 0   # diffusion calls
         self.n_advance = 0   # positions served from the queue (calls skipped)
         self.n_reject = 0    # verification failures (subset of redrafts)
+        self.n_gate = 0      # goal-progress failures: replans served with the raw goal
 
     @torch.no_grad()
     def current(self, sg_steps, obs_latent=None, replan_idx=None, goal_latent=None) -> torch.Tensor:
         if replan_idx is not None and len(replan_idx) > 0 and obs_latent is not None:
             z_now = obs_latent.to(self.device)               # (R, dim) achieved latents
+            z_goal_rows = (goal_latent.to(self.device)
+                           if (self.goal_gate and goal_latent is not None) else None)
+
+            def _prog(cand, r):
+                # goal-progress test on the metric CEM plans with (latent L2)
+                return float((cand - z_goal_rows[r]).norm()) \
+                    < float((z_now[r] - z_goal_rows[r]).norm())
+
             need_rows, need_envs = [], []
             for r, i in enumerate(replan_idx):
                 q, tgt = self._queue[i], self._target[i]
+
+                if z_goal_rows is not None and self._gated[i] and q is not None:
+                    # goal-fallback mode: consume-and-discard through the stale
+                    # block (zero diffusion); resume waypoints on first pass
+                    if self._ptr[i] < self.N:
+                        cand = q[self._ptr[i]]
+                        self._ptr[i] += 1
+                        if _prog(cand, r):
+                            self._gated[i] = False
+                            self._target[i] = cand
+                            self._cache[i] = cand
+                            self.n_advance += 1
+                        else:
+                            self._cache[i] = z_goal_rows[r]
+                            self.n_gate += 1
+                        continue
+                    need_rows.append(r)   # block exhausted -> fresh draft
+                    need_envs.append(i)
+                    continue
+
                 accept = False
                 if q is not None and tgt is not None:
                     rel = float((z_now[r] - tgt).norm()
@@ -274,16 +316,23 @@ class SpecAcceptSubgoalSource:
                 if accept:
                     nxt = self._queue[i][self._ptr[i]]
                     self._ptr[i] += 1
-                    self._target[i] = nxt
-                    self._cache[i] = nxt
-                    self.n_advance += 1
+                    if z_goal_rows is not None and not _prog(nxt, r):
+                        self._gated[i] = True
+                        self._target[i] = None
+                        self._cache[i] = z_goal_rows[r]
+                        self.n_gate += 1
+                    else:
+                        self._target[i] = nxt
+                        self._cache[i] = nxt
+                        self.n_advance += 1
                 else:
                     need_rows.append(r)
                     need_envs.append(i)
             if need_rows:
                 z_cond = z_now[need_rows].to(self.planner.device)
                 z_goal = (goal_latent[need_rows].to(self.planner.device)
-                          if (self.needs_goal and goal_latent is not None) else None)
+                          if (self.needs_goal and goal_latent is not None
+                              and getattr(self.planner, "goal_cond", False)) else None)
                 blocks = self.planner.sample_sequence(z_cond, n_steps=self.n_steps,
                                                       generator=self._gen,
                                                       z_goal_native=z_goal)  # (R', N, dim)
@@ -293,11 +342,56 @@ class SpecAcceptSubgoalSource:
                                        "z_cond": z_cond.detach().float().cpu(),
                                        "block": blocks.detach().float().cpu()})
                 for j, i in enumerate(need_envs):
+                    rr = need_rows[j]
                     self._queue[i] = blocks[j]
-                    self._target[i] = blocks[j][0]
-                    self._cache[i] = blocks[j][0]
                     self._ptr[i] = 1
                     self.n_redraft += 1
+                    if z_goal_rows is not None and not _prog(blocks[j][0], rr):
+                        self._gated[i] = True
+                        self._target[i] = None
+                        self._cache[i] = z_goal_rows[rr]
+                        self.n_gate += 1
+                    else:
+                        self._gated[i] = False
+                        self._target[i] = blocks[j][0]
+                        self._cache[i] = blocks[j][0]
+        return self._cache.clone()
+
+
+class LerpSubgoalSource:
+    """Straight-line oracle: the subgoal is the point a fixed fraction along
+    the latent segment from the CURRENT achieved latent to the goal latent,
+    re-anchored at every replan (no staleness). Isolates the intrinsic cost of
+    decomposition (CEM converging to intermediate targets it never needed)
+    from the data-meander cost of dataset-derived oracles: dataset waypoints
+    inherit the collection policy's detours, a lerp waypoint by construction
+    cannot. frac=1.0 degenerates to flat goal-image planning (sanity arm).
+    Assumes local linearity of the latent space between z_now and z_goal --
+    a diagnostic arm, not a method."""
+
+    needs_obs = True
+    needs_goal = True
+
+    def __init__(self, n_envs, device="cpu", frac=0.5):
+        self.device = device
+        self.n_envs = n_envs
+        self.frac = float(frac)
+        self._cache = None  # lazy: dim taken from the first observed latent
+
+    @torch.no_grad()
+    def current(self, sg_steps, obs_latent=None, replan_idx=None, goal_latent=None) -> torch.Tensor:
+        if self._cache is None:
+            ref = obs_latent if obs_latent is not None else goal_latent
+            if ref is None:
+                raise RuntimeError("LerpSubgoalSource needs obs/goal latents on first call")
+            self._cache = torch.zeros(self.n_envs, ref.shape[-1], device=self.device)
+        if replan_idx is not None and len(replan_idx) > 0 \
+                and obs_latent is not None and goal_latent is not None:
+            z_now = obs_latent.to(self.device)
+            z_goal = goal_latent.to(self.device)
+            tgt = z_now + self.frac * (z_goal - z_now)
+            for r, i in enumerate(replan_idx):
+                self._cache[i] = tgt[r]
         return self._cache.clone()
 
 

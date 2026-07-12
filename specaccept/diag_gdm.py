@@ -61,6 +61,9 @@ def parse_args():
                         "(1 for stride-25 file, 25 for a dense --stride 1 file)")
     p.add_argument("--n-probe", type=int, default=256, help="conditions per probe")
     p.add_argument("--gdm-steps", type=int, default=50)
+    p.add_argument("--gdm-noise-scale", type=float, default=1.0,
+                   help="gamma: sampler noise scale (see eval drivers); offline arm "
+                        "of the gamma dose-response joint plot")
     p.add_argument("--tf-steps", type=int, nargs="+", default=[50, 200, 400, 600, 800],
                    help="diffusion timesteps for the teacher-forced denoising probe")
     p.add_argument("--stride", type=int, default=25)
@@ -158,6 +161,7 @@ def main():
     args = parse_args()
     torch.manual_seed(args.seed)
     planner = load_gdm_planner(args.gdm_ckpt, device=args.device)
+    planner.noise_scale = args.gdm_noise_scale
     print(f"[gdm] N={planner.cfg.n_future} WG={planner.cfg.wg} "
           f"T={planner.diffusion.timesteps} "
           f"sampler={planner.diffusion.sampler}"

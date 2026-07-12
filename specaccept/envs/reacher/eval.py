@@ -39,6 +39,7 @@ from specaccept import encoder
 from specaccept.envs.pusht.eval import sample_short, sample_long
 from specaccept.sources import (SubgoalCostModel, OracleSubgoalSource,
                                     GDMSubgoalSource, SpecAcceptSubgoalSource,
+                                    LerpSubgoalSource,
                                     build_oracle_table, make_ffjepa_policy)
 
 
@@ -51,12 +52,20 @@ def parse_args():
     p.add_argument("--swm-src", default=None)
     p.add_argument("--device", default="cuda")
     # what to evaluate
-    p.add_argument("--subgoal", choices=["oracle", "gdm", "baseline", "specaccept"],
+    p.add_argument("--lerp-frac", type=float, default=0.5,
+                   help="lerp source: waypoint at this fraction along the latent "
+                        "segment from the CURRENT latent to the goal (re-anchored "
+                        "each replan); frac=1.0 degenerates to flat planning")
+    p.add_argument("--subgoal", choices=["oracle", "gdm", "baseline", "specaccept", "lerp"],
                    default="oracle")
     p.add_argument("--gdm-ckpt", default=None, help="trained (goal-cond) planner checkpoint")
     p.add_argument("--gdm-steps", type=int, default=50, help="DDIM sampling steps for GDM")
     p.add_argument("--accept-tau", type=float, default=0.2,
                    help="specaccept: relative-L2 tolerance for the reality verifier")
+    p.add_argument("--goal-gate", action="store_true",
+                   help="specaccept: serve a drafted waypoint only if it reduces "
+                        "latent distance to the goal; otherwise serve the goal "
+                        "itself (native-regime parity, no extra diffusion)")
     p.add_argument("--goal-offset", type=int, default=25,
                    help="steps from start to the goal frame (LeWM reacher protocol: 25)")
     p.add_argument("--start", choices=["random", "final"], default="random",
@@ -261,7 +270,12 @@ def main():
                                              device=args.device,
                                              n_steps=args.gdm_steps, seed=cem_seed,
                                              tau=args.accept_tau,
+                                             goal_gate=args.goal_gate,
                                              record=bool(args.dump_traces))
+        elif args.subgoal == "lerp":
+            source = LerpSubgoalSource(n_envs=args.num_eval, device=args.device,
+                                       frac=args.lerp_frac)
+            print(f"[lerp] straight-line oracle, frac={args.lerp_frac:g}")
         else:
             source = OracleSubgoalSource(table, device=args.device)
         policy = PolicyCls(cost_model=cost_model, subgoal_source=source,
@@ -277,10 +291,13 @@ def main():
 
     if args.subgoal == "specaccept":
         total = source.n_redraft + source.n_advance
+        total_all = total + source.n_gate
         print(f"[specaccept] tau={args.accept_tau} gdm_steps={args.gdm_steps} "
+              f"goal_gate={args.goal_gate} "
               f"re-drafts={source.n_redraft} advances={source.n_advance} "
-              f"rejects={source.n_reject} "
+              f"rejects={source.n_reject} gate_serves={source.n_gate} "
               f"call_ratio={source.n_redraft / max(total, 1):.3f} "
+              f"call_ratio_all={source.n_redraft / max(total_all, 1):.3f} "
               f"(every-step=1.000; lower = fewer diffusion calls)")
 
     if args.dump_traces:

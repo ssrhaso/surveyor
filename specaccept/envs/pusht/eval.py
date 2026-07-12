@@ -88,6 +88,10 @@ def parse_args():
                         "within tau of the subgoal just driven toward)")
     p.add_argument("--gdm-ckpt", default=None, help="(Task C) trained planner checkpoint")
     p.add_argument("--gdm-steps", type=int, default=50, help="DDIM sampling steps for GDM")
+    p.add_argument("--gdm-noise-scale", type=float, default=1.0,
+                   help="gamma: scales every injected noise draw in the drafter sampler "
+                        "(0=deterministic mode-seeking, 1=native, >1=inflated spread). "
+                        "Inference-only dose-response knob for the spread thesis.")
     # DSpark mechanism (--subgoal dspark): frozen GDM drafter + trained refiner/confidence
     p.add_argument("--dspark-ckpt", default=None, help="train_dspark_head.py checkpoint")
     p.add_argument("--commit", choices=["adaptive", "fixed"], default="adaptive",
@@ -316,13 +320,14 @@ def main():
     if args.subgoal in ("gdm", "dspark", "specaccept"):
         from specaccept.drafter import load_gdm_planner, count_params
         gdm_planner = load_gdm_planner(args.gdm_ckpt, device=args.device)
+        gdm_planner.noise_scale = args.gdm_noise_scale
         d = gdm_planner.diffusion
         # report the sampler that ACTUALLY runs (GDMPlanner branches on the ckpt's
         # sampler field): ddpm ancestral visits all T steps and ignores --gdm-steps
         samp = (f"ddpm_ancestral/all-{d.timesteps}-steps (--gdm-steps ignored)"
                 if d.sampler == "ddpm" else f"ddim/{args.gdm_steps}-steps")
         print(f"[gdm] planner from {args.gdm_ckpt}: head={count_params(gdm_planner.model)/1e6:.2f}M, "
-              f"N={gdm_planner.cfg.n_future} WG={gdm_planner.cfg.wg} "
+              f"N={gdm_planner.cfg.n_future} WG={gdm_planner.cfg.wg} gamma={args.gdm_noise_scale} "
               f"T={d.timesteps} sampler={samp} param={d.parameterization} "
               f"schedule={d.schedule} norm={gdm_planner.normalization}")
 

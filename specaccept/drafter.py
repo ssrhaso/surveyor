@@ -293,12 +293,17 @@ class GaussianDiffusion:
     @torch.no_grad()
     def ddim_sample(self, model: GDM, cond: torch.Tensor, shape, n_steps: int = 50,
                     eta: float = 0.0, generator: torch.Generator | None = None,
-                    goal: torch.Tensor | None = None) -> torch.Tensor:
+                    goal: torch.Tensor | None = None,
+                    noise_scale: float = 1.0) -> torch.Tensor:
         """Deterministic DDIM sampling (eta=0). cond: (B, wg, D) or (B,D).
-        shape: (B, N, D). Returns x0 estimate in the DM's (standardized) space."""
+        shape: (B, N, D). Returns x0 estimate in the DM's (standardized) space.
+        noise_scale (gamma) scales every injected noise draw: with eta=0 the
+        initial draw is the ONLY stochasticity, so gamma directly modulates the
+        drafter's conditional spread at inference (gamma=0 -> deterministic
+        mode-seeking sample; gamma=1 -> native; gamma>1 -> inflated spread)."""
         B = shape[0]
         device = cond.device
-        x = torch.randn(shape, device=device, generator=generator)
+        x = noise_scale * torch.randn(shape, device=device, generator=generator)
         # evenly spaced subsequence of the full schedule, descending
         step_idx = torch.linspace(self.timesteps - 1, 0, n_steps, device=device).round().long()
         for i in range(n_steps):
@@ -313,7 +318,7 @@ class GaussianDiffusion:
                 dir_xt = torch.sqrt(1 - acp_prev - sigma ** 2) * eps
                 x = torch.sqrt(acp_prev) * x0_pred + dir_xt
                 if eta > 0:
-                    x = x + sigma * torch.randn(shape, device=device, generator=generator)
+                    x = x + sigma * noise_scale * torch.randn(shape, device=device, generator=generator)
             else:
                 x = x0_pred
         return x
@@ -321,7 +326,8 @@ class GaussianDiffusion:
     @torch.no_grad()
     def ddpm_sample(self, model: GDM, cond: torch.Tensor, shape, n_steps=None,
                     generator: torch.Generator | None = None,
-                    goal: torch.Tensor | None = None, clip_x0: bool = False) -> torch.Tensor:
+                    goal: torch.Tensor | None = None, clip_x0: bool = False,
+                    noise_scale: float = 1.0) -> torch.Tensor:
         """Full DDPM ANCESTRAL sampling over all `timesteps` reverse steps (the LDP /
         Diffusion-Policy default; pair with a small T, e.g. 100). Stochastic: draws
         posterior noise at every step except t=0. Works for eps or v (both decoded via
@@ -330,7 +336,7 @@ class GaussianDiffusion:
         data, matching Diffusion Policy). Returns x0 estimate in the DM's space."""
         B = shape[0]
         device = cond.device
-        x = torch.randn(shape, device=device, generator=generator)
+        x = noise_scale * torch.randn(shape, device=device, generator=generator)
         for t in range(self.timesteps - 1, -1, -1):
             t_batch = torch.full((B,), t, device=device, dtype=torch.long)
             model_out = model(x, cond, t_batch, goal=goal)
@@ -347,7 +353,7 @@ class GaussianDiffusion:
             mean = coef_x0 * x0 + coef_xt * x
             if t > 0:
                 var = beta_t * (1.0 - acp_prev) / (1.0 - acp_t)
-                noise = torch.randn(shape, device=device, generator=generator)
+                noise = noise_scale * torch.randn(shape, device=device, generator=generator)
                 x = mean + torch.sqrt(var.clamp_min(0.0)) * noise
             else:
                 x = mean
@@ -404,13 +410,18 @@ class GDMPlanner:
         goal = (self.standardize(z_goal_native)
                 if (self.goal_cond and z_goal_native is not None) else None)
         shape = (B, self.cfg.n_future, self.cfg.latent_dim)
+        # gamma dose-response knob: set `planner.noise_scale = gamma` (default 1.0
+        # = native behavior, bit-identical to the pre-knob code path)
+        gamma = float(getattr(self, "noise_scale", 1.0))
         if getattr(self.diffusion, "sampler", "ddim") == "ddpm":
             seq_std = self.diffusion.ddpm_sample(
                 self.model, cond, shape, generator=generator, goal=goal,
-                clip_x0=(self.normalization == "minmax"))            # clip valid iff [-1,1] data
+                clip_x0=(self.normalization == "minmax"),            # clip valid iff [-1,1] data
+                noise_scale=gamma)
         else:
             seq_std = self.diffusion.ddim_sample(self.model, cond, shape, n_steps=n_steps,
-                                                 generator=generator, goal=goal)
+                                                 generator=generator, goal=goal,
+                                                 noise_scale=gamma)
         return self.unstandardize(seq_std)                           # (B, N, D)
 
     @torch.no_grad()
