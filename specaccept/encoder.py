@@ -1,15 +1,11 @@
-"""FF-JEPA shared I/O: load the FROZEN LeWM world model, encode frames into the
-192-d latent, the canonical PushT target, and a tolerance-parameterized copy of
-the env's success criterion.
+"""Shared I/O for the frozen LeWM world model: model loading, frame encoding
+into the 192-d latent space, the canonical PushT target, and tolerance
+parameterized copies of the env success criteria.
 
-Two model-load paths, producing the *identical* frozen LeWM either way:
-  * source="pretrained": stable_worldmodel.wm.utils.load_pretrained(encoder_id)
-        the box path (hydra instantiates from the HF config.json).
-  * source="local":      reconstruct from a dir with config.json + weights.pt
-        the CPU/Windows path (no hydra). Mirrors the validated drift_probe
-        reconstruction; arch is identical, weights load strict=True.
-
-Nothing here ever trains or unfreezes the encoder/predictor.
+Two load paths produce the identical frozen model: source="pretrained" loads
+the published checkpoint via stable_worldmodel, and source="local"
+reconstructs the architecture from a directory with config.json and weights.pt
+(no hydra). The encoder and predictor are never trained or unfrozen here.
 """
 
 from __future__ import annotations

@@ -1,3 +1,4 @@
-"""spec-accept: hierarchical latent planning with reality-verified speculative consumption,
-on the frozen LeWM JEPA encoder with a diffusion subgoal drafter (GDM).
+"""Spec-accept: hierarchical latent planning with reality-verified speculative
+subgoal consumption, built on a frozen LeWM encoder and a diffusion subgoal
+drafter (GDM).
 """

@@ -1,25 +1,18 @@
-"""TASK B - injection wrapper + FF-JEPA policy (no training).
+"""Subgoal injection layer: cost model, subgoal sources, and the FF-JEPA policy.
 
-Three pieces that sit on top of the FROZEN LeWM + the existing swm planning stack:
+Components on top of the frozen LeWM and the stable_worldmodel planning stack:
 
-* SubgoalCostModel - thin wrapper over LeWM. Its get_cost IGNORES the goal image
-  and instead reads a per-env subgoal latent from info_dict['subgoal_emb'],
-  using it as the goal latent for LeWM.criterion. Reduces EXACTLY to flat-LeWM
-  cost when subgoal_emb == E(goal_image).
+* SubgoalCostModel: LeWM wrapper whose get_cost reads a per-env subgoal latent
+  from info_dict['subgoal_emb'] in place of the goal image. Reduces to the
+  flat LeWM cost when the subgoal equals the encoded goal image.
+* FFJEPAPolicy: advances and injects per-env subgoal latents at each replan
+  boundary; the subgoal source is pluggable.
+* Subgoal sources: oracle table, diffusion drafter (GDM), deterministic
+  regressor, spec-accept, DSpark, and a lerp diagnostic.
 
-* FFJEPAPolicy(WorldModelPolicy) - at each 25-step replan boundary, advances each
-  env's subgoal index and injects the per-env subgoal latent into info_dict so
-  the existing policy-slice + solver-expand carries it to get_cost aligned per-env.
-  The subgoal SOURCE is pluggable (oracle now, GDM in Task C).
-
-* OracleSubgoalSource / build_oracle_table - the oracle source: the TRUE demo
-  latents at start, start+H, ..., start+goal_offset (the goal frame), encoded with
-  the frozen E. subgoal[1] == the baseline's goal latent (short-horizon).
-
-Representation contract: the injected latent must be the IDENTICAL object E(goal_image)
-produces (same encode path, dtype, device, native ||z||~13.9). No renorm/projection.
-build_oracle_table uses specaccept.encoder.encode_frames, which is verified to match the
-harness goal-encode path to ~1e-6.
+Representation contract: injected latents must match the encoder's native
+output exactly (same encode path, dtype, device, and norm); no renormalization
+or projection is applied.
 """
 
 from __future__ import annotations
@@ -122,17 +115,13 @@ class OracleSubgoalSource:
 
 
 class GDMSubgoalSource:
-    """GOAL-FREE subgoal source: a trained GDM latent diffusion planner.
+    """Goal-free subgoal source backed by a trained GDM latent diffusion planner.
 
-    At each replan boundary the policy encodes the CURRENT env frame (the achieved
-    state) with the frozen E and hands it here as `obs_latent`. We condition the
-    DM on it, sample, and select the IMMEDIATELY NEXT subgoal z_{m+1} (paper
-    fig.1 / SS9.5). The result is in native E-space (||z||~13.9; the planner
-    inverts its standardization), so it drops straight into SubgoalCostModel.
-
-    Subgoals are sampled only at replan and cached per-env; `current` returns the
-    cache between replans (the cost model is only queried at replan anyway).
-    Sampling is deterministic given a seeded generator.
+    At each replan boundary the policy encodes the current frame and passes it
+    as `obs_latent`; the planner conditions on it and samples the immediately
+    next subgoal z_{m+1} in native encoder space. Subgoals are sampled only at
+    replan and cached per env; sampling is deterministic given a seeded
+    generator.
     """
 
     needs_obs = True
@@ -171,13 +160,10 @@ class GDMSubgoalSource:
 
 
 class RegressorSubgoalSource:
-    """Deterministic z_cond -> m+1 subgoal source (train_regressor.py ckpt).
+    """Deterministic z_cond -> m+1 subgoal source (train_regressor.py checkpoint).
 
-    The diffusion-vs-regression closed-loop arm: offline this architecture
-    dominated the diffusion drafter on latent fidelity; the spread thesis
-    (validated on the refiner, -11pp) predicts its zero conditional spread
-    makes a WORSE CEM target. Same current() contract as GDMSubgoalSource;
-    re-anchors every replan."""
+    The regression arm of the diffusion-vs-regression closed-loop comparison.
+    Same current() contract as GDMSubgoalSource; re-anchors at every replan."""
 
     needs_obs = True
     needs_goal = False
@@ -214,34 +200,25 @@ class RegressorSubgoalSource:
 
 
 class SpecAcceptSubgoalSource:
-    """Speculative subgoal consumption with REALITY as the verifier (the DSpark
-    draft-verify-accept skeleton with the learned confidence head replaced by
-    the achieved latent; DIRECTION_dspark_gdm.md Phase B).
+    """Speculative subgoal consumption with reality as the verifier.
 
-    At each replan boundary the policy hands over the CURRENT achieved latent.
-    Verify it against the subgoal we were just driving toward: within `tau`
-    (relative L2) -> consume the NEXT position of the block drafted at the last
-    re-anchor (no diffusion call); outside `tau`, or block exhausted -> re-draft
-    the whole N-block from the achieved state. Re-anchoring is never sacrificed
-    when reality diverges; diffusion is only skipped while reality confirms the
-    plan. Offline calibration (probe_dspark_gates A2): s5 tau=0.20 / s25
-    tau=0.40 give ~1.9x fewer diffusion calls at ~zero staleness penalty.
+    At each replan boundary the achieved latent is verified against the
+    subgoal last driven toward: within `tau` (relative L2), the next position
+    of the block drafted at the last re-anchor is consumed with no diffusion
+    call; on rejection or block exhaustion, the full N-block is re-drafted
+    from the achieved state. Re-anchoring is never skipped when reality
+    diverges; diffusion is skipped only while reality confirms the plan.
 
-    Goal-conditioned drafters (Reacher: planner.goal_cond=True) are supported:
-    needs_goal mirrors the planner flag and re-drafts pass the per-env goal
-    latent through to sample_sequence. Verification itself stays goal-free -
-    reality is compared against the subgoal just pursued, same as ever.
+    Goal-conditioned drafters are supported (needs_goal mirrors the planner
+    flag; re-drafts pass the per-env goal latent through). Verification
+    itself remains goal-free.
 
-    goal_gate=True adds a second, goal-progress verifier at serve time: a
-    waypoint is only served if it reduces latent distance to the goal
-    (||wp - g|| < ||z_now - g||, the same metric CEM plans on). A waypoint
-    that fails is consumed-and-discarded and the GOAL latent is served
-    instead (locally = flat-LeWM behavior, zero diffusion); a fresh draft
-    happens only once the block exhausts. Motivation: on Reacher the drafter
-    (trained on SAC-wander data) pays a ~24pp detour tax on the native task
-    where the goal is already inside the planning window - the gate filters
-    detour waypoints exactly there while leaving long-horizon behavior
-    (where waypoints do progress) untouched."""
+    goal_gate=True adds a goal-progress check at serve time: a waypoint is
+    served only if it reduces latent distance to the goal (the metric CEM
+    plans on). A failing waypoint is consumed and discarded and the goal
+    latent is served instead, with a fresh draft once the block exhausts.
+    This filters detour waypoints when the goal is already inside the
+    planning window while leaving long-horizon behavior untouched."""
 
     needs_obs = True
 
@@ -359,15 +336,11 @@ class SpecAcceptSubgoalSource:
 
 
 class LerpSubgoalSource:
-    """Straight-line oracle: the subgoal is the point a fixed fraction along
-    the latent segment from the CURRENT achieved latent to the goal latent,
-    re-anchored at every replan (no staleness). Isolates the intrinsic cost of
-    decomposition (CEM converging to intermediate targets it never needed)
-    from the data-meander cost of dataset-derived oracles: dataset waypoints
-    inherit the collection policy's detours, a lerp waypoint by construction
-    cannot. frac=1.0 degenerates to flat goal-image planning (sanity arm).
-    Assumes local linearity of the latent space between z_now and z_goal --
-    a diagnostic arm, not a method."""
+    """Straight-line diagnostic source: the subgoal is a fixed fraction along
+    the latent segment from the current achieved latent to the goal latent,
+    re-anchored at every replan. Isolates the intrinsic cost of decomposition
+    from the data-meander cost of dataset-derived oracles; frac=1.0
+    degenerates to flat goal planning. A diagnostic arm, not a method."""
 
     needs_obs = True
     needs_goal = True
@@ -408,22 +381,16 @@ def load_dspark_heads(path, device):
 
 
 class DSparkSubgoalSource:
-    """The DSpark mechanism for FF-JEPA: confidence-scheduled speculative decoding
-    with semi-autoregressive refinement, over the frozen GDM's drafted subgoal block.
+    """DSpark subgoal source: confidence-scheduled speculative decoding with
+    semi-autoregressive refinement over the frozen GDM's drafted block.
 
-    At a replan boundary, if the per-env committed block is exhausted, it RE-DRAFTS:
-    the frozen GDM samples the N-block from the CURRENT achieved latent (re-anchor),
-    the DSparkHead refines it (semi-AR residual), the ConfidenceHead scores each
-    refined position, and the commit depth is set speculatively to
-    k* = max{k : Π_{i<=k} c_i > theta} (adaptive) or a fixed k. Those k* subgoals are
-    committed to a per-env queue and consumed one per replan (every `stride` steps),
-    so the expensive diffusion re-draft runs only every k* replans instead of every
-    replan -- decoupling subgoal-resample cadence from CEM's action-replan cadence
-    (the "fewer replans at equal fidelity" systems win). Reduces to GDMSubgoalSource
-    when commit='fixed' with fixed_k=1.
-
-    Same `current(...)` contract as GDMSubgoalSource; standalone apart from the frozen
-    GDM planner + the loaded heads (no coupling to CEM internals).
+    When a per-env committed block is exhausted, the frozen GDM re-drafts an
+    N-block from the current achieved latent, the DSparkHead refines it, and
+    the ConfidenceHead sets the commit depth k* = max{k : prod_{i<=k} c_i >
+    theta} (adaptive) or a fixed k. Committed subgoals are consumed one per
+    replan, so the diffusion re-draft runs once per k* replans. Reduces to
+    GDMSubgoalSource when commit='fixed' with fixed_k=1. Same current()
+    contract as GDMSubgoalSource.
     """
 
     needs_obs = True

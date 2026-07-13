@@ -1,21 +1,15 @@
-"""TASK C - GDM latent diffusion planner (model + diffusion + checkpoint I/O).
+"""GDM latent diffusion planner: model, diffusion process, and checkpoint I/O.
 
-A conditional DDPM over a length-N sequence of 192-d subgoal latents, conditioned
-on the CURRENT subgoal/observation latent z_{sg,m} (WG=1) and the diffusion
-timestep k. Backbone is a DiT (Peebles & Xie [7]) with adaLN-Zero conditioning.
-Trained with the standard denoising score-matching (epsilon-prediction) objective
-(paper SS II-C; Xie et al. [10]):
+A conditional DDPM over a length-N sequence of 192-d subgoal latents,
+conditioned on the current latent z_m and the diffusion timestep, with a DiT
+backbone (adaLN-Zero conditioning) trained with the standard epsilon
+prediction objective.
 
-    L_DM(psi) = E_{k,eps} || eps_psi(z^(k)_{m+1:m+N}; z_m, k) - eps ||^2 .
-
-Everything operates in the frozen LeWM encoder's latent space (no pixels). The
-latents live near the sqrt(192) sphere (||z||~13.9), so the DM works on PER-DIM
-STANDARDIZED latents (z -> (z-mean)/std); the standardization is inverted on
-sampled outputs so injected subgoals return to native E-space. The per-dim
-mean/std are computed once over the training set and stored in the checkpoint.
-
-This module is imported by both train_drafter.py (training) and the env eval drivers /
-sources.py (inference via GDMPlanner); it never touches the frozen LeWM.
+All computation is in the frozen LeWM encoder's latent space. The DM operates
+on per-dim standardized latents; sampled outputs are inverted back to native
+encoder space. The standardization stats are computed once over the training
+set and stored in the checkpoint. Imported by train_drafter.py and the eval
+drivers; never touches the frozen LeWM.
 """
 
 from __future__ import annotations
@@ -177,25 +171,17 @@ def _cosine_alphas_cumprod(timesteps: int, s: float = 0.008) -> torch.Tensor:
 
 
 class GaussianDiffusion:
-    """DDPM training + deterministic DDIM (eta=0) sampling.
+    """DDPM training with DDIM (eta=0) or ancestral DDPM sampling.
 
-    Two OPEN diffusion design knobs are flag-gated so an A/B can flip exactly ONE
-    while everything else (data, optimizer, arch) is held fixed:
-
-      parameterization : "eps" (predict the noise; the faithful default that
-                          reproduces gdm_faithful.pt) or "v" (predict the
-                          velocity v = sqrt(acp)*eps - sqrt(1-acp)*x0; Salimans &
-                          Ho 2022, better-conditioned across ALL noise levels so
-                          the x0 reconstruction does not blow up at high t).
+    Design knobs are flag-gated so an A/B comparison can flip exactly one:
+      parameterization : "eps" (predict the noise; default) or "v" (predict
+                         the velocity; Salimans & Ho 2022).
       schedule         : "linear" beta (default) or "cosine" bar-alpha.
+      min_snr_gamma    : Min-SNR loss weighting (Hang et al. 2023) when > 0;
+                         0 (default) is plain MSE in the prediction space.
 
-    min_snr_gamma>0 applies Min-SNR-gamma loss weighting (Hang et al. 2023),
-    rebalancing the per-timestep objective. gamma=0 (default) = plain MSE in the
-    prediction space, i.e. the current faithful behavior.
-
-    The x0/eps reconstruction (`pred_from_model`) is the SINGLE place the
-    parameterization is interpreted, so training loss, DDIM sampling, and the
-    teacher-forced diagnostic all stay consistent by construction.
+    `pred_from_model` is the single place the parameterization is decoded, so
+    training loss, sampling, and diagnostics stay consistent by construction.
     """
 
     def __init__(self, timesteps: int = 1000, beta_start: float = 1e-4,
