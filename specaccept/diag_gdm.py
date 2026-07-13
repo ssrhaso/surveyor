@@ -1,37 +1,19 @@
-"""Diagnose GDM subgoal-prediction quality WITHOUT running CEM (~2 min on GPU).
+"""GDM subgoal-prediction diagnostic, run entirely offline (no CEM rollouts).
 
-Tests the hypothesis that the gap (GDM short 56% block vs oracle ~90%) is a
-phase / sliding-condition problem: we trained conditioning on stride-25-ALIGNED
-subgoals (z_{sg,m} -> z_{sg,m+1}), but at eval the closed-loop conditions on
-E(current frame) at an ARBITRARY phase. If the model predicts well for
-stride-aligned conditions (in-distribution) but poorly for arbitrary-phase
-conditions (eval-distribution), that confirms we need sliding-condition training.
+Compares the GDM's predicted next subgoal against the true next latent under
+two conditioning distributions:
 
-Two probes, both comparing the GDM's predicted next subgoal to the TRUE next
-latent (the thing the oracle injects):
+  A. In-distribution:   condition on a stride-aligned training subgoal.
+  B. Eval-distribution: condition on E(frame) at an arbitrary eval start.
 
-  A. IN-DISTRIBUTION  - condition = z_{sg,m} straight from subgoals_pusht.pt
-                        (a stride-aligned training condition); true = z_{sg,m+1}.
-  B. EVAL-DISTRIBUTION - condition = E(h5 frame at an arbitrary eval start);
-                        true = E(h5 frame at start+25) (== the oracle subgoal[1]).
+Metrics per probe: rel_err, cos_pred, cos_move (direction of the predicted
+move), noop_err (predict-no-change baseline), and collapse (prediction spread
+over target spread; << 1 indicates mean prediction). A good A with a bad B
+indicates a conditioning-distribution mismatch; both bad indicates capacity
+or undertraining.
 
-Metrics per probe:
-  rel_err   = ||z_pred - z_true|| / ||z_true||         (lower better)
-  cos_pred  = cos(z_pred, z_true)                       (higher better)
-  cos_move  = cos(z_pred - z_cond, z_true - z_cond)     (did it move the RIGHT way?)
-  noop_err  = ||z_cond - z_true|| / ||z_true||          (baseline: predict no change)
-  collapse  = mean_d std_d(z_pred) / mean_d std_d(z_true) over the batch
-              (<<1 => mode collapse / mean prediction)
-
-Read-off:
-  * A good, B bad           -> phase/OOD: rebuild with sliding conditions, retrain.
-  * A and B both bad         -> capacity/undertraining: train far longer / more data.
-  * collapse << 1            -> model predicts ~the mean subgoal regardless of input.
-
-Run on the box:
-  STABLEWM_HOME=$HOME/.stable-wm SDL_VIDEODRIVER=dummy python -m specaccept.diag_gdm \
-    --gdm-ckpt gdm_pusht.pt --subgoals subgoals_pusht.pt \
-    --h5 $HOME/.stable-wm/datasets/pusht_expert_train.h5 --device cuda
+Usage:
+  python -m specaccept.diag_gdm --gdm-ckpt <ckpt> --subgoals <pt> --h5 <h5>
 """
 
 from __future__ import annotations

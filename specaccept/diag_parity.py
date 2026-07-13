@@ -1,13 +1,11 @@
-"""Box parity diagnostic (NO CEM): locate the oracle-vs-baseline SR gap.
+"""Parity diagnostic (no CEM): locate any oracle-vs-baseline discrepancy.
 
-(1) LATENT parity: oracle encode path (encoder.encode_frames) vs the harness goal
-    encode path (img_transform + LeWM.encode) on each eval goal frame. If these
-    diverge on the box, the injected subgoal != the baseline's goal latent.
-(2) COST parity: SubgoalCostModel's terminal-L2^2 vs the box's LeWM.get_cost on the
-    SAME goal latent and SAME candidates. If these diverge, the cost math differs
-    from 0.1.1's criterion.
+(1) Latent parity: encoder.encode_frames vs the harness goal-encode path
+    (img_transform + LeWM.encode) on each eval goal frame.
+(2) Cost parity: SubgoalCostModel's terminal L2^2 vs LeWM.get_cost on the
+    same goal latent and candidates.
 
-Fast (a few encodes + one rollout). Run on the box where LeWM.get_cost works.
+Fast (a few encodes and one rollout); run where LeWM.get_cost is available.
 """
 from __future__ import annotations
 

@@ -1,19 +1,12 @@
-"""CPU smoke test for the GDM latent diffusion planner (Task C).
+"""CPU smoke test for the GDM latent diffusion planner.
 
-Validates the logic on tiny tensors before any box run (handoff SS9.7):
-  1. DiT forward shape + noise-schedule sanity (alphas_cumprod in (0,1], decreasing).
-  2. q_sample shapes; eps-prediction training loss is finite and DROPS on a
-     fixed tiny batch (the model can learn).
-  3. DDIM sampling returns finite (B,N,D) of the right shape.
-  4. GDMPlanner standardize/unstandardize round-trips; a sampled subgoal returned
-     to native E-space has ||z|| of the right scale given native-scale stats.
-  5. GDMSubgoalSource.current shapes + closed-loop caching (samples only at replan).
-  6. save_gdm / load_gdm_planner round-trip (sampling is bit-identical given seed).
+Validates the logic on tiny synthetic tensors: DiT forward shapes and noise
+schedule sanity, training loss decreasing on a fixed batch, DDIM sampling
+shapes, GDMPlanner standardization round-trip, GDMSubgoalSource caching, and
+checkpoint save/load reproducibility. No frozen LeWM, h5 data, or
+stable_worldmodel required.
 
-No frozen LeWM, no h5, no swm needed - pure latent-space logic on synthetic data
-at the native ||z||~sqrt(192) scale.
-
-Run:  python -m specaccept.test_gdm_cpu
+Usage: python -m specaccept.test_gdm_cpu
 """
 
 from __future__ import annotations
