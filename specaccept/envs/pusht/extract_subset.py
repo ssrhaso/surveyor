@@ -1,27 +1,13 @@
 """Extract a small, self-contained subset h5 covering only the episodes needed
-for specific eval conditions, for transferring to a box without the full
-43GB dataset (e.g. Isambard, which has no direct network path from ofs-v01).
+for specific eval conditions, for transfer to hosts without the full dataset.
 
-The CEM rollout itself uses the live simulated PushT env, not replayed pixel
-frames -- the h5 is only read for env-reset state, the goal image, and (oracle
-mode) a handful of subgoal-interval frames per episode. So the needed episode
-set is tiny relative to the full 18,685-episode dataset. This script copies
-FULL per-episode data (not just the specific frames) for robustness against
-whatever stable_worldmodel's HDF5Dataset does internally, remapped to a
-compact 0..K-1 index so the subset file is schema-identical to the original
-and works as a drop-in --h5 replacement.
-
-Run on ofs-v01 (where the real h5 works):
-    cd ~/le-wm
-    python -m specaccept.envs.pusht.extract_subset --h5 ~/.stable-wm/datasets/pusht_expert_train.h5 \
-        --out subset_longeval.h5 --seed 42 --eval-filter success5 \
-        --goal-offsets 75 150 --num-eval 256
-
-Produces subset_longeval.h5 plus one episodes-file per goal-offset
-(subset_longeval.episodes75.json, subset_longeval.episodes150.json), each a
-list of [new_episode_idx, start_step] pairs -- pass to the pusht eval driver via
---episodes-file to bypass sample_long/short and use this exact, reproducible
-episode set.
+The CEM rollout uses the live PushT env; the h5 is read only for reset state,
+the goal image, and (oracle mode) a few subgoal frames per episode, so the
+required episode set is small. Full per-episode data is copied and remapped
+to a compact 0..K-1 index, so the subset file is schema-identical to the
+original and works as a drop-in --h5 replacement. Also writes one
+episodes-file JSON of [episode_idx, start_step] pairs per goal-offset; pass
+it to the eval driver via --episodes-file for a reproducible episode set.
 """
 
 from __future__ import annotations

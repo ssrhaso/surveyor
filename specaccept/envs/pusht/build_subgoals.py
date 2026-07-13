@@ -1,34 +1,15 @@
-"""TASK A - subgoal-dataset builder (offline).
+"""Subgoal-dataset builder for PushT (offline).
 
-Produces per-episode stride-H subgoal-latent sequences from the SUCCESSFUL expert
-PushT episodes, in the frozen LeWM encoder's 192-d latent space.
+Builds per-episode stride-H subgoal-latent sequences from successful expert
+episodes in the frozen encoder's 192-d latent space:
 
-Pipeline:
-  1. Success filter (consistency rule): keep episode iff its FINAL block pose
-     reaches the canonical PushT target (block 256,256 / angle pi/4) under the
-     env's exact eval_state. Headline tolerance = 20 deg; the stricter 5 deg
-     subset is recorded as a per-episode flag (5 deg keep is a subset of 20 deg).
-     The agent term of eval_state's 4-D pos_diff is neutralized (no canonical
-     agent rest pose) -> a block-only criterion matching the paper's prose.
-  2. Stride-H subsample: frames at rows[ep_off : ep_off+ep_len : H].
-  3. Encode those frames with the frozen encoder E -> (n_sg_i, 192).
-  4. Pack to a single .pt with metadata; report kept/dropped counts and ||z||.
-
-CPU (Windows, local model) develop/test on a sample; full encode runs on the box.
-
-Examples:
-  # CPU smoke test (random sample, local model):
-  python -m specaccept.envs.pusht.build_subgoals --source local \
-      --local-dir ../drift_probe/model --swm-src ../lewm-investigation/stable-worldmodel \
-      --h5 ../drift_probe/expert/pusht_expert_train.h5 \
-      --out ../drift_probe/subgoals_pusht_smoke.pt \
-      --max-episodes 60 --sample-mode random --device cpu
-
-  # Box full run (pretrained model, A100):
-  STABLEWM_HOME=$HOME/.stable-wm python -m specaccept.envs.pusht.build_subgoals \
-      --source pretrained --encoder-id quentinll/lewm-pusht \
-      --h5 $HOME/.stable-wm/datasets/pusht_expert_train.h5 \
-      --out subgoals_pusht.pt --device cuda
+  1. Success filter: keep an episode iff its final block pose reaches the
+     canonical target under the env's exact eval_state (20 deg headline; the
+     stricter 5 deg subset is recorded as a per-episode flag). The agent term
+     is neutralized, giving a block-only criterion.
+  2. Stride-H frame subsample.
+  3. Encode the frames with the frozen encoder.
+  4. Pack to a single .pt with metadata.
 """
 
 from __future__ import annotations

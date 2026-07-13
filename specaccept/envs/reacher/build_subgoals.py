@@ -1,23 +1,12 @@
-"""TASK A (Reacher variant) - subgoal-dataset builder.
+"""Subgoal-dataset builder for Reacher.
 
-Reacher analog of build_subgoals.py / build_subgoals_tworoom.py. One structural
-difference from both: the LeWM Reacher dataset (quentinll/lewm-reacher,
-dmc/reacher_random.h5) is RANDOM-POLICY data - there are no "successful demos"
-to filter, and no canonical target to filter against. Every episode is a valid
-random walk through (shoulder, wrist) space, so the success filter is dropped
-entirely and every considered episode is kept.
-
-That same fact is why the Reacher drafter must be GOAL-CONDITIONED
-(train_gdm --goal-cond --goal-rule window): a goal-free drafter trained on
-random walks predicts undirected drift (the TwoRoom lesson). The hindsight
-window goal (z at m+G frames) is drawn from these dense latents at training
-time, so this builder just encodes EVERY frame (--stride 1) of every episode.
-
-Examples:
-  # GH200 full run (frozen reacher encoder downloaded from HF):
-  python -m specaccept.envs.reacher.build_subgoals --source local --local-dir encoder_reacher \
-      --h5 /scratch/u6ko/hasoshu.u6ko/data/reacher/reacher.h5 \
-      --out subgoals_reacher_dense.pt --stride 1 --device cuda
+Reacher analog of the PushT builder with one structural difference: the LeWM
+Reacher dataset is random-policy data, so there are no successful demos to
+filter and every considered episode is kept. Because random walks are
+undirected, the Reacher drafter must be goal-conditioned (train_drafter
+--goal-cond --goal-rule window); the hindsight window goal is drawn from
+these latents at training time, so this builder encodes every frame
+(--stride 1) of every episode.
 """
 
 from __future__ import annotations

@@ -1,26 +1,12 @@
-"""TASK A (TwoRoom variant) - subgoal-dataset builder.
+"""Subgoal-dataset builder for TwoRoom.
 
-TwoRoom analog of build_subgoals.py: same pipeline shape (success filter ->
-stride subsample -> encode -> pack), different success filter. PushT needs a
-fixed canonical target + 4-D pos/angle criterion; TwoRoom's target is sampled
-per episode and already recorded in the h5 (`goal_state`, `distance_to_target`),
-so success is just `distance_to_target[final_row] < 16` (see encoder.tworoom_success).
-
-Accepts multiple --h5 files (the two independent 5,000-ep batches: seed42 on
-isca/ofs-v01, seed43 on Isambard), concatenated with per-episode source tags.
-
-Examples:
-  # CPU smoke test:
-  python -m specaccept.envs.tworoom.build_subgoals --source local \
-      --local-dir encoder_tworoom --swm-src ../lewm-investigation/stable-worldmodel \
-      --h5 /path/to/trial_300.h5 \
-      --out /tmp/subgoals_tworoom_smoke.pt --max-episodes 60 --device cpu
-
-  # Box full run (both batches):
-  python -m specaccept.envs.tworoom.build_subgoals --source local --local-dir encoder_tworoom \
-      --h5 /scratch/u6ko/hasoshu.u6ko/data/tworoom/tworoom_expert_300_seed42_isca.h5 \
-           /scratch/u6ko/hasoshu.u6ko/data/tworoom/tworoom_expert_300_seed43.h5 \
-      --out subgoals_tworoom.pt --device cuda
+TwoRoom analog of the PushT builder (success filter, stride subsample,
+encode, pack) with a different success filter: the target is sampled per
+episode and recorded in the h5, so success is the final-row
+distance_to_target below the env threshold (see encoder.tworoom_success).
+Accepts multiple --h5 files, concatenated with per-episode source tags.
+--require-cross-room drops episodes where agent and target start in the same
+room (about half the collected episodes are trivially same-room).
 """
 
 from __future__ import annotations

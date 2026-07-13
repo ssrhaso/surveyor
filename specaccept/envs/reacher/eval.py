@@ -1,31 +1,17 @@
-"""FF-JEPA evaluation driver - Reacher (DMControl qpos_match) variant.
+"""Reacher (DMControl qpos_match) evaluation driver.
 
-Reacher analog of the pusht/tworoom eval drivers. Reuses FFJEPAPolicy /
-SubgoalCostModel / OracleSubgoalSource / GDMSubgoalSource /
-SpecAcceptSubgoalSource and sample_short/sample_long UNMODIFIED.
+Reacher analog of the PushT driver; reuses the policy, cost model, subgoal
+sources, and episode sampling unmodified. Differences:
 
-Env specifics vs the PushT driver:
-  * env = swm/ReacherDMControl-v0 with task='qpos_match'. Success is the env's
-    OWN termination rule: all |qpos - target_qpos| < qpos_threshold (0.05 rad
-    per joint, ReacherQPosMatchTask default). No eval_state monkeypatch, no
-    --angles/--score sweep; world.evaluate reads `terminated` directly.
-  * callables mirror stable-worldmodel's own config/eval/reacher.yaml:
-    set_state(qpos, qvel) from the start frame + set_target_qpos(goal_qpos)
-    from the goal frame (start + goal_offset of the SAME replayed episode).
-  * the dataset (dmc/reacher_random.h5) is RANDOM-POLICY data, so the paper's
-    "final-N steps of successful demos" sampling is meaningless here; the
-    protocol is LeWM's own: random valid start, goal = start+goal_offset
-    (sample_short). Defaults goal_offset=25, budget=50 (their reacher.yaml).
-  * goal-free drafting is ill-posed on random-walk data (the TwoRoom lesson),
-    so the GDM/spec-accept arms expect a GOAL-CONDITIONED drafter
-    (train_gdm --goal-cond --goal-rule window); the policy encodes the goal
-    image at each replan and the sources pass it through to the sampler.
-
-Smoke (GPU box, no drafter needed - oracle + baseline validate the harness):
-  cd ~/le-wm && SDL_VIDEODRIVER=dummy python -m specaccept.envs.reacher.eval \
-    --source local --local-dir encoder_reacher --device cuda \
-    --h5 /scratch/u6ko/hasoshu.u6ko/data/reacher/reacher.h5 \
-    --num-eval 16 --subgoal oracle
+* Success is the env's own termination rule (all |qpos - target_qpos| <
+  qpos_threshold); no eval_state monkeypatch or angle sweep.
+* State/goal callables mirror stable_worldmodel's reacher eval config:
+  set_state from the start frame, set_target_qpos from the goal frame.
+* The dataset is random-policy data, so sampling follows LeWM's own protocol
+  (random valid start, goal = start + goal_offset; defaults 25/50).
+* The GDM/spec-accept arms expect a goal-conditioned drafter (train_drafter
+  --goal-cond --goal-rule window); the policy encodes the goal image at each
+  replan and the sources pass it through to the sampler.
 """
 
 from __future__ import annotations

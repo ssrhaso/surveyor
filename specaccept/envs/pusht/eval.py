@@ -1,36 +1,16 @@
-"""FF-JEPA evaluation driver (Task B oracle test; Task C GDM later).
+"""PushT evaluation driver.
 
-Runs FFJEPAPolicy + SubgoalCostModel through the validated swm harness and
-reports success rate at BOTH 20 deg (headline) and 5 deg (supplementary), using
-the same eval_state pin as the baseline run_eval.py.
+Runs FFJEPAPolicy + SubgoalCostModel through the stable_worldmodel harness and
+reports success rate at 20 deg (headline) and 5 deg (supplementary), under the
+same eval_state pin as the baseline.
 
-Subgoal source:
-  --subgoal oracle : the TRUE demo latents at start, start+25, ..., goal frame
-                     (subgoal[1] == the baseline's goal latent in short-horizon).
-  --subgoal gdm    : goal-FREE trained latent diffusion planner (--gdm-ckpt). At
-                     each replan it encodes the current frame with E and samples
-                     the next subgoal; no goal image is used.
+Subgoal sources (--subgoal): oracle (true demo latents), gdm (goal-free
+diffusion planner), baseline, dspark, specaccept, regressor.
 
-Horizon modes (paper FF-JEPA protocol by default: final-N window, goal = last
-frame = the task target -- same scheme for short and long; this is what makes the
-goal-free planner's subgoals align with the eval goal):
-  short : goal_offset 25, budget 50,  start = ep_len-1-25 (final 25 steps).
-  long  : goal_offset 75, budget 150, start = ep_len-1-75 (final 75 steps).
-  --start random : eval.py/[13,5] common setting (random valid start, goal =
-                   start+goal_offset) -- baseline-comparable, NOT the FF-JEPA
-                   short protocol. Applies to short only.
-
-CPU smoke (tiny CEM, local model, 2 envs):
-  SDL_VIDEODRIVER=dummy python -m specaccept.envs.pusht.eval --source local \
-    --local-dir ../drift_probe/model --swm-src ../lewm-investigation/stable-worldmodel \
-    --h5 ../drift_probe/expert/pusht_expert_train.h5 --device cpu \
-    --num-eval 2 --num-samples 8 --n-steps 2 --mode short --angles 20
-
-Box (A100), short, n=32, matches baseline episode set (seed 42):
-  cd ~/le-wm && STABLEWM_HOME=$HOME/.stable-wm SDL_VIDEODRIVER=dummy \
-    python -m specaccept.envs.pusht.eval --source pretrained --encoder-id quentinll/lewm-pusht \
-    --h5 $HOME/.stable-wm/datasets/pusht_expert_train.h5 --device cuda \
-    --num-eval 32 --mode short --angles 20 5
+Horizon modes follow the paper protocol by default (final-N window, goal =
+last frame): short (goal_offset 25, budget 50), long (75, 150), and
+random_init (synthetic random starts). --start random instead uses a random
+valid start with goal = start + goal_offset (baseline-comparable; short only).
 """
 
 from __future__ import annotations
