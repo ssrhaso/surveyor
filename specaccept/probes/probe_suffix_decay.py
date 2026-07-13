@@ -1,22 +1,11 @@
-"""Direct, SAMPLED per-position fidelity probe for the N=3 GDM subgoal block:
-does predicted quality really degrade m+1 -> m+2 -> m+3 ("suffix decay"), the
-premise DSpark is being built to fix?
+"""Sampled per-position fidelity probe for the N-position GDM subgoal block:
+does predicted quality degrade with block position (suffix decay)?
 
-diag_gdm.py's Probe B only samples position 0 (matching closed-loop deployment,
-which discards m+2/m+3 every replan), so there's never been a real sampled
-measurement of m+2/m+3 vs m+1. `GDMPlanner.sample_sequence(...)` already returns
-the full (B, N, D) block via the real diffusion sampler; this script points it
-at per-position ground truth (E(frame at start+(k+1)*stride)) and reports the
-same rel_err/cos_move/collapse metrics diag_gdm.py uses, broken out by position.
-
-Reuses an existing episodes-file (episode_idx, start_step pairs); any file
-whose episodes satisfy ep_len > start + N*stride works.
-
-Run (Isambard):
-    python -m specaccept.probes.probe_suffix_decay --gdm-ckpt gdm_faithful.pt \
-        --source local --local-dir encoder_local \
-        --h5 subset_longeval.h5 --episodes-file subset_longeval.episodes150.json \
-        --device cuda --n-probe 256 --stride 25
+Samples the full (B, N, D) block with the real diffusion sampler
+(GDMPlanner.sample_sequence) and scores each position against per-position
+ground truth E(frame at start+(k+1)*stride), reporting the diag_gdm metrics
+(rel_err, cos_move, collapse) broken out by position. Reuses an existing
+episodes-file whose episodes satisfy ep_len > start + N*stride.
 """
 
 from __future__ import annotations

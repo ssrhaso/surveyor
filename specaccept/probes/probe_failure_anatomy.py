@@ -1,27 +1,17 @@
-"""Failure anatomy from closed-loop --dump-traces files (stride round lever 4).
+"""Failure anatomy from closed-loop --dump-traces files.
 
-For each failed episode (strict 5-degree criterion) reconstruct, from the
-per-replan (z_cond, z_next) trace, the latent trajectory toward the goal and
-bucket the failure:
+For each failed episode (strict 5-degree criterion), reconstructs the latent
+trajectory toward the goal from the per-replan (z_cond, z_next) trace and
+buckets the failure:
 
-  near_miss : final distance-to-goal below the successful episodes' p75 --
-              the loop converged but the terminal pose missed the tolerance.
-  stuck     : distance stops improving in the last third of the episode while
-              still far (plateau above success-final range).
-  diverged  : final distance worse than the episode's own minimum by a wide
-              margin (got close, then lost it).
-  unreachable_subgoals : commanded latent step chronically >> achieved step
-              (median commanded/achieved ratio > 3) -- the FF-JEPA paper's
-              hypothesized failure mode.
+  near_miss : converged, but the terminal pose missed the tolerance.
+  stuck     : distance stops improving in the last third while still far.
+  diverged  : final distance far worse than the episode's own minimum.
+  unreachable_subgoals : commanded latent step chronically much larger than
+              the achieved step.
 
-Buckets are checked in that order; first match wins (a stuck episode with sane
-subgoals is 'stuck', etc.). Also prints the same stats for successful episodes
-as the reference distribution.
-
-Local run (traces scp'd from Isambard):
-    python -m specaccept.probes.probe_failure_anatomy --traces runs/stride/traces_s10_seed42.pt ... \
-        --h5 subset_longeval.h5 --source local --local-dir ../drift_probe/model \
-        --swm-src ../lewm-investigation/stable-worldmodel --device cpu
+Buckets are checked in that order; first match wins. Successful episodes are
+reported as the reference distribution.
 """
 
 from __future__ import annotations

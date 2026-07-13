@@ -1,47 +1,23 @@
-"""CEM cost-signal SNR probe (stride-spacing round): is the cost landscape a
-fine-stride CEM sees informative, or flat relative to noise?
+"""CEM cost-signal SNR probe: is the cost landscape at a fine stride
+informative, or flat relative to noise?
 
-This is the MECHANISTIC form of the degeneracy risk (DIRECTION_stride_spacing.md
-1): at stride 5 the subgoal sits 5 env-steps out, and the worry is that CEM's
-cost -- terminal L2^2 of the frozen-predictor rollout to the subgoal -- barely
-depends on the chosen action block, so CEM ranks noise. Measured IN THE MODEL
-CEM actually optimizes (frozen LeWM predictor rollout, exactly the
-SubgoalCostModel math), with REAL demo action blocks as candidates (drawn from
-other windows/episodes), which sidesteps action-space scale guesswork and asks
-the operative question: can the cost function tell apart realistic candidate
-plans at this horizon?
-
-Per window t (end-anchored runway, matching the anchor convention) and per
-stride S in {5, 25}: subgoal = TRUE E(t+S); candidates = the window's own true
-action block + K decoy blocks from random other success episodes (the SAME
-decoy windows serve both strides: S=5 uses the first 5 actions, S=25 all 25)
-+ an all-zeros "hold" block. CEM loop geometry matches Stage 3 by construction
-(horizon = S/5 predictor steps, action_block=5, H=1 history).
+Measured in the model CEM actually optimizes (frozen-predictor rollout, the
+SubgoalCostModel math), with real demo action blocks as candidates. Per
+end-anchored window and per stride S in {5, 25}: subgoal = true E(t+S);
+candidates = the window's own true action block, K decoy blocks from other
+success episodes (the same decoy windows serve both strides), and an
+all-zeros hold block.
 
 Metrics (mean over windows):
-  true_pct   : fraction of decoys costlier than the TRUE continuation block --
-               the cost function's ability to rank the right plan highly.
-               ~0.5 = chance = degenerate; high = informative.
-  cv         : std/mean of decoy costs (cost-landscape dynamic range).
-  best_gap   : (median - min)/median of decoy costs (how much better the best
-               candidate looks than a typical one -- what CEM's elite picks up).
-  act_sens   : normalized per-dim std of the predicted TERMINAL latent across
-               candidates (do different plans even reach different predicted
-               states at this horizon? compare to the Stage-0 S=1 encoder
-               floor ~0.074 and S=5 realized displacement ~0.35).
-  hold_pct   : fraction of decoys costlier than doing nothing (zeros block).
+  true_pct : fraction of decoys costlier than the true continuation block
+             (0.5 = chance = degenerate).
+  cv       : std/mean of decoy costs (cost-landscape dynamic range).
+  best_gap : (median - min)/median of decoy costs.
+  act_sens : normalized per-dim std of the predicted terminal latent across
+             candidates.
+  hold_pct : fraction of decoys costlier than the zeros block.
 
-Read-off: if S=5 true_pct ~ 0.5 and cv/act_sens collapse vs S=25, the fine-
-stride cost signal is degenerate IN-MODEL -> mechanism for a Stage 3 loss. If
-S=5 ranks the true block as well as S=25 does, the degeneracy concern is dead
-in-model and Stage 3 measures control, not cost noise.
-
-CPU-friendly (predictor is small); runs on the laptop against the local full h5:
-    python -m specaccept.probes.probe_cost_snr \
-        --h5 ../drift_probe/expert/pusht_expert_train.h5 \
-        --source local --local-dir ../drift_probe/model \
-        --swm-src ../lewm-investigation/stable-worldmodel \
-        --device cpu --n-windows 64 --n-decoys 128
+CPU-friendly; the predictor is small.
 """
 
 from __future__ import annotations

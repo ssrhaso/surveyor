@@ -1,33 +1,15 @@
-"""Stage 0 pre-gate for the stride-spacing direction: is a fine-stride subgoal
-target even well-posed in the frozen encoder's latent space?
+"""Pre-gate for the stride-spacing direction: is a fine-stride subgoal target
+well-posed in the frozen encoder's latent space?
 
-Measures, over successful expert episodes and uniform-random anchors t, the
-realised latent displacement
+Measures, over successful expert episodes and random anchors t, the realized
+latent displacement disp(S) = ||E(t+S) - E(t)|| / ||E(t+S)|| for S in
+{1, 5, 10, 15, 25} (S=1 is the encoder noise floor), plus two directional
+checks: cos_long(S) (does the short move point where the stride-25 move
+goes) and cos_succ(S) (do successive S-segments continue in a consistent
+direction). If disp(5) collapses toward disp(1), the fine-stride target is
+degenerate regardless of drafter.
 
-    disp(S) = ||E(t+S) - E(t)|| / ||E(t+S)||
-
-for S in {1, 5, 10, 15, 25} (S=1 is the encoder noise floor: nothing meaningful
-happens in one env step), plus two directional-structure checks:
-
-  * cos_long(S)  = cos( E(t+S)-E(t),  E(t+25)-E(t) )   -- does the short move
-    point where the stride-25 move is going?
-  * cos_succ(S)  = cos( E(t+S)-E(t),  E(t+2S)-E(t+S) ) -- do successive
-    S-segments continue in a consistent direction?
-
-Kill rule (from DIRECTION_stride_spacing.md Stage 0): if disp(5) collapses
-toward disp(1) -- 5-step targets latent-indistinguishable from "stay put" --
-the fine-stride target is degenerate regardless of any drafter, and the
-direction dies here. Proceed if fine-stride displacements sit well above the
-floor and are directionally structured.
-
-No model training, no CEM, no GDM checkpoint: h5 + frozen encoder only. CPU ok.
-
-Run (Windows laptop, local model, full h5):
-    python -m specaccept.probes.probe_stride_displacement \
-        --h5 ../drift_probe/expert/pusht_expert_train.h5 \
-        --source local --local-dir ../drift_probe/model \
-        --swm-src ../lewm-investigation/stable-worldmodel \
-        --device cpu --n-episodes 128 --anchors-per-ep 4
+Requires only the h5 and the frozen encoder; CPU is sufficient.
 """
 
 from __future__ import annotations

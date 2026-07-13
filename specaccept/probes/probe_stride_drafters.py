@@ -1,26 +1,13 @@
-"""Offline block-quality battery for the stride-S GDM drafters (stride-spacing
-round): per-position sampled fidelity (suffix decay) PLUS across-seed
-conditional spread, in one pass.
+"""Offline block-quality battery for stride-S GDM drafters: per-position
+sampled fidelity (suffix decay) plus across-seed conditional spread, in one
+pass.
 
-Why both:
-  * per-position rel_err/cos_move vs per-position ground truth E(t+(k+1)*S) --
-    the probe_suffix_decay readout, here at arbitrary stride (its anchor at
-    S=25 on gdm_faithful: 0.1593/0.2288/0.3179);
-  * ACROSS-SEED conditional spread (same input, K sampler seeds) -- the one
-    offline signal validated against closed-loop SR in the DSpark round (the
-    SR-hurting refiner collapsed spread to 0.37-0.42 while rel_err looked
-    fine). A fine-stride drafter with collapsed spread would be flagged here
-    before any closed-loop spend.
-
-Windows use the SAME episodes-file convention as the anchor (end-anchored
-runway windows, e.g. subset_longeval.episodes150.json) so S=25 numbers are
-directly comparable to the recorded anchor triplet.
-
-Run (Isambard):
-    python -m specaccept.probes.probe_stride_drafters --gdm-ckpt gdm_stride5.pt --stride 5 \
-        --source local --local-dir encoder_local \
-        --h5 subset_longeval.h5 --episodes-file subset_longeval.episodes150.json \
-        --device cuda --n-probe 256 --n-seeds 8
+Per-position rel_err/cos_move against ground truth E(t+(k+1)*S) reproduces
+the probe_suffix_decay readout at arbitrary stride. Across-seed conditional
+spread (same input, K sampler seeds) is the offline signal validated against
+closed-loop success rate; a drafter with collapsed spread is flagged here
+before any closed-loop spend. Windows use the same episodes-file convention
+as the anchor, so stride-25 numbers are directly comparable.
 """
 
 from __future__ import annotations

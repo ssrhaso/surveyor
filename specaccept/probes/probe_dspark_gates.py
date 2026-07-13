@@ -1,39 +1,21 @@
-"""Phase A gates for the DSpark->GDM Round 2 direction (DIRECTION_dspark_gdm.md):
-three offline probes, no CEM, one data load.
+"""Offline gate probes for the DSpark/GDM direction: three probes, no CEM,
+one data load.
 
-A1  Few-step-draft acceptance curve (self-speculative drafting).
-    DDIM here is deterministic given x_T (eta=0), so with a matched generator
-    seed the k-step draft and the 50-step reference differ ONLY in step count.
-    Per k: rel_err vs true, distance to the matched-seed 50-step draw,
-    fraction within tolerance of it, and across-seed spread (health).
-    Gate: some k <= 8 with ~50-step quality => >=6x cheaper drafting is free.
+A1  Few-step-draft acceptance curve. DDIM is deterministic given x_T (eta=0),
+    so with a matched generator seed the k-step draft and the 50-step
+    reference differ only in step count. Reports per-k rel_err, distance to
+    the matched-seed reference, and across-seed spread.
 
-A2  Env-verifier speculative-acceptance SIMULATOR (the decisive gate).
-    Demo-replay proxy for the closed loop: draft the N-block at hop h0; the
-    "achieved" latent after S steps is the demo's own next frame latent;
-    accept iff rel dist(achieved, predicted position) <= tau -> consume the
-    next block position WITHOUT re-drafting; reject or exhaust -> re-draft
-    from the achieved state. All blocks are precomputed once per hop (the
-    simulator itself is pure bookkeeping), so every tau sees identical drafts.
-    Reports per tau: diffusion-call ratio vs every-step, mean accepted depth,
-    per-position acceptance rates, consumed-subgoal error vs the fresh
-    every-step baseline. CAVEAT printed: expert acts in the replay, so
-    acceptance is an optimistic bound on closed-loop acceptance; the
-    closed-loop arm (Phase B) uses the tau chosen here.
-    Gate: mean accepted depth >= ~1.5 at a tau whose consumed error ~= fresh.
+A2  Speculative-acceptance simulator (the decisive gate). Demo-replay proxy
+    for the closed loop: draft the N-block, take the demo's next frame latent
+    as the achieved state, accept iff the relative distance is within tau,
+    re-draft on reject or exhaustion. All drafts are precomputed once per
+    hop, so every tau sees identical drafts. Reports per-tau diffusion-call
+    ratio, mean accepted depth, per-position acceptance, and consumed-subgoal
+    error. Acceptance here is an optimistic bound on the closed loop.
 
-A3  m+1 posterior multimodality (closes the K-wide-CEM-target question).
-    K full-sampler draws per condition; per-condition 2-means; a condition is
-    "candidate-multimodal" iff the centroid separation is large vs the
-    cluster radii AND the minor cluster is non-trivial AND the mode gap is
-    a non-trivial fraction of the actual move magnitude.
-    Expected per existing evidence (JointMLP ~ oracle floor): unimodal.
-
-Run (Isambard):
-    python -m specaccept.probes.probe_dspark_gates --gdm-ckpt gdm_faithful.pt --stride 25 \
-        --source local --local-dir encoder_local \
-        --h5 subset_longeval.h5 --episodes-file subset_longeval.episodes150.json \
-        --device cuda --n-probe 256 --json-out runs/dspark2/gates_s25.json
+A3  m+1 posterior multimodality: K sampler draws per condition with a
+    per-condition 2-means separation test.
 """
 
 from __future__ import annotations
