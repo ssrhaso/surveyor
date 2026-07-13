@@ -1,45 +1,16 @@
-"""TASK C - train the GDM latent diffusion planner.
+"""Train the GDM latent diffusion planner on cached subgoal latents.
 
-Trains a conditional DDPM (DiT backbone, WG=1, predicts N=3 future subgoals,
-denoising score-matching) on the stride-25 subgoal latents in subgoals_pusht.pt
-(Task A output). The frozen LeWM is NOT needed here - we operate purely on the
-cached latents.
+Trains a conditional DDPM (DiT backbone, WG=1, N=3 future subgoals) on the
+subgoal latents produced by the env builders; the frozen LeWM is not needed.
+Training pairs per episode: condition z[m], target [z[m+1], .., z[m+N]].
+--window-rule selects how windows are formed at episode end: "clamp" (default)
+repeats the final subgoal, "full" requires a complete N-window. Latents are
+per-dim standardized for training; the stats are stored in the checkpoint and
+inverted at inference so sampled subgoals return to native encoder space.
 
-(condition, target) pairs per episode (stride-25 latent sequence z[0..n_sg-1]):
-  condition = z[m]                                     (WG=1)
-  target    = [z[m+1], z[m+2], z[m+3]]                 (N=3)
-End-of-episode rule (--window-rule):
-  clamp (default): future indices clamped to the last subgoal (n_sg-1), so near
-      the goal the targets repeat the goal latent - mirrors build_oracle_table's
-      frame clamping and the inference behavior. m in [0, n_sg-2].
-  full           : require a complete N-window; m in [0, n_sg-1-N]. Drops short
-      episodes (mean n_sg ~ 5.3), so far fewer pairs.
-
-Latents live near the sqrt(192) sphere; the DM trains on PER-DIM STANDARDIZED
-latents (mean/std over the masked training subset). The stats are saved in the
-checkpoint and inverted at inference so injected subgoals return to native
-E-space (||z||~13.9). Encoder/predictor stay frozen; only GDM trains.
-
-Train set: --mask 5 (default, in_5deg subset ~ 9,094 eps ~ paper's 8,318) or
---mask 20 (all 12,042 kept episodes).
-
-CPU smoke (tiny model, 1 epoch - logic only; real train on the box):
-  python -m specaccept.train_drafter --subgoals subgoals_pusht.pt --out /tmp/gdm_smoke.pt \
-      --device cpu --epochs 1 --hidden 64 --depth 2 --heads 4 --timesteps 50
-
-Box (A100), full training (~20 epochs, ~50M-param DiT):
-  cd ~/le-wm && python -m specaccept.train_drafter --subgoals subgoals_pusht.pt \
-      --out gdm_pusht.pt --device cuda --mask 5 --epochs 20
-
-WARNING - the argparse DEFAULTS here (lr 1e-4, batch 256, no grad-clip, no
-lr-schedule, no --amp, ema_decay 0.999) do NOT reproduce the faithful baseline
-`gdm_faithful.pt`. The faithful recipe = LeWM's config (batch 128, lr 5e-5,
-wd 1e-3, grad-clip 1.0, warmup_cosine, bf16 --amp, EMA OFF) + dense data
-(subgoals_dense_full.pt, --subgoal-step 25). The CANONICAL faithful invocation
-lives in run_recipe.sh (eps) / run_vpred.sh (v); reproduce from there, not the
-bare defaults. Two training-set knobs are also live and unspecified by the paper:
---mask {5,20} (filter tolerance; 5=in_5deg~9,094~paper count, 20=all~12,042~our
-20 deg eval criterion - a single-variable A/B) and --window-rule.
+Note: the argparse defaults do not reproduce the faithful baseline
+gdm_faithful.pt. The canonical recipe (LeWM optimizer settings plus dense
+data) lives in run_recipe.sh (eps) and run_vpred.sh (v); reproduce from there.
 """
 
 from __future__ import annotations

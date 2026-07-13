@@ -1,20 +1,13 @@
-"""Train the deterministic z_cond -> N-block subgoal REGRESSOR (JointMLP-class)
-for the deferred diffusion-vs-regression closed-loop arm.
+"""Train the deterministic z_cond -> N-block subgoal regressor (JointMLP).
 
-Offline, this architecture DOMINATED the diffusion drafter and every refiner
-(val rel_err 0.062/0.102/0.151 vs raw diffusion 0.158/0.233/0.302 at stride 25,
-verified not-overfit at wd=1e-3). The spread thesis predicts it LOSES in the
-closed loop (zero conditional spread = maximal regression-to-mean, the same
-property that cost the refiner 11pp). Whichever way it goes, this closes the
-last open SR question: is the diffusion drafter's stochasticity load-bearing?
+The regression arm of the diffusion-vs-regression closed-loop comparison.
+Trains on the same subgoal file, mask population, and sliding-window pair
+construction as train_drafter (build_pairs is reused), so architecture and
+objective are the only differences vs the GDM.
 
-Trains on the SAME dense subgoal file / mask-5 population / sliding-window
-pair construction as train_gdm (build_pairs reused), so the only differences
-vs the GDM are architecture + objective.
-
-Run (Isambard):
-    python -m specaccept.train_regressor --subgoals subgoals_dense_full.pt \
-        --subgoal-step 10 --out regressor_stride10.pt --device cuda
+Usage:
+    python -m specaccept.train_regressor --subgoals <dense.pt> \
+        --subgoal-step <S> --out <ckpt.pt> --device cuda
 """
 
 from __future__ import annotations

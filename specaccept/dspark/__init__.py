@@ -1,4 +1,4 @@
-"""DSpark port: the literal speculative-decoding components (refinement head,
-confidence scheduling, blind commitment). Kept as the negative-result baseline
-(paper Table 2); the surviving idea, spec-accept, lives in sources.py.
+"""DSpark port: speculative-decoding components (refinement head, confidence
+scheduling, blind commitment). Retained as the negative-result baseline; the
+surviving mechanism, spec-accept, lives in specaccept.sources.
 """

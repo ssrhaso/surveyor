@@ -1,34 +1,20 @@
-"""DSpark refinement head -- a standalone, first-order-conditioned RESIDUAL
-refiner for a block of N drafted subgoal latents.
+"""DSpark refinement head: a standalone residual refiner for a block of N
+drafted subgoal latents.
 
-This module has ZERO dependency on subgoal_planner.py / gdm_model.py (only torch)
-so it drops unchanged into a V-JEPA2 planner later. It takes a raw draft block
-`draft: (B, N, D)` (the frozen diffusion drafter's parallel output, native
-latent space) plus the conditioning latent `cond: (B, D)` (the current
-observation/subgoal latent) and returns a refined block `refined: (B, N, D)`,
-same native space.
+Depends only on torch, so it ports unchanged to other planners. Takes a raw
+draft block (B, N, D) and the conditioning latent (B, D), and returns a
+refined block in the same native latent space:
 
-Design (matches the DSpark porting brief, NOT DSpark Eq.5 -- there is no
-vocabulary / low-rank V*V transition here; this is a continuous residual head):
+    z_refined_i = z_draft_i + MLP([z_cond, z_draft_i, cond_prev, pos_emb_i])
 
-    z_refined_i = z_draft_i + MLP([ z_cond_std, z_draft_i_std, cond_prev_std, pos_emb_i ])
-
-  * Shared weights across positions; sinusoidal `pos_emb_i` gives arbitrary-N
-    generalization (no per-position heads -- those would not port to a different N).
-  * Residual with near-identity init: the final linear is zeroed (adaLN-Zero
-    convention, matching gdm_model._init_weights) so training starts as a pure
-    pass-through of the raw draft.
-  * Operates in per-dim STANDARDIZED space (z-mean)/std, inverting on output, so
-    the residual magnitude is well-scaled regardless of the latent's native norm.
-  * cond_prev for i=1 is `z_cond`.
-  * mode='causal'   : cond_prev_i = z_refined_{i-1} (sequential unroll).
-    mode='noncausal': additionally concatenate the FULL raw draft block
-                      z_draft_{1..N} to every position's input (free -- the
-                      diffusion draft is non-causal, all N are available before
-                      refinement); cond_prev_i = z_draft_{i-1} (raw), no unroll.
-
-Never trained on ground-truth z_{i-1} (exposure bias) or injected Gaussian noise
--- only on real frozen-drafter chains (see build_real_chains.py).
+Weights are shared across positions with a sinusoidal position embedding for
+arbitrary-N generalization. The final linear is zero-initialized (adaLN-Zero
+convention) so training starts as an identity pass-through. Inputs are per-dim
+standardized and outputs inverted. mode='causal' uses the previously refined
+latent as cond_prev (sequential unroll); mode='noncausal' uses the raw
+previous draft plus a block summary, fully parallel. Trained only on real
+frozen-drafter chains (see build_real_chains.py), never on ground-truth
+prefixes or injected noise.
 """
 
 from __future__ import annotations
