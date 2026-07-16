@@ -368,6 +368,217 @@ class LerpSubgoalSource:
         return self._cache.clone()
 
 
+@torch.no_grad()
+def cem_flat_cstar(lewm, cost_model, z0, z_goal, cem, adim=2):
+    """One flat CEM plan per row -> predicted terminal rel to the goal
+    (the exact replan-0 call the flat policy would execute; emb pre-injected
+    so the rollout skips the pixel encode). `adim`: env action dim."""
+    import stable_worldmodel as swm
+    from gymnasium.spaces import Box
+
+    n = z0.shape[0]
+    dev = cost_model.device
+    config = swm.PlanConfig(horizon=cem["horizon"],
+                            receding_horizon=cem["horizon"],
+                            action_block=cem["action_block"])
+    # SDPA kernel limit: batch x num_samples rollouts per solve step. Cap the
+    # solver batch inside the validated 128x300 envelope (128x600 and 256x300
+    # both raise CUDA invalid-configuration); CEMSolver chunks n_envs by
+    # batch_size internally (proven: pusht route pass, 256 rows @ batch 128).
+    batch = max(1, min(n, 38400 // int(cem["num_samples"])))
+    solver = swm.solver.CEMSolver(model=cost_model, batch_size=batch,
+                                  num_samples=cem["num_samples"],
+                                  var_scale=cem["var_scale"],
+                                  n_steps=cem["n_steps"],
+                                  topk=cem["topk"], device=dev,
+                                  seed=cem["seed"])
+    solver.configure(action_space=Box(low=-1.0, high=1.0, shape=(n, adim),
+                                      dtype=np.float32),
+                     n_envs=n, config=config)
+    z0d, zgd = z0.to(dev), z_goal.to(dev)
+    info = {"pixels": torch.zeros(n, 1, 1, 1, 1, device=dev),
+            "emb": z0d[:, None, :],
+            SubgoalCostModel.SUBGOAL_KEY: zgd}
+    plan = solver.solve(info)["actions"].to(dev)       # (n, H, block*adim)
+    roll = {"pixels": torch.zeros(n, 1, 1, 1, 1, 1, device=dev),
+            "emb": z0d[:, None, None, :]}
+    roll = lewm.rollout(roll, plan.unsqueeze(1))       # S=1 candidate
+    z_hat = roll["predicted_emb"][:, 0, -1, :]
+    return ((z_hat - zgd).norm(dim=-1)
+            / z_hat.norm(dim=-1).clamp_min(1e-8)).cpu().numpy()
+
+
+class CstarRetireSource:
+    """Unified spec-accept: draft only while the planner certifies the goal
+    is out of reach.
+
+    Each unretired env re-reads c* = rel(z_hat_H, z_goal) of one flat CEM
+    plan at every replan; the first time c* <= tau the drafter RETIRES,
+    one-way, and the goal latent is served thereafter (zero diffusion).
+    Replaces the latent-distance goal_gate (which saturates at range); the
+    first-replan check doubles as the episode router's fire test. One
+    threshold (the verifier's tau) at every scope. Cost: one extra batched
+    CEM solve per replan on unretired envs only."""
+
+    needs_obs = True
+    needs_goal = True
+
+    def __init__(self, planner, lewm, n_envs, device="cpu", n_steps=50, seed=42,
+                 tau=0.2, horizon=2, action_block=5, num_samples=300,
+                 cem_steps=30, topk=30, var_scale=1.0, adim=2, record=False):
+        self.spec = SpecAcceptSubgoalSource(planner, n_envs, device=device,
+                                            n_steps=n_steps, seed=seed, tau=tau,
+                                            record=record)  # latent goal_gate OFF by design
+        self.lewm = lewm
+        self.cost_model = SubgoalCostModel(lewm)
+        self.dim = int(planner.cfg.latent_dim)
+        self.device = device
+        self.n_envs = n_envs
+        self.tau = float(tau)
+        self.adim = int(adim)
+        self.cem = dict(horizon=int(horizon), action_block=int(action_block),
+                        num_samples=int(num_samples), n_steps=int(cem_steps),
+                        topk=int(topk), var_scale=float(var_scale), seed=int(seed))
+        self._retired = np.zeros(n_envs, dtype=bool)
+        self._seen = np.zeros(n_envs, dtype=bool)
+        self._replans = np.zeros(n_envs, dtype=int)
+        self.retire_replan = np.full(n_envs, -1, dtype=int)
+        self.c_first = np.full(n_envs, np.nan)   # first-replan c* == router fire test
+        self.c_last = np.full(n_envs, np.nan)    # most recent c* per env
+        self._cache = torch.zeros(n_envs, self.dim, device=device)
+        self.record = record
+        self.trace = {"c_first": self.c_first, "retire_replan": self.retire_replan,
+                      "spec": self.spec.trace}
+
+    @torch.no_grad()
+    def current(self, sg_steps, obs_latent=None, replan_idx=None, goal_latent=None) -> torch.Tensor:
+        if replan_idx is not None and len(replan_idx) > 0 \
+                and obs_latent is not None and goal_latent is not None:
+            replan_idx = list(replan_idx)
+            z_goal = goal_latent.to(self.device)
+
+            # per-replan retirement check, batched over unretired rows
+            live = [r for r, i in enumerate(replan_idx) if not self._retired[i]]
+            if live:
+                cs = cem_flat_cstar(self.lewm, self.cost_model,
+                                    obs_latent[live], goal_latent[live],
+                                    self.cem, adim=self.adim)
+                for j, r in enumerate(live):
+                    i = replan_idx[r]
+                    self.c_last[i] = cs[j]
+                    if not self._seen[i]:
+                        self.c_first[i] = cs[j]
+                        self._seen[i] = True
+                    if cs[j] <= self.tau:
+                        self._retired[i] = True
+                        self.retire_replan[i] = self._replans[i]
+
+            # retired envs: the goal latent, every replan, zero drafter calls
+            for r, i in enumerate(replan_idx):
+                if self._retired[i]:
+                    self._cache[i] = z_goal[r]
+                self._replans[i] += 1
+
+            # live envs: plain spec-accept (rows re-aligned)
+            sub = [(r, i) for r, i in enumerate(replan_idx) if not self._retired[i]]
+            if sub:
+                rows = [r for r, _ in sub]
+                envs = [i for _, i in sub]
+                out = self.spec.current(sg_steps, obs_latent=obs_latent[rows],
+                                        replan_idx=envs,
+                                        goal_latent=goal_latent[rows])
+                for i in envs:
+                    self._cache[i] = out[i]
+        return self._cache.clone()
+
+
+class HorizonGatedSource:
+    """Episode-level planner-reachability gate (gate v3): route flat vs spec.
+
+    At each env's FIRST replan the source runs one flat CEM plan from the
+    achieved latent toward the goal latent (the arm's own plan config, the
+    shipped CEMSolver) and reads c* = ||z_hat_H - z_goal|| / ||z_hat_H||, the
+    predicted terminal discrepancy of the plan the policy would execute.
+    Fire iff c* <= tau (the verifier's threshold, unchanged): the env serves
+    the GOAL latent at every replan for its whole episode -- zero drafter
+    calls (the degenerate flat case SubgoalCostModel already supports).
+    Otherwise the env is delegated to an internal SpecAcceptSubgoalSource
+    for its whole episode. One decision per env, never revisited.
+
+    Rationale (gate-validity post-mortem, 2026-07-14): c* predicts
+    PER-EPISODE flat success (AUC 0.85-0.92); routing on it tied or beat the
+    best single arm at every t in exact offline replay of recorded
+    outcomes. Fire-rate is expected to track flat-solvability (high at t25,
+    ~0.5 at t150), NOT to vanish with horizon.
+    """
+
+    needs_obs = True
+    needs_goal = True
+
+    def __init__(self, planner, lewm, n_envs, device="cpu", n_steps=50, seed=42,
+                 tau=0.2, horizon=2, action_block=5, num_samples=300,
+                 cem_steps=30, topk=30, var_scale=1.0, record=False):
+        self.spec = SpecAcceptSubgoalSource(planner, n_envs, device=device,
+                                            n_steps=n_steps, seed=seed, tau=tau,
+                                            record=record)
+        self.lewm = lewm
+        self.cost_model = SubgoalCostModel(lewm)
+        self.dim = int(planner.cfg.latent_dim)
+        self.device = device
+        self.n_envs = n_envs
+        self.tau = float(tau)
+        self.cem = dict(horizon=int(horizon), action_block=int(action_block),
+                        num_samples=int(num_samples), n_steps=int(cem_steps),
+                        topk=int(topk), var_scale=float(var_scale), seed=int(seed))
+        self._decided = np.zeros(n_envs, dtype=bool)
+        self._fired = np.zeros(n_envs, dtype=bool)
+        self._cache = torch.zeros(n_envs, self.dim, device=device)
+        self.c_star = np.full(n_envs, np.nan)
+        self.record = record
+        self.trace = {"c_star": self.c_star, "fired": self._fired,
+                      "spec": self.spec.trace}
+
+    @torch.no_grad()
+    def _flat_c_star(self, z0, z_goal):
+        """One flat CEM plan per row -> predicted terminal rel to the goal."""
+        return cem_flat_cstar(self.lewm, self.cost_model, z0, z_goal,
+                              self.cem, adim=2)
+
+    @torch.no_grad()
+    def current(self, sg_steps, obs_latent=None, replan_idx=None, goal_latent=None) -> torch.Tensor:
+        if replan_idx is not None and len(replan_idx) > 0 \
+                and obs_latent is not None and goal_latent is not None:
+            replan_idx = list(replan_idx)
+            z_goal = goal_latent.to(self.device)
+
+            # episode-start gate: decide once per env, one batched solve
+            new_rows = [r for r, i in enumerate(replan_idx) if not self._decided[i]]
+            if new_rows:
+                cs = self._flat_c_star(obs_latent[new_rows], goal_latent[new_rows])
+                for j, r in enumerate(new_rows):
+                    i = replan_idx[r]
+                    self.c_star[i] = cs[j]
+                    self._fired[i] = cs[j] <= self.tau
+                    self._decided[i] = True
+
+            # fired envs: the goal latent, every replan, zero drafter calls
+            for r, i in enumerate(replan_idx):
+                if self._fired[i]:
+                    self._cache[i] = z_goal[r]
+
+            # unfired envs: whole episode on spec-accept (rows re-aligned)
+            sub = [(r, i) for r, i in enumerate(replan_idx) if not self._fired[i]]
+            if sub:
+                rows = [r for r, _ in sub]
+                envs = [i for _, i in sub]
+                out = self.spec.current(sg_steps, obs_latent=obs_latent[rows],
+                                        replan_idx=envs,
+                                        goal_latent=goal_latent[rows])
+                for i in envs:
+                    self._cache[i] = out[i]
+        return self._cache.clone()
+
+
 def load_dspark_heads(path, device):
     """Load a train_dspark_head.py checkpoint -> (DSparkHead, ConfidenceHead, ckpt)."""
     from specaccept.dspark.dspark_head import DSparkHead, ConfidenceHead

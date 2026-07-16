@@ -25,7 +25,8 @@ from specaccept import encoder
 from specaccept.envs.pusht.eval import sample_short, sample_long
 from specaccept.sources import (SubgoalCostModel, OracleSubgoalSource,
                                     GDMSubgoalSource, SpecAcceptSubgoalSource,
-                                    LerpSubgoalSource,
+                                    LerpSubgoalSource, HorizonGatedSource,
+                                    CstarRetireSource,
                                     build_oracle_table, make_ffjepa_policy)
 
 
@@ -42,7 +43,8 @@ def parse_args():
                    help="lerp source: waypoint at this fraction along the latent "
                         "segment from the CURRENT latent to the goal (re-anchored "
                         "each replan); frac=1.0 degenerates to flat planning")
-    p.add_argument("--subgoal", choices=["oracle", "gdm", "baseline", "specaccept", "lerp"],
+    p.add_argument("--subgoal", choices=["oracle", "gdm", "baseline", "specaccept",
+                                         "lerp", "horizon_gated", "unified"],
                    default="oracle")
     p.add_argument("--gdm-ckpt", default=None, help="trained (goal-cond) planner checkpoint")
     p.add_argument("--gdm-steps", type=int, default=50, help="DDIM sampling steps for GDM")
@@ -132,7 +134,7 @@ def build_process(dataset, keys):
 
 def main():
     args = parse_args()
-    if args.subgoal in ("gdm", "specaccept") and not args.gdm_ckpt:
+    if args.subgoal in ("gdm", "specaccept", "horizon_gated", "unified") and not args.gdm_ckpt:
         raise ValueError(f"--subgoal {args.subgoal} requires --gdm-ckpt")
 
     encoder._ensure_swm_importable(args.swm_src)
@@ -151,7 +153,7 @@ def main():
           f"device={args.device}, training={model.training}, subgoal={args.subgoal}")
 
     gdm_planner = None
-    if args.subgoal in ("gdm", "specaccept"):
+    if args.subgoal in ("gdm", "specaccept", "horizon_gated", "unified"):
         from specaccept.drafter import load_gdm_planner, count_params
         gdm_planner = load_gdm_planner(args.gdm_ckpt, device=args.device)
         d = gdm_planner.diffusion
@@ -258,6 +260,32 @@ def main():
                                              tau=args.accept_tau,
                                              goal_gate=args.goal_gate,
                                              record=bool(args.dump_traces))
+        elif args.subgoal == "horizon_gated":
+            source = HorizonGatedSource(gdm_planner, model, n_envs=args.num_eval,
+                                        device=args.device, n_steps=args.gdm_steps,
+                                        seed=cem_seed, tau=args.accept_tau,
+                                        horizon=args.horizon,
+                                        action_block=args.action_block,
+                                        num_samples=args.num_samples,
+                                        cem_steps=args.n_steps, topk=args.topk,
+                                        var_scale=args.var_scale,
+                                        record=bool(args.dump_traces))
+            print(f"[horizon-gate] episode-level c* gate: tau={args.accept_tau} "
+                  f"plan window={args.horizon * args.action_block} steps; "
+                  f"fired episodes run flat on the goal latent, others spec-accept")
+        elif args.subgoal == "unified":
+            source = CstarRetireSource(gdm_planner, model, n_envs=args.num_eval,
+                                       device=args.device, n_steps=args.gdm_steps,
+                                       seed=cem_seed, tau=args.accept_tau,
+                                       horizon=args.horizon,
+                                       action_block=args.action_block,
+                                       num_samples=args.num_samples,
+                                       cem_steps=args.n_steps, topk=args.topk,
+                                       var_scale=args.var_scale, adim=2,
+                                       record=bool(args.dump_traces))
+            print(f"[unified] c*-retire spec-accept: tau={args.accept_tau}, "
+                  f"retire window={args.horizon * args.action_block} steps; "
+                  f"drafting only while the goal is out of certified reach")
         elif args.subgoal == "lerp":
             source = LerpSubgoalSource(n_envs=args.num_eval, device=args.device,
                                        frac=args.lerp_frac)
@@ -275,6 +303,21 @@ def main():
     n_succ = int(metrics["episode_successes"].sum())
     world.close()
 
+    if args.subgoal == "horizon_gated":
+        dec = int(source._decided.sum())
+        fired = int(source._fired.sum())
+        cs = source.c_star[source._decided]
+        sp = source.spec
+        sp_total = sp.n_redraft + sp.n_advance
+        print(f"[horizon-gate] tau={args.accept_tau} fired={fired}/{dec} "
+              f"(fire-rate={fired / max(dec, 1):.3f}) "
+              f"c* p10/p50/p90={np.percentile(cs, 10):.3f}/"
+              f"{np.percentile(cs, 50):.3f}/{np.percentile(cs, 90):.3f} | "
+              f"spec branch: re-drafts={sp.n_redraft} advances={sp.n_advance} "
+              f"rejects={sp.n_reject} "
+              f"call_ratio={sp.n_redraft / max(sp_total, 1):.3f} "
+              f"(fired episodes make zero drafter calls by construction)")
+
     if args.subgoal == "specaccept":
         total = source.n_redraft + source.n_advance
         total_all = total + source.n_gate
@@ -285,6 +328,24 @@ def main():
               f"call_ratio={source.n_redraft / max(total, 1):.3f} "
               f"call_ratio_all={source.n_redraft / max(total_all, 1):.3f} "
               f"(every-step=1.000; lower = fewer diffusion calls)")
+
+    if args.subgoal == "unified":
+        seen = source._seen
+        retired = int(source._retired.sum())
+        fire0 = int((source.c_first[seen] <= source.tau).sum())
+        rr = source.retire_replan[source.retire_replan >= 0]
+        cf = source.c_first[seen]
+        sp = source.spec
+        sp_total = sp.n_redraft + sp.n_advance
+        print(f"[unified] tau={source.tau} retired={retired}/{int(seen.sum())} "
+              f"(fired-at-first-replan={fire0}, == the router fire test) "
+              f"retire_replan p10/p50/p90="
+              + (f"{np.percentile(rr, 10):.0f}/{np.percentile(rr, 50):.0f}/"
+                 f"{np.percentile(rr, 90):.0f} " if len(rr) else "-/-/- ")
+              + f"c*_first p50={np.percentile(cf, 50):.3f} | "
+              f"spec: re-drafts={sp.n_redraft} advances={sp.n_advance} "
+              f"rejects={sp.n_reject} "
+              f"call_ratio={sp.n_redraft / max(sp_total, 1):.3f}")
 
     if args.dump_traces:
         from pathlib import Path

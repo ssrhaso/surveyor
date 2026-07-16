@@ -25,6 +25,7 @@ from specaccept import encoder
 from specaccept.sources import (SubgoalCostModel, OracleSubgoalSource,
                                     GDMSubgoalSource, DSparkSubgoalSource,
                                     SpecAcceptSubgoalSource, RegressorSubgoalSource,
+                                    CstarRetireSource,
                                     build_oracle_table, make_ffjepa_policy)
 
 
@@ -58,7 +59,7 @@ def parse_args():
                    help="swm dataset name (box: resolved under STABLEWM_HOME); --h5 used for oracle/state")
     # what to evaluate
     p.add_argument("--subgoal", choices=["oracle", "gdm", "baseline", "dspark", "specaccept",
-                                         "regressor"],
+                                         "regressor", "unified"],
                    default="oracle")
     p.add_argument("--regressor-ckpt", default=None,
                    help="train_regressor.py checkpoint (--subgoal regressor)")
@@ -264,7 +265,7 @@ def sample_random_init_goals(h5, num_eval, seed, angle_deg=20.0):
 
 def main():
     args = parse_args()
-    if args.subgoal in ("gdm", "specaccept") and not args.gdm_ckpt:
+    if args.subgoal in ("gdm", "specaccept", "unified") and not args.gdm_ckpt:
         raise ValueError(f"--subgoal {args.subgoal} requires --gdm-ckpt <trained planner checkpoint>")
     if args.subgoal == "regressor" and not args.regressor_ckpt:
         raise ValueError("--subgoal regressor requires --regressor-ckpt (train_regressor.py)")
@@ -274,8 +275,10 @@ def main():
         if not args.no_refine and not args.dspark_ckpt:
             raise ValueError("--subgoal dspark requires --dspark-ckpt (refiner/confidence); "
                              "or pass --no-refine to use the raw draft block")
-    if args.mode == "random_init" and args.subgoal != "gdm":
-        raise ValueError("--mode random_init only supports --subgoal gdm for now (see --mode help)")
+    if args.mode == "random_init" and args.subgoal not in ("gdm", "specaccept"):
+        raise ValueError("--mode random_init supports --subgoal gdm/specaccept (closed-loop "
+                         "sources, same interface); oracle/baseline have no natural subgoal "
+                         "chain for a synthetic start (see --mode help)")
 
     encoder._ensure_swm_importable(args.swm_src)
     import stable_worldmodel as swm
@@ -297,7 +300,7 @@ def main():
 
     # GDM planner (goal-free) loaded once; the per-env source is rebuilt per run
     gdm_planner = None
-    if args.subgoal in ("gdm", "dspark", "specaccept"):
+    if args.subgoal in ("gdm", "dspark", "specaccept", "unified"):
         from specaccept.drafter import load_gdm_planner, count_params
         gdm_planner = load_gdm_planner(args.gdm_ckpt, device=args.device)
         gdm_planner.noise_scale = args.gdm_noise_scale
@@ -426,6 +429,19 @@ def main():
                                                      n_steps=args.gdm_steps, seed=cem_seed,
                                                      tau=args.accept_tau,
                                                      record=bool(args.dump_traces))
+                elif args.subgoal == "unified":
+                    source = CstarRetireSource(gdm_planner, model, n_envs=args.num_eval,
+                                               device=args.device, n_steps=args.gdm_steps,
+                                               seed=cem_seed, tau=args.accept_tau,
+                                               horizon=args.horizon,
+                                               action_block=args.action_block,
+                                               num_samples=args.num_samples,
+                                               cem_steps=args.n_steps, topk=args.topk,
+                                               var_scale=args.var_scale, adim=2,
+                                               record=bool(args.dump_traces))
+                    print(f"[unified] c*-retire spec-accept: tau={args.accept_tau}, "
+                          f"retire window={args.horizon * args.action_block} steps; "
+                          f"drafting only while the goal is out of certified reach")
                 elif args.subgoal == "dspark":
                     source = DSparkSubgoalSource(gdm_planner, args.dspark_ckpt,
                                                  n_envs=args.num_eval, device=args.device,
@@ -508,6 +524,23 @@ def main():
                       f"rejects={source.n_reject} "
                       f"call_ratio={source.n_redraft / max(total, 1):.3f} "
                       f"(every-step=1.000; lower = fewer diffusion calls)")
+            if args.subgoal == "unified":
+                seen = source._seen
+                retired = int(source._retired.sum())
+                fire0 = int((source.c_first[seen] <= source.tau).sum())
+                rr = source.retire_replan[source.retire_replan >= 0]
+                cf = source.c_first[seen]
+                sp = source.spec
+                sp_total = sp.n_redraft + sp.n_advance
+                print(f"[unified] tau={source.tau} retired={retired}/{int(seen.sum())} "
+                      f"(fired-at-first-replan={fire0}, == the router fire test) "
+                      f"retire_replan p10/p50/p90="
+                      + (f"{np.percentile(rr, 10):.0f}/{np.percentile(rr, 50):.0f}/"
+                         f"{np.percentile(rr, 90):.0f} " if len(rr) else "-/-/- ")
+                      + f"c*_first p50={np.percentile(cf, 50):.3f} | "
+                      f"spec: re-drafts={sp.n_redraft} advances={sp.n_advance} "
+                      f"rejects={sp.n_reject} "
+                      f"call_ratio={sp.n_redraft / max(sp_total, 1):.3f}")
             if args.subgoal == "dspark":
                 cd = source.commit_depths
                 ratio = source.n_redraft / max(source.n_advance, 1)
