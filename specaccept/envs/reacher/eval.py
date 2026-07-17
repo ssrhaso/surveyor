@@ -1,17 +1,11 @@
 """Reacher (DMControl qpos_match) evaluation driver.
 
-Reacher analog of the PushT driver; reuses the policy, cost model, subgoal
-sources, and episode sampling unmodified. Differences:
-
-* Success is the env's own termination rule (all |qpos - target_qpos| <
-  qpos_threshold); no eval_state monkeypatch or angle sweep.
-* State/goal callables mirror stable_worldmodel's reacher eval config:
-  set_state from the start frame, set_target_qpos from the goal frame.
-* The dataset is random-policy data, so sampling follows LeWM's own protocol
-  (random valid start, goal = start + goal_offset; defaults 25/50).
-* The GDM/spec-accept arms expect a goal-conditioned drafter (train_drafter
-  --goal-cond --goal-rule window); the policy encodes the goal image at each
-  replan and the sources pass it through to the sampler.
+Reacher analog of the PushT driver, reusing the policy, cost model, and
+subgoal sources. Success is the env's own qpos_match rule; state and goal
+callables set the start-frame state and the goal-frame target qpos. The
+dataset is random-policy data, so drafting arms expect a goal-conditioned
+drafter; the policy encodes the goal image at each replan and sources pass
+it through.
 """
 
 from __future__ import annotations

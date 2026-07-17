@@ -1,16 +1,10 @@
 """PushT evaluation driver.
 
-Runs FFJEPAPolicy + SubgoalCostModel through the stable_worldmodel harness and
-reports success rate at 20 deg (headline) and 5 deg (supplementary), under the
-same eval_state pin as the baseline.
-
-Subgoal sources (--subgoal): oracle (true demo latents), gdm (goal-free
-diffusion planner), baseline, dspark, specaccept, regressor.
-
-Horizon modes follow the paper protocol by default (final-N window, goal =
-last frame): short (goal_offset 25, budget 50), long (75, 150), and
-random_init (synthetic random starts). --start random instead uses a random
-valid start with goal = start + goal_offset (baseline-comparable; short only).
+Runs FFJEPAPolicy + SubgoalCostModel through the stable_worldmodel harness,
+reporting success at 20 deg (headline) and 5 deg (strict) under the same
+eval_state pin as the baseline. Subgoal sources are selected via --subgoal;
+horizon modes follow the paper protocol (final-N window, goal = last frame)
+with short, long, and random_init variants.
 """
 
 from __future__ import annotations

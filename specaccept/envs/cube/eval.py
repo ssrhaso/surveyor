@@ -1,24 +1,11 @@
 """OGBench-Cube (single) evaluation driver.
 
-Cube analog of the Reacher/PushT drivers; reuses the policy, cost model,
-subgoal sources, and episode sampling. Differences:
-
-* Env is swm/OGBCube-v0 (env_type='single'): a robot arm moving one cube to a
-  target. Success is the env's own criterion --- the cube within 0.04m
-  (Euclidean) of its target position (cube_env._compute_successes) --- so no
-  eval_state monkeypatch; we read info['success'] like Reacher's qpos_match.
-* State/goal callables mirror the swm manip-space convention: set_state from
-  the start frame's (prev_qpos, prev_qvel), and set_target_pos(cube_id=0,
-  target_pos = the GOAL frame's cube position) so success is hindsight
-  goal-reaching, exactly as Reacher's set_target_qpos(goal_qpos).
-* Cube demonstrations are EXPERT and goal-directed, so (2x2 regime map) the
-  goal-FREE drafter should work here as it does on PushT --- the pre-registered
-  primary arm. A goal-conditioned control is available via --gdm-ckpt to a
-  goal-cond checkpoint (its planner.goal_cond flag drives the source).
-
-Derive-first protocol: tau and k for Cube come from specaccept.probes.probe_floor
-on the frozen quentinll/lewm-cube encoder + this dataset, computed and
-pre-registered BEFORE any closed-loop cell here.
+Cube analog of the Reacher/PushT drivers, reusing the policy, cost model,
+and subgoal sources. Env is swm/OGBCube-v0; success is the env's own
+criterion (cube within 0.04 m of target). Callables set the start-frame
+MuJoCo state and the goal-frame cube position, so evaluation is hindsight
+goal-reaching. tau and k follow the derive-first protocol (probe_floor on
+the frozen cube encoder, registered before any closed-loop cell).
 """
 
 from __future__ import annotations
