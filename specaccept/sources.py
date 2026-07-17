@@ -1,18 +1,11 @@
 """Subgoal injection layer: cost model, subgoal sources, and the FF-JEPA policy.
 
-Components on top of the frozen LeWM and the stable_worldmodel planning stack:
-
-* SubgoalCostModel: LeWM wrapper whose get_cost reads a per-env subgoal latent
-  from info_dict['subgoal_emb'] in place of the goal image. Reduces to the
-  flat LeWM cost when the subgoal equals the encoded goal image.
-* FFJEPAPolicy: advances and injects per-env subgoal latents at each replan
-  boundary; the subgoal source is pluggable.
-* Subgoal sources: oracle table, diffusion drafter (GDM), deterministic
-  regressor, spec-accept, DSpark, and a lerp diagnostic.
-
-Representation contract: injected latents must match the encoder's native
-output exactly (same encode path, dtype, device, and norm); no renormalization
-or projection is applied.
+SubgoalCostModel reads a per-env subgoal latent from info_dict['subgoal_emb']
+in place of the goal image (reducing to the flat LeWM cost when the two are
+equal); FFJEPAPolicy injects per-env subgoals at each replan boundary from a
+pluggable source (oracle, GDM drafter, regressor, spec-accept, DSpark, lerp,
+horizon-gated, c*-retire). Injected latents must match the encoder's native
+output exactly; no renormalization or projection is applied.
 """
 
 from __future__ import annotations
@@ -202,23 +195,14 @@ class RegressorSubgoalSource:
 class SpecAcceptSubgoalSource:
     """Speculative subgoal consumption with reality as the verifier.
 
-    At each replan boundary the achieved latent is verified against the
-    subgoal last driven toward: within `tau` (relative L2), the next position
-    of the block drafted at the last re-anchor is consumed with no diffusion
-    call; on rejection or block exhaustion, the full N-block is re-drafted
-    from the achieved state. Re-anchoring is never skipped when reality
-    diverges; diffusion is skipped only while reality confirms the plan.
-
-    Goal-conditioned drafters are supported (needs_goal mirrors the planner
-    flag; re-drafts pass the per-env goal latent through). Verification
-    itself remains goal-free.
-
-    goal_gate=True adds a goal-progress check at serve time: a waypoint is
-    served only if it reduces latent distance to the goal (the metric CEM
-    plans on). A failing waypoint is consumed and discarded and the goal
-    latent is served instead, with a fresh draft once the block exhausts.
-    This filters detour waypoints when the goal is already inside the
-    planning window while leaving long-horizon behavior untouched."""
+    At each replan boundary the achieved latent is checked against the
+    subgoal last pursued: within tau (relative L2) the next pre-drafted
+    block position is served with no diffusion call; on rejection or block
+    exhaustion the N-block is re-drafted from the achieved state.
+    Goal-conditioned drafters are supported; verification itself is
+    goal-free. goal_gate=True additionally serves a waypoint only if it
+    reduces latent distance to the goal, substituting the goal latent
+    otherwise (an arrival filter for goal-near tasks)."""
 
     needs_obs = True
 
@@ -495,21 +479,13 @@ class CstarRetireSource:
 class HorizonGatedSource:
     """Episode-level planner-reachability gate (gate v3): route flat vs spec.
 
-    At each env's FIRST replan the source runs one flat CEM plan from the
-    achieved latent toward the goal latent (the arm's own plan config, the
-    shipped CEMSolver) and reads c* = ||z_hat_H - z_goal|| / ||z_hat_H||, the
-    predicted terminal discrepancy of the plan the policy would execute.
-    Fire iff c* <= tau (the verifier's threshold, unchanged): the env serves
-    the GOAL latent at every replan for its whole episode -- zero drafter
-    calls (the degenerate flat case SubgoalCostModel already supports).
-    Otherwise the env is delegated to an internal SpecAcceptSubgoalSource
-    for its whole episode. One decision per env, never revisited.
-
-    Rationale (gate-validity post-mortem, 2026-07-14): c* predicts
-    PER-EPISODE flat success (AUC 0.85-0.92); routing on it tied or beat the
-    best single arm at every t in exact offline replay of recorded
-    outcomes. Fire-rate is expected to track flat-solvability (high at t25,
-    ~0.5 at t150), NOT to vanish with horizon.
+    At each env's first replan the source runs one flat CEM plan toward the
+    goal latent and reads c*, the predicted terminal discrepancy of the plan
+    the policy would execute. If c* <= tau the env serves the goal latent
+    for its whole episode (zero drafter calls); otherwise it is delegated to
+    an internal SpecAcceptSubgoalSource. One decision per env, never
+    revisited. c* predicts per-episode flat success (AUC 0.85 to 0.92), so
+    fire-rate tracks flat-solvability rather than vanishing with horizon.
     """
 
     needs_obs = True

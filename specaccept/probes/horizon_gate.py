@@ -1,37 +1,13 @@
-"""Horizon-gate probe (Phase 1, offline): is rel(z0, z_goal) a usable
-episode-level horizon signal?
+"""Horizon-gate probe v1 (offline): is encoder distance rel(z0, z_goal) a
+usable episode-level horizon signal?
 
-The regime map says short-horizon losses (Reacher t=25: flat 83.2/95.7 vs
-S=10 drafter 59.8) are the decomposition tax -- the goal already sits inside
-the flat planner's lookahead, so waypoints are pure overhead (ground-truth
-waypoints tie flat there). The proposed fix is an episode-level gate: at
-episode start, encode observation and goal, compute h = rel(z0, z_goal) =
-||z0 - z_goal|| / ||z0|| (the accept test's own unit, sources.py rel), and
-plan flat for the whole episode iff h <= theta.
-
-theta is DERIVED, not swept: disp_p50(S=10) from probe_floor's already-run
-measurement (Results/floor_reacher.json, key disp_S10) -- a goal less than
-one subgoal displacement away is by construction inside the window that
-decomposition is supposed to buy. This script only READS that number; it
-never recomputes or fits it.
-
-Pre-registered sanity condition (fixed before running, printed in the
-verdict): the gate must separate the horizons -- fire-rate (h <= theta)
->= 0.70 at t=25 and <= 0.15 at t=150 on the fixed populations. If h is flat
-across t or the t=25/t=150 distributions overlap substantially, the gate is
-dead and we stop; theta is NOT amended to make the condition pass.
-
-Data paths (pick one):
-  --h5        raw pixels, encoded here with the frozen LeWM encoder;
-  --dense-pt  a stride-1 latent dump from build_subgoals (the drafter's own
-              training artifact). encode_frames runs in eval() with running
-              BN stats, so latents are batch-independent: the dump equals
-              the pixel path frame-for-frame. Used when the raw h5 is not
-              on disk (ISCA, post cube-download purge).
-
-Offline only: 2 latents per (episode, offset), no CEM, no closed loop, no
-drafter. Phase 2 (closed-loop HorizonGatedSource) runs only if this passes
-AND is separately approved.
+Gate rule under test: plan flat for the whole episode iff h = rel(z0,
+z_goal) <= theta, with theta read from the floor probe's recorded
+disp_p50(S=10), never fitted here. Pre-registered kill condition: fire-rate
+>= 0.70 at t=25 and <= 0.15 at t=150; theta is not amended to pass. Latents
+come from the raw h5 (encoded here) or the stride-1 dense dump, which are
+frame-identical. Offline only: two latents per episode-offset pair, no CEM,
+no closed loop. Result: FAILED as specified (rel saturates by t=50).
 """
 
 from __future__ import annotations

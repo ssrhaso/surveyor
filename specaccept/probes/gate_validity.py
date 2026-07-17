@@ -1,43 +1,13 @@
-"""Gate validity post-mortem: score gate SIGNALS against per-episode OUTCOMES.
+"""Gate validity post-mortem: score routing signals against recorded
+per-episode outcomes.
 
-DIAGNOSTIC, post-hoc analysis -- not a pre-registered test. Anything that
-looks alive here must be re-derived and pre-registered on fresh populations
-before any claim is made. Printed at the end as a disclaimer.
-
-Both pre-registered gates were validated against "does fire-rate track t".
-But a gate's real job is per-episode: route each episode to the planner that
-wins it. The closed-loop result of ANY episode-level gate is exactly
-determined by already-recorded outcomes,
-
-    SR_gated = mean_e [ fire(e) ? flat_outcome(e) : spec_outcome(e) ],
-
-because the fixed-population sweeps dumped per-episode success flags for
-flat (baseline) and spec-accept on identical episodes (4 seeds). So gates
-can be evaluated EXACTLY, offline, with zero new rollouts.
-
-Signals per episode (z0, z_goal from the validated dense-latent path):
-  h      = rel(z0, z_goal)                      -- gate v1's instrument
-  c*     = rel(z_hat_H, z_goal), one flat CEM   -- gate v2's instrument
-  arrive = min_j rel(block_j, z_goal)           -- NEW: the goal-conditioned
-           drafter's own block, sampled once from (z0, z_goal): does the
-           drafter claim the goal is reached within its window? Trained on
-           real window statistics, no adversarial optimizer in the loop.
-
-Gate rules evaluated (ALL thresholds derived elsewhere, nothing fitted here):
-  G_h   : h <= theta (disp_p50(S=10), floor probe)
-  G_c   : c* <= tau (0.20, the verifier's frozen threshold)
-  G_arr : arrive <= tau
-  G_c&arr: both (planner AND drafter agree the goal is in the window)
-  G_best: fire iff P_flat(e) > P_spec(e)        -- oracle upper bound
-
-Also reported per cell, from the DEPLOYED spec/gdm traces: first-draft
-detour stats (is the drafter's first waypoint farther from the goal than
-the current state, in the plain L2 CEM plans on?) -- the mechanism check
-for WHY spec-accept loses at t=25.
-
-Everything runs from artifacts already on disk: traces (runs/reacher),
-subgoals_reacher_dense.pt, floor_reacher.json, the drafter ckpt. No env,
-no h5, no closed loop.
+Diagnostic, post-hoc analysis; not a pre-registered test. Any episode-level
+gate's closed-loop result is exactly determined by the dumped per-episode
+success flags of the fixed arms (fire an episode: it gets flat's recorded
+outcome; otherwise spec's), so candidate signals (h, c*, drafter arrival)
+are evaluated exactly, offline, with zero new rollouts. All thresholds are
+read from prior derivations; nothing is fitted here. Runs entirely from
+artifacts on disk (traces, dense latents, floor json, drafter checkpoint).
 """
 
 from __future__ import annotations

@@ -1,14 +1,12 @@
-"""Gate v4 (ternary router): offline routing pass for flat2 / flat5 / spec.
+"""Ternary router (gate v4): offline routing pass for flat2 / flat5 / spec.
 
-Per episode, from its true start state: c*_2 <= tau -> flat2; elif
-c*_5 <= tau -> flat5; else spec (c* = planner-predicted terminal rel of one
-flat CEM plan, gate v3's instrument at two window depths). Writes one
-eval-compatible --episodes-file per branch; the companion sbatch executes
-each episode once under its routed arm, so the composite is a single policy
-with the RH degree of freedom restored (v3's structural t50 miss). tau is
-READ from the floor probe's recorded args -- third use, never swept. Known
-risk, reported as-is: CEM optimism grows with plan DOF, so c*_5 may over-fire
-at long horizon.
+Per episode, from its true start state: route to flat2 if c*_2 <= tau, else
+flat5 if c*_5 <= tau, else spec, where c* is the planner-predicted terminal
+rel of one flat CEM plan at the corresponding window depth. Writes one
+eval-compatible episodes file per branch; the companion sbatch executes each
+episode once under its routed arm, so the composite is a single policy with
+the planning-depth degree of freedom restored. tau is read from the floor
+probe's recorded value, never swept here.
 """
 
 from __future__ import annotations

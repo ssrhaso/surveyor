@@ -1,45 +1,14 @@
-"""Horizon gate v2 (Phase 1, offline): planner-predicted reachability.
+"""Horizon-gate probe v2 (offline): planner-predicted reachability c*.
 
-v1 (probes/horizon_gate.py) failed its pre-registered condition: rel(z0,
-z_goal) saturates at ~sqrt(2) (decorrelated latents) by t=50, so encoder
-distance carries no horizon information above one hop. That result stands;
-this probe changes the INSTRUMENT, not the hypothesis. "Inside the lookahead"
-is a property of the planner and its learned dynamics, not of latent
-distance -- so ask the planner: run ONE flat CEM plan from z0 toward z_goal
-and read its predicted terminal discrepancy
-
-    c* = rel(z_hat_H, z_goal) = ||z_hat_H - z_goal|| / ||z_hat_H||
-
-where z_hat_H is the predicted terminal latent of the plan CEM would hand to
-the env (the final elite mean -- exactly what WorldModelPolicy executes at
-replan 0). Predicted, not achieved: no environment stepping anywhere here.
-
-Gate rule: plan flat iff c* <= tau, with tau the verifier's own frozen
-accept threshold (0.20, criterion-floor-derived; every closed-loop sbatch
-pins --accept-tau 0.20). tau is READ from the floor probe's recorded args --
-same number, same unit, second use; no new constant, no sweep.
-
-Flat branch config: RH=2, flat's strongest short-range configuration per the
-existing sweep (batch/isca/run_reacher_strongbase.sbatch: "RH=2 flat hit
-95.7 at t25 but 67.6 at t100"). CEM params are the eval driver's defaults
-(300 samples / 30 steps / topk 30 / var_scale 1.0, seed 42). The plan is the
-same call the policy makes: swm CEMSolver + SubgoalCostModel with
-info_dict['subgoal_emb'] = z_goal (the degenerate flat case, terminal-L2^2
-math identical to the baseline arm's LeWM.criterion). Nothing reimplemented:
-CEMSolver is the shipped solver, the terminal rollout is
-probe_cost_snr.rollout_terminal, latents come via horizon_gate's validated
-make_latent_lookup (pixel-free dense path).
-
-Pre-registered condition (module constants, cells with zero dropped
-episodes): fire-rate >= 0.70 at t=25 and <= 0.15 at t=150. KNOWN RISK,
-stated not corrected: c* is the planner's own optimistic estimate under its
-learned dynamics and may under-report difficulty uniformly. If fire is high
-at EVERY t including t=150, that is model exploitation, not a horizon
-signal, and the gate fails for that reason -- the verdict flags it
-explicitly rather than passing on the t=25 check alone.
-
-Fails => the gate is dead a second time, tau/theta are not amended, and the
-decomposition tax stands as the finding. No Phase 2 without approval.
+After v1's encoder-distance signal failed (rel saturates by t=50), this
+probe asks the planner instead: run one flat CEM plan from z0 toward z_goal
+and read c* = rel(z_hat_H, z_goal), the predicted terminal discrepancy of
+the exact plan the policy would execute at replan 0. No environment
+stepping. Gate rule: plan flat iff c* <= tau, with tau read from the floor
+probe's recorded value (the verifier's threshold, never swept here). CEM
+parameters are the eval driver's defaults through the shipped solver and
+cost model. Pre-registered kill condition on fire-rate separation, with a
+declared model-exploitation flag if fire stays high at every horizon.
 """
 
 from __future__ import annotations

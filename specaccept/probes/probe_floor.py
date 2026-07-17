@@ -1,29 +1,12 @@
-"""Floor probe: is tau a tuned hyperparameter or a measured property of the
-stack?
+"""Floor probe: derive tau and k from offline measurements of the stack.
 
-The spec-accept verifier tests rel = ||z_now - tgt|| / ||z_now||. Hypothesis:
-the swept optimum tau* is the resolution floor of the latent space rather
-than a tuned constant; a discrepancy smaller than the encoder's precision
-cannot be verified, so re-drafting below the floor is re-drafting on noise.
-If true, tau is derivable from one offline measurement and portable to
-unseen encoders.
-
-Three measurements, all in the accept test's own units (||a-b||/||a||):
-
-  A. Temporal floor: rel distance between consecutive frames z_t, z_{t+1};
-     reference scale is disp at the subgoal stride S.
-  B. Criterion floor (primary): rel distance between frames from different
-     episodes whose ground-truth states are equivalent under the benchmark's
-     own success criterion; the resolution at which latent distance stops
-     being physically meaningful.
-  C. Sampler dispersion per DDIM step count k: repeat draws of the
-     position-1 waypoint from identical conditioning, plus bias to the k=50
-     mean. Separates an encoder floor (B k-independent, C moving with k)
-     from sampler noise (tau* tracking C).
-
-The verdict logic is printed at the end: tau* within the criterion floor's
-range is floor-consistent, and dispersion crossing the floor at small k
-explains the k-cliff. No CEM, no closed loop; one GPU, minutes.
+Three measurements in the accept test's unit, rel(a, b) = ||a-b|| / ||a||:
+(A) temporal floor, consecutive-frame distance; (B) criterion floor, the
+primary tau basis: distance between frames whose ground-truth states are
+equivalent under the benchmark's own success criterion; (C) per-k sampler
+dispersion and bias to the k=50 mean, the k basis. Rejecting below the
+criterion floor is re-drafting on noise, so tau is set to the floor itself.
+Offline only: no CEM, no closed loop; one GPU, minutes per environment.
 """
 
 from __future__ import annotations
