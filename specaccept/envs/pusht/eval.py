@@ -25,7 +25,7 @@ from specaccept import encoder
 from specaccept.sources import (SubgoalCostModel, OracleSubgoalSource,
                                     GDMSubgoalSource, DSparkSubgoalSource,
                                     SpecAcceptSubgoalSource, RegressorSubgoalSource,
-                                    CstarRetireSource,
+                                    CstarRetireSource, LerpSubgoalSource,
                                     build_oracle_table, make_ffjepa_policy)
 
 
@@ -59,8 +59,12 @@ def parse_args():
                    help="swm dataset name (box: resolved under STABLEWM_HOME); --h5 used for oracle/state")
     # what to evaluate
     p.add_argument("--subgoal", choices=["oracle", "gdm", "baseline", "dspark", "specaccept",
-                                         "regressor", "unified"],
+                                         "regressor", "unified", "lerp"],
                    default="oracle")
+    p.add_argument("--lerp-frac", type=float, default=0.5,
+                   help="lerp source: waypoint at this fraction along the latent segment "
+                        "from the CURRENT latent to the goal (re-anchored each replan); "
+                        "frac=1.0 degenerates to flat planning (instrumented-flat tautology)")
     p.add_argument("--regressor-ckpt", default=None,
                    help="train_regressor.py checkpoint (--subgoal regressor)")
     p.add_argument("--accept-tau", type=float, default=0.2,
@@ -429,6 +433,9 @@ def main():
                                                      n_steps=args.gdm_steps, seed=cem_seed,
                                                      tau=args.accept_tau,
                                                      record=bool(args.dump_traces))
+                elif args.subgoal == "lerp":
+                    source = LerpSubgoalSource(n_envs=args.num_eval, device=args.device,
+                                               frac=args.lerp_frac)
                 elif args.subgoal == "unified":
                     source = CstarRetireSource(gdm_planner, model, n_envs=args.num_eval,
                                                device=args.device, n_steps=args.gdm_steps,

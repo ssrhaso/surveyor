@@ -92,6 +92,8 @@ def parse_args():
                    help="oracle subgoal table stride (oracle arm only)")
     p.add_argument("--dump-traces", default=None,
                    help="path (.pt): per-episode success flags + per-replan latents")
+    p.add_argument("--time-instrument", action="store_true",
+                   help="CUDA-synced drafter/CEM wall-clock per episode (timing figure)")
     return p.parse_args()
 
 
@@ -293,6 +295,7 @@ def main():
         else:
             source = OracleSubgoalSource(table, device=args.device)
         policy = PolicyCls(cost_model=cost_model, subgoal_source=source,
+                           time_instrument=args.time_instrument,
                            solver=solver, config=config, process=process, transform=transform)
     world.set_policy(policy)
     metrics = world.evaluate(
@@ -302,6 +305,15 @@ def main():
     sr = metrics["success_rate"]
     n_succ = int(metrics["episode_successes"].sum())
     world.close()
+
+    if args.time_instrument and not is_baseline:
+        t_d, t_c = policy.t_drafter, policy.t_cem
+        t_tot = t_d + t_c
+        print(f"[timing] drafter={t_d:.3f}s cem={t_c:.3f}s total={t_tot:.3f}s "
+              f"drafter_frac={100.0 * t_d / max(t_tot, 1e-9):.2f}% "
+              f"per_episode_ms={{'drafter_ms': {1000.0 * t_d / max(args.num_eval, 1)}, "
+              f"'cem_ms': {1000.0 * t_c / max(args.num_eval, 1)}, "
+              f"'total_ms': {1000.0 * t_tot / max(args.num_eval, 1)}}}")
 
     if args.subgoal == "horizon_gated":
         dec = int(source._decided.sum())
