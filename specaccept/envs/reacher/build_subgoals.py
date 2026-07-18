@@ -1,12 +1,9 @@
 """Subgoal-dataset builder for Reacher.
 
-Reacher analog of the PushT builder with one structural difference: the LeWM
-Reacher dataset is random-policy data, so there are no successful demos to
-filter and every considered episode is kept. Because random walks are
-undirected, the Reacher drafter must be goal-conditioned (train_drafter
---goal-cond --goal-rule window); the hindsight window goal is drawn from
-these latents at training time, so this builder encodes every frame
-(--stride 1) of every episode.
+Reacher analog of the PushT builder. The dataset is random-policy data, so
+no success filter applies and the drafter must be goal-conditioned; every
+frame of every episode is encoded (stride 1) so hindsight window goals can
+be drawn at training time.
 """
 
 from __future__ import annotations

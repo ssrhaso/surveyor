@@ -1,15 +1,9 @@
 """Subgoal-dataset builder for PushT (offline).
 
 Builds per-episode stride-H subgoal-latent sequences from successful expert
-episodes in the frozen encoder's 192-d latent space:
-
-  1. Success filter: keep an episode iff its final block pose reaches the
-     canonical target under the env's exact eval_state (20 deg headline; the
-     stricter 5 deg subset is recorded as a per-episode flag). The agent term
-     is neutralized, giving a block-only criterion.
-  2. Stride-H frame subsample.
-  3. Encode the frames with the frozen encoder.
-  4. Pack to a single .pt with metadata.
+episodes: success-filter against the canonical target (block-only criterion,
+with the strict 5 deg subset flagged per episode), subsample at stride H,
+encode with the frozen encoder, and pack to one .pt with metadata.
 """
 
 from __future__ import annotations

@@ -1,16 +1,10 @@
 """Subgoal-dataset builder for OGBench-Cube (single).
 
-Cube analog of the PushT/Reacher builders. Cube demonstrations are EXPERT and
-goal-directed (the arm moves the cube to a target), so --- unlike Reacher's
-random-policy data --- the data flows toward goals and the primary drafter is
-GOAL-FREE (the PushT regime; 2x2 map). Every episode is a successful demo, so
-no success filter is applied; we encode dense (--stride 1) frames of every
-episode so train_gdm --subgoal-step S can carve any stride from one file.
-
-Derive-first note: this builder only touches the frozen quentinll/lewm-cube
-encoder and the dataset; it does not read tau/k. Those come from
-specaccept.probes.probe_floor and are pre-registered before the closed-loop
-battery.
+Cube analog of the PushT/Reacher builders. Every episode is a successful
+expert demo, so no success filter applies; dense (stride-1) frames of every
+episode are encoded so training can carve any stride from one file. Touches
+only the frozen cube encoder and the dataset; tau and k come from the floor
+probe, registered separately.
 """
 
 from __future__ import annotations

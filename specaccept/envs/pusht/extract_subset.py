@@ -1,13 +1,7 @@
-"""Extract a small, self-contained subset h5 covering only the episodes needed
-for specific eval conditions, for transfer to hosts without the full dataset.
-
-The CEM rollout uses the live PushT env; the h5 is read only for reset state,
-the goal image, and (oracle mode) a few subgoal frames per episode, so the
-required episode set is small. Full per-episode data is copied and remapped
-to a compact 0..K-1 index, so the subset file is schema-identical to the
-original and works as a drop-in --h5 replacement. Also writes one
-episodes-file JSON of [episode_idx, start_step] pairs per goal-offset; pass
-it to the eval driver via --episodes-file for a reproducible episode set.
+"""Extract a small self-contained subset h5 for specific eval conditions,
+for hosts without the full dataset. Episodes are copied and remapped to a
+compact index (schema-identical, drop-in --h5 replacement), and one
+episodes-file JSON per goal-offset is written for --episodes-file.
 """
 
 from __future__ import annotations
