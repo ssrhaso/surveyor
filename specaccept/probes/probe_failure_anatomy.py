@@ -1,17 +1,8 @@
 """Failure anatomy from closed-loop --dump-traces files.
 
-For each failed episode (strict 5-degree criterion), reconstructs the latent
-trajectory toward the goal from the per-replan (z_cond, z_next) trace and
-buckets the failure:
-
-  near_miss : converged, but the terminal pose missed the tolerance.
-  stuck     : distance stops improving in the last third while still far.
-  diverged  : final distance far worse than the episode's own minimum.
-  unreachable_subgoals : commanded latent step chronically much larger than
-              the achieved step.
-
-Buckets are checked in that order; first match wins. Successful episodes are
-reported as the reference distribution.
+Reconstructs each failed episode's latent trajectory from the per-replan
+trace and buckets it (first match wins): near_miss, stuck, diverged, or
+unreachable_subgoals. Successful episodes are the reference distribution.
 """
 
 from __future__ import annotations

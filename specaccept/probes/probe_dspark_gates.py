@@ -1,21 +1,10 @@
-"""Offline gate probes for the DSpark/GDM direction: three probes, no CEM,
-one data load.
+"""Offline gate probes for the DSpark/GDM direction (no CEM, one data load).
 
-A1  Few-step-draft acceptance curve. DDIM is deterministic given x_T (eta=0),
-    so with a matched generator seed the k-step draft and the 50-step
-    reference differ only in step count. Reports per-k rel_err, distance to
-    the matched-seed reference, and across-seed spread.
-
-A2  Speculative-acceptance simulator (the decisive gate). Demo-replay proxy
-    for the closed loop: draft the N-block, take the demo's next frame latent
-    as the achieved state, accept iff the relative distance is within tau,
-    re-draft on reject or exhaustion. All drafts are precomputed once per
-    hop, so every tau sees identical drafts. Reports per-tau diffusion-call
-    ratio, mean accepted depth, per-position acceptance, and consumed-subgoal
-    error. Acceptance here is an optimistic bound on the closed loop.
-
-A3  m+1 posterior multimodality: K sampler draws per condition with a
-    per-condition 2-means separation test.
+A1: few-step-draft acceptance curve (matched-seed DDIM, per-k error to the
+50-step reference). A2: speculative-acceptance simulator, a demo-replay
+proxy for the closed loop reporting per-tau call ratio, accepted depth, and
+consumed-subgoal error (an optimistic bound). A3: posterior multimodality
+via repeat draws with a per-condition two-means separation test.
 """
 
 from __future__ import annotations

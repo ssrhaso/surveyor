@@ -1,23 +1,10 @@
-"""CEM cost-signal SNR probe: is the cost landscape at a fine stride
-informative, or flat relative to noise?
+"""CEM cost-signal SNR probe: is the fine-stride cost landscape informative
+or flat relative to noise?
 
-Measured in the model CEM actually optimizes (frozen-predictor rollout, the
-SubgoalCostModel math), with real demo action blocks as candidates. Per
-end-anchored window and per stride S in {5, 25}: subgoal = true E(t+S);
-candidates = the window's own true action block, K decoy blocks from other
-success episodes (the same decoy windows serve both strides), and an
-all-zeros hold block.
-
-Metrics (mean over windows):
-  true_pct : fraction of decoys costlier than the true continuation block
-             (0.5 = chance = degenerate).
-  cv       : std/mean of decoy costs (cost-landscape dynamic range).
-  best_gap : (median - min)/median of decoy costs.
-  act_sens : normalized per-dim std of the predicted terminal latent across
-             candidates.
-  hold_pct : fraction of decoys costlier than the zeros block.
-
-CPU-friendly; the predictor is small.
+Scores real demo action blocks against decoys in the exact model CEM
+optimizes (frozen-predictor rollout, SubgoalCostModel cost) per stride,
+reporting the fraction of decoys costlier than the true continuation,
+decoy-cost dispersion, and terminal-latent action sensitivity. CPU-friendly.
 """
 
 from __future__ import annotations
