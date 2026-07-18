@@ -1,11 +1,7 @@
-"""Shared I/O for the frozen LeWM world model: model loading, frame encoding
-into the 192-d latent space, the canonical PushT target, and tolerance
-parameterized copies of the env success criteria.
-
-Two load paths produce the identical frozen model: source="pretrained" loads
-the published checkpoint via stable_worldmodel, and source="local"
-reconstructs the architecture from a directory with config.json and weights.pt
-(no hydra). The encoder and predictor are never trained or unfrozen here.
+"""Shared I/O for the frozen LeWM world model: loading, frame encoding, the
+canonical PushT target, and tolerance-parameterized success criteria. The
+pretrained and local load paths produce the identical frozen model; nothing
+is trained or unfrozen here.
 """
 
 from __future__ import annotations

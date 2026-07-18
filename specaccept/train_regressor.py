@@ -1,13 +1,7 @@
-"""Train the deterministic z_cond -> N-block subgoal regressor (JointMLP).
-
-The regression arm of the diffusion-vs-regression closed-loop comparison.
-Trains on the same subgoal file, mask population, and sliding-window pair
-construction as train_drafter (build_pairs is reused), so architecture and
-objective are the only differences vs the GDM.
-
-Usage:
-    python -m specaccept.train_regressor --subgoals <dense.pt> \
-        --subgoal-step <S> --out <ckpt.pt> --device cuda
+"""Train the deterministic z_cond -> N-block subgoal regressor (JointMLP),
+the regression arm of the diffusion-vs-regression comparison. Reuses
+train_drafter's data pipeline, so architecture and objective are the only
+differences vs the GDM.
 """
 
 from __future__ import annotations

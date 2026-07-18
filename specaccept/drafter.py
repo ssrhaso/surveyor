@@ -1,15 +1,8 @@
-"""GDM latent diffusion planner: model, diffusion process, and checkpoint I/O.
-
-A conditional DDPM over a length-N sequence of 192-d subgoal latents,
-conditioned on the current latent z_m and the diffusion timestep, with a DiT
-backbone (adaLN-Zero conditioning) trained with the standard epsilon
-prediction objective.
-
-All computation is in the frozen LeWM encoder's latent space. The DM operates
-on per-dim standardized latents; sampled outputs are inverted back to native
-encoder space. The standardization stats are computed once over the training
-set and stored in the checkpoint. Imported by train_drafter.py and the eval
-drivers; never touches the frozen LeWM.
+"""GDM latent diffusion planner: model, diffusion process, and checkpoint
+I/O. A conditional DDPM over length-N subgoal latent sequences (DiT
+backbone, epsilon objective) operating on per-dim standardized latents with
+the stats stored in the checkpoint and inverted on sampling. Never touches
+the frozen LeWM.
 """
 
 from __future__ import annotations

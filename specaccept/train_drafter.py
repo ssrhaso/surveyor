@@ -1,16 +1,10 @@
 """Train the GDM latent diffusion planner on cached subgoal latents.
 
-Trains a conditional DDPM (DiT backbone, WG=1, N=3 future subgoals) on the
-subgoal latents produced by the env builders; the frozen LeWM is not needed.
-Training pairs per episode: condition z[m], target [z[m+1], .., z[m+N]].
---window-rule selects how windows are formed at episode end: "clamp" (default)
-repeats the final subgoal, "full" requires a complete N-window. Latents are
-per-dim standardized for training; the stats are stored in the checkpoint and
-inverted at inference so sampled subgoals return to native encoder space.
-
-Note: the argparse defaults do not reproduce the faithful baseline
-gdm_faithful.pt. The canonical recipe (LeWM optimizer settings plus dense
-data) lives in run_recipe.sh (eps) and run_vpred.sh (v); reproduce from there.
+Conditional DDPM (DiT backbone, N=3 future subgoals) over the env builders'
+latents; the frozen LeWM is not needed. Latents are per-dim standardized for
+training, with the stats stored in the checkpoint and inverted at inference.
+The argparse defaults do not reproduce the faithful baseline; the canonical
+recipe lives in run_recipe.sh and run_vpred.sh.
 """
 
 from __future__ import annotations
