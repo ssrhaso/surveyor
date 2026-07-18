@@ -1,15 +1,10 @@
-"""Pre-gate for the stride-spacing direction: is a fine-stride subgoal target
-well-posed in the frozen encoder's latent space?
+"""Stride pre-gate: is a fine-stride subgoal target well-posed in latent
+space?
 
-Measures, over successful expert episodes and random anchors t, the realized
-latent displacement disp(S) = ||E(t+S) - E(t)|| / ||E(t+S)|| for S in
-{1, 5, 10, 15, 25} (S=1 is the encoder noise floor), plus two directional
-checks: cos_long(S) (does the short move point where the stride-25 move
-goes) and cos_succ(S) (do successive S-segments continue in a consistent
-direction). If disp(5) collapses toward disp(1), the fine-stride target is
-degenerate regardless of drafter.
-
-Requires only the h5 and the frozen encoder; CPU is sufficient.
+Measures the realized latent displacement disp(S) per stride (S=1 is the
+encoder noise floor) plus directional consistency checks; if disp at the
+fine stride collapses toward the noise floor, the target is degenerate
+regardless of drafter. Needs only the h5 and the frozen encoder.
 """
 
 from __future__ import annotations

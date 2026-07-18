@@ -1,11 +1,7 @@
-"""Sampled per-position fidelity probe for the N-position GDM subgoal block:
-does predicted quality degrade with block position (suffix decay)?
-
-Samples the full (B, N, D) block with the real diffusion sampler
-(GDMPlanner.sample_sequence) and scores each position against per-position
-ground truth E(frame at start+(k+1)*stride), reporting the diag_gdm metrics
-(rel_err, cos_move, collapse) broken out by position. Reuses an existing
-episodes-file whose episodes satisfy ep_len > start + N*stride.
+"""Per-position fidelity probe for the N-position subgoal block: does
+sampled quality degrade with block position (suffix decay)? Samples full
+blocks with the real diffusion sampler and reports the diag_gdm metrics
+broken out by position, from an existing episodes-file.
 """
 
 from __future__ import annotations

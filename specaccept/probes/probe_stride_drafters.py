@@ -1,13 +1,7 @@
-"""Offline block-quality battery for stride-S GDM drafters: per-position
-sampled fidelity (suffix decay) plus across-seed conditional spread, in one
-pass.
-
-Per-position rel_err/cos_move against ground truth E(t+(k+1)*S) reproduces
-the probe_suffix_decay readout at arbitrary stride. Across-seed conditional
-spread (same input, K sampler seeds) is the offline signal validated against
-closed-loop success rate; a drafter with collapsed spread is flagged here
-before any closed-loop spend. Windows use the same episodes-file convention
-as the anchor, so stride-25 numbers are directly comparable.
+"""Offline block-quality battery for stride-S drafters: per-position sampled
+fidelity (suffix decay) plus across-seed conditional spread in one pass.
+Collapsed spread is flagged here before any closed-loop spend; windows reuse
+the anchor's episodes-file convention so strides are directly comparable.
 """
 
 from __future__ import annotations
