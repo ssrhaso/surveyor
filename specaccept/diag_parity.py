@@ -1,11 +1,6 @@
-"""Parity diagnostic (no CEM): locate any oracle-vs-baseline discrepancy.
-
-(1) Latent parity: encoder.encode_frames vs the harness goal-encode path
-    (img_transform + LeWM.encode) on each eval goal frame.
-(2) Cost parity: SubgoalCostModel's terminal L2^2 vs LeWM.get_cost on the
-    same goal latent and candidates.
-
-Fast (a few encodes and one rollout); run where LeWM.get_cost is available.
+"""Parity diagnostic (no CEM): latent parity between the two encode paths
+and cost parity between SubgoalCostModel and LeWM.get_cost on identical
+inputs. Fast; run where LeWM.get_cost is available.
 """
 from __future__ import annotations
 

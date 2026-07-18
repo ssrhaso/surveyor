@@ -1,19 +1,9 @@
-"""GDM subgoal-prediction diagnostic, run entirely offline (no CEM rollouts).
+"""Offline GDM subgoal-prediction diagnostic (no CEM rollouts).
 
-Compares the GDM's predicted next subgoal against the true next latent under
-two conditioning distributions:
-
-  A. In-distribution:   condition on a stride-aligned training subgoal.
-  B. Eval-distribution: condition on E(frame) at an arbitrary eval start.
-
-Metrics per probe: rel_err, cos_pred, cos_move (direction of the predicted
-move), noop_err (predict-no-change baseline), and collapse (prediction spread
-over target spread; << 1 indicates mean prediction). A good A with a bad B
-indicates a conditioning-distribution mismatch; both bad indicates capacity
-or undertraining.
-
-Usage:
-  python -m specaccept.diag_gdm --gdm-ckpt <ckpt> --subgoals <pt> --h5 <h5>
+Scores the predicted next subgoal against ground truth under in-distribution
+and eval-distribution conditioning (rel_err, cos metrics, no-op baseline,
+collapse). A gap between the two conditions indicates conditioning mismatch;
+both bad indicates capacity or undertraining.
 """
 
 from __future__ import annotations

@@ -1,12 +1,7 @@
-"""CPU smoke test for the GDM latent diffusion planner.
-
-Validates the logic on tiny synthetic tensors: DiT forward shapes and noise
-schedule sanity, training loss decreasing on a fixed batch, DDIM sampling
-shapes, GDMPlanner standardization round-trip, GDMSubgoalSource caching, and
-checkpoint save/load reproducibility. No frozen LeWM, h5 data, or
-stable_worldmodel required.
-
-Usage: python -m specaccept.test_gdm_cpu
+"""CPU smoke test for the GDM latent diffusion planner: shapes, schedule
+sanity, loss decrease, sampling, standardization round-trip, source caching,
+and checkpoint reproducibility on tiny synthetic tensors. No frozen LeWM,
+h5, or stable_worldmodel required.
 """
 
 from __future__ import annotations
