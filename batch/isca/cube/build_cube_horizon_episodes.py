@@ -1,26 +1,12 @@
 """Fixed-population horizon episode file for OGBench-Cube.
 
-Two protocol bugs this fixes (both found 2026-07-14 by the vacuous-cell diagnostic):
-
- 1. Cube expert episodes are NOT single goal-directed trajectories: the collector
-    repeatedly re-samples a new target within one episode (data_collection mode), so
-    the expert performs a SEQUENCE of pick-and-places. The PushT convention
-    (goal = final frame, start = ep_len-1-t) is therefore meaningless here -- for some
-    offsets the cube at the start frame is coincidentally already where it ends up, so
-    the cell is VACUOUS (100% of episodes already solved at t=25 and t=100; every arm
-    trivially scores 100%). We instead take goal = frame at start + t (a genuine
-    t-step-ahead hindsight goal, the Reacher convention).
-
- 2. Independent per-offset sampling gives a DIFFERENT population at every offset (the
-    PushT t75-vs-t150 lesson). We emit ONE fixed set of (episode, start) pairs, valid
-    for the largest offset, reused at every t -- so horizon is the only variable.
-
-Non-vacuity filter: require the cube to actually move by > --min-disp between the start
-and the goal at EVERY offset evaluated, so no cell degenerates to "already solved".
-
-Usage:
-  python batch/isca/cube/build_cube_horizon_episodes.py --h5 <cube.h5> \
-      --out cube_horizon.ep.json --n 128 --offsets 25 50 75 100 150 --min-disp 0.08
+Uses hindsight goals at start + t (small offsets under the final-frame
+convention are vacuous: the cube is already at its target) and one fixed
+(episode, start) set reused at every offset so horizon is the only
+variable. A non-vacuity filter requires the cube to move by more than
+--min-disp between start and goal at every evaluated offset. NOTE: the
+filter over-selects hard episodes at small offsets; the certified cube
+protocol uses per-seed sampling at offset 150 instead (see cube eval).
 """
 from __future__ import annotations
 

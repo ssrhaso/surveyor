@@ -1,19 +1,10 @@
 """Build the fixed-population episode file for the Reacher horizon sweep.
 
-Samples n (episode, start) pairs from the HOLDOUT episodes (>= episode_min)
-whose start is valid for the LARGEST sweep offset, so ONE file serves every
---goal-offset in {25, 50, 75, 100}: the start states are byte-identical across
-the whole curve and horizon is the only variable. This is the t75-vs-t150
-sampling-artifact lesson (PushT audit) applied up front -- per-offset sampling
-gives each offset a different episode population and confounds horizon with
-population. Reacher improves on the PushT reindexing scheme: because goals sit
-at start+offset (not pinned to episode ends), the same START can simply reach
-further, rather than the start moving backwards.
-
-Deterministic given --seed, so concurrent array tasks can regenerate it
-identically. Usage (inside the sweep sbatch, on the box):
-  python batch/build_reacher_horizon_episodes.py --h5 <reacher.h5> \
-      --out reacher_horizon.episodes.json
+Samples n (episode, start) pairs from holdout episodes whose starts are
+valid for the largest sweep offset, so one file serves every goal-offset:
+starts are byte-identical across the curve and horizon is the only variable
+(the per-offset-sampling confound, applied up front). Deterministic given
+--seed, so concurrent array tasks regenerate it identically.
 """
 import argparse
 import json
