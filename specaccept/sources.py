@@ -21,11 +21,9 @@ from specaccept import encoder
 
 # Cost model: swap the goal-latent source, keep LeWM's rollout + criterion math
 class SubgoalCostModel(nn.Module):
-    """Wrap a frozen LeWM; cost = terminal L2^2 of the predictor rollout to a
-    per-env subgoal latent carried in info_dict['subgoal_emb'].
-
-    The class is an nn.Module so CEMSolver can read `next(model.parameters())`
-    for dtype/device. It owns no parameters of its own (LeWM stays frozen).
+    """Frozen-LeWM cost model: terminal L2^2 of the predictor rollout to the
+    per-env subgoal latent in info_dict['subgoal_emb']. An nn.Module only so
+    CEMSolver can read parameter dtype/device; owns no parameters itself.
     """
 
     SUBGOAL_KEY = "subgoal_emb"
@@ -44,25 +42,16 @@ class SubgoalCostModel(nn.Module):
 
     @staticmethod
     def _terminal_l2sq(predicted_emb: torch.Tensor, z: torch.Tensor) -> torch.Tensor:
-        """Terminal L2^2 of each candidate's final predicted latent vs subgoal z.
-
-        Matches LeWM.criterion's math exactly: F.mse_loss(pred[...,-1:,:],
-        goal[...,-1:,:], reduction='none').sum over (T=1, D) == sum_d (pred-z)^2.
-        predicted_emb: (B,S,L,D); z: (B,D) -> cost (B,S).
-        """
+        """Terminal L2^2 of each candidate's final predicted latent vs z;
+        math-identical to LeWM.criterion. (B,S,L,D) x (B,D) -> (B,S)."""
         pred_terminal = predicted_emb[..., -1, :]          # (B,S,D)
         return ((pred_terminal - z.unsqueeze(1)) ** 2).sum(dim=-1)  # (B,S)
 
     def get_cost(self, info_dict: dict, action_candidates: torch.Tensor) -> torch.Tensor:
-        """info_dict values are (B, S, ...) as expanded by CEMSolver. Reads the
-        per-env subgoal latent, rolls out the frozen predictor under the
-        candidates (reusing LeWM.rollout), and returns terminal L2^2 to the
-        subgoal. IGNORES info_dict['goal'] (the goal image).
-
-        Cost is computed directly (not via LeWM.criterion) so behavior is
-        independent of swm-version criterion-shape conventions; the math is
-        identical to LeWM.criterion (terminal L2^2). MUTATES info_dict (like
-        LeWM.get_cost) so rollout's 'emb' cache persists across CEM iterations.
+        """Roll out the frozen predictor under the candidates and return
+        terminal L2^2 to the subgoal latent, ignoring info_dict['goal'].
+        Mutates info_dict (as LeWM.get_cost does) so the 'emb' cache persists
+        across CEM iterations.
         """
         assert self.SUBGOAL_KEY in info_dict, (
             f"info_dict missing '{self.SUBGOAL_KEY}'; FFJEPAPolicy must inject it"
@@ -108,13 +97,9 @@ class OracleSubgoalSource:
 
 
 class GDMSubgoalSource:
-    """Goal-free subgoal source backed by a trained GDM latent diffusion planner.
-
-    At each replan boundary the policy encodes the current frame and passes it
-    as `obs_latent`; the planner conditions on it and samples the immediately
-    next subgoal z_{m+1} in native encoder space. Subgoals are sampled only at
-    replan and cached per env; sampling is deterministic given a seeded
-    generator.
+    """Every-step drafting source: at each replan, condition the GDM planner
+    on the achieved latent and sample the next subgoal z_{m+1} in native
+    encoder space. Cached per env; deterministic given the seeded generator.
     """
 
     needs_obs = True
@@ -320,10 +305,8 @@ class SpecAcceptSubgoalSource:
 
 
 class LerpSubgoalSource:
-    """Straight-line diagnostic source: the subgoal is a fixed fraction along
-    the latent segment from the current achieved latent to the goal latent,
-    re-anchored at every replan. Isolates the intrinsic cost of decomposition
-    from the data-meander cost of dataset-derived oracles; frac=1.0
+    """Straight-line diagnostic source: subgoal = a fixed fraction along the
+    current-to-goal latent segment, re-anchored each replan. frac=1.0
     degenerates to flat goal planning. A diagnostic arm, not a method."""
 
     needs_obs = True
@@ -568,16 +551,11 @@ def load_dspark_heads(path, device):
 
 
 class DSparkSubgoalSource:
-    """DSpark subgoal source: confidence-scheduled speculative decoding with
-    semi-autoregressive refinement over the frozen GDM's drafted block.
-
-    When a per-env committed block is exhausted, the frozen GDM re-drafts an
-    N-block from the current achieved latent, the DSparkHead refines it, and
-    the ConfidenceHead sets the commit depth k* = max{k : prod_{i<=k} c_i >
-    theta} (adaptive) or a fixed k. Committed subgoals are consumed one per
-    replan, so the diffusion re-draft runs once per k* replans. Reduces to
-    GDMSubgoalSource when commit='fixed' with fixed_k=1. Same current()
-    contract as GDMSubgoalSource.
+    """DSpark source: confidence-scheduled commitment with semi-autoregressive
+    refinement over the frozen GDM's drafted block. The confidence head sets
+    the commit depth (adaptive or fixed); committed subgoals are consumed one
+    per replan, so re-drafting runs once per depth. Reduces to
+    GDMSubgoalSource at fixed depth 1.
     """
 
     needs_obs = True
@@ -670,12 +648,9 @@ class DSparkSubgoalSource:
 @torch.no_grad()
 def build_oracle_table(h5_path, model, episodes_idx, start_steps, goal_offset,
                        stride=25, device="cpu", batch_size=256):
-    """Encode demo subgoal frames for each eval episode at rows
-    start, start+stride, ..., start+goal_offset (the goal frame), per env.
-
-    Returns list of (K_i, 192) tensors with K_i = goal_offset//stride + 1.
-    Uses encoder.encode_frames (matches the harness goal-encode path).
-    """
+    """Encode per-episode demo subgoal frames at start, start+stride, ...,
+    start+goal_offset. Returns a list of (K_i, 192) tensors via the harness
+    goal-encode path."""
     import h5py
 
     n_sg = goal_offset // stride + 1
