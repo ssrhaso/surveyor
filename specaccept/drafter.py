@@ -88,15 +88,9 @@ class GDMConfig:
 
 
 class GDM(nn.Module):
-    """DiT denoiser. Predicts the noise eps added to a length-N latent sequence,
-    conditioned on the WG conditioning latent(s) and the diffusion timestep.
-
-    forward(x_noised, cond, t):
-      x_noised : (B, N, latent_dim)   noised target subgoal sequence
-      cond     : (B, wg, latent_dim)  or (B, latent_dim) when wg==1  (standardized)
-      t        : (B,)                 diffusion timestep indices
-      returns  : (B, N, latent_dim)   predicted noise eps
-    """
+    """DiT denoiser over a length-N latent sequence, conditioned on the
+    conditioning latent(s) and diffusion timestep. forward(x_noised (B,N,D),
+    cond (B,wg,D) or (B,D), t (B,)) -> predicted noise (B,N,D)."""
 
     def __init__(self, cfg: GDMConfig | None = None, **kw):
         super().__init__()
@@ -164,17 +158,11 @@ def _cosine_alphas_cumprod(timesteps: int, s: float = 0.008) -> torch.Tensor:
 
 
 class GaussianDiffusion:
-    """DDPM training with DDIM (eta=0) or ancestral DDPM sampling.
-
-    Design knobs are flag-gated so an A/B comparison can flip exactly one:
-      parameterization : "eps" (predict the noise; default) or "v" (predict
-                         the velocity; Salimans & Ho 2022).
-      schedule         : "linear" beta (default) or "cosine" bar-alpha.
-      min_snr_gamma    : Min-SNR loss weighting (Hang et al. 2023) when > 0;
-                         0 (default) is plain MSE in the prediction space.
-
-    `pred_from_model` is the single place the parameterization is decoded, so
-    training loss, sampling, and diagnostics stay consistent by construction.
+    """DDPM training with DDIM (eta=0) or ancestral sampling. Flag-gated
+    knobs: parameterization ("eps" or "v"), schedule ("linear" or "cosine"),
+    and optional Min-SNR loss weighting. pred_from_model is the single place
+    the parameterization is decoded, keeping loss, sampling, and diagnostics
+    consistent by construction.
     """
 
     def __init__(self, timesteps: int = 1000, beta_start: float = 1e-4,
@@ -234,10 +222,8 @@ class GaussianDiffusion:
 
     def pred_from_model(self, model_out: torch.Tensor, x_t: torch.Tensor,
                         t: torch.Tensor):
-        """Map a model output to (x0_hat, eps_hat), interpreting it per the
-        active parameterization. This is the ONLY place eps/v is decoded, so the
-        1/sqrt(acp) amplification is confined to the eps path: for v the x0 map
-        uses bounded coefficients (sqrt(acp), sqrt(1-acp)) and cannot blow up."""
+        """Decode a model output to (x0_hat, eps_hat) per the active
+        parameterization; the only place eps/v is interpreted."""
         a, b = self._ab(t, x_t.ndim)
         if self.parameterization == "eps":
             eps = model_out
@@ -274,12 +260,10 @@ class GaussianDiffusion:
                     eta: float = 0.0, generator: torch.Generator | None = None,
                     goal: torch.Tensor | None = None,
                     noise_scale: float = 1.0) -> torch.Tensor:
-        """Deterministic DDIM sampling (eta=0). cond: (B, wg, D) or (B,D).
-        shape: (B, N, D). Returns x0 estimate in the DM's (standardized) space.
-        noise_scale (gamma) scales every injected noise draw: with eta=0 the
-        initial draw is the ONLY stochasticity, so gamma directly modulates the
-        drafter's conditional spread at inference (gamma=0 -> deterministic
-        mode-seeking sample; gamma=1 -> native; gamma>1 -> inflated spread)."""
+        """DDIM sampling (eta=0): cond (B,wg,D) or (B,D), shape (B,N,D) ->
+        x0 estimate in the DM's standardized space. With eta=0 the initial
+        draw is the only stochasticity, so noise_scale directly modulates the
+        conditional spread (0 = mode-seeking, 1 = native)."""
         B = shape[0]
         device = cond.device
         x = noise_scale * torch.randn(shape, device=device, generator=generator)
@@ -307,12 +291,10 @@ class GaussianDiffusion:
                     generator: torch.Generator | None = None,
                     goal: torch.Tensor | None = None, clip_x0: bool = False,
                     noise_scale: float = 1.0) -> torch.Tensor:
-        """Full DDPM ANCESTRAL sampling over all `timesteps` reverse steps (the LDP /
-        Diffusion-Policy default; pair with a small T, e.g. 100). Stochastic: draws
-        posterior noise at every step except t=0. Works for eps or v (both decoded via
-        pred_from_model). `n_steps` is ignored (DDPM visits every timestep). clip_x0
-        clamps the predicted x0 to [-1,1] each step (valid only for minmax-normalized
-        data, matching Diffusion Policy). Returns x0 estimate in the DM's space."""
+        """Ancestral DDPM sampling over every reverse step (n_steps ignored),
+        drawing posterior noise at each step except t=0. clip_x0 clamps the
+        predicted x0 to [-1,1] (minmax-normalized data only). Returns the x0
+        estimate in the DM's standardized space."""
         B = shape[0]
         device = cond.device
         x = noise_scale * torch.randn(shape, device=device, generator=generator)
@@ -341,12 +323,9 @@ class GaussianDiffusion:
 
 # Standardization (native E-space <-> DM space) + checkpoint bundle
 class GDMPlanner:
-    """Bundles the trained GDM, the diffusion process, and the per-dim
-    standardization stats. Converts native E-space latents to the DM's
-    standardized space, samples, and inverts back to native E-space.
-
-    `sample_next(z_cond_native, ...)` returns the IMMEDIATELY NEXT subgoal
-    z_{m+1} in native E-space (||z||~13.9) for closed-loop replanning.
+    """Bundles the trained GDM, diffusion process, and standardization stats:
+    converts native encoder-space latents in, samples, and inverts back out.
+    sample_next returns the immediately next subgoal z_{m+1} in native space.
     """
 
     def __init__(self, model: GDM, diffusion: GaussianDiffusion,
