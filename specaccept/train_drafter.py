@@ -111,25 +111,14 @@ def parse_args():
 
 def build_pairs(latents, lengths, offsets, mask, n_future, window_rule, step=1,
                 goal_rule="final", goal_gap=None, goal_gap_max=None):
-    """Build (condition, target) index pairs across all masked episodes.
-
-    condition = z[m]; target = [z[m+1*step], ..., z[m+N*step]]. With step=1 on a
-    stride-25 subgoal file this is the stride-aligned scheme. With step=25 on a
-    DENSE file (every frame encoded) the condition is ANY frame and the targets
-    are the subgoals 25/50/75 frames ahead -> sliding conditions, full phase
-    coverage (what the closed-loop eval actually feeds).
-
-    goal_rule (used only when the caller trains goal_cond):
-      final  = per-episode goal = z[last] (expert demos ending at the target).
-      window = hindsight window goal for random-policy data: goal index
-               gi = min(m + goal_gap, last), and target indices are clamped at
-               gi, so the block runs TO the goal and then repeats it (the clamp
-               semantics PushT gets for free from demos ending at the target).
-               With goal_gap_max set, the gap is sampled per pair, uniform in
-               [goal_gap, goal_gap_max] (uses the global numpy RNG - seeded in
-               main - so pair construction stays deterministic per --seed).
-
-    Returns conds (M,D), targets (M,N,D) as float32 tensors (native E-space).
+    """Build (condition, target) index pairs across all masked episodes:
+    condition z[m], targets [z[m+step], ..., z[m+N*step]]. On a dense file a
+    stride-size step gives sliding conditions with full phase coverage, which
+    is what the closed loop feeds. goal_rule (goal-conditioned training only):
+    "final" uses the episode's last latent; "window" uses a hindsight goal at
+    m+gap with targets clamped at the goal (gap sampled per pair when
+    goal_gap_max is set; deterministic per seed). Returns float32 conds (M,D)
+    and targets (M,N,D) in native encoder space.
     """
     D = latents.shape[1]
     gap = goal_gap if goal_gap is not None else n_future * step
