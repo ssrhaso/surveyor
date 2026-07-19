@@ -37,12 +37,8 @@ def tworoom_success(dist_to_target: float, pos_thresh: float = TWOROOM_POS_THRES
 
 
 def eval_state_tol(goal_state, cur_state, angle_deg, pos_thresh: float = POS_THRESH):
-    """Tolerance-parameterized copy of PushT.eval_state (env.py:347).
-
-    Verified byte-identical to the bound env method at 20 deg (pi/9). Returns
-    only the success bool (the env also returns a raw state distance we don't
-    need for filtering).
-    """
+    """Tolerance-parameterized copy of PushT.eval_state, verified identical
+    to the bound env method at 20 deg. Returns the success bool only."""
     goal_state = np.asarray(goal_state, dtype=np.float64)
     cur_state = np.asarray(cur_state, dtype=np.float64)
     pos_diff = np.linalg.norm(goal_state[:4] - cur_state[:4])
@@ -52,14 +48,10 @@ def eval_state_tol(goal_state, cur_state, angle_deg, pos_thresh: float = POS_THR
 
 
 def canonical_target_for(final_state):
-    """Build the 7-D canonical goal_state for a given episode's final state.
-
-    Block xy/angle are set to the canonical target; agent xy and velocity are
-    copied from `final_state` so they contribute 0 to eval_state's 4-D pos_diff.
-    This realizes the "did the BLOCK reach the target" criterion using the exact
-    env math (the env's pos_diff includes the agent, for which no canonical rest
-    pose exists; neutralizing it matches the paper's block-only success prose).
-    """
+    """Build the 7-D canonical goal_state for an episode's final state: block
+    pose set to the canonical target, agent terms copied from final_state so
+    they contribute zero, realizing the block-only success criterion with the
+    exact env math."""
     final_state = np.asarray(final_state, dtype=np.float64)
     target = final_state.copy()
     target[2:4] = TARGET_BLOCK_XY
@@ -175,12 +167,9 @@ def preprocess_frames(frames):
 
 @torch.no_grad()
 def encode_frames(model, frames, device="cpu", batch_size=256):
-    """frames: (N,H,W,3) uint8 -> (N,192) latent (CLS -> projector).
-
-    Identical encode path to LeWM.encode (info['pixels'] shape (b,1,3,224,224),
-    take emb[:,0]). Runs in eval() so the projector BatchNorm uses running stats
-    -> latents are independent of batch composition.
-    """
+    """Encode frames (N,H,W,3) uint8 to (N,192) latents via the exact
+    LeWM.encode path. Runs in eval() so projector BatchNorm uses running
+    stats, making latents independent of batch composition."""
     assert not model.training, "model must be in eval() before encoding"
     x = preprocess_frames(frames)
     out = []
