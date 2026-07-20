@@ -4,8 +4,8 @@ TwoRoom analog of the PushT driver; reuses the policy, cost model, subgoal
 sources, and episode sampling unmodified. Simpler than PushT: the env's own
 step() sets terminated when dist(agent, target) < 16 and world.evaluate reads
 that flag directly, so no eval_state monkeypatch or angle sweep is needed.
-State/goal callables map to TwoRoomEnv's _set_state/_set_goal_state methods
-and the h5's state/goal_state columns.
+State and goal callables map to TwoRoomEnv's _set_state/_set_goal_state and
+the h5's state/goal_state columns.
 """
 
 from __future__ import annotations
@@ -46,12 +46,12 @@ def parse_args():
     p.add_argument("--eval-filter", choices=["none", "success"], default="none",
                    help="restrict eval episodes to demos whose final frame reaches "
                         "within --pos-thresh of their OWN target (TwoRoom's own "
-                        "success rule) - the TwoRoom analog of PushT's success20/5.")
+                        "success rule); the TwoRoom analog of PushT's success20/5.")
     p.add_argument("--pos-thresh", type=float, default=encoder.TWOROOM_POS_THRESH)
     p.add_argument("--require-cross-room", action="store_true",
                    help="restrict eval episodes to ones whose agent and target START in "
                         "different rooms (the intended door-crossing task; ~48%% of "
-                        "collected episodes are trivially same-room -- see "
+                        "collected episodes are trivially same-room; see "
                         "build_subgoals_tworoom's matching training-side filter)")
     p.add_argument("--wall-center", type=float, default=112.0)
     p.add_argument("--episode-min", type=int, default=None,
