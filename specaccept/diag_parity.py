@@ -85,7 +85,7 @@ def main():
                              z_harness=z_harness, z_oracle=z_oracle)
     diffs = np.array(diffs)
     print("[LATENT parity] encode_frames vs harness img_transform+E:")
-    print(f"   worst|Δ|={diffs.max():.3e} mean={diffs.mean():.3e} "
+    print(f"   worst|diff|={diffs.max():.3e} mean={diffs.mean():.3e} "
           f"#>1e-4={(diffs > 1e-4).sum()} #>1e-3={(diffs > 1e-3).sum()} (of {len(diffs)})")
 
     # (2) cost parity on episode 0 (B=1,S=8)
@@ -107,7 +107,7 @@ def main():
         print("[COST parity] box LeWM.get_cost vs SubgoalCostModel (same goal latent):")
         print(f"   cost_box[:4] ={[round(x,4) for x in cb[:4].tolist()]}")
         print(f"   cost_mine[:4]={[round(x,4) for x in cm[:4].tolist()]}")
-        print(f"   max|Δ|={(cb - cm).abs().max().item():.3e}  argsort_match={order_match}")
+        print(f"   max|diff|={(cb - cm).abs().max().item():.3e}  argsort_match={order_match}")
     except Exception as e:
         import traceback; traceback.print_exc()
         print("[COST parity] box get_cost raised (expected on the broken source checkout):", repr(e))
