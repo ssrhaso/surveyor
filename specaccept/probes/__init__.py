@@ -9,4 +9,8 @@ Run as modules, e.g. `python -m specaccept.probes.probe_suffix_decay`.
   probe_dspark_gates        offline acceptance simulator (tau / call-ratio design)
   probe_failure_anatomy     classify closed-loop failures from --dump-traces
   probe_floor               encoder resolution floor vs sampler dispersion
+  horizon_gate              gate v1: encoder distance as a horizon signal (killed)
+  horizon_gate_cem          gate v2: planner c* as a horizon signal (killed)
+  gate_validity             post-mortem: routing signals vs recorded outcomes
+  route_horizon             gate v4: offline ternary router (flat2/flat5/spec)
 """

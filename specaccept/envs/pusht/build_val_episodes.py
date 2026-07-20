@@ -1,8 +1,9 @@
-"""Build a held-out episodes file for the DSpark closed-loop eval: the val
-episodes (episode_id % 5 == 0) of real_chains_n3.pt, disjoint from the DSpark
-head's training episodes, at a given goal_offset (start = ep_len-1-offset,
-matching sample_long). Output is an --episodes-file JSON for the PushT eval
-driver.
+"""Build a held-out episodes file for the DSpark closed-loop eval.
+
+Takes the val episodes (episode_id % 5 == 0) of real_chains_n3.pt, disjoint
+from the DSpark head's training episodes, at a given goal_offset
+(start = ep_len - 1 - offset, matching sample_long). Writes an
+--episodes-file JSON for the PushT eval driver.
 """
 import argparse, json
 import numpy as np, torch, h5py
