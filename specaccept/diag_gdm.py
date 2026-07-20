@@ -87,7 +87,7 @@ def teacher_forced(planner, cond_native, tgt_native, ts, gen_fn):
 
     GATE A caveat: for the v parameterization the x0 <- (x_t, v) map uses bounded
     coefficients, so a flat-low x0_relerr across ALL t is TRUE BY CONSTRUCTION
-    once the v_mse is small -- it only confirms the math is wired correctly, NOT
+    once the v_mse is small; it only confirms the math is wired correctly, NOT
     that sampled fidelity improved. The arbiter for "did it help" is GATE B
     (SAMPLED Probe B rel_err / cos_move below), never this curve.
     """
@@ -212,7 +212,7 @@ def main():
     # ones: a FAILED demo's future is exactly what a success-trained planner should
     # NOT predict, so the mixed mean conflates off-manifold phase with episode mix.
     # If B-success ~= Probe A and B-failed << it, the plateau is CONTAMINATION,
-    # not a diffusion/phase problem (H8) -- fix the EVAL set, not the model.
+    # not a diffusion/phase problem (H8): fix the EVAL set, not the model.
     ok = np.array([encoder.eval_state_tol(encoder.canonical_target_for(s), s, 20.0)
                    for s in finals], dtype=bool)
     okt = torch.from_numpy(ok)

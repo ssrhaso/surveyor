@@ -713,8 +713,8 @@ def make_ffjepa_policy(base_cls):
             # check (additive; a few numpy copies/step, only when opted in): the
             # FIRST info_dict['pixels']/['goal'] this policy ever sees per env is
             # the raw reset frame (get_action is called BEFORE env.step at t=0),
-            # and _frame_last is refreshed every call so the final overwrite --
-            # the call where info_dict['terminated'][i] first flips True -- holds
+            # and _frame_last is refreshed every call so the final overwrite
+            # (the call where info_dict['terminated'][i] first flips True) holds
             # the true terminal frame (env freezes afterward under reset_mode='wait').
             self.dump_frames = dump_frames
             self._frame_start = None
