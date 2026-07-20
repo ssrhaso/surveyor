@@ -1,12 +1,12 @@
 """Subgoal-dataset builder for TwoRoom.
 
 TwoRoom analog of the PushT builder (success filter, stride subsample,
-encode, pack) with a different success filter: the target is sampled per
-episode and recorded in the h5, so success is the final-row
-distance_to_target below the env threshold (see encoder.tworoom_success).
-Accepts multiple --h5 files, concatenated with per-episode source tags.
---require-cross-room drops episodes where agent and target start in the same
-room (about half the collected episodes are trivially same-room).
+encode, pack) with its own success rule: the target is sampled per episode
+and recorded in the h5, so success is the final-row distance_to_target below
+the env threshold (see encoder.tworoom_success). Accepts multiple --h5
+files, concatenated with per-episode source tags. --require-cross-room drops
+episodes where agent and target start in the same room (about half the
+collected episodes are trivially same-room).
 """
 
 from __future__ import annotations
@@ -41,7 +41,7 @@ def parse_args():
     p.add_argument("--sample-seed", type=int, default=0)
     p.add_argument("--require-cross-room", action="store_true", default=True,
                    help="drop episodes where agent and target start in the SAME room "
-                        "(no door-crossing needed) - the env's own target-sampling "
+                        "(no door-crossing needed); the env's own target-sampling "
                         "constraint that enforces this is disabled by default, so "
                         "~48%% of collected episodes are a trivial same-room task, "
                         "not the intended door-crossing one")
@@ -100,7 +100,7 @@ def main():
                   f"(mode={args.sample_mode})")
 
             # Pass 1: success filter (final distance-to-target) + optional
-            # cross-room filter (agent/target start in different rooms - the
+            # cross-room filter (agent/target start in different rooms, the
             # intended task; see --require-cross-room help)
             kept_rows_per_ep = []
             n_drop = 0
@@ -132,7 +132,7 @@ def main():
                   f"({100*n_kept_file/max(len(ep_ids),1):.1f}% kept)")
 
             # Pass 2: encode kept stride-H frames, one contiguous h5 slice per
-            # episode (fast; avoids scattered point-selection - see build_subgoals.py).
+            # episode (fast; avoids scattered point-selection, see build_subgoals.py).
             n_rows_file = sum(len(r) for r in kept_rows_per_ep)
             done = 0
             for ep_i, rows in enumerate(kept_rows_per_ep):
