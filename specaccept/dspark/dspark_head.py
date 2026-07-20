@@ -1,16 +1,16 @@
-"""DSpark refinement head: a standalone residual refiner for a block of N
+"""DSpark refinement head: standalone residual refiner for a block of N
 drafted subgoal latents.
 
-Depends only on torch, so it ports unchanged to other planners. Takes a raw
-draft block (B, N, D) and the conditioning latent (B, D), and returns a
-refined block in the same native latent space:
+Torch-only, so it ports unchanged to other planners. Takes a raw draft block
+(B, N, D) and the conditioning latent (B, D); returns a refined block in the
+same native latent space:
 
     z_refined_i = z_draft_i + MLP([z_cond, z_draft_i, cond_prev, pos_emb_i])
 
-Weights are shared across positions with a sinusoidal position embedding for
+Weights are shared across positions; a sinusoidal position embedding gives
 arbitrary-N generalization. The final linear is zero-initialized (adaLN-Zero
 convention) so training starts as an identity pass-through. Inputs are per-dim
-standardized and outputs inverted. mode='causal' uses the previously refined
+standardized and outputs inverted. mode='causal' feeds the previously refined
 latent as cond_prev (sequential unroll); mode='noncausal' uses the raw
 previous draft plus a block summary, fully parallel. Trained only on real
 frozen-drafter chains (see build_real_chains.py), never on ground-truth
@@ -124,11 +124,12 @@ class DSparkHead(nn.Module):
 class ConfidenceHead(nn.Module):
     """Per-position acceptance confidence c_k for the DSpark speculative commit.
 
-    Single-model (no ensemble) so it is deployable at the cost of one drafter
-    sample. Predicts P(refined subgoal k is "good enough" = rel_err < tau_k) from
+    Single model (no ensemble), deployable at the cost of one drafter sample.
+    Predicts P(refined subgoal k is good enough, i.e. rel_err < tau_k) from
     (refined_k, draft_k, cond, residual_k, pos). At deploy time the cumulative
-    product Π_{i<=k} c_i sets the commit depth k* = max{k : Π c_i > theta} -- the
-    confidence-scheduled speculative-decoding rule adapted to continuous latents.
+    product over c_1..c_k sets the commit depth
+    k* = max{k : prod(c_1..c_k) > theta}: the confidence-scheduled
+    speculative-decoding rule adapted to continuous latents.
     """
 
     def __init__(self, dim: int, mean: torch.Tensor, std: torch.Tensor,
@@ -171,20 +172,21 @@ class ConfidenceHead(nn.Module):
 
 
 def commit_depth(conf: torch.Tensor, theta: float, max_commit: int) -> int:
-    """conf: (N,) per-position confidence in [0,1]. Returns k* = max{k : Π_{i<k} c_i
-    > theta}, clamped to [1, max_commit]. (cumprod is monotone-decreasing so the
-    accepted set is a prefix.)"""
+    """conf: (N,) per-position confidence in [0,1]. Returns
+    k* = max{k : prod(c_1..c_k) > theta}, clamped to [1, max_commit]. The
+    cumulative product is monotone decreasing, so the accepted set is a
+    prefix."""
     cum = torch.cumprod(conf.clamp(0, 1), dim=0)
     k = int((cum > theta).sum().item())
     return max(1, min(k, max_commit))
 
 
 class OracleFloorHead(nn.Module):
-    """Probe-0 ceiling head: conditions on GROUND-TRUTH z_{i-1} (+ z_cond + full
-    raw draft block) to predict z_i. This is the best-case any-conditioning
-    ceiling -- it is NOT deployable (ground truth is unavailable at inference) and
-    exists only to measure how much of the horizon error is recoverable in
-    principle vs horizon-intrinsic. High capacity, direct prediction (not residual).
+    """Probe-0 ceiling head: conditions on GROUND-TRUTH z_{i-1} (plus z_cond
+    and the full raw draft block) to predict z_i. Best-case any-conditioning
+    ceiling; NOT deployable (ground truth is unavailable at inference). Exists
+    only to measure how much of the horizon error is recoverable in principle
+    vs horizon-intrinsic. High capacity, direct prediction (not residual).
     """
 
     def __init__(self, dim: int, mean: torch.Tensor, std: torch.Tensor,
