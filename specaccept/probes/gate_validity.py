@@ -119,7 +119,7 @@ def main():
     tau = float(floor["args"]["tau"])
     theta = float(floor["disp_S10"]["p50"])
     print(f"[thresholds] tau={tau:.2f} (verifier, frozen) theta={theta:.4f} "
-          f"(disp_p50(S=10)) -- both read, nothing fitted in this script")
+          f"(disp_p50(S=10)); both read, nothing fitted in this script")
 
     z_at, ep_len_of, _ = make_latent_lookup(args)
     lewm = encoder.load_lewm(source=args.source, encoder_id=args.encoder_id,

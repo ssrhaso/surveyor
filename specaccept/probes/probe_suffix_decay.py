@@ -67,7 +67,7 @@ def main():
                 row = base + int(st) + (k + 1) * args.stride
                 assert row <= last, (
                     f"episode {ep} too short for position {k+1} at stride {args.stride} "
-                    f"(row {row} > last {last}) -- use an episodes-file with longer episodes")
+                    f"(row {row} > last {last}); use an episodes-file with longer episodes")
                 target_rows[k].append(row)
 
         all_rows = np.array(cond_rows + [r for tk in target_rows for r in tk])

@@ -67,7 +67,7 @@ def dist_stats(x: np.ndarray) -> dict:
 def encode_rows(model, pixels, rows, device, batch_size):
     """Encode h5 pixel rows (any order, duplicates ok); returns (len(rows), D).
 
-    h5py fancy indexing requires STRICTLY increasing indices -- unique-ify,
+    h5py fancy indexing requires STRICTLY increasing indices: unique-ify,
     encode each row once, scatter back through the inverse map."""
     rows = np.asarray(rows)
     uniq, inv = np.unique(rows, return_inverse=True)
@@ -97,7 +97,7 @@ def load_states(f, env):
         # (cube fixed, arm anywhere) and inflates the measured floor ~10x. We
         # instead require the cube AND the end-effector (the visually dominant,
         # task-relevant arm state) to match, both at the benchmark's 0.04 m scale,
-        # so equivalent frames actually look alike -- the floor then measures
+        # so equivalent frames actually look alike; the floor then measures
         # encoder resolution, not task-irrelevant arm variation.
         assert "privileged_block_0_pos" in f and "proprio_effector_pos" in f, \
             f"cube needs block+effector pos (keys: {list(f.keys())})"

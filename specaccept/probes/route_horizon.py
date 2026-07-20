@@ -48,7 +48,7 @@ def parse_args():
     p.add_argument("--topk", type=int, default=30)
     p.add_argument("--var-scale", type=float, default=1.0)
     p.add_argument("--cem-seed", type=int, default=42,
-                   help="routing CEM seed -- ONE fixed decision per episode, "
+                   help="routing CEM seed: ONE fixed decision per episode, "
                         "shared by every eval seed downstream")
     p.add_argument("--cem-batch", type=int, default=128)
     p.add_argument("--rh-short", type=int, default=2)
@@ -114,7 +114,7 @@ def main():
         valid = goal_steps <= L - 1
         if (~valid).sum():
             print(f"[t={t}] WARNING {int((~valid).sum())} episodes dropped "
-                  f"(goal past episode end) -- population-shifted cell")
+                  f"(goal past episode end); population-shifted cell")
         vidx = np.flatnonzero(valid)
         z_goal = z_at(eps[vidx], goal_steps[vidx])
         c2, _ = flat_plan_c_star(lewm, cost_model, z0_all[vidx], z_goal,
