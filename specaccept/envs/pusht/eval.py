@@ -103,13 +103,13 @@ def parse_args():
     p.add_argument("--episodes-file", default=None,
                    help="JSON file from specaccept.envs.pusht.extract_subset (produces a small subset --h5 "
                         "plus this file). Bypasses sample_long/short entirely and uses the "
-                        "exact precomputed (episode, start_step) pairs -- for running against "
+                        "exact precomputed (episode, start_step) pairs; for running against "
                         "a transferred subset h5 on a box without the full dataset.")
     p.add_argument("--eval-filter", choices=["none", "success20", "success5"], default="none",
                    help="restrict eval episodes to demos whose FINAL frame reaches the "
-                        "canonical target (paper III-A: 'the last frame -- where the "
-                        "T-piece reaches its target position -- serves as the goal "
-                        "state'). none = current behavior: ALL episodes, of which ~34%% "
+                        "canonical target (paper III-A: the last frame, where the "
+                        "T-piece reaches its target position, serves as the goal "
+                        "state). none = current behavior: ALL episodes, of which ~34%% "
                         "are FAILED demos whose goal a goal-free planner cannot target.")
     p.add_argument("--num-eval", type=int, default=32)
     p.add_argument("--eval-budget", type=int, default=None, help="override mode default")
@@ -139,7 +139,7 @@ def parse_args():
                         "Non-baseline subgoal sources only.")
     p.add_argument("--dump-traces", default=None,
                    help="path (.pt): save per-episode success flags plus, for the gdm "
-                        "source, every replan's (z_cond, drafted subgoal) pair -- the "
+                        "source, every replan's (z_cond, drafted subgoal) pair; the "
                         "raw material for failure anatomy (unreachable-subgoal vs "
                         "drift vs budget) without re-running the eval")
     return p.parse_args()
@@ -286,7 +286,7 @@ def main():
     eval_budget = args.eval_budget or (50 if args.mode == "short" else (150 if args.mode == "long" else 300))
     cem_seed = args.cem_seed if args.cem_seed is not None else args.seed  # == eval.py ${seed}
 
-    # -- frozen model + cost model
+    # ---- frozen model + cost model
     model = encoder.load_lewm(source=args.source, encoder_id=args.encoder_id,
                               local_dir=args.local_dir, swm_src=args.swm_src,
                               device=args.device)
@@ -312,12 +312,12 @@ def main():
               f"T={d.timesteps} sampler={samp} param={d.parameterization} "
               f"schedule={d.schedule} norm={gdm_planner.normalization}")
 
-    # -- dataset (use local path so it works on CPU and box)
+    # ---- dataset (use local path so it works on CPU and box)
     from stable_worldmodel.data.formats.hdf5 import HDF5Dataset
     keys = ["action", "proprio", "state"]
     dataset = HDF5Dataset(path=args.h5, keys_to_cache=keys)
 
-    # -- transform + process (mirror eval.py)
+    # ---- transform + process (mirror eval.py)
     try:
         tf = img_transform()
     except Exception:
@@ -325,12 +325,12 @@ def main():
     transform = {"pixels": tf, "goal": tf}
     process = build_process(dataset, keys)
 
-    # -- episode sampling
+    # ---- episode sampling
     #   paper FF-JEPA protocol (default): the final `goal_offset` steps of each
-    #   episode, with the LAST frame (T at the target) as the goal -- same for
+    #   episode, with the LAST frame (T at the target) as the goal; same for
     #   short (25) and long (75). `--start random` falls back to eval.py's
     #   common 25-step setting (random valid start, goal = start+goal_offset).
-    #   random_init mode skips this whole block entirely -- no episode is sampled
+    #   random_init mode skips this whole block entirely; no episode is sampled
     #   from the dataset at all, see the world.evaluate(episodes=...) branch below.
     use_final = (args.mode == "long") or (args.start == "final")
     episodes_idx = start_steps = None
@@ -351,7 +351,7 @@ def main():
         start_steps = [p[1] for p in pairs]
         print(f"[episodes-file] {args.episodes_file}: {len(pairs)} precomputed pairs "
               f"(goal_offset={payload.get('goal_offset')}, seed={payload.get('seed')}, "
-              f"eval_filter={payload.get('eval_filter')}) -- sample_long/short bypassed")
+              f"eval_filter={payload.get('eval_filter')}); sample_long/short bypassed")
     else:
         ep_mask = None
         if args.eval_filter != "none":
@@ -371,7 +371,7 @@ def main():
               f"eval_filter={args.eval_filter}")
         print(f"[eval] episodes_idx[:5]={episodes_idx[:5]} start_steps[:5]={start_steps[:5]}")
 
-    # -- oracle subgoal table (oracle mode only; gdm samples closed-loop, baseline uses goal image)
+    # ---- oracle subgoal table (oracle mode only; gdm samples closed-loop, baseline uses goal image)
     table = None
     if args.subgoal == "oracle":
         table = build_oracle_table(args.h5, model, episodes_idx, start_steps, goal_offset,
@@ -465,7 +465,7 @@ def main():
                 if args.dump_frames_dir:
                     # default reset_mode for episodic eval is 'auto' (finished envs
                     # are immediately reset to start a NEW episode so the run keeps
-                    # going until `episodes` total complete) -- that can reuse an env
+                    # going until `episodes` total complete); that can reuse an env
                     # slot for a 2nd, DIFFERENT episode before the run ends, which
                     # would desync the frame capture (start frame from episode 1,
                     # last frame from episode 2). 'wait' freezes each env after its

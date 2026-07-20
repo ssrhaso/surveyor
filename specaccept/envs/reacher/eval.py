@@ -187,7 +187,7 @@ def main():
                              f"{args.episodes_file} (pass --num-eval {len(pairs)})")
         print(f"[episodes-file] {args.episodes_file}: {len(pairs)} precomputed pairs "
               f"(built for max_offset={payload.get('max_offset')}, seed={payload.get('seed')}, "
-              f"episode_min={payload.get('episode_min')}) -- sampling bypassed; "
+              f"episode_min={payload.get('episode_min')}); sampling bypassed, "
               f"running at goal_offset={goal_offset}")
     else:
         ep_mask = None

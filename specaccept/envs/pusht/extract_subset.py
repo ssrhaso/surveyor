@@ -9,7 +9,7 @@ from __future__ import annotations
 import argparse
 import json
 
-import hdf5plugin  # noqa: F401 -- registers the dynamically-loaded filter plugin
+import hdf5plugin  # noqa: F401; registers the dynamically-loaded filter plugin
                     # this h5's `pixels` dataset uses (~10x compression); without
                     # this import, reading pixels fails with "Can't open directory
                     # (/usr/local/lib/plugin)". Other scripts don't need this
