@@ -25,7 +25,7 @@ from specaccept.probes.probe_cost_snr import rollout_terminal
 from specaccept.probes.probe_floor import dist_stats, rel
 from specaccept.sources import SubgoalCostModel
 
-# pre-registered separation condition -- constants, not flags (v1 convention)
+# pre-registered separation condition: constants, not flags (v1 convention)
 T_SHORT, FIRE_MIN_SHORT = 25, 0.70
 T_LONG, FIRE_MAX_LONG = 150, 0.15
 
@@ -169,7 +169,7 @@ def main():
             cell["n_dropped"] = n_drop
             cell["median_elite_l2sq"] = med_l2sq
             cells[str(t)] = cell
-            drop_note = (f"  [{n_drop} dropped: goal past episode end -- "
+            drop_note = (f"  [{n_drop} dropped: goal past episode end; "
                          f"population-shifted cell]" if n_drop else "")
             print(f"[pop {label}] t={t:>3d}: c* p10={cell['p10']:.3f} "
                   f"p50={cell['p50']:.3f} p90={cell['p90']:.3f} "
@@ -204,7 +204,7 @@ def main():
                       f"(need <= {FIRE_MAX_LONG}) -> {'PASS' if ok else 'FAIL'}")
             else:
                 print(f"{label} t={T_LONG}: fire={long_cell['fire_rate']:.3f} but "
-                      f"{long_cell['n_dropped']} episodes dropped -- population-"
+                      f"{long_cell['n_dropped']} episodes dropped; population-"
                       f"shifted, excluded from the verdict")
         med = [(int(t), c["p50"])
                for t, c in sorted(cells.items(), key=lambda kv: int(kv[0]))]
@@ -221,7 +221,7 @@ def main():
                     and min(long_fires) > FIRE_MAX_LONG)
     if exploitation:
         print("\nMODEL EXPLOITATION FLAG: fire-rate is high at t=150 as well as "
-              "t=25 -- c* is the planner's own optimistic estimate under its "
+              "t=25; c* is the planner's own optimistic estimate under its "
               "learned dynamics, and a uniformly low c* means CEM believes it can "
               "reach ANY goal in one plan. That is optimism, not a horizon "
               "signal; the gate fails for this reason regardless of the t=25 "
@@ -229,8 +229,8 @@ def main():
         passed = False
     out["verdict"] = {"passed": passed, "n_checks": len(checks),
                       "model_exploitation": exploitation}
-    verdict_msg = ("SEPARATES -- Phase 1 PASS" if passed else
-                   "does NOT meet the pre-registered condition -- Phase 1 FAIL, "
+    verdict_msg = ("SEPARATES: Phase 1 PASS" if passed else
+                   "does NOT meet the pre-registered condition: Phase 1 FAIL, "
                    "gate v2 is dead as specified")
     print(f"\ngate {verdict_msg}")
     print("(tau is the verifier's frozen threshold; not amended either way)")

@@ -24,7 +24,7 @@ import torch
 
 from specaccept.probes.probe_floor import dist_stats, rel
 
-# pre-registered separation condition -- constants, not flags, so they cannot
+# pre-registered separation condition: constants, not flags, so they cannot
 # be tuned from the command line after seeing the data
 T_SHORT, FIRE_MIN_SHORT = 25, 0.70
 T_LONG, FIRE_MAX_LONG = 150, 0.15
@@ -148,7 +148,7 @@ def main():
             cell["fire_rate"] = float((h <= theta).mean())
             cell["n_dropped"] = n_drop
             cells[str(t)] = cell
-            drop_note = (f"  [{n_drop} dropped: goal past episode end -- "
+            drop_note = (f"  [{n_drop} dropped: goal past episode end; "
                          f"population-shifted cell]" if n_drop else "")
             print(f"[pop {label}] t={t:>3d}: h p10={cell['p10']:.3f} "
                   f"p50={cell['p50']:.3f} p90={cell['p90']:.3f} "
@@ -179,7 +179,7 @@ def main():
                       f"(need <= {FIRE_MAX_LONG}) -> {'PASS' if ok else 'FAIL'}")
             else:
                 print(f"{label} t={T_LONG}: fire={long_cell['fire_rate']:.3f} but "
-                      f"{long_cell['n_dropped']} episodes dropped -- population-"
+                      f"{long_cell['n_dropped']} episodes dropped; population-"
                       f"shifted, excluded from the verdict")
         med = [(int(t), c["p50"])
                for t, c in sorted(cells.items(), key=lambda kv: int(kv[0]))]
@@ -189,8 +189,8 @@ def main():
               + f"  (monotone increasing: {mono})")
     passed = bool(checks) and all(checks) and evaluated_long
     out["verdict"] = {"passed": passed, "n_checks": len(checks)}
-    verdict_msg = ("SEPARATES -- Phase 1 PASS" if passed else
-                   "does NOT meet the pre-registered condition -- Phase 1 FAIL, "
+    verdict_msg = ("SEPARATES: Phase 1 PASS" if passed else
+                   "does NOT meet the pre-registered condition: Phase 1 FAIL, "
                    "gate is dead as specified")
     print(f"\ngate {verdict_msg}")
     print("(theta is derived; the condition is not re-tuned either way)")
