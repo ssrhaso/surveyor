@@ -35,4 +35,4 @@ for pid in "${PIDS[@]}"; do
   wait "$pid" || fail=1
 done
 exec 3>&-
-[ "$fail" -eq 0 ] || { echo "[dispatch_pool] one or more jobs failed -- check logs" >&2; exit 1; }
+[ "$fail" -eq 0 ] || { echo "[dispatch_pool] one or more jobs failed; check logs" >&2; exit 1; }
