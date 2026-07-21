@@ -1,11 +1,11 @@
 """Disjoint VALIDATION population for hyperparameter selection (audit #1).
 
 pusht.episodes150.json (seed 42) is the TEST population every reported number
-uses. tau/k selection must not touch it: this builds pusht.episodes150.val.json
--- 256 (episode, start) pairs drawn from the same eligibility pool (seed 777)
-with any episode index overlapping the test set removed BEFORE truncation to
-256. Selection sweeps run on val; the chosen configuration is then reported on
-test, untouched.
+uses, and tau/k selection must not touch it. This builds
+pusht.episodes150.val.json: 256 (episode, start) pairs drawn from the same
+eligibility pool (seed 777), with any episode index overlapping the test set
+removed BEFORE truncation to 256. Selection sweeps run on val; the chosen
+configuration is then reported on test, untouched.
 """
 import json
 import sys

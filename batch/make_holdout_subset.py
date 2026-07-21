@@ -1,10 +1,12 @@
-"""Build a holdout-only Reacher h5 (episodes >= EP_MIN) that is INDEX-COMPATIBLE
-with the full file: per-episode arrays keep their full length-10000 shape, with
-ep_len[e]=0 for dropped episodes (which makes them ineligible under every
-existing sampler/eligibility filter without any flag changes), and ep_offset
-re-pointed into the subset's row space for kept episodes. Row-level columns
-(pixels/qpos/...) contain only the kept episodes' rows, in episode order.
-Compression/chunking are mirrored from the source so readability is identical.
+"""Build a holdout-only Reacher h5 (episodes >= EP_MIN), INDEX-COMPATIBLE
+with the full file.
+
+Per-episode arrays keep their full length-10000 shape, with ep_len[e]=0 for
+dropped episodes (ineligible under every existing sampler/eligibility filter
+without any flag changes) and ep_offset re-pointed into the subset's row
+space for kept episodes. Row-level columns (pixels/qpos/...) contain only the
+kept episodes' rows, in episode order. Compression and chunking are mirrored
+from the source so readability is identical.
 
 Usage (on the box that has the full file):
   python batch/make_holdout_subset.py --src data/reacher/reacher.h5 \
@@ -55,7 +57,7 @@ with h5py.File(args.src, "r") as f, h5py.File(args.out, "w") as g:
                     kw["compression_opts"] = src.compression_opts
             elif src.compression is not None:
                 # source uses a dynamic plugin filter (h5py says "unknown");
-                # re-compress with zstd via hdf5plugin -- same plugin family
+                # re-compress with zstd via hdf5plugin, the same plugin family
                 # the eval stack already reads the source file with
                 import hdf5plugin as _hp
                 kw.update(_hp.Zstd())

@@ -2,14 +2,14 @@
 
 Builds pusht.episodes150.json (n=256, offset 150, seed 42, driver-default
 eligibility) via the eval driver's own sample_long, then reindexes the SAME
-256 episodes to goal_offset in {25,50,75,100} (start = ep_len-1-off) -- the
-t75-vs-t150 sampling-artifact lesson applied up front: one population,
+256 episodes to goal_offset in {25,50,75,100} (start = ep_len-1-off). This
+applies the t75-vs-t150 sampling-artifact lesson up front: one population,
 horizon as the only variable.
 
 NOTE: this is a REGENERATION, not a byte-copy, of the box-era
 subset_longeval.episodes150.json (whose eval_filter field is not recoverable
 here). Cross-pipeline absolute comparisons lean on the short-protocol
-replication + the s25 diag gate instead; the horizon curve is internally
+replication plus the s25 diag gate instead; the horizon curve is internally
 consistent by construction.
 """
 import json

@@ -1,13 +1,15 @@
-"""Derive fixed-population horizon-sweep episode files: the SAME 256 episodes
-as the trusted t=150 GDM result (subset_longeval.episodes150.json), reindexed
-to goal_offset in {25, 50, 100} (the 75 variant already exists as
-subset_longeval.episodes150as75.json from the t75-vs-t150 resolution).
+"""Derive fixed-population horizon-sweep episode files.
 
-This is the lesson of the t75-vs-t150 sampling artifact applied up front:
-sample_long's eligibility filter gives each offset a DIFFERENT episode
-population (90.3% vs 22.7% eligible at 75 vs 150), so an SR-vs-horizon curve
-drawn per-offset confounds horizon with population. Reindexing one population
-isolates horizon as the only variable across the whole curve.
+Reindexes the SAME 256 episodes as the trusted t=150 GDM result
+(subset_longeval.episodes150.json) to goal_offset in {25, 50, 100}; the 75
+variant already exists as subset_longeval.episodes150as75.json from the
+t75-vs-t150 resolution.
+
+This applies the t75-vs-t150 sampling-artifact lesson up front: sample_long's
+eligibility filter gives each offset a DIFFERENT episode population (90.3% vs
+22.7% eligible at 75 vs 150), so an SR-vs-horizon curve drawn per-offset
+confounds horizon with population. Reindexing one population isolates horizon
+as the only variable across the whole curve.
 """
 import json
 
