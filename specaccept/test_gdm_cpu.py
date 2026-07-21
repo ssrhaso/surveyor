@@ -31,6 +31,8 @@ def _synth_latents(n, seed=0):
 
 
 def test_dit_forward_and_schedule():
+    """DiT forward gives finite (B, N, D) for cond shaped (B, D) or (B, wg, D);
+    alphas_cumprod is in (0, 1] and non-increasing; timestep embedding shape."""
     cfg = GDMConfig(latent_dim=D, n_future=N, wg=1, hidden=64, depth=2, heads=4)
     model = GDM(cfg)
     B = 5
@@ -56,6 +58,8 @@ def test_dit_forward_and_schedule():
 
 
 def test_qsample_and_loss_drops():
+    """q_sample preserves shape and stays finite; 200 Adam steps on a fixed
+    synthetic batch must reduce the diffusion loss."""
     cfg = GDMConfig(latent_dim=D, n_future=N, wg=1, hidden=128, depth=3, heads=4)
     model = GDM(cfg)
     diff = GaussianDiffusion(timesteps=100, device=DEV)
@@ -87,6 +91,8 @@ def test_qsample_and_loss_drops():
 
 
 def test_ddim_sample():
+    """DDIM sampling returns finite (B, N, D) and is deterministic for a
+    fixed generator seed."""
     cfg = GDMConfig(latent_dim=D, n_future=N, wg=1, hidden=64, depth=2, heads=4)
     model = GDM(cfg).eval()
     diff = GaussianDiffusion(timesteps=100, device=DEV)
@@ -102,7 +108,8 @@ def test_ddim_sample():
 
 
 def test_planner_standardization_and_scale():
-    # native-scale data -> stats -> standardize round-trip + native-scale output
+    """Planner standardize/unstandardize round-trips on native-scale data;
+    sample_next equals sample_sequence position 0; output keeps native scale."""
     z = _synth_latents(2000, seed=3)
     mean, std = z.mean(0), z.std(0).clamp_min(1e-6)
 
@@ -133,6 +140,9 @@ def test_planner_standardization_and_scale():
 
 
 def test_subgoal_source_closedloop():
+    """GDMSubgoalSource cache protocol: zeros before the first replan, refresh
+    on replan, hold between replans, and partial replans leave the other envs'
+    cached subgoals untouched."""
     z = _synth_latents(2000, seed=5)
     mean, std = z.mean(0), z.std(0).clamp_min(1e-6)
     cfg = GDMConfig(latent_dim=D, n_future=N, wg=1, hidden=64, depth=2, heads=4)
@@ -167,10 +177,11 @@ def test_subgoal_source_closedloop():
 
 
 def test_v_param_x0_identity():
-    """GATE-A math check: with the TRUE target fed in, x0 is reconstructed EXACTLY
-    at every t for BOTH parameterizations. For v this holds with bounded
-    coefficients (no 1/sqrt(acp) amplification) - the property that motivates the
-    A/B. This proves the wiring, NOT fidelity (that's GATE B / sampled Probe B)."""
+    """GATE-A math check: with the TRUE target fed in, x0 is reconstructed
+    EXACTLY at every t for BOTH parameterizations. For v this holds with
+    bounded coefficients (no 1/sqrt(acp) amplification), the property that
+    motivates the A/B. Proves the wiring, NOT fidelity (that is GATE B, the
+    sampled Probe B)."""
     torch.manual_seed(0)
     x0 = torch.randn(64, N, D)
     noise = torch.randn(64, N, D)
@@ -342,6 +353,8 @@ def test_ldp_config_ckpt_roundtrip():
 
 
 def test_ckpt_roundtrip():
+    """save_gdm/load_gdm_planner round-trip: the reloaded planner samples
+    identically to the in-memory reference and config fields survive."""
     z = _synth_latents(500, seed=8)
     mean, std = z.mean(0), z.std(0).clamp_min(1e-6)
     cfg = GDMConfig(latent_dim=D, n_future=N, wg=1, hidden=64, depth=2, heads=4)
