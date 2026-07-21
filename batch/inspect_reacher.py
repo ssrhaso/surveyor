@@ -1,6 +1,8 @@
-"""Generic inspection of the decompressed Reacher dataset -- schema/format
-unknown ahead of time (unlike TwoRoom, no prior exploration done), so this
-lists whatever's actually there and adapts rather than assuming column names.
+"""Generic inspection of the decompressed Reacher dataset.
+
+The schema and format are unknown ahead of time (unlike TwoRoom, no prior
+exploration was done), so this lists whatever is actually there and adapts
+rather than assuming column names.
 """
 import glob
 import os
@@ -43,7 +45,7 @@ if h5_candidates:
             if candidate in keys:
                 print(f"'{candidate}' column present, shape:", f[candidate].shape)
 elif lance_candidates:
-    print(f"\n=== Lance format found at {lance_candidates[0]} -- needs a different reader, "
+    print(f"\n=== Lance format found at {lance_candidates[0]}; needs a different reader, "
           f"not inspected here (h5py won't open this) ===")
 else:
-    print("\n=== no recognized dataset format found -- manual inspection needed ===")
+    print("\n=== no recognized dataset format found; manual inspection needed ===")

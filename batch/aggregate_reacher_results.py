@@ -2,12 +2,13 @@
 
 Parses logs/reacher_arms_*.log and logs/reacher_horizon_*.log (the tee'd
 per-run logs from run_reacher_local.sh) for:
-  * the summary line:  "subgoal=... goal_offset=... budget=... seed=... S=..."
-  * the SR line:       "  SR = 84.38%  (27/32)"
+  * the summary line:      "subgoal=... goal_offset=... budget=... seed=..."
+  * the SR line:           "  SR = 84.38%  (27/32)"
   * spec-accept telemetry: "[specaccept] ... call_ratio=0.532 ..."
-and prints (a) the arms table: per-config SR mean +/- sd over seeds, with mean
-call_ratio for the spec arms; (b) the horizon table: arm x offset for both
-budget regimes. Run from the repo root on the box that ran the stage:
+
+Prints (a) the arms table, per-config SR mean +/- sd over seeds with mean
+call_ratio for the spec arms, and (b) the horizon table, arm x offset for
+both budget regimes. Run from the repo root on the box that ran the stage:
   python batch/aggregate_reacher_results.py
 """
 import glob
@@ -46,7 +47,7 @@ def fmt_cell(srs, crs):
         return "--"
     mean = statistics.mean(srs)
     sd = statistics.stdev(srs) if len(srs) > 1 else 0.0
-    cell = f"{mean:6.2f} ±{sd:4.2f} (n={len(srs)})"
+    cell = f"{mean:6.2f} +-{sd:4.2f} (n={len(srs)})"
     crs = [c for c in crs if c is not None]
     if crs:
         cell += f"  cr={statistics.mean(crs):.3f}"
@@ -95,7 +96,7 @@ def main():
                     if (n, o, regime) in hz]
             if not rows:
                 continue
-            print(f"==== HORIZON SWEEP -- {label} ====")
+            print(f"==== HORIZON SWEEP: {label} ====")
             for n in arms_seen:
                 cells = []
                 for o in offs:
