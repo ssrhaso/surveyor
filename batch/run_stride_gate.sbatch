@@ -7,7 +7,7 @@
 # Stage 2 mechanical gate (stride-spacing round). Runs after the train array
 # (submit with: sbatch --dependency=afterany:<ARRAYID> batch/run_stride_gate.sbatch <ARRAYID>)
 # and parses each arm's in-job diag_gdm output. Gates OUT (never greenlights
-# quality -- rel_err does not decide SR, validated inversion):
+# quality; rel_err does not decide SR, validated inversion):
 #   * degeneracy:  B rel_err < 0.5 x noop_err for every stride
 #   * collapse:    B collapse >= 0.6
 #   * S=25 sanity: B-success rel_err in [0.10, 0.25] (must reproduce
@@ -54,7 +54,7 @@ if missing:
     ok = False; reasons.append(f"missing strides {sorted(missing)}")
 if 25 in seen and not (0.10 <= seen[25][0] <= 0.25):
     ok = False; reasons.append(f"S=25 sanity FAIL: rel_err {seen[25][0]:.4f} outside [0.10,0.25] "
-                               f"(gdm_faithful ~0.16) -- rebuild/retrain pipeline not faithful")
+                               f"(gdm_faithful ~0.16); rebuild/retrain pipeline not faithful")
 
 if ok:
     print("[gate] ALL PASS -> submitting Stage 3 closed-loop A/B")
@@ -63,5 +63,5 @@ if ok:
 else:
     with open("logs/STRIDE_GATE_FAILED.txt", "w") as f:
         f.write("\n".join(reasons) + "\n")
-    print("[gate] FAILED -- Stage 3 NOT submitted:\n  " + "\n  ".join(reasons))
+    print("[gate] FAILED; Stage 3 NOT submitted:\n  " + "\n  ".join(reasons))
 EOF

@@ -9,11 +9,11 @@
 #SBATCH --time=06:00:00
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/cube_download_%j.log
 # OGBench-Cube staging step 1: stream-download + extract in one pass (the
-# 46.18GB tar.zst is never stored -- curl | zstd | tar), then a schema
+# 46.18GB tar.zst is never stored; curl | zstd | tar), then a schema
 # inspection gate (mirrors the Reacher pattern: verify episodes/columns
 # BEFORE any port code is written). PRE-REGISTRATION NOTE: after this lands,
 # the FIRST compute on Cube is probe_floor.py (derive tau/k), committed
-# before any closed-loop cell -- the derivation rule's graduation test.
+# before any closed-loop cell; the derivation rule's graduation test.
 # Requires ~150GB free (reacher.h5 deletion, done manually by user).
 set -eu
 URL=https://huggingface.co/datasets/quentinll/lewm-cube/resolve/main/cube_single_expert.tar.zst

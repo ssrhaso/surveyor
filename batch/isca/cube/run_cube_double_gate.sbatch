@@ -10,7 +10,7 @@
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/cube_dbl_gate_%j.log
 # FEASIBILITY GATE for the genuine long-horizon manipulation test (cube-DOUBLE).
 #
-# Why: cube-SINGLE is structurally one pick-and-place -- the cube's start->goal
+# Why: cube-SINGLE is structurally one pick-and-place; the cube's start->goal
 # displacement saturates (~0.23m at EVERY offset), so the goal never outruns the
 # planner's lookahead and drafting cannot help by construction. Multi-cube is a
 # SEQUENCE of pick-and-places = genuinely long horizon, which is where the regime

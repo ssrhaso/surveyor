@@ -12,15 +12,15 @@
 # ================== PURE SPEC-ACCEPT, NO ROUTER ("just our method") ==========
 # Question (user, 2026-07-15): cube is won by spec-accept alone (gc + goal-gate,
 # S=10 -> 78.9 vs flat 70.9, every episode on the method, no episode routing).
-# Can the SAME single arm beat LeWM at every reacher horizon too -- making the
+# Can the SAME single arm beat LeWM at every reacher horizon too; making the
 # v4 router an optimization rather than a correctness requirement?
 # Arm: specaccept + --goal-gate, gc drafter gdm_reacher_s10.pt, k=8, tau=0.20,
-# RH=2, S=10 -- the exact cube-winning mechanism, nothing env-tuned.
+# RH=2, S=10; the exact cube-winning mechanism, nothing env-tuned.
 # Populations: the SAME builder-seed-888 files the v4 eval is running on, so
 # flat2/flat5/spec references come for free from job 2274091 (same pop, same
 # seeds, same budgets). t x seeds = {25,50,100,150} x {42-45}, budget=2t.
 # Known prior evidence: goal-gated spec at t25 previously read ~90.6-93.8 vs
-# flat2 96.9 (exploratory, old pop) -- i.e. the waypoint gate recovers most but
+# flat2 96.9 (exploratory, old pop); i.e. the waypoint gate recovers most but
 # maybe not all of the overshoot tax against a near-ceiling baseline. This run
 # settles it on a fresh population; reported as-is either way.
 # ==============================================================================

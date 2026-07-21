@@ -15,10 +15,10 @@
 #     goal-free drafting is ill-posed (the TwoRoom lesson). Per-pair gap
 #     G~U[1,100] covers the native protocol (25), the horizon sweep offsets
 #     (50/75/100), and the shrinking in-episode remaining gap; targets clamped
-#     at the goal -- the clamp semantics PushT gets free from demos ending at
+#     at the goal; the clamp semantics PushT gets free from demos ending at
 #     the target.
 #   * HOLDOUT: train on episodes 0..7999 only (--mask custom); eval draws from
-#     8000..9999 -- the H8 eval-contamination guard from the PushT audit.
+#     8000..9999; the H8 eval-contamination guard from the PushT audit.
 set -eu
 SIF=/scratch/u6ko/hasoshu.u6ko/containers/pytorch_2412.sif
 VENV=/scratch/u6ko/hasoshu.u6ko/venv3

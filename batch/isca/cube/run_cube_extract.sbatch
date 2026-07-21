@@ -9,7 +9,7 @@
 #SBATCH --time=00:10:00
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/cube_extract_%j.log
 # DERIVE-FIRST extraction: read the cube floor probe json and apply the
-# PRE-REGISTERED rules to name (tau, k) -- no closed-loop number is consulted.
+# PRE-REGISTERED rules to name (tau, k); no closed-loop number is consulted.
 # Writes cube_derived.env for the battery to source. The rules below were
 # fixed on the two dev environments BEFORE cube ran:
 #   tau = criterion-floor p50 (expert-data convention, as PushT), clamp[.10,.40]
@@ -29,7 +29,7 @@ temporal = d["temporal_floor_disp1"]["p50"]
 # floor sits within a sane multiple of the per-step temporal floor. On a partial-/
 # under-specified success criterion (Cube: success scores only the cube while the
 # encoder sees the whole arm) the criterion floor inflates ~10x the temporal floor
-# even after full-scene matching -- out of scope. There we fall back to the
+# even after full-scene matching; out of scope. There we fall back to the
 # transferred dev-env default tau=0.20 (established robust across PushT/Reacher) and
 # say so, rather than emit a clamped non-derived number.
 ratio = floor / max(temporal, 1e-6)

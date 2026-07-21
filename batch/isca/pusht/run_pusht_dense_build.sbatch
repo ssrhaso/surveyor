@@ -11,7 +11,7 @@
 # ISCA port of run_build_dense_isambard.sbatch: rebuild subgoals_dense_full.pt
 # (stride-1, every frame of every successful@20deg episode, 18,685 eps) with
 # the frozen pretrained encoder. Independent re-derivation of the PushT
-# pipeline on new hardware -- the stride-S drafters train from this ONE file.
+# pipeline on new hardware; the stride-S drafters train from this ONE file.
 set -eu
 VENV=/lustre/home/ha676/le-wm/.venv
 H5=/lustre/home/ha676/data/pusht/pusht_expert_train.h5

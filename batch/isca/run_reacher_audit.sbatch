@@ -18,7 +18,7 @@
 #         alone explains the native-parity bound. frac=1.0 is the sanity arm
 #         (must ~= the RH2 flat baseline, 95.7).
 #   12-15 EVERY-STEP k=8 MIRROR at t100 (2t, max-100 pop): isolates the
-#         consumption policy against an equally-cheap baseline -- the missing
+#         consumption policy against an equally-cheap baseline; the missing
 #         twin of the k-isolation arm. Reference: every-step k=50 = 90.8,
 #         spec tau=.2 k=8 = 91.0 (cr .61).
 #   16-19 EVERY-STEP k=8 at the native protocol (completes the pair).

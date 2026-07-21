@@ -10,7 +10,7 @@
 #SBATCH --array=0-5
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/cube_basrhjob_%A_%a.log
 # Strongest-baseline control for cube: flat goal-image planner at RH{1,2} across
-# t{25,100,150}, seed 42, n=128 -- so every comparison anchors to the strongest
+# t{25,100,150}, seed 42, n=128; so every comparison anchors to the strongest
 # flat configuration per cell (the replan-rate-is-a-brittle-tradeoff finding).
 # RH5 is already in the main battery.
 #   RH = {1,2}[idx//3]; OFF = {25,100,150}[idx%3]

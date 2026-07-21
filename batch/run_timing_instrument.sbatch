@@ -8,11 +8,11 @@
 #SBATCH --output=/home/u6ko/hasoshu.u6ko/le-wm/logs/timing_inst_%A_%a.log
 # Reviewer-proofing (wall-clock CEM-vs-drafter split): the writeup claims
 # "wall-clock is CEM-dominated and near-identical across all three (within
-# +-10% at matched workload; fine stride is never slower)" -- an NFE/call-count
+# +-10% at matched workload; fine stride is never slower)"; an NFE/call-count
 # claim, never actually measured in wall-clock. Uses the new --time-instrument
 # flag (additive; subgoal_planner.py/_FFJEPAPolicy accumulates t_drafter/t_cem
 # with torch.cuda.synchronize() at each boundary). Same controlled protocol as
-# the stride-spacing round's tab:spec arms, single seed (42) -- wall-clock/step
+# the stride-spacing round's tab:spec arms, single seed (42); wall-clock/step
 # doesn't vary by seed the way SR does.
 #   task 0: s25   every-step, stride-25 drafter, horizon=receding=5
 #   task 1: s10   every-step, stride-10 drafter, horizon=receding=2

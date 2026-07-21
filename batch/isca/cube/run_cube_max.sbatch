@@ -16,13 +16,13 @@
 #   arm0 gc10_gate   : gdm_cube_s10_gc.pt existed but was never gate-tested;
 #                      S-curve is sharp (5:67.2, 15:79.3, 25:68.2) -> locate peak
 #   arm1 gc15_rh5    : gate's flat branch currently plans at RH=2, but flat's
-#                      strongest cube config is RH=5 (70.9 vs ~66) -- the exact
+#                      strongest cube config is RH=5 (70.9 vs ~66); the exact
 #                      reacher-t50 structural miss, tested here as H=5/RH=5
 #   arm2 gc15_k4     : k matched to the certified spec arm (27.3 ran k=4);
-#                      champion ran k=8 -- is the win k-sensitive? (cheaper too)
+#                      champion ran k=8; is the win k-sensitive? (cheaper too)
 #   arm3 gc15_k3     : derive-k's cliff said k=3 is the minimum resolvable draft
 #   arm4 gc15_t15    : tau could NOT be derived on cube (criterion floor
-#   arm5 gc15_t30    :   OFF-FLOOR) so 0.20 is a transfer -- bracket it
+#   arm5 gc15_t30    :   OFF-FLOOR) so 0.20 is a transfer; bracket it
 #   arm6 gc15_s4649  : champion config verbatim, fresh seeds 46-49 -> 8-seed CI
 # All at the certified protocol: offset150 budget300 num_samples=600 n_steps=30.
 # ==============================================================================

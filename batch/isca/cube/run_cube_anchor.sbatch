@@ -10,7 +10,7 @@
 #SBATCH --array=0-11
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/cube_anchorjob_%A_%a.log
 # BASELINE ANCHOR SWEEP. LeWM reports 74% on OGBench-Cube; our flat baseline gets
-# ~21%, so OUR PROTOCOL IS WRONG -- no cube conclusion is valid until the baseline
+# ~21%, so OUR PROTOCOL IS WRONG; no cube conclusion is valid until the baseline
 # reproduces. Certify first, like PushT (94.6) and Reacher (84).
 #
 # What the data says (measured): ONE target per episode; the expert moves the cube

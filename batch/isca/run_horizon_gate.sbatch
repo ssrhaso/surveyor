@@ -18,7 +18,7 @@
 # (2026-07-13), so latents come from subgoals_reacher_dense.pt (stride-1
 # dump of EVERY episode; frozen encoder in eval() => identical to pixels).
 # Populations are the existing deterministic epfiles (seed 42, n=128) from
-# the horizon sweeps -- no h5 needed to rebuild them. No GPU needed.
+# the horizon sweeps; no h5 needed to rebuild them. No GPU needed.
 set -eu
 source /lustre/home/ha676/le-wm/.venv/bin/activate
 cd /lustre/home/ha676/le-wm

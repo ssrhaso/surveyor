@@ -7,7 +7,7 @@
 #SBATCH --array=0-3
 #SBATCH --output=/home/u6ko/hasoshu.u6ko/le-wm/logs/stride_train_%A_%a.log
 # Stage 1 (stride-spacing round): retrain the GDM drafter at stride S in
-# {5,10,15,25} -- the EXACT faithful recipe from run_recipe.sh (batch 128,
+# {5,10,15,25}; the EXACT faithful recipe from run_recipe.sh (batch 128,
 # lr 5e-5, wd 1e-3, clip 1.0, warmup_cosine, 20 ep, EMA off, bf16 amp, mask 5),
 # only --subgoal-step changes (dense file_stride=1 => horizon = S frames).
 # S=25 is the re-derivation sanity check: its diag curve must reproduce

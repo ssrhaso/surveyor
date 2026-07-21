@@ -10,7 +10,7 @@
 #SBATCH --array=0-39
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/pusht_hz_%A_%a.log
 # PushT fixed-population horizon battery on ISCA, WITH the baseline arm the
-# original (box-era) design lacked -- the Reacher lesson applied back to
+# original (box-era) design lacked; the Reacher lesson applied back to
 # PushT. One 256-episode population (pusht.episodes150*.json), budgets 2t.
 # Audit anchors: baseline collapses long (21.48 @t75, 1.17 @t150 old pipeline);
 # gdm holds ~90.

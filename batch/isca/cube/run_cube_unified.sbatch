@@ -9,19 +9,19 @@
 #SBATCH --time=02:00:00
 #SBATCH --array=0-7%8
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/unif_cube_%A_%a.log
-# ============ UNIFIED METHOD (c*-retire spec) -- CUBE, FULL ARM ===============
+# ============ UNIFIED METHOD (c*-retire spec): CUBE, FULL ARM ===============
 # PRE-REGISTERED. The unified source REPLACES the latent goal-gate on cube:
-# same gc drafter (s10_gc), same derived k=3, same tau=0.20, RH=2, S=10 -- but
+# same gc drafter (s10_gc), same derived k=3, same tau=0.20, RH=2, S=10; but
 # arrival handling is now c*-retire (the planner's certificate) instead of the
 # latent-distance goal-gate. Cube runs the WHOLE unified method in one process:
 # the first-replan c* check IS the router's fire test (fired episodes serve the
 # goal from replan 0 = the flat branch), and transport ~90 steps >> the 10-step
-# window means the predicted fire-rate is ~0 -- the [unified] stats line
+# window means the predicted fire-rate is ~0; the [unified] stats line
 # reports it (fired-at-first-replan) so the prediction is checked, not assumed.
 # Seeds 50-57 = the SAME eight fresh seeds as the k3c confirm (job 2276035), so
 # flat and the goal-gate variant are directly comparable rows.
 # BAR (frozen; 8-seed mean): unified >= flat + 5.0pp. Reported: vs speck3+goal-
-# gate (k3c) -- does the principled retire match or beat the latent gate?
+# gate (k3c); does the principled retire match or beat the latent gate?
 # ==============================================================================
 set -euo pipefail
 source /lustre/home/ha676/le-wm/.venv/bin/activate

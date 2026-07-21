@@ -8,7 +8,7 @@
 # Resolve the Stage 2 gate's S=25 "sanity fail": the gate band [0.10,0.25] was
 # calibrated to probe_suffix_decay's anchor (0.1593 @ m+1; end-anchored runway
 # windows, success5 episodes), but diag_gdm Probe B samples arbitrary-phase
-# windows incl. the fast early-push regime -- a different, harder distribution.
+# windows incl. the fast early-push regime; a different, harder distribution.
 # Two direct apples-to-apples reads:
 #   1. diag_gdm on gdm_faithful.pt with the IDENTICAL settings the stride-25 arm
 #      used -> if its B-success rel_err ~ 0.40 too, the rebuilt pipeline IS

@@ -6,7 +6,7 @@
 #SBATCH --time=06:00:00
 #SBATCH --output=/home/u6ko/hasoshu.u6ko/le-wm/logs/reacher_dense_%j.log
 # Reacher Stage 1 prerequisite: dense (stride-1) latent build over ALL 10,000
-# random-policy episodes with the frozen lewm-reacher encoder -- the reacher
+# random-policy episodes with the frozen lewm-reacher encoder; the reacher
 # analog of subgoals_dense_full.pt. Stride-S drafters then train from this one
 # file via train_gdm --subgoal-step S (the PushT stride-sweep scheme).
 # Run after run_reacher_download_inspect.sbatch (needs reacher.h5 + encoder_reacher).

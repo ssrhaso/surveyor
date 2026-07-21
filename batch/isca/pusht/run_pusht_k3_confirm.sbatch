@@ -12,7 +12,7 @@
 # THE DERIVATION-CONFIRMATION CELL (floor probe, 2026-07-13): the PushT sampler
 # unconverges abruptly between k=3 and k=2 (bias-to-converged-mean 0.11 -> 1.04,
 # dispersion 0.08 -> 0.65), so the rule "smallest k with a converged sampler"
-# names k=3 -- a configuration the log-spaced sweep NEVER RAN (it bracketed the
+# names k=3; a configuration the log-spaced sweep NEVER RAN (it bracketed the
 # knee at [2,4]). Prediction: every-step k=3 lands on the k>=4 plateau (~63-64,
 # not the ~55 cliff), and spec tau=.2 k=3 matches spec k=4 at ~25% fewer NFE.
 # If this hits, k is derived, not swept.

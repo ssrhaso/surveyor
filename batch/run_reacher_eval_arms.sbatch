@@ -11,9 +11,9 @@
 # NFE). 9 configs x seeds 42-45, n=128 held-out episodes (>=8000), LeWM
 # reacher protocol (goal_offset 25, budget 50, qpos_match 0.05 rad),
 # S = RH * action_block(5):
-#   c0 baseline  flat LeWM, goal image       (RH 5)  -- the LeWM reference
-#   c1-c4 every-step gdm at S=25/15/10/5     (RH 5/3/2/1) -- the scale curve
-#   c5-c8 spec-accept tau=0.20 k=8 at same   (RH 5/3/2/1) -- efficiency arms
+#   c0 baseline  flat LeWM, goal image       (RH 5) ; the LeWM reference
+#   c1-c4 every-step gdm at S=25/15/10/5     (RH 5/3/2/1); the scale curve
+#   c5-c8 spec-accept tau=0.20 k=8 at same   (RH 5/3/2/1); efficiency arms
 #     (s10 spec = PushT headline system; s5 spec = PushT 8-seed best cell)
 # Success criteria: (i) scale law reproduces (interior optimum over S=25),
 # (ii) spec-accept SR within noise of its every-step reference at

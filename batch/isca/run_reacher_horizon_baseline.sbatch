@@ -12,7 +12,7 @@
 # The missing baseline arm of the horizon sweep: flat LeWM (goal image, no
 # drafter) on the SAME fixed episode population as run_reacher_horizon_sweep,
 # offsets {25,50,75,100} x seeds {42,43}, both budget regimes. Without this
-# the drafter arms' ~90% at t100 (2t regime) is uninterpretable -- baseline
+# the drafter arms' ~90% at t100 (2t regime) is uninterpretable; baseline
 # beat every drafter arm by ~24-30pp on the native task, so the only
 # pre-registered place the method can win must be measured against baseline
 # too. t25 cell re-run here (rather than reusing the arms battery) so the

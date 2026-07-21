@@ -10,7 +10,7 @@
 #SBATCH --array=0-1
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/pusht_scurve_train_%A_%a.log
 # Interior-optimum symmetry (audit follow-up): Reacher's long-horizon S grid
-# has 4 points {5,10,15,25}; PushT's has 2 {10,25} -- a curve vs a line
+# has 4 points {5,10,15,25}; PushT's has 2 {10,25}; a curve vs a line
 # segment. Train the missing PushT drafters (faithful recipe, mask 5, goal-
 # free); evals at t150 + native follow gated (run_pusht_scurve_eval.sbatch).
 set -eu

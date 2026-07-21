@@ -14,7 +14,7 @@
 # episode-level c* gate (HorizonGatedSource): one flat RH=2 CEM plan at
 # episode start; fire iff c* <= tau=0.20 (the verifier's frozen threshold)
 # -> whole episode flat on the goal latent; else whole episode spec-accept
-# (tau=0.20, k=8, S=10). FRESH populations (builder seed 777 -- never used
+# (tau=0.20, k=8, S=10). FRESH populations (builder seed 777; never used
 # before; all prior analysis used seed 42) so the offline post-mortem
 # cannot have leaked into these cells.
 #

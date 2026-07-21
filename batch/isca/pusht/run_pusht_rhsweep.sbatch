@@ -14,14 +14,14 @@
 # short protocol and every horizon offset. RH=5 rows come from the
 # replication/horizon batteries. Every paper table then anchors to the
 # strongest flat configuration per cell. Reacher precedent: RH=2 flat hit
-# 95.7 at t25 (vs protocol 84.0) but collapsed to 66.6 at t100 -- if PushT
+# 95.7 at t25 (vs protocol 84.0) but collapsed to 66.6 at t100; if PushT
 # reproduces that brittleness, the "subgoals resolve the replan-rate
 # trade-off" finding is cross-env.
 #   0-7   short protocol (success5, n=256, budget 50): RH1 x seeds 42-45,
 #         RH2 x seeds 42-45
 #   8-27  horizon (fixed population, budget 2t): RH{1,2} x t{25,50,75,100,150}
 #         x seeds{42,43}
-# No drafter needed anywhere -- runnable before tonight's training.
+# No drafter needed anywhere; runnable before tonight's training.
 set -eu
 VENV=/lustre/home/ha676/le-wm/.venv
 H5=/lustre/home/ha676/data/pusht/pusht_expert_train.h5

@@ -9,7 +9,7 @@
 #SBATCH --time=02:00:00
 #SBATCH --array=0-23
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/reacher_slongjob_%A_%a.log
-# The scale sweep AT LONG HORIZON -- the hole the paper's own logic requires
+# The scale sweep AT LONG HORIZON; the hole the paper's own logic requires
 # filled: S is the one tuned knob (tau=0.2, k=8 frozen globally), so S must be
 # swept in the regime the headline claims live in, not only at t=25.
 # S in {5,15,25} x t in {100,150} x seeds 42-45 on the max-offset-150 fixed

@@ -10,7 +10,7 @@
 #SBATCH --array=0-23
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/reacher_frontierjob_%A_%a.log
 # SR-vs-compute frontier for spec-accept at the winning cell (t100, 2t budget,
-# s10 drafter, max-offset-100 population -- directly comparable to the main
+# s10 drafter, max-offset-100 population; directly comparable to the main
 # horizon table's t100 cells): tau {0.1,0.2,0.3,0.4} x k {4,8,16} x seeds
 # {42,43}. Characterizes the efficiency claim quantitatively (NFE per replan
 # = call_ratio * k vs every-step's 1.0 * 50). tau=0.1 approximates the

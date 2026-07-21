@@ -10,7 +10,7 @@
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/reacher_smoke_%j.log
 # ISCA port of batch/run_reacher_smoke.sbatch (Isambard). Oracle + baseline at
 # n=32, LeWM's reacher protocol (goal_offset 25, budget 50, qpos_match 0.05
-# rad) -- validates the ENTIRE eval stack before any training compute.
+# rad); validates the ENTIRE eval stack before any training compute.
 # Success criterion: baseline SR well above 0 and oracle >= baseline.
 set -eu
 VENV=/lustre/home/ha676/le-wm/.venv

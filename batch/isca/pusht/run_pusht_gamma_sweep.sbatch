@@ -9,13 +9,13 @@
 #SBATCH --time=04:00:00
 #SBATCH --array=0-63
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/pusht_gammajob_%A_%a.log
-# Spread dose-response (gamma sweep): the paper's mechanistic claim -- drafter
-# conditional SPREAD is load-bearing -- currently rests on three categorical
+# Spread dose-response (gamma sweep): the paper's mechanistic claim; drafter
+# conditional SPREAD is load-bearing; currently rests on three categorical
 # ablations (refinement/regressor/blind-commit), all at reduced/zero spread,
 # none above gamma=1. This sweep converts the claim into a curve, plus the
 # joint offline/closed-loop plot (rel_err is monotone-worse in gamma by
 # construction; if SR rises where rel_err falls, offline fidelity
-# anti-correlates with control -- measured on ONE continuous lever).
+# anti-correlates with control; measured on ONE continuous lever).
 #
 # PRE-REGISTERED GATES (before any result was seen):
 #   PASS: SR(gamma) non-monotone w/ interior optimum (>=2pp above gamma=1, or
@@ -25,7 +25,7 @@
 #   KILL: SR flat on gamma in [0.5,1.5] -> the three ablations failed for
 #         unrelated reasons; report as such.
 #   CONFOUND: gamma=0 should land near the deterministic-regressor deficit
-#         (box battery: -5/-12pp); if wildly off, the knob is suspect -- the
+#         (box battery: -5/-12pp); if wildly off, the knob is suspect; the
 #         regressor arm may need porting to this exact protocol to adjudicate.
 #
 # GAMMA(8: 0 .25 .5 .75 1.0 1.25 1.5 2.0) x S(2: 10,25) x SEED(4: 42-45)

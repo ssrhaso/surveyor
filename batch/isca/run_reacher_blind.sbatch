@@ -12,7 +12,7 @@
 # Blind commitment on Reacher, zero code changes: spec-accept with tau=999
 # accepts every waypoint -> consumes the full N=3 block blindly (call ratio
 # ~1/3). The PushT matched-k cells showed blind TIES spec in-distribution and
-# BEATS it at the k-cliff (63.5 vs 55.6 -- the "self-test" was false
+# BEATS it at the k-cliff (63.5 vs 55.6; the "self-test" was false
 # rejection under sampler noise). Reacher is where the verifier actually
 # fires in-distribution (call ratio 0.62 = real rejections): if those
 # rejections are load-bearing, blind loses here; if blind ties here too,

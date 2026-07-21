@@ -8,16 +8,16 @@
 #SBATCH --output=/scratch/u6ko/hasoshu.u6ko/containers/install_%j.log
 # Full working recipe, consolidated from three failed attempts:
 #   1. stable-worldmodel[env] needs box2d-py, which needs swig to build (missing
-#      in the container) -- install swig via pip first.
+#      in the container); install swig via pip first.
 #   2. This node is headless: opencv-python (GUI variant) needs libxcb/libGL
-#      that aren't present -- force opencv-python-headless instead.
+#      that aren't present; force opencv-python-headless instead.
 #   3. pip install silently replaces the container's own driver-matched torch
 #      with a generic newer-CUDA wheel while resolving stable-worldmodel's
 #      deps. A constraints-file pin does NOT fix this (pip freeze can't see
 #      the container's NVIDIA-custom torch build before anything else has
 #      touched the venv). The actual fix: the replacement lands as a
 #      venv-LOCAL shadow install (the container's own /usr/local torch is
-#      read-only inside the SIF, so pip can't touch it) -- uninstalling the
+#      read-only inside the SIF, so pip can't touch it); uninstalling the
 #      shadowed torch/torchvision/torchmetrics lets the container's own
 #      build show back through via --system-site-packages.
 set -eu

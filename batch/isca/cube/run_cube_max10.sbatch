@@ -11,17 +11,17 @@
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/cubeX10_%A_%a.log
 # =============== S=10 MECHANISM SWEEP (stride frozen by decision) =============
 # DECISION (user, 2026-07-15): S=10 is the universal stride across PushT/Reacher/
-# Cube -- no per-env stride tuning. The S={12,20} training chain was cancelled and
+# Cube; no per-env stride tuning. The S={12,20} training chain was cancelled and
 # the S=15 sweep arms scancelled. gc10+gate early cells: 79.69/82.81 (>= gc15's
-# 79.30 mean) -- S=10 costs nothing on cube. This array measures every cheap
+# 79.30 mean); S=10 costs nothing on cube. This array measures every cheap
 # mechanism axis AT S=10 (ckpt gdm_cube_s10_gc.pt, gate on, certified protocol):
-#   arm0 rh5   : H=5/RH=5 loop -- flat's strongest planner config; tests whether
+#   arm0 rh5   : H=5/RH=5 loop; flat's strongest planner config; tests whether
 #                the gate's served-goal episodes were being taxed by RH=2
 #   arm1 k4    : k matched to the certified spec arm    arm2 k3: derive-k minimum
 #   arm3 t15   : tau bracket below                      arm4 t30: tau bracket above
 #   arm5 s4649 : champion config verbatim, seeds 46-49 (8-seed CI with arm0 of
 #                2274057, which already runs gc10+gate seeds 42-45)
-# EXPLORATORY -- the winning config goes to a frozen-bar confirm on fresh
+# EXPLORATORY; the winning config goes to a frozen-bar confirm on fresh
 # populations before anything is cited.
 # ==============================================================================
 set -eu

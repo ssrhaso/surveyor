@@ -8,12 +8,12 @@
 #SBATCH --mem=60G
 #SBATCH --time=08:00:00
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/cube_train_gc_%j.log
-# GOAL-CONDITIONED cube drafter -- the arm we SHOULD have pre-registered.
+# GOAL-CONDITIONED cube drafter; the arm we SHOULD have pre-registered.
 #
 # The mis-call: we pre-registered goal-FREE on the reasoning "cube is expert,
 # goal-directed data -> the PushT regime". Wrong. The OGBench cube collector
 # re-samples a NEW RANDOM TARGET within each episode, so the expert's continuation
-# from any state heads toward whatever target it happened to have -- unrelated to our
+# from any state heads toward whatever target it happened to have; unrelated to our
 # hindsight evaluation goal. That is exactly the REACHER regime (data not directed at
 # our goal), where goal-free drafting is ill-posed and collapses to the floor. It did:
 # 2-4% vs a 21% flat baseline (v2, corrected non-vacuous protocol).

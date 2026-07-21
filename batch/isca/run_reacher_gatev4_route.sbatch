@@ -8,14 +8,14 @@
 #SBATCH --mem=40G
 #SBATCH --time=00:30:00
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/gatev4_route_%j.log
-# ==================== GATE V4 TERNARY ROUTER -- ROUTING PASS ==================
+# ==================== GATE V4 TERNARY ROUTER: ROUTING PASS ==================
 # Stage 1 of 2 (eval array runs afterok). Builds FRESH populations (builder
-# seed 888 -- 42 was analysis, 777 was the v3 confirm) and routes every
+# seed 888; 42 was analysis, 777 was the v3 confirm) and routes every
 # (episode, t) via specaccept/probes/route_horizon.py:
 #   c*_2 <= tau=0.20 -> flat2 ; elif c*_5 <= tau -> flat5 ; else spec
 # c* = planner-predicted terminal discrepancy of one flat CEM plan from the
 # episode's true start latent (gate v3's exact signal; RH=5 adds the deep
-# branch v3 structurally lacked -- the diagnosed t50 miss). Routing CEM seed
+# branch v3 structurally lacked; the diagnosed t50 miss). Routing CEM seed
 # 42, one decision per (episode, t), episode-start information only.
 # ==============================================================================
 set -eu

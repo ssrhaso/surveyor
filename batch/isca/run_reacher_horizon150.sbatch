@@ -13,7 +13,7 @@
 # going at t125/t150 while the drafter holds? {baseline, s10gdm, s10spec} x
 # t {100,125,150} x seeds 42-45, 2t budget. PUSHT LESSON: offset-150
 # eligibility shrinks the episode pool, so this is its OWN fixed population
-# (max-offset 150) INCLUDING a t100 re-run for continuity -- results are a
+# (max-offset 150) INCLUDING a t100 re-run for continuity; results are a
 # separate table, never spliced onto the max-offset-100 sweep. Log prefix
 # reacher_hz150_ deliberately does NOT match the aggregator's
 # reacher_horizon_* glob (would collide with the population-A t100 cells).

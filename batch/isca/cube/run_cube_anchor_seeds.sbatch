@@ -10,7 +10,7 @@
 #SBATCH --array=0-3
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/cube_anch4job_%A_%a.log
 # Tighten the cube anchor: the winning config (offset=150, budget=300, RH=5) gave
-# 71.1% +- 4.0 (n=128, 1 seed) vs LeWM's published 74% -- a 0.7-SE difference, i.e.
+# 71.1% +- 4.0 (n=128, 1 seed) vs LeWM's published 74%; a 0.7-SE difference, i.e.
 # already a reproduction. Run 4 seeds (n=512) to halve the SE to ~2.0pp and settle it.
 set -eu
 source /lustre/home/ha676/le-wm/.venv/bin/activate

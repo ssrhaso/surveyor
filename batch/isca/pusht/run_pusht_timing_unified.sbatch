@@ -14,7 +14,7 @@
 # untouched): --time-instrument cells so the paper's efficiency table reports
 # MEASURED drafter-ms vs CEM-ms per episode for the final arms. Key numbers:
 # the unified arm's retire-check overhead (one extra flat CEM per replan on
-# still-drafting episodes -- the declared <=2x planning cost, attributed to
+# still-drafting episodes; the declared <=2x planning cost, attributed to
 # t_drafter since the check runs inside source.current) and the retired
 # episodes' zero-drafter fast path.
 #   0 baseline RH5 t100   1 speck3 t100   2 unified t100 (all-spec regime)

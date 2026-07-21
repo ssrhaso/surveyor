@@ -12,7 +12,7 @@
 # ===================== PRE-REGISTERED (next array, HELD) ======================
 # Written 2026-07-15 BEFORE the gate array (2273854) and the dspark ceiling probe
 # land, so it is not post-hoc. Purpose: separate "drafter quality" from
-# "verification adds value" -- the paper-relevant split -- at a NON-degenerate tau.
+# "verification adds value" (the paper-relevant split) at a NON-degenerate tau.
 #
 # Both arms use the SAME gc15 drafter + goal-gate, differing only in tau:
 #   arm0 open-loop  : tau=0.00 -> verifier never accepts -> every-step re-draft,

@@ -6,7 +6,7 @@
 #SBATCH --time=06:00:00
 #SBATCH --output=/home/u6ko/hasoshu.u6ko/le-wm/logs/densebuild_%j.log
 # Stage 1 prerequisite (stride-spacing round): rebuild subgoals_dense_full.pt on
-# Isambard -- the original lives only on unreachable ofs-v01. Same invocation as
+# Isambard; the original lives only on unreachable ofs-v01. Same invocation as
 # the original (FFJEPA_HANDOFF.md 10.6): build_subgoals --stride 1 (encode every
 # frame of every successful@20deg episode; 5deg subset flagged) on the full
 # 18,685-episode pusht_expert_train.h5, frozen local encoder. The stride-S

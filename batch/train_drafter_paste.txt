@@ -282,7 +282,7 @@ def main():
               f"(sqrt(D)={np.sqrt(D):.2f}); minmax->[-1,1] per-dim "
               f"(range mean={rng.mean():.3f})")
 
-    # free the stats pool and normalize IN PLACE -- the native tensors are not
+    # free the stats pool and normalize IN PLACE: the native tensors are not
     # referenced again, and _norm()'s full-size copies (plus the pool cat) were
     # the other big contributors to the 20GB cgroup-cap OOM on shared boxes.
     del pool

@@ -16,7 +16,7 @@
 #     reach, flat = 75.8%) and the negative is STRUCTURAL, not a deficiency of our
 #     drafter. This is exactly the Reacher-native result (oracle 84.2 == flat 84.0).
 #   - If the oracle BEATS flat, then headroom exists and our drafter is simply weak
-#     -- a very different (and much worse for us) conclusion.
+#    ; a very different (and much worse for us) conclusion.
 # Certified protocol: offset=150, budget=300, 600 CEM samples; oracle stride S=10,
 # matched loop RH=2. 4 seeds, n=512.
 set -eu

@@ -12,7 +12,7 @@
 # k-cliff cells: k in {1,2} x {every-step, spec tau=.2} x seeds 42-45 at the
 # t100 freeze anchor, BOTH envs. Completes the k cost-quality curve
 # (50->8->4->2->1): locates the knee the frozen k sits on. One-step diffusion
-# sampling normally degrades sharply -- if SR survives at k=1 that is itself
+# sampling normally degrades sharply; if SR survives at k=1 that is itself
 # a finding (max-roughness drafts still steer CEM).
 #   0-15 reacher, 16-31 pusht ; within env: arm*8 + kidx*4 + seed
 set -eu

@@ -13,8 +13,8 @@
 # instrumented (the earlier timing cells covered spec/unified; flat's cost is
 # arithmetic from the measured CEM solve x replan count since the bare
 # baseline bypasses the instrumented policy).
-#   0: GDM every-step k=50, S=10 loop (RH=2)  -- our-substrate every-step ref
-#   1: GDM every-step k=50, S=25 loop (RH=5)  -- the FF-JEPA native config
+#   0: GDM every-step k=50, S=10 loop (RH=2) ; our-substrate every-step ref
+#   1: GDM every-step k=50, S=25 loop (RH=5) ; the FF-JEPA native config
 # PushT t=100, s5 spine population, seed 42, n=256, budget 200.
 set -euo pipefail
 VENV=/lustre/home/ha676/le-wm/.venv

@@ -9,7 +9,7 @@
 #SBATCH --time=04:00:00
 #SBATCH --array=0-9%8
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/unif_pusht_%A_%a.log
-# ============ UNIFIED METHOD (c*-retire spec) -- PUSHT SPEC LEG ===============
+# ============ UNIFIED METHOD (c*-retire spec): PUSHT SPEC LEG ===============
 # PRE-REGISTERED. Same unified source as reacher/cube (CstarRetireSource: one
 # rule, one tau, drafting only while c* > tau). Runs the composite's spec leg
 # on the routed spec subsets (pusht_gatev4_route_t*_spec.json, route job
@@ -34,7 +34,7 @@ source "$VENV/bin/activate"
 EPFILE=pusht_gatev4_route_t${OFF}_spec.json
 N=$(python -c "import json;print(len(json.load(open('$EPFILE'))['episodes']))")
 if [ "$N" -eq 0 ]; then
-  echo "=== unif-pusht t=$OFF seed=$SEED: EMPTY SUBSET -- SR = (0/0), skipped ==="
+  echo "=== unif-pusht t=$OFF seed=$SEED: EMPTY SUBSET; SR = (0/0), skipped ==="
   exit 0
 fi
 echo "=== unif-pusht t=$OFF seed=$SEED n=$N (unified c*-retire, budget=$((2*OFF))) ==="

@@ -9,7 +9,7 @@
 #SBATCH --time=04:00:00
 #SBATCH --array=0-39%8
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/pusht_v4eval_%A_%a.log
-# ================ GATE V4 ON PUSHT -- CLOSED-LOOP EVAL (PRE-REGISTERED) =======
+# ================ GATE V4 ON PUSHT: CLOSED-LOOP EVAL (PRE-REGISTERED) =======
 # afterok the routing pass. Arms x t{25,50,75,100,150} x seeds{42,43} (the s5
 # spine convention), n=256, budget=2t, score block, angles 20/5:
 #   flat2   : baseline RH=2 on the FULL population (the one missing reference;
@@ -18,7 +18,7 @@
 # Composite SR per (t, seed) = (succ_r_flat2 + succ_r_flat5 + succ_r_spec)/256.
 #
 # SUCCESS CONDITION (frozen NOW; means over seeds 42-43, 20deg):
-#   PRIMARY: composite >= speck3 spine - 1.0pp at EVERY t -- the router must
+#   PRIMARY: composite >= speck3 spine - 1.0pp at EVERY t; the router must
 #            not break pure spec's dominance on the env where flat collapses
 #            (the c*-optimism worst case: any episode mis-routed to a flat arm
 #            at t>=100 is likely lost, flat=2.7-12.7 there).
@@ -52,7 +52,7 @@ else
 fi
 N=$(python -c "import json;print(len(json.load(open('$EPFILE'))['episodes']))")
 if [ "$N" -eq 0 ]; then
-  echo "=== pusht-v4 arm=$NAME t=$OFF seed=$SEED: EMPTY SUBSET -- SR = (0/0), skipped ==="
+  echo "=== pusht-v4 arm=$NAME t=$OFF seed=$SEED: EMPTY SUBSET; SR = (0/0), skipped ==="
   exit 0
 fi
 CKPT_ARG=""

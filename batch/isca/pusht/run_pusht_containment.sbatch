@@ -12,7 +12,7 @@
 # ============== BAD-DRAFTER CONTAINMENT (PRE-REGISTERED) ======================
 # Does the certificate bound the damage of a BROKEN drafter? Certified
 # spec-accept with the drafter forced BELOW the convergence cliff (k=1: drafts
-# are partially denoised noise, bias ~1.0 -- the measured worst case, no
+# are partially denoised noise, bias ~1.0; the measured worst case, no
 # retraining needed). In-process unified (routing at first replan + retire),
 # full s5as populations. PREDICTIONS (frozen now): (i) at t=25/50 the routing
 # floor holds (certificate keeps flat-solvable episodes away from the garbage

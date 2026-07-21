@@ -11,7 +11,7 @@
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/cube_f2d_%A_%a.log
 # ============== CUBE DECOMPOSITION CELL: flat RH=2 @ certified budget =========
 # The unified arm scored 79.88 on seeds 50-57 with ~55-58% of episodes retiring
-# at replan 0-1 (c*-selected) -- i.e. much of the policy ran goal-serving at
+# at replan 0-1 (c*-selected); i.e. much of the policy ran goal-serving at
 # RH=2/600 samples. The RH=2 flat anchor (65.6-66.4) predates the 600-sample
 # certification, so the seed-matched flat2@600 full-population reference is
 # MISSING. This cell decomposes the unified win: if flat2@600 << 79.88, the

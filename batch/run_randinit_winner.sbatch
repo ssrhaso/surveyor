@@ -6,7 +6,7 @@
 #SBATCH --time=08:00:00
 #SBATCH --array=0-2
 #SBATCH --output=/home/u6ko/hasoshu.u6ko/le-wm/logs/randinit_winner_%A_%a.log
-# Random-init n=256 for the stride winners -- the paper's weakest cell (its
+# Random-init n=256 for the stride winners; the paper's weakest cell (its
 # random-init: 82.42%; our gdm_faithful/stride-25 repro: 96.48/78.12 at
 # 20/5deg, seed 42). If the fine-stride precision story transfers, the 5deg
 # number is where it shows. Loop geometry scaled to the stride as in Stage 3.

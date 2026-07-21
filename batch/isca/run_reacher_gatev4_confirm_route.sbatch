@@ -8,7 +8,7 @@
 #SBATCH --mem=40G
 #SBATCH --time=00:30:00
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/gatev4c_route_%j.log
-# ================= GATE V4 CONFIRM -- ROUTING PASS (PRE-REGISTERED) ===========
+# ================= GATE V4 CONFIRM: ROUTING PASS (PRE-REGISTERED) ===========
 # Written BEFORE any confirmation data. The exploratory v4 run (pop seed 888,
 # jobs 2274090/2274091) gave composite 98.05/97.07/93.75/93.55 vs LeWM-best
 # 97.07/96.88/83.79/75.20 -> beat both flat arms at every t. This chain is its

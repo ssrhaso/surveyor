@@ -15,7 +15,7 @@
 # goal-free drafting is structurally ill-posed (the parked-phase finding; this
 # array is the scale-curve version of gdm_tworoom_goalcond.pt).
 # HOLDOUT: train on episodes < 4000 of source file 0 only (--mask custom);
-# eval draws episodes >= 4000 -- the H8 contamination guard.
+# eval draws episodes >= 4000; the H8 contamination guard.
 set -eu
 SIF=/scratch/u6ko/hasoshu.u6ko/containers/pytorch_2412.sif
 VENV=/scratch/u6ko/hasoshu.u6ko/venv3

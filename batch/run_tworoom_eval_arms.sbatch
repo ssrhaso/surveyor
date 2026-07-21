@@ -12,8 +12,8 @@
 # short protocol (goal_offset 25, budget 50, native dist<16px criterion),
 # S = RH * action_block(5):
 #   c0 baseline  flat LeWM, goal image      (RH 5)
-#   c1-c4 every-step gdm at S=25/15/10/5    (RH 5/3/2/1) -- the scale curve
-#   c5-c8 spec-accept tau=0.20 k=8 at same  (RH 5/3/2/1) -- efficiency arms
+#   c1-c4 every-step gdm at S=25/15/10/5    (RH 5/3/2/1); the scale curve
+#   c5-c8 spec-accept tau=0.20 k=8 at same  (RH 5/3/2/1); efficiency arms
 # The eval h5 is resolved from the dense file's source_files[0] (the same
 # collection the drafters trained on; episodes >= 4000 are held out).
 set -eu

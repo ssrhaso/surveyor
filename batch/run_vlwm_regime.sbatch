@@ -10,7 +10,7 @@
 # budget FIXED at 50 env steps regardless of goal offset (their App. B), same
 # fixed 256-episode population as job 5579798. t=25/budget-50 already exists
 # (it IS the t=25 cells of 5579798), so this covers t in {50,75,100}. At
-# t=100/budget-50 success requires beating the expert's pace 2x -- expect a
+# t=100/budget-50 success requires beating the expert's pace 2x; expect a
 # real drop; how much we retain vs LeWM's 8% / VLWM's 12% is the honest
 # cross-paper claim (curve shapes still the primary comparison).
 #   task = CONFIG(3) x OFFSET(3) x SEED(2): idx = c*6 + o*2 + s

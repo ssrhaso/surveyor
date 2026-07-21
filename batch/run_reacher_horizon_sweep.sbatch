@@ -6,13 +6,13 @@
 #SBATCH --time=04:00:00
 #SBATCH --array=0-23
 #SBATCH --output=/home/u6ko/hasoshu.u6ko/le-wm/logs/reacher_horizon_%A_%a.log
-# Reacher fixed-population horizon sweep -- the PushT Section-"Horizon Scaling"
+# Reacher fixed-population horizon sweep; the PushT Section-"Horizon Scaling"
 # + VLWM cross-paper cell transplanted. One episode population (same 128
 # (episode,start) pairs, holdout >= 8000) at every offset; per task BOTH
 # regimes run:
 #   * FF-JEPA regime: budget = 2t (the paper's final-window convention)
 #   * VLWM regime:    budget = 50 fixed for every t (budget starvation; skipped
-#     at t=25 where 2t == 50 and the two regimes coincide -- the PushT dagger note)
+#     at t=25 where 2t == 50 and the two regimes coincide; the PushT dagger note)
 # Arms x offsets x seeds: {s25gdm(FF-JEPA native), s10gdm(scale winner),
 # s10spec(tau=.20 k=8)} x {25,50,75,100} x {42,43}.
 # Requires trained drafters (run_reacher_train_array.sbatch).

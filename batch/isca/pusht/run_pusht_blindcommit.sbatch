@@ -13,7 +13,7 @@
 # verifier: --subgoal dspark --no-refine --commit fixed --commit-k 2, raw GDM
 # block, call ratio 0.50 by construction) at MATCHED k, on the same fixed
 # unfiltered anchors as the spec-accept cells. Table 5's old comparison ran
-# blind at k=50 vs spec at k=8 -- never matched. If blind-2 ties spec here,
+# blind at k=50 vs spec at k=8; never matched. If blind-2 ties spec here,
 # PushT has no evidence the verifier does anything in-distribution (only the
 # k-cliff remains); if it loses, verification has direct in-distribution
 # evidence. The k=2 rows are the cliff variant: spec degrades to every-step

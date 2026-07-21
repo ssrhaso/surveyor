@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# One-time env setup for a bare GPU box (no SLURM, no apptainer) -- the local
+# One-time env setup for a bare GPU box (no SLURM, no apptainer); the local
 # equivalent of install_deps.sbatch. Run once from ~/le-wm:
 #   bash batch/setup_local_env.sh
 #
 # Assumes: a working NVIDIA driver (`nvidia-smi` succeeds) and python3 with venv.
-# Does NOT assume a specific CUDA version -- pip installs the CUDA-bundled
+# Does NOT assume a specific CUDA version; pip installs the CUDA-bundled
 # torch wheel (cu121 by default). If `nvidia-smi` reports a driver too old for
 # that wheel, override: TORCH_INDEX=https://download.pytorch.org/whl/cu118
 set -eu
@@ -23,7 +23,7 @@ pip install --no-cache-dir --upgrade pip
 echo "=== [2/4] torch (CUDA wheel: $TORCH_INDEX) ==="
 pip install --no-cache-dir torch torchvision --index-url "$TORCH_INDEX"
 
-echo "=== [3/4] project deps (Reacher boxes: NO [env] extra -- its box2d-py dep"
+echo "=== [3/4] project deps (Reacher boxes: NO [env] extra; its box2d-py dep"
 echo "    cannot build under pip's isolation on these boxes, and box2d is"
 echo "    PushT-only physics; Reacher needs dm_control/mujoco, added explicitly) ==="
 # transformers MUST stay on the 4.x naming scheme: the LeWM encoder checkpoints
@@ -39,4 +39,4 @@ python -c 'import torch; print("torch", torch.__version__, "cuda:", torch.cuda.i
 python -c 'import stable_worldmodel; print("stable_worldmodel OK")'
 python -c 'import h5py, hdf5plugin, sklearn, stable_pretraining; print("h5py/hdf5plugin/sklearn/stable_pretraining OK")'
 python -c 'import dm_control, mujoco; print("dm_control/mujoco OK (reacher env)")'
-echo '=== SETUP DONE -- source .venv/bin/activate before running batch/run_reacher_local.sh ==='
+echo '=== SETUP DONE: source .venv/bin/activate before running batch/run_reacher_local.sh ==='

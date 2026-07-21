@@ -45,7 +45,7 @@ else
 fi
 N=$(python -c "import json;print(len(json.load(open('$EPFILE'))['episodes']))")
 if [ "$N" -eq 0 ]; then
-  echo "=== rea-ext arm=$NAME t=$OFF seed=$SEED: EMPTY SUBSET -- SR = (0/0), skipped ==="
+  echo "=== rea-ext arm=$NAME t=$OFF seed=$SEED: EMPTY SUBSET; SR = (0/0), skipped ==="
   exit 0
 fi
 CKPT_ARG=""

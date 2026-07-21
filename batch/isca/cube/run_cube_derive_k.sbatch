@@ -9,14 +9,14 @@
 #SBATCH --time=01:00:00
 #SBATCH --array=0-3
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/cube_dk_%A_%a.log
-# RE-DERIVE k PER DRAFTER. k is the SAMPLER'S convergence point -- a property of the
+# RE-DERIVE k PER DRAFTER. k is the SAMPLER'S convergence point; a property of the
 # drafter, not the environment. k=4 was derived on the GOAL-FREE gdm_cube_s10.pt; the
 # new GOAL-CONDITIONED drafters (S=5/10/15/25) are different models with different
 # samplers, so k must be re-derived for each. Reusing k=4 across them would violate
 # the method's own rule (the paper claims k is DERIVED, not carried over).
 #
 # NOTE on tau: the criterion-floor rule is OUT OF SCOPE on cube (floor 0.79-0.97 vs a
-# normal temporal floor of 0.087 -- the success criterion scores only the cube while
+# normal temporal floor of 0.087; the success criterion scores only the cube while
 # the encoder sees the whole arm). Cube therefore uses the TRANSFERRED default
 # tau=0.20, reported as a measured scope boundary, NOT as a derived value.
 #   S = {5,10,15,25}[idx]  (goal-cond ckpts)
@@ -29,7 +29,7 @@ export MUJOCO_GL=egl SDL_VIDEODRIVER=dummy
 SS=(5 10 15 25)
 S=${SS[$SLURM_ARRAY_TASK_ID]}
 CKPT=gdm_cube_s${S}_gc.pt
-if [ ! -f "$CKPT" ]; then echo "MISSING $CKPT -- drafter not trained yet"; exit 1; fi
+if [ ! -f "$CKPT" ]; then echo "MISSING $CKPT; drafter not trained yet"; exit 1; fi
 echo "=== derive k for $CKPT (sampler convergence; tau stays transferred 0.20) ==="
 python -m specaccept.probes.probe_floor --env cube --h5 "$H5" \
   --source pretrained --encoder-id quentinll/lewm-cube --gdm-ckpt "$CKPT" \

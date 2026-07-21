@@ -14,7 +14,7 @@
 # rests on the n=32 smoke. Re-run at the same power as every other cited cell
 # (n=128 x seeds 42-45 = 512). NATIVE ONLY: at multi-hop horizons the static
 # OracleSubgoalSource measures its own staleness (non-adaptive lookup), not a
-# ceiling -- the audit's retracted-framing lesson; do not extend this to t>=50.
+# ceiling; the audit's retracted-framing lesson; do not extend this to t>=50.
 set -eu
 VENV=/lustre/home/ha676/le-wm/.venv
 H5=$(find /lustre/home/ha676/data/reacher \( -name '*.h5' -o -name '*.hdf5' \) | head -1)

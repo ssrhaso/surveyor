@@ -11,7 +11,7 @@
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/cube_gcS_%A_%a.log
 # The cube S-curve, GOAL-CONDITIONED (S=10 is already training as 2272341).
 # Justified now that the ORACLE proved cube HAS decomposition headroom (82.4% vs
-# flat 70.9%, +11.5pp) -- so waypoints CAN win here and the scale law is worth
+# flat 70.9%, +11.5pp); so waypoints CAN win here and the scale law is worth
 # measuring, as on PushT/Reacher. Goal-cond because the goal-FREE drafter fails
 # (33%): the target is not inferable from the observation, so goal-free drafting is
 # ill-posed on cube (the Reacher/TwoRoom regime).

@@ -9,7 +9,7 @@
 #SBATCH --time=02:30:00
 #SBATCH --array=0-15%8
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/unif_reacher_%A_%a.log
-# ============ UNIFIED METHOD (c*-retire spec) -- REACHER SPEC LEG =============
+# ============ UNIFIED METHOD (c*-retire spec): REACHER SPEC LEG =============
 # PRE-REGISTERED. The claimable method is ONE rule at every scope: draft only
 # while the planner certifies the goal is out of reach (c* > tau); retire the
 # drafter one-way the moment c* <= tau (CstarRetireSource; replaces the latent
@@ -37,7 +37,7 @@ source "$VENV/bin/activate"
 EPFILE=reacher_gatev4c_route_t${OFF}_spec.json
 N=$(python -c "import json;print(len(json.load(open('$EPFILE'))['episodes']))")
 if [ "$N" -eq 0 ]; then
-  echo "=== unif-reacher t=$OFF seed=$SEED: EMPTY SUBSET -- SR = (0/0), skipped ==="
+  echo "=== unif-reacher t=$OFF seed=$SEED: EMPTY SUBSET; SR = (0/0), skipped ==="
   exit 0
 fi
 echo "=== unif-reacher t=$OFF seed=$SEED n=$N (unified c*-retire, budget=$((2*OFF))) ==="

@@ -9,14 +9,14 @@
 #SBATCH --time=12:00:00
 #SBATCH --array=0-2
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/pusht_train_%A_%a.log
-# PushT drafters on ISCA -- the EXACT faithful recipe (batch 128, lr 5e-5,
+# PushT drafters on ISCA; the EXACT faithful recipe (batch 128, lr 5e-5,
 # wd 1e-3, clip 1.0, warmup_cosine, 20 ep, EMA off, bf16 amp, mask 5 =
 # success5 training population):
 #   task 0: gdm_stride10.pt      goal-FREE  (headline replication: PushT winner)
 #   task 1: gdm_stride25.pt      goal-FREE  (faithful/native reference; its diag
-#            curve must reproduce gdm_faithful.pt rel_err ~0.16 -- pipeline gate)
+#            curve must reproduce gdm_faithful.pt rel_err ~0.16; pipeline gate)
 #   task 2: gdm_stride10_gc.pt   GOAL-COND  (--goal-rule final: expert demos end
-#            at the goal, the TwoRoom rule) -- fills the last 2x2 ablation cell
+#            at the goal, the TwoRoom rule); fills the last 2x2 ablation cell
 #            {env} x {drafter conditioning}
 # Stage-2 offline gate (diag_gdm rel_err vs noop degeneracy) runs in-job.
 set -eu

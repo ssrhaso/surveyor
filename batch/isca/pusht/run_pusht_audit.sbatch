@@ -14,7 +14,7 @@
 #         protocol, seeds 42-45. Isolates spec-accept's call reduction against
 #         an equally-cheap-per-call baseline. If this arm matches spec-accept's
 #         SR at NFE = 8/replan-every-replan, the honest headline shrinks to the
-#         call-ratio factor alone -- we need to know either way.
+#         call-ratio factor alone; we need to know either way.
 #   4-11  TAU RE-SELECTION ON A DISJOINT VAL SPLIT (audit #1): tau in
 #         {0.15,0.2,0.25,0.3} x k=8 x seeds 42-43 on pusht.episodes150.VAL
 #         (episode-disjoint from the test population; task 0 builds it).

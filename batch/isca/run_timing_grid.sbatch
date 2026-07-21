@@ -14,7 +14,7 @@
 # 4 arms x 5 seeds (42-46). Flat is measured through the instrumented policy
 # via the validated tautologies (PushT: oracle stride > offset => the single
 # waypoint IS the goal; Reacher/Cube: lerp frac=1.0 == flat, harness-checked
-# within 0.2pp) -- SR must reproduce the flat reference as the equivalence
+# within 0.2pp); SR must reproduce the flat reference as the equivalence
 # check on every cell. Arms: flat-equiv (strongest RH), FF-JEPA every-step
 # k=50 (its recipe per env), spec-accept (certified config), certified
 # spec-accept. Cells: PushT t=100 (s5as100, budget 200, n=256); Reacher t=100

@@ -18,7 +18,7 @@
 #   12-13 frontier s10spec tau=0.2 k=4, t100, seeds 44-45  (-> n=4)
 #   14-15 frontier s10spec tau=0.1 k=4, t100, seeds 44-45  (-> n=4)
 # Purpose: every paper table anchors to the STRONGEST flat baseline per cell
-# (RH=2 flat hit 95.7 at t25 but 67.6 at t100 — replan-rate is a brittle
+# (RH=2 flat hit 95.7 at t25 but 67.6 at t100; replan-rate is a brittle
 # trade-off; the crossover must be shown against best-per-cell).
 set -eu
 VENV=/lustre/home/ha676/le-wm/.venv

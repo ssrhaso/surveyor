@@ -10,7 +10,7 @@
 #SBATCH --array=0-15
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/pusht_k100job_%A_%a.log
 # Matched k-freeze anchor (audit follow-up): Reacher's k grid sits at t=100,
-# PushT's at t=150 -- a cross-env k disagreement would be confounded with
+# PushT's at t=150; a cross-env k disagreement would be confounded with
 # horizon. This runs the full PushT k grid AT t=100 (same anchor as Reacher):
 # {every-step, spec tau=.2} x k {4,8} x seeds 42-45, fixed population
 # (episodes150as100 reindex), budget 200, RH2.

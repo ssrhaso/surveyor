@@ -9,9 +9,9 @@
 #SBATCH --time=02:30:00
 #SBATCH --array=0-95%8
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/gatev4_eval_%A_%a.log
-# ==================== GATE V4 TERNARY ROUTER -- CLOSED-LOOP EVAL ==============
+# ==================== GATE V4 TERNARY ROUTER: CLOSED-LOOP EVAL ==============
 # Stage 2 of 2 (afterok the routing pass). EXPLORATORY (the ternary rule is
-# new; rule/tau/populations were fixed BEFORE any cell ran -- this header --
+# new; rule/tau/populations were fixed BEFORE any cell ran (this header)
 # but v4 has never been run, so a pass here graduates to a frozen-bar confirm
 # on ANOTHER fresh builder seed before anything is cited).
 #
@@ -19,7 +19,7 @@
 # budget=2t, pop max100 for t<=100 / max150 for t=150 (the v3 conventions):
 #   full-pop references: flat2, flat5, spec        (the bars)
 #   routed subsets:      r_flat2, r_flat5, r_spec  (the composite policy)
-# Composite SR per (t, seed) = (succ_r2 + succ_r5 + succ_rs) / 128 -- each
+# Composite SR per (t, seed) = (succ_r2 + succ_r5 + succ_rs) / 128; each
 # episode executed exactly ONCE, under the arm the router chose from its
 # start state. Empty subsets are skipped (contribute 0 successes, 0 episodes).
 #
@@ -32,7 +32,7 @@
 # branch). Prediction: t50 routes mostly flat5 and recovers to ~95. KNOWN
 # RISK (stated in route_horizon.py): CEM optimism at RH=5 may over-fire
 # c*_5 at t150; if flat5 eats spec's territory there the composite drops
-# below spec -- reported as-is, no post-hoc amendment.
+# below spec; reported as-is, no post-hoc amendment.
 # ==============================================================================
 set -eu
 VENV=/lustre/home/ha676/le-wm/.venv
@@ -59,7 +59,7 @@ else
 fi
 N=$(python -c "import json;print(len(json.load(open('$EPFILE'))['episodes']))")
 if [ "$N" -eq 0 ]; then
-  echo "=== gatev4 arm=$NAME t=$OFF seed=$SEED: EMPTY SUBSET -- SR = (0/0), skipped ==="
+  echo "=== gatev4 arm=$NAME t=$OFF seed=$SEED: EMPTY SUBSET; SR = (0/0), skipped ==="
   exit 0
 fi
 CKPT_ARG=""

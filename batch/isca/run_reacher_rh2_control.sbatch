@@ -12,7 +12,7 @@
 # Replan-rate control: flat LeWM baseline (goal image, no drafter) at RH=2
 # (replan every 10 steps) instead of the LeWM-protocol RH=5 (every 25).
 # Disambiguates the goal-gate battery: gated spec-accept behaved ~= baseline
-# at t100/t150 but scored 91.6 at t25 vs protocol-baseline 84.0 -- if THIS
+# at t100/t150 but scored 91.6 at t25 vs protocol-baseline 84.0; if THIS
 # control also scores ~91 at t25, the gate's t25 "win" was just replan
 # frequency and the gate criterion (greedy latent progress) is refuted in
 # both directions.

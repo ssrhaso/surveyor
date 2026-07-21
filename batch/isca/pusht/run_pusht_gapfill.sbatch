@@ -10,12 +10,12 @@
 #SBATCH --array=0-15
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/pusht_gapfilljob_%A_%a.log
 # Two remaining PushT gap-fills (2026-07-13 eve):
-# (B) t=75 PAPER PROTOCOL on the certified pipeline -- the last box-era number
+# (B) t=75 PAPER PROTOCOL on the certified pipeline; the last box-era number
 #     cited in the main text (headline footnote d: "ours at t75: 97.9" was
 #     box-era k=8). Paper-matched sampling (success5 filter, offset 75,
 #     budget 150, n=256). every-step k=50 = comparable to published 91.8;
 #     spec at the DERIVED config.
-# (C) S x tau interaction mini-grid -- floor-theory corollary: the tau band's
+# (C) S x tau interaction mini-grid; floor-theory corollary: the tau band's
 #     UPPER edge should scale with the real-divergence scale, i.e. coarser S
 #     tolerates looser tau (old offline calibration hinted tau=0.4 for S=25).
 #     S=25 drafter (RH=5 matched loop), k=8 (in-band for that drafter; k=3 was

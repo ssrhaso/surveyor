@@ -12,8 +12,8 @@
 # ============ COMPUTE-MATCHED FLAT CONTROL (PRE-REGISTERED) ===================
 # The arbitrated policy spends up to 1.58x planning wall-clock on drafting
 # episodes (measured). The fairness control this licenses: give FLAT planning
-# the same extra compute -- CEM samples 300 -> 600 (2x, a strict upper bound on
-# the arbiter's overhead) -- at the long horizons where our margins are largest,
+# the same extra compute; CEM samples 300 -> 600 (2x, a strict upper bound on
+# the arbiter's overhead); at the long horizons where our margins are largest,
 # on the SAME confirm populations. PREDICTION (frozen now): no material rescue.
 # The long-horizon collapse is a LOOKAHEAD limit, not an optimization-power
 # limit (cube showed sample-plateau 600->1000; no RH rescues it); doubling
