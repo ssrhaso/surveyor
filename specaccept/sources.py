@@ -96,6 +96,52 @@ class OracleSubgoalSource:
         return torch.stack(rows, dim=0)  # (n_envs, 192)
 
 
+class VerifiedOracleSource:
+    """TRUE demo waypoints consumed the way spec-accept consumes drafts:
+    advance to the next waypoint only when the ACHIEVED latent verifies
+    against the current one (rel L2 <= tau), re-anchored at every replan.
+    The clean subgoal-serving ceiling; OracleSubgoalSource advances on a
+    schedule (sg_steps) regardless of achievement and goes stale (see the
+    7/2 retraction), so its SR is a scheduling-contaminated lower bound.
+    ptr starts at 1 (table[0] is the start frame, not a target)."""
+
+    needs_obs = True
+    needs_goal = False
+
+    def __init__(self, table: list[torch.Tensor], device="cpu", tau: float = 0.2):
+        self.table = [t.to(device) for t in table]
+        self.device = device
+        self.n_envs = len(table)
+        self.dim = table[0].shape[1]
+        self.tau = float(tau)
+        self._ptr = np.ones(self.n_envs, dtype=int)
+        self.n_advance = 0
+        self.n_hold = 0
+
+    @torch.no_grad()
+    def current(self, sg_steps, obs_latent=None, replan_idx=None, goal_latent=None) -> torch.Tensor:
+        if replan_idx is not None and len(replan_idx) > 0 and obs_latent is not None:
+            z_now = obs_latent.to(self.device)
+            for r, i in enumerate(replan_idx):
+                K = self.table[i].shape[0]
+                advanced = False
+                while self._ptr[i] < K - 1:
+                    tgt = self.table[i][self._ptr[i]]
+                    rel = float((z_now[r] - tgt).norm() / z_now[r].norm().clamp_min(1e-8))
+                    if rel <= self.tau:
+                        self._ptr[i] += 1          # reached -> next waypoint
+                        advanced = True
+                    else:
+                        break
+                if advanced:
+                    self.n_advance += 1
+                else:
+                    self.n_hold += 1
+        rows = [self.table[i][min(self._ptr[i], self.table[i].shape[0] - 1)]
+                for i in range(self.n_envs)]
+        return torch.stack(rows, dim=0)
+
+
 class GDMSubgoalSource:
     """Every-step drafting source: at each replan, condition the GDM planner
     on the achieved latent and sample the next subgoal z_{m+1} in native
