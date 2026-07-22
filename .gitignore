@@ -3,7 +3,7 @@ pycache/
 cld/
 __pycache__/
 
-# large box-local artifacts -- never fit under GitHub's 100MB/file limit;
+# large box-local artifacts; never fit under GitHub's 100MB/file limit,
 # reproducible via batch/run_recipe.sh or the stride/reacher train arrays,
 # or downloaded fresh per box (data/, encoder_reacher/)
 *.pt
@@ -22,3 +22,8 @@ writeup/*.log
 writeup/*.out
 writeup/*.blg
 writeup/*.synctex.gz
+
+# vjepa2 transplant: upstream clone (its own git repo, re-cloned per the
+# README pin) and encoded-latent artifacts (reproducible via encode_episodes)
+vjepa2/upstream/
+vjepa2/*.npz
