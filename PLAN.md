@@ -1,8 +1,64 @@
 # PLAN (tick sheet)
 
-Paper: `paper/paper (1).tex` (ICLR draft; writeup/main.tex = older interim doc).
+Paper: `paper/main_v2.tex` (ACTIVE — method-paper restructure, 2026-07-13;
+`paper (1).tex` = v1 forensic archive feeding the appendices; writeup/main.tex = older interim doc).
 Rule: update the paper ONCE per completed block, not per job.
 Method = spec-accept; "DSpark" = the ported negative-result baseline only.
+
+---
+
+## ================================================================
+## STATUS 2026-07-15 (READ THIS FIRST — supersedes cube/EXP-3 blocks)
+## ================================================================
+## The paper's method is now UNIFIED SPEC-ACCEPT (spec-accept v2): draft
+## subgoals only while the planner certifies the goal is out of reach
+## (c* > tau); episode-start c* commit = the router; per-replan c*-retire
+## replaces the latent goal-gate. One rule, one tau=0.20 (criterion-floor
+## derived), S=10 universal (user decision 2026-07-15: NO per-env stride),
+## k derived per env (pusht 3 / reacher 8 / cube 3). Implemented as
+## `CstarRetireSource` (sources.py) + `--subgoal unified` in all 3 drivers;
+## episode-level routing via probes/route_horizon.py + routed-subset eval
+## (`--episodes-file`). Old goal-gate + plain-router results = ablations.
+##
+## BANKED 2026-07-14/15 (all at certified protocols, ISCA):
+##  * CUBE FLIPPED TO A WIN then CONFIRMED: gc10+goal-gate k=3 vs flat on
+##    8 FRESH seeds (50-57, job 2276035, pre-registered bar >= flat+5pp):
+##    76.46 vs 65.92 = +10.5pp PASS (exploratory margin +10.3 reproduced;
+##    oracle 82.4 for context). Mechanism: overshoot tax (same as reacher
+##    short) +32pp via gate + goal-conditioning +49pp; both needed on cube.
+##  * REACHER gate v4 ternary router (exploratory, pop 888): composite
+##    98.05/97.07/93.75/93.55 vs LeWM-best 97.07/96.88/83.79/75.20 ->
+##    beats BOTH flat arms at all four t; the one leak = -2.15 vs our own
+##    spec at t150. r_flat2 subsets 98-100% pure at every t (c* selection
+##    is the mechanism proof). Gate v3 = 2/4 pre-reg (t50 miss diagnosed
+##    -> fixed by v4's RH5 flat branch).
+##  * PUSHT already won by PURE spec k=3 everywhere (s5 spine, 20deg:
+##    99.6/97.9/98.8/97.3/98.0 vs flat 98.1/60.4/42.6/12.7/2.7) — the one
+##    env whose expert data contains arrival (episodes end at goal), which
+##    is WHY it needed no gate: independent confirmation of the overshoot
+##    mechanism. Routing pass: c*-optimism REFUTED on pusht (t100/t150
+##    route 256/256 to spec; flat fires only at t25/t50).
+##  * Goal-gate scope finding: rescues short horizon (+35pp reacher t25)
+##    but HURTS long horizon on reacher (-10/-15pp vs ungated; latent
+##    distance saturates at range) — hence c*-retire in the unified method.
+##
+## IN FLIGHT (all pre-registered, frozen bars in sbatch headers):
+##  * reacher v4c confirm, fresh pop 999: 2276033(done)->2276034 (~1h left)
+##  * pusht v4 eval (flat2 refs + routed subsets): 2276094 (overnight)
+##  * UNIFIED batteries: reacher spec-leg 2276371 (16c), pusht spec-leg
+##    2276360 (10c), cube full arm seeds 50-57 2276361 (8c)
+##  KNOWN RISK (declared): cube c*-retire may never fire (criterion floor
+##  0.76-0.79 >> tau) -> behaves like ungated gc spec ~76-77; principled
+##  fix if so = retire threshold := criterion floor (derived, new pre-reg).
+##
+## NEXT after the grid lands: (1) assemble 3-env x 11-cell table (unified
+## vs flat refs vs plain spec; two-sided bar: >=LeWM everywhere, >=spec
+## within noise) + efficiency column (NFE + CEM solves + pusht wall-clock);
+## (2) write into Results/RESULTS.md + main_v2 tables; (3) ICLR push =
+## V-JEPA 2 TRANSPLANT (the generality result; ~8 weeks to deadline);
+## more seeds on headline cells; failure-anatomy figure (trace format
+## reconciliation pending in probe_failure_anatomy).
+## ================================================================
 
 ---
 
@@ -20,10 +76,14 @@ Method = spec-accept; "DSpark" = the ported negative-result baseline only.
         2026-07-10 22:19, fate unknown — cull hazard; check browser tab, may yield a free replication)
 
 ## WRITE 0 - paper work with no experiment dependency (do anytime)
-- [ ] references.bib: replace all 6 TBD stubs (LeWM = arXiv 2603.19312, FF-JEPA = arXiv 2606.09311; CEM, VLWM, OGBench, DSpark)
-- [ ] algorithm box tbdblock (~L159): spec-accept pseudocode + CEM cost
-- [ ] related work tbdblock (~L115)
+- [x] references.bib CREATED 2026-07-13 (verified IDs only; DSpark = arXiv 2607.05147
+      confirmed via live sweep; author-list CHECK notes remain; VLWM still unresolved)
+- [ ] algorithm box tbdblock: spec-accept pseudocode + CEM cost
+- [x] related work WRITTEN 2026-07-13 (main_v2, with live concurrent-work sweep:
+      closest = BID 2408.17355 / RTC 2506.07339 / DCDP 2603.01953; SPO 2603.19418 =
+      concurrent but speculates over network transport, not drafter compute; re-sweep at submission)
 - [ ] terminology sweep: spec-accept vs DSpark usage
+- [x] NFE-currency defense paragraph + abstract honest-ordering skeleton (2026-07-13, per review)
 
 ## DECIDE - scope (anytime before WRITE 2)
 - [x] sec 11.2 TwoRoom: DECIDED 2026-07-12 — boundary-case paragraph written into
@@ -114,13 +174,68 @@ gated ->
       failed demos), so absolutes sit below box-era table; success5-filtered
       respin queued (2271135) for box-era comparability; unfiltered spine kept
       as harder-population robustness row. NEVER merge the two populations.
-- [ ] OVERNIGHT GATES (queued, ETA ~04:00): gamma dose-response x40 (running;
-      gamma=0 confound gate + mechanism curve) | k-grids both anchors + k-cliff
-      k{1,2} x32 (k FREEZE decision) | tau-on-val + off-axis separability |
-      timing x4 | reacher S-long x24 | s15/s5 train+eval (PushT interior
-      optimum at t150) | success5 spine x40
+- [x] OVERNIGHT GATES LANDED 2026-07-13 (all COMPLETED; 763 logs pulled, parsed,
+      archived Results/isca_gates_logs/ + README job map; main_v2 tables updated):
+      gamma x40 final (S25 49.0->57.9->4.7; S10 gentler) | k-grids + cliff (es
+      55.9/55.0/63.3/64.1 at k1/2/4/8 t100; spec k<=2 cr=1.00) | tau-on-val flat
+      (63.5-64.5, tau=.20 re-selected) + off-axis separable | timing (drafter
+      1.0%@k50/0.4% frozen; S10 12% faster) | reacher S-long 91-96 flat |
+      s5/s15 t150 (interior optimum persists: 55.3/59.6/58.3/55.9) |
+      success5 spine x40 (reproduces box-era: flat 98.1->2.7, s10 ~98-99) |
+      gc 2x2 closed (98.9 vs 99.4 short; 60.1 vs 59.6 t150)
 
-### CONFIG FREEZE POLICY (adopted 2026-07-12)
+### EXP 2e - VERDICT BATTERY: blind-vs-verified + derivability (2026-07-13) == DONE ==
+### (triggered by external review: "tau may be the encoder's noise floor; blind
+###  commit-2 at matched k is the single highest-information cell in the paper")
+- [x] blind commit-2 at MATCHED k (--subgoal dspark --no-refine --commit fixed --commit-k 2):
+      PushT in-distribution TIES spec at cr .50 — t100: 65.3 vs 65.0 (k4), 64.3 vs 63.3 (k8);
+      t150: 58.1 vs 58.9 (k4). Verifier buys nothing in-distribution on PushT.
+- [x] k-cliff INVERSION: blind2@k2 = 63.5 BEATS spec@k2 = 55.6 (+8pp; ~k4 quality at 1 NFE/replan).
+      The cliff was CHURN (re-drafting under sampler noise), not "drafts unusable".
+      ** RETRACTION: the "verifier self-test" claim (call_ratio->1.00 at k<=2 as a
+      safety feature) is FALSE REJECTION. Never present it as a feature. **
+- [x] Reacher blind-3 (spec tau=999, zero code changes): LOSES 5-6pp — 87.9/89.8 vs spec
+      94.5/93.9 (t100/t150). Verifier LOAD-BEARING exactly where rejections fire (cr .62).
+      Blind depth = hidden hyperparam with its own cliff (box-era commit-3 = -18pp).
+      VERDICT: verification is REGIME-DEPENDENT and predictable, not universal.
+- [x] FLOOR PROBE both envs (specaccept/probes/probe_floor.py -> Results/floor_*.json):
+      * criterion floor (success-equivalent latent distance): PushT p50 .233 (20deg) /
+        .173 (5deg), temporal .080; Reacher p50 .106 / p90 .153, temporal .223
+      * tau* = 0.20 sits on both floors; cross-env SHAPE prediction PASSES (lower floor
+        -> plateau ends earlier: Reacher degrades at tau=.3 while PushT still flat) —
+        tau derivable to its plateau (band ~ floor p50..1.3xp90). Caveats: retrospective,
+        n=2, quantile differs per env (reviewer surface).
+      * sampler convergence: PushT SHARP unconvergence cliff k3->k2 (bias .11->1.04,
+        dispersion .08->.65); Reacher NO cliff (wide conditional = spread, not error;
+        k=1 works closed-loop, pre-existing)
+- [x] k=3 PROSPECTIVE CONFIRMATION (2271747): the rule named k=3, never swept (grid
+      bracketed [2,4]); measured es 63.3±0.5 (= k4 plateau, NOT the 55 cliff), spec
+      64.5±1.1 at cr .63 = 1.9 NFE/replan (~18-25% under frozen k=4). DERIVED, NOT SWEPT.
+- [x] Reacher spec k=4 respin (k-freeze consistency fix; review caught headline cells at
+      gdm_steps=8): t100/125/150 = 95.5/95.5/95.7 — >= old k8 cells; use for headline.
+- [x] 2271772 LANDED 2026-07-13 eve: ALL 24 PushT headline/spine/repl spec cells
+      re-stamped at the DERIVED config (tau .20, k=3), logs *_s10speck3_*; every cell
+      within noise of its k=8 predecessor (repl short 98.7±1.0 incl. a 256/256 seed;
+      s5-spine 99.6/97.9/98.8/97.3/98.1; unfilt 86.5/79.1/70.5/64.1/58.4). Call ratio
+      drifts up at k=3 on some cells (up to .81 vs .54) — verifier absorbing noisier
+      drafts, SR unchanged; NFE/replan still ~1.9-2.4 vs ~4.3-4.5 at k=8.
+      == DEV-ENV EXPERIMENTAL PROGRAM CLOSED (PushT + Reacher: nothing left to run) ==
+- MECHANISM for paper §7 ("churn thesis", unifies 5 results): control pays for TARGET
+      CONSISTENCY; re-draft churn ∝ draft noise. Evidence: cadence collapse, gamma curve,
+      S=5 anti-churn (+5pp), k2 blind>spec (+8pp), Reacher blind<spec (-6pp).
+- DERIVATION STATUS: validated retrospectively 2/2 envs + ONE prospective hit (k=3).
+      NOT yet derive-FIRST. Graduates via pre-registered Cube (or TwoRoom / DINO-WM
+      encoder swap). Confidence ~70-80%. Do NOT write unconditional "derived" in the
+      paper until a derive-first battery lands.
+
+### CONFIG FREEZE POLICY (adopted 2026-07-12; SUPERSEDED IN PART 2026-07-13)
+- 2026-07-13 UPDATE: tau and k are now DERIVED, not frozen-by-sweep (EXP 2e):
+  tau = the encoder's criterion floor (per encoder, offline, minutes);
+  k = the sampler's convergence point (per drafter, offline, minutes).
+  PushT derived = (0.20, k=3); Reacher derived = (0.20 in-band; k=4 recipe cell,
+  k=1 cheapest Pareto point). The sweeps below are demoted to VALIDATION evidence.
+  S remains the one tuned knob (the finding). NEW ENVIRONMENTS: derive-first,
+  pre-registered, NO grids.
 - tau = 0.20 FROZEN globally. Provenance disclosed in paper sec 6: selected on
   PushT, within 0.4pp of Reacher optimum, re-selection on disjoint val split in
   flight (robustness appendix, not tuning).
@@ -137,12 +252,144 @@ gated ->
       unpacked), fits quota at ~440/500GB. Reacher-h5 shrink deferred to BEFORE
       the Cube download (46GB compressed, ~150GB+ unpacked — will need it).
 
-### EXP 2d - third env: OGBench-Cube                  [biggest accept lever]
+### ===================================================================
+### CUBE STATUS 2026-07-14 (READ THIS FIRST -- supersedes the block below)
+### ===================================================================
+### HARD LESSON: we NEVER ANCHORED THE CUBE BASELINE before running arms.
+### On PushT we refused to trust any drafter number until flat anchored at 94.6;
+### on Reacher until 84. For Cube we skipped that step -- and every conclusion we
+### drew on 2026-07-13/14 was consequently WRONG. Four retracted claims:
+###   (x) "drafting loses on cube"        -> from the INVALID v1 (vacuous cells)
+###   (x) "cube-single is structurally short-horizon / untestable" -> premature
+###   (x) "multi-segment random targets -> goal-free ill-posed"    -> FALSE, measured:
+###        exactly ONE target per episode; the data IS goal-directed
+###   (x) "the LeWM world model is too weak for manipulation"      -> FALSE:
+###        LeWM's paper reports 74% on OGBench-Cube (user supplied the figure)
+###
+### MEASURED FACTS about cube_single_expert.h5 (trust these):
+###   * ONE fixed target per episode (target changes 0 times in 201 steps)
+###   * cube starts ~0.275 m from target, expert delivers it in ~90 steps, then
+###     IDLES ~110 steps (cube is AT target for 109/201 frames)
+###   * => our protocol was broken two ways:
+###       (a) start = ep_len-1-t puts the start AFTER the cube already arrived for
+###           small t  -> the cell is VACUOUS (doing nothing scores 100%). This is
+###           why t=25/t=100 read 100% for every arm.
+###       (b) budget = 2t gave 50 steps for a task that physically needs ~90
+###           -> the planner was STARVED, and we misread the failure as a finding.
+###   * with a non-vacuous fixed population (v2), flat baseline = ~21% vs LeWM's 74%
+###     -> OUR PROTOCOL IS WRONG, not the substrate.
+###
+### *** ANCHOR ACHIEVED 2026-07-14 11:33 (2272343) ***
+###   flat baseline = 71.1% @ goal_offset=150, budget>=300, RH=5  (LeWM: 74%)
+###   -> REPRODUCED within noise. THIS IS THE CERTIFIED CUBE PROTOCOL.
+###   (RH=2 gives only 65.6-66.4 -> RH=5 is the strongest flat config, as at range
+###    on the other envs. offset-200 cells still running, may be closer still.)
+###   Why v2 gave 21%: its non-vacuity filter demanded cube displacement > 0.08 m at
+###   EVERY offset incl. t=25, which silently selected only the steepest part of the
+###   trajectory -- a far harder subset than the real task. Over-corrected one bug
+###   into another. DO NOT reuse cube_horizon.ep.json.
+### NEXT: re-run the drafting arms (goal-free gdm_cube_s10.pt, + spec at tau=0.20/k=4)
+###   at the CERTIFIED protocol and compare against flat=71.1. Only now do the numbers
+###   mean anything. Regime-map prediction to score: cube is ONE pick-and-place with the
+###   goal inside the planner's reach (flat already 71%) => expect LITTLE/NO drafting
+###   headroom (the Reacher-native regime), NOT a win.
+###   ALSO: gdm_cube_s10_gc.pt goal-cond drafter training 2272341 (~16:00) -- kept as
+###   a control, though its justification (the multi-segment story) was wrong; the
+###   goal-FREE drafter is probably fine since the data IS goal-directed and the
+###   target marker is rendered in the observation.
+### NOTHING about cube may be concluded (or written into the paper) until flat ~74%.
+### Retire/ignore: cube v1 battery (2272069), cube v2 battery (2272298) -- both used
+###   the unanchored protocol. gdm_cube_s10.pt (goal-free) is fine and reusable.
+### OGBench 5 predefined tasks exist (task1_horizontal ... task5_diagonal2, with
+###   init_xyzs/goal_xyzs in cube_env.py) -- if the dataset-replay anchor cannot hit
+###   74%, switch to the env's TASK mode (reset(task_id), env's own rendered goal).
+### CUBE-DOUBLE: parked. Premature until single-cube anchors.
+###
+### EXP 2d - third env: OGBench-Cube  [THE DERIVATION GRADUATION TEST]
+## DERIVE-FIRST PRE-REGISTRATION (2026-07-13, before any closed-loop battery cell):
+##  - S = 10 (pre-registered primary arm, zero-shot transfer of the dev-env
+##    optimum; gated by floor-probe disp(10) >> criterion floor).
+##  - drafter = GOAL-FREE (cube is expert/goal-directed data -> PushT regime;
+##    2x2 prediction: goal-free works here, unlike Reacher).
+##  - tau = the cube encoder's criterion floor (from Results/floor_cube.json,
+##    floor-AB job 2272066); k = the sampler convergence point (from
+##    Results/floor_cube_full.json, floor-C after training). BOTH recorded here
+##    BEFORE the battery is submitted. Battery = baseline(strongest RH) +
+##    every-step + spec-accept at derived (tau,k), horizon sweep.
+##  REGIME-MAP PREDICTIONS to score: (i) goal-free works (expert data);
+##  (ii) drafting beats flat at long horizon / where goal outruns lookahead;
+##  (iii) spec-accept SR-neutral at derived (tau,k). If tau lands on the floor
+##  DERIVE-FIRST (never seen this encoder), the derivation rule GRADUATES from
+##  retrospective pattern to rule.
+- [x] port VALIDATED 2026-07-13: swm/OGBCube-v0 + quentinll/lewm-cube encoder
+      both exist; ogbench-1.2.1 installed; smoke baseline 100% (16/16) t=25.
+      success = cube within 0.04m of target (env criterion); callables
+      set_state(qpos,qvel)+set_target_pos(0, goal block pos, hindsight).
+      Files: specaccept/envs/cube/{eval,build_subgoals}.py, probe_floor --env cube.
+- [>] FULL OVERNIGHT CHAIN QUEUED 2026-07-13 ~21:30 (autonomous, dependency-linked):
+      build 2272065 -> train+floorC 2272067 -> extract 2272068 -> BATTERY 2272069;
+      floor-AB(tau) 2272066 + baseline-RH 2272070 parallel. Extract applies the
+      PRE-REGISTERED rule (tau=criterion-floor p50; k=sampler convergence step,
+      validated PushT->3 / Reacher->4) to Results/floor_cube_full.json -> writes
+      cube_derived.env -> battery sources it. NO closed-loop number picks tau/k.
+      Battery = {baseline RH5, s10 goal-free every-step k50, s10 spec derived} x
+      t{25,50,75,100,150} x 2 seeds, n=128. ETA full spine ~morning.
+- [!] CONFOUND FOUND 2026-07-13 (floor-AB 2272066): cube criterion_floor p50=0.967
+      -- ~10x PushT/Reacher, BUT temporal_floor disp1 p50=0.087 (normal, ~PushT
+      0.080). ENCODER FINE. Cause: cube success criterion covers ONLY the cube
+      (0.04m) while the LeWM latent sees the WHOLE ARM; my criterion-equivalence
+      matched cube-pos-alone -> paired frames with cube fixed but arm in different
+      poses -> huge latent gap. The criterion-floor tau-rule DOES NOT PORT to a
+      partial-observation criterion. Genuine scope finding, not a bug.
+      => spec-accept overnight tau is PROVISIONAL (extract clamps 0.967->0.40).
+      MORNING FIX (needs design decision, not a hack): options -- (a) criterion-
+      equivalence = full-scene match (cube 0.04m AND proprio_effector_pos/joints
+      within tol) so equivalent frames actually look alike; (b) tau basis = the
+      TEMPORAL floor (disp1, confound-free, env-agnostic) -- cube 0.087; check it
+      retro-fits PushT(0.080)/Reacher(0.223) vs tau*=0.20. Then re-run floor + spec.
+- [!] EARLY SIGNAL: baseline-RH cells 100% so far -> cube-single flat planning may
+      have NO drafting headroom (Reacher-native regime) at all horizons; if so the
+      honest cube result is "no crossover / bounded", not a drafting win. Confirm
+      from the every-step arm vs baseline overnight. (Multi-cube double/triple would
+      be the real long-horizon case but we only have single-cube data.)
+- [ ] MORNING: pull cube_*_t*_seed* logs -> (a) goal-free every-step works?
+      (b) any crossover vs baseline? (c) derived k (floor_cube_full.json part C,
+      valid). FIX tau-derivation per above, re-run spec. Then decide cube framing
+      (win / bounded-negative) + add to tab:spine, archive logs.
+- [x] k-derivation (floor-C part C) UNAFFECTED by the confound -- drafter dispersion,
+      not criterion pairs. Valid overnight.
+- [x] TAU-FIX ATTEMPTED 2026-07-13 ~22:00 (full-scene: match cube AND effector, both
+      0.04m; probe_floor cube branch updated + redeployed; floor-AB 2272078 rerun):
+      floor only 0.97->0.79, STILL ~9x temporal (0.087). Full-scene match does NOT
+      rescue it -> criterion-floor rule genuinely OUT OF SCOPE on cube (encoder keeps
+      task-irrelevant scene variation). SHARPER finding for the paper. Kept both
+      floor_cube.json (cube-only) + floor_cube_fullscene.json as evidence.
+      => extract now has a SCOPE GUARD: if criterion_floor > 3x temporal, fall back to
+      transferred default tau=0.20 (auto, logged); k still derived. floor-C bumped to
+      pair-pool 120000. Battery spec now runs at a DEFENSIBLE tau, not a clamp.
+- [+] EXTRA overnight (fill idle nodes, finish before cube battery): S x tau grid
+      2272079 (S{5,10,25} x tau{.1-.4} k8 t100, closes sec:calib-scale separability
+      TBD + documents the check(iv) band-widens-with-S effect). Spine FIGURE generated
+      locally (figs/spine.{pdf,png}, make_spine.py) -> wired into paper (fig:spine),
+      closes the centerpiece figure TBD.
 - [x] recon: datasets/quentinll/lewm-cube EXISTS on HF (2026-07-12)
 - [ ] scope after PushT restage: port = reacher pattern (envs/cube/eval.py
       driver + build_subgoals + batch chain); DECIDE sec 11.3 accordingly
+- [ ] STAGING ORDER (2026-07-13): shrink reacher.h5 first (disk: 46GB compressed,
+      ~150GB+ unpacked vs ~60GB free) -> download -> port -> PRE-REGISTER derive-first:
+      run probe_floor.py on the Cube encoder BEFORE any closed-loop cell, commit to
+      the derived (tau, k) + declared S rule, one battery at that config only.
+      This battery doubles as the derivation rule's graduation test.
+      (Optional cheaper alternative/parallel: DINO-WM encoder swap on PushT —
+      re-encode + retrain one S=10 drafter overnight, derive tau, one confirmation cell.)
 
 ### WRITE RULES (from the 2026-07-12 review; bind WRITE 1/2)
+- (2026-07-13) NEVER present call_ratio->1.00 at low k as a "self-test" feature —
+  RETRACTED, it is false rejection (blind2@k2 63.5 vs spec@k2 55.6). Verifier claims
+  are REGIME-DEPENDENT, evidenced by the Reacher blind loss; blind rows are SHOWN in
+  the tables, never hidden — the PushT tie is what the floor theory predicts.
+- (2026-07-13) "derived" appears in the paper ONLY with its validation tier attached
+  (retrospective 2/2 + prospective k=3) until a derive-first battery lands.
 - The Reacher t25 row (spec 58.6 vs flat 95.7) is the paper's most attackable
   number: the oracle-parity bound AND the lerp collapse must sit IN THE SAME
   PARAGRAPH as that table, never in an appendix.
@@ -156,9 +403,14 @@ gated ->
       baseline control, horizon table, frontier, transfers/does-not-transfer;
       TwoRoom boundary note; sec 9 replan-rate para; sec 6 denominators +
       selection defence; limitations/conclusion/abstract updated
-- [ ] FINAL-NUMBER PASS after overnight gates (needs: k frozen, goal-free row
-      swapped in for its TBD, k-mirror haircut applied per WRITE RULES, lerp +
-      oracle numbers into the t25 paragraph, gamma verdict sentence)
+- [x] FINAL-NUMBER PASS round 1 DONE 2026-07-13 in main_v2 (tau-grid table filled,
+      k/S exact numbers, dual-population spine, gamma full curve, gc 2x2, timing,
+      Reacher fail-safe note, goal-gate negative, pareto fig regenerated)
+- [ ] FINAL-NUMBER PASS round 2 (gated by 2271772): swap headline/spine/repl spec
+      cells to the *_s10speck3_* derived-config numbers; NFE figures to 1.9/replan;
+      Reacher headline cells to the k=4 respin (95.5/95.5/95.7)
+- [ ] §5/§7.1/§8 REWRITE to the churn + derivation story (floor tables in §5;
+      regime-dependent verification + blind rows in §7/§8; self-test retraction)
 - [ ] update headline table (Table 8) if a Reacher row belongs there
 - [ ] compile check (needs iclr2026_conference.sty dropped into paper/ — not on
       this machine; structural checks pass)
