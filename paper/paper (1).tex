@@ -47,6 +47,16 @@ in Hierarchical Latent World-Model Planning}
 \begin{document}
 \maketitle
 
+\begin{center}\fcolorbox{red}{red!10}{\parbox{0.92\linewidth}{\centering
+\color{red}\textbf{ARCHIVED DRAFT (v1) --- SUPERSEDED BY \texttt{main\_v2.tex}
+(2026-07-13).}\\ \color{red}Kept only as source material for the v2 appendices.
+Numbers here predate the derived-config re-stamp (spec cells ran $k{=}8$, not the
+derived $k{=}3$; rand-init spec cell was unrun); the ``verifier self-test'' claim in
+\S\ref{sec:spec} was RETRACTED 2026-07-13 (it is false rejection --- see v2 \S7.1);
+the framing predates the calibration-by-measurement section. Do not cite, compile,
+or copy numbers from this file except when porting appendix tables.}}
+\end{center}
+
 % ============================================================
 \begin{abstract}
 We study the FF-JEPA hierarchical latent planner --- a frozen LeWM JEPA encoder, a
@@ -66,13 +76,14 @@ from $+3.3$ to $+11.9$pp}. A cadence-isolation control shows the mechanism is
 DSpark-style speculative decoding that survives measurement --- a draft--verify--accept
 skeleton with the learned verifier replaced by the \emph{achieved environment state}
 --- cuts diffusion compute ${\sim}11\times$ versus every-step drafting while remaining
-success-rate-neutral at the official criterion. On a second environment (Reacher,
-exploratory non-expert data), this consumption mechanism transfers with zero re-tuning
---- SR-neutral at every horizon, reaching $95.5\%$ at ${\sim}20\times$ less drafter
-compute at the strongest cell --- while drafting itself proves regime-dependent:
-against the strongest flat baseline at every replanning rate, drafted subgoals win
-$+11$ to $+19$pp exactly where the goal outruns the planning window, and are a
-measurable detour tax where it does not. Refinement heads, learned confidence
+success-rate-neutral at the official criterion. The cost claim decomposes into two factors, stated separately throughout: cheap
+drafts ($k{=}50\to4$ at equal-or-better SR --- the inherited 50-step sampler was
+convention, not necessity) and verified consumption (${\sim}1.8\times$ fewer calls at
+matched $k$, SR-neutral). On a second environment (Reacher, exploratory non-expert
+data), the mechanism transfers with zero re-tuning --- SR-neutral at every horizon ---
+while drafting itself proves regime-dependent: against the strongest flat baseline at
+every replanning rate, drafted subgoals win $+11$ to $+19$pp exactly where the goal
+outruns the planning window, and are a measurable detour tax where it does not. Refinement heads, learned confidence
 scheduling, blind multi-step commitment, and a deterministic regressor that dominates
 the drafter \emph{offline} each measurably \emph{hurt} in closed loop; we report them
 as negative results that causally implicate drafter stochasticity.
@@ -272,8 +283,9 @@ apples-to-apples comparison); the $4.4\times$ in this caption is $600{\to}135$ a
 FF-JEPA's \emph{native} configuration ($S{=}25$ every-step), which is cheaper per
 episode but weaker. The reduction compounds two factors --- fewer calls (ratio
 ${\sim}0.56$) and cheaper calls ($k{=}8$ vs.\ $50$); the $k$-isolation row holds $k$
-fixed to isolate the former, and the mirror arm (every-step at $k{=}8$, isolating the
-consumption policy against an equally-cheap-per-call baseline) is \TBD: run in flight.
+fixed to isolate the former; the mirror arms (every-step at cheap $k$, isolating the
+consumption policy against equally-cheap-per-call baselines) are reported in the
+$k$-curve paragraph below.
 At 8-seed power, verified coasting
 is \degc{20}-neutral at $S{=}10$ but costs ${\sim}3.5$pp at \degc{5}; at $S{=}5$ the sign
 \emph{reverses} (spec-accept beats its own every-step reference on both criteria) --- when
@@ -286,7 +298,6 @@ $4.4\times$ lower diffusion cost.}
 Arm ($S{=}10$ unless noted) & SR \degc{20} & SR \degc{5} & call ratio & NFE/ep \\
 \midrule
 every-step drafting, $k{=}50$ (reference)          & 97.2 & 96.4 & 1.00 & 1500 \\
-every-step drafting, $k{=}8$ (cheap-call mirror)   & \TBD & \TBD & 1.00 & 240 \\
 spec-accept $\tau{=}0.15$, $k{=}8$                  & 98.0 & 95.2 & 0.67 & 161 \\
 spec-accept $\tau{=}0.20$, $k{=}8$                  & \ours{98.0} & \ours{94.8} & \ours{0.56} & \ours{135} \\
 spec-accept $\tau{=}0.30$, $k{=}8$                  & 96.8 & 94.8 & 0.45 & 108 \\
@@ -310,12 +321,34 @@ paper config ($S{=}25$ every-step, 8 seeds \degc{5})& 91.1 & 87.7 & --- & 600 \\
 \paragraph{Hyperparameter selection.} $\tau$ and $k$ were chosen by offline calibration
 and the closed-loop sweep of \Cref{tab:spec}, which runs on the same fixed evaluation
 population as the reported cells --- a selection-on-evaluation-set risk we address two
-ways. First, a re-selection of $\tau$ on an episode-disjoint validation population
-(selection on validation, chosen cell reported on the untouched evaluation split) is
-\TBD: run in flight. Second, and independently, the same $\tau{=}0.20,k{=}8$ transferred
-to Reacher with \emph{zero re-tuning} and remained SR-neutral at call ratios
-$0.59$--$0.88$ in every cell of every regime (\Cref{sec:reacher}) --- the behavior of a
+ways. First, $\tau$ was re-selected on an episode-disjoint validation population: the
+grid is flat ($63.3$--$64.9$ \degc{20} across $\tau\in[0.15,0.30]$ on the harder
+unfiltered population) and $\tau{=}0.20$ remains the selected cell --- the threshold is
+not load-bearing. Second, and independently, the same $\tau{=}0.20$ transferred to
+Reacher with \emph{zero re-tuning} and remained SR-neutral at call ratios
+$0.46$--$0.88$ in every cell of every regime (\Cref{sec:reacher}) --- the behavior of a
 robust operating point, not an overfit one.
+
+\paragraph{The $k$-curve, and an honest decomposition of the cost claim.} On the
+re-derived pipeline we swept $k\in\{1,2,4,8,50\}$ at matched long-horizon anchors on
+both environments. PushT: every-step SR is flat across $k\in\{4,8,50\}$ and cliffs
+below ($55$--$56$ at $k\leq2$ vs.\ $63$--$65$ at $k\geq4$); Reacher tolerates even
+$k{=}1$ ($95.1$). We therefore \textbf{freeze $k{=}4$ globally} --- the knee of the
+cost-quality curve on the stricter environment. This resizes the efficiency claim into
+two separable factors: (i) \emph{cheap drafts}, $k{=}50\to4$, a $12.5\times$ per-call
+reduction available to every-step drafting too --- FF-JEPA's $k{=}50$ was image-domain
+convention, not necessity; and (ii) \emph{verified consumption}, spec-accept's own
+marginal factor of ${\sim}1.8\times$ at matched $k$ (call ratio ${\approx}0.55$),
+SR-neutral or better. The legacy single-number comparison ($135$ vs.\ $1500$ NFE/ep,
+${\sim}11\times$) conflates the two and we retain it only against the paper's native
+configuration. The verifier also passes a self-test at the cliff: at $k\leq2$, where
+drafts are genuinely poor, the reality check rejects essentially every draft (call
+ratio $1.00$) --- it degrades to every-step rather than coasting on bad plans.
+Wall-clock, measured with CUDA-synced instrumentation: the drafter is ${\sim}1\%$ of
+episode time in this stack (CEM dominates), so the NFE reduction is a drafter-side
+compute claim --- material when the drafter is large relative to the planner, immaterial
+to end-to-end latency here; fine stride itself costs nothing ($S{=}10$ episodes run
+$12\%$ \emph{faster} than $S{=}25$ at matched protocol).
 
 % ============================================================
 \section{Is the Diffusion Drafter Necessary?}
@@ -348,6 +381,20 @@ $\Delta$                      & $-5.2$ & $-4.4$ & $-4.8$ & $-11.7$ \\
 \end{tabular}
 \end{table}
 
+\paragraph{Dose-response: spread as a continuous lever.} The regressor, the refinement
+head, and blind commitment are all \emph{categorical} spread reductions. To close the
+thesis causally we sweep a single continuous lever: the sampler's injected-noise scale
+$\gamma$ ($\gamma{=}0$ deterministic, $1$ native, $>1$ inflated), inference-only, on the
+fixed long-horizon population ($t{=}100$, seeds 42--45 at the endpoints). SR is
+\textbf{non-monotone with an interior optimum at native spread}: for $S{=}25$,
+$49.0 \to 57.9 \to 28.7 \to 4.7$ across $\gamma{=}0 \to 1 \to 1.5 \to 2$ (\degc{20});
+$S{=}10$ traces the same shape with a gentler low side ($56.6$ at $\gamma{=}0$,
+$59.1$--$59.4$ at $\gamma{=}1$--$1.25$, collapse by $\gamma{=}2$). Too little spread
+re-creates the regressor's loss; too much destroys the draft distribution entirely.
+The three categorical ablations and this curve are one phenomenon: closed-loop control
+pays for conditional spread near the level the drafter was trained at, in both
+directions.
+
 % ============================================================
 \section{Failure Anatomy}
 \label{sec:failure}
@@ -365,33 +412,38 @@ scale; the residue is quantization at the success threshold.
 \section{Horizon Scaling (Fixed Population)}
 \label{sec:horizon}
 
-Goal offsets $t\in\{25,50,75,100\}$ on the \emph{identical} 256 episodes at every offset
-(reindexed from the $t{=}150$ set), budget $2t$, seeds 42/43 --- so horizon is the only
-variable, free of the eligibility confound that invalidates independent per-offset draws.
+Goal offsets $t\in\{25,50,75,100,150\}$ on the \emph{identical} 256 episodes at every
+offset (reindexed from the $t{=}150$ set, success-population eligibility), budget $2t$,
+seeds 42/43 --- so horizon is the only variable, free of the eligibility confound that
+invalidates independent per-offset draws.
 
 \begin{table}[h]
 \centering
 \small
 \setlength{\tabcolsep}{4.5pt}
-\caption{Fixed-population horizon sweep ($n{=}512$/cell). \textbf{The baseline decays
-monotonically at the strict criterion ($-11.9$pp from $t{=}25$ to $t{=}100$) while
-$S{=}10$ is flat from $t{=}50$ onward --- the gap widens monotonically.} Spec-accept tracks
-every-step within $1.2$pp across the curve (call ratio ${\approx}0.57$ at long horizons,
-${\approx}0.85$ at $t{=}25$: the cost win is a long-horizon phenomenon).}
+\caption{Fixed-population horizon sweep ($n{=}512$/cell), re-derived end-to-end from
+public assets on independent hardware (anchor cells match the original pipeline within
+noise), now \emph{including the flat-planner arm on the identical population} and
+extended to $t{=}150$. \textbf{Flat planning collapses ($98.1 \to 2.7$) while $S{=}10$
+is flat at ${\sim}98$ across the entire sweep.} Spec-accept tracks every-step within
+noise at every offset (call ratio $0.54$ at long horizons, $0.85$ at $t{=}25$: the cost
+win is a long-horizon phenomenon). Replan-rate controls (RH$\,{=}1/2$) do not rescue
+the flat planner (\S\ref{sec:horizon} text).}
 \label{tab:horizon}
-\begin{tabular}{lcccccc}
+\begin{tabular}{lcccccccc}
 \toprule
-& \multicolumn{2}{c}{$S{=}25$ (FF-JEPA)} & \multicolumn{2}{c}{$S{=}10$ every-step}
-& \multicolumn{2}{c}{$S{=}10$ $+$ spec-accept} \\
-\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
-$t$ & \degc{20} & \degc{5} & \degc{20} & \degc{5} & \degc{20} & \degc{5} \\
+& \multicolumn{2}{c}{LeWM flat} & \multicolumn{2}{c}{$S{=}25$ (FF-JEPA)}
+& \multicolumn{2}{c}{$S{=}10$ every-step} & \multicolumn{2}{c}{$S{=}10$ $+$ spec-accept} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}
+$t$ & \degc{20} & \degc{5} & \degc{20} & \degc{5} & \degc{20} & \degc{5} & \degc{20} & \degc{5} \\
 \midrule
-25  & 98.1 & 93.8 & \ours{99.8} & \ours{97.1} & 99.6 & 95.1 \\
-50  & 93.6 & 85.0 & \ours{97.5} & \ours{93.8} & 97.1 & 93.9 \\
-75  & 92.6 & 83.2 & \ours{98.2} & \ours{93.8} & 97.9 & 93.0 \\
-100 & 93.8 & 81.8 & 97.9 & \ours{93.8} & \ours{98.6} & 92.6 \\
+25  & 98.1 & 95.3 & 99.0 & 93.2 & \ours{99.6} & \ours{97.5} & 99.6 & 96.7 \\
+50  & 60.4 & 48.8 & 94.1 & 85.0 & \ours{99.0} & 93.8 & 97.1 & 93.0 \\
+75  & 42.6 & 28.5 & 95.9 & 82.2 & \ours{98.1} & \ours{95.1} & 97.5 & 93.2 \\
+100 & 12.7 & 5.3  & 95.7 & 86.1 & 98.1 & 94.3 & \ours{99.2} & \ours{95.7} \\
+150 & 2.7  & 2.0  & 93.9 & 85.6 & 98.4 & 96.5 & \ours{98.8} & \ours{96.9} \\
 \midrule
-\degc{5} gap ($S{=}10-$ baseline) & & & \multicolumn{2}{c}{$+3.3\to+8.8\to+10.5\to+11.9$} & & \\
+\degc{20} gap ($S{=}10-$flat) & & & & & \multicolumn{2}{c}{$+1.5\to+38.6\to+55.5\to+85.4\to+95.7$} & & \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -445,9 +497,9 @@ fixed-population sweep, \emph{no} replan rate rescues flat planning from the hor
 collapse --- RH${=}1$ falls $88.3\to18.0$ and RH${=}2$ $96.3\to47.1$ over
 $t{=}25\to75/100$, alongside the native configuration's published-anchored cliff ---
 while the drafted-subgoal arms of \Cref{tab:horizon} hold ${\geq}97$ throughout.
+The in-population flat arm of \Cref{tab:horizon} (RH${=}5$, the strongest
+configuration at distance) completes the picture: $98.1\to2.7$ across the sweep.
 Replanning faster is not a substitute for planning \emph{toward something nearer}.
-(Remaining cells of this grid, and an in-population flat arm for \Cref{tab:horizon},
-are \TBD: runs in flight.)
 
 % ============================================================
 \section{Headline Comparison}
@@ -513,16 +565,28 @@ expert demonstrations, the Reacher dataset is collected by an exploratory SAC po
 ill-posed --- the data's continuation from $z_t$ carries no information about an
 arbitrary hindsight goal --- so all drafters here are goal-conditioned (hindsight goals,
 gap ${\sim}U[1,100]$), trained with the identical recipe of \Cref{sec:scale}. A
-goal-free control drafter quantifies this claim: \TBD\ (run in flight).
+goal-free control drafter quantifies this: $8.6$--$11.3\%$ SR at every horizon ---
+statistically the random-policy floor ($\approx10\%$) --- versus $60.6$--$95.1\%$
+goal-conditioned. The converse cell closes the $2{\times}2$: on PushT's expert data,
+goal-conditioning the drafter changes \emph{nothing} ($98.9$ vs.\ $99.4$ \degc{20}
+short; parity at $t{=}150$) --- conditioning is necessary exactly when the data does
+not already flow toward goals, and redundant when it does.
 
 \paragraph{Native task: drafting has no headroom, and pays a detour tax.}
 At the native protocol ($t{=}25$, budget 50) the scale law's \emph{shape} reproduces
 --- the interior optimum at $S{=}10$ beats the native $S{=}25$ --- but the entire
-drafter curve sits far below flat planning (\Cref{tab:reacher-native}). Two controls
+drafter curve sits far below flat planning (\Cref{tab:reacher-native}). Three controls
 attribute this. First, an \emph{oracle} arm (ground-truth dataset latents as subgoals)
-also fails to beat flat planning ($90.6$ vs.\ $93.8$, $n{=}32$): a single short reach
-inside the planner's lookahead gains nothing from decomposition, bounding all drafters
-at parity. Second, the deficit below that bound is a \emph{detour tax}: waypoints
+lands at exact parity with matched-loop flat planning ($84.2\pm1.0$ vs.\ $84.0$,
+$n{=}512$): a single short reach inside the planner's lookahead gains nothing from
+decomposition, bounding all drafters at parity. Second, a \emph{straight-line} oracle
+(waypoints interpolated in latent space toward the goal, re-anchored per replan)
+isolates decomposition from data quality: even geometrically perfect waypoints collapse
+short-range SR monotonically in hop count ($95.5 \to 70.7 \to 21.9$ for interpolation
+fractions $1.0/0.5/0.25$; the $1.0$ arm reproduces flat planning within $0.2$pp, a
+harness self-check) --- the tax is intrinsic to making the planner land on intermediate
+targets, not an artifact of meandering data. Third, the deficit below the bound is
+worsened by the \emph{detour tax}: waypoints
 imitate the exploratory data's meanders, and with budget $2t$ the wasted steps are
 unaffordable (the tax is largest under the harshest budgets; see below). Spec-accept
 remains SR-neutral relative to its every-step reference throughout --- the mechanism
@@ -565,7 +629,16 @@ best flat configuration degrades monotonically with goal distance while the draf
 arms are flat --- the gap widens from $+11$ to $+19$pp, with spec-accept delivering it
 at a $0.62$ call ratio. The environment-level picture mirrors PushT's horizon sweep
 (\Cref{sec:horizon}) in attenuated form: a free-space reach never becomes \emph{hard},
-merely under-specified by a remote goal image.
+merely under-specified by a remote goal image. Two follow-up controls sharpen the
+attribution. The straight-line oracle \emph{fails} here ($33/44/55\%$ at interpolation
+fractions $0.25/0.5/0.75$, far below the drafter's $94.5$ and below even flat
+planning's $83.2$): latent-space geometry is not linear over long ranges, so the
+learned draft distribution is \emph{necessary}, not replaceable by interpolation ---
+the same object that is pure overhead at short range carries irreplaceable information
+at long range. And the scale law \emph{flattens} where drafting wins broadly: at
+$t\in\{100,150\}$ all of $S\in\{5,15,25\}$ land within $91$--$96\%$ of $S{=}10$'s
+$94.5/95.1$ --- the interior optimum is a short-range phenomenon on Reacher, whereas
+PushT retains it at $t{=}150$ ($S{=}10/15$ over $S{=}5/25$ by ${\sim}3$--$4$pp).
 
 \begin{table}[h]
 \centering
@@ -594,10 +667,14 @@ gap (best drafter $-$ best flat)    & $+11.3$ & $+11.8$ & $+19.2$ \\
 \paragraph{Efficiency frontier at the crossover cell.}
 Sweeping the acceptance threshold and draft steps at $t{=}100$
 ($\tau\in\{0.1,\ldots,0.4\}\times k\in\{4,8,16\}$) yields a clean SR-vs-compute
-frontier: $k{=}4$ dominates uniformly across $\tau$, and at $\tau{=}0.2,k{=}4$
-spec-accept reaches $95.5\%$ ($n{=}4$ seeds) at $2.6$ drafter NFE per replan ---
-\ours{${\sim}20\times$ below} the every-step reference's 50 NFE, while \emph{exceeding}
-its SR ($90.8$). SR degrades gracefully with $\tau$, as an acceptance threshold should.
+frontier: $k{=}4$ dominates uniformly across $\tau$, and at the frozen
+$\tau{=}0.2,k{=}4$ spec-accept reaches $95.5\%$ ($n{=}4$ seeds) at $2.6$ drafter NFE
+per replan. Decomposed per \Cref{sec:spec}: the cheap-draft factor alone lifts
+every-step drafting to $96.1$ at $4$ NFE (and Reacher tolerates even $k{=}1$ at
+$95.1$), so spec-accept's marginal contribution here is ${\sim}1.5\times$ at SR-parity;
+the legacy comparison against the $k{=}50$ reference ($90.8$ at $50$ NFE) compounds
+both factors to ${\sim}19\times$ \emph{with} an SR gain, and is quoted only with that
+decomposition. SR degrades gracefully with $\tau$, as an acceptance threshold should.
 
 \paragraph{What transfers, what does not.} Transfers: the scale law's interior optimum;
 spec-accept's SR-neutrality at large compute reduction, with zero re-tuning of
@@ -650,10 +727,15 @@ waypoints, and (c) offline data whose trajectories are goal-directed enough to i
 defeat it (TwoRoom). OGBench-Cube remains \TBD. (iii) The \degc{20}/\degc{5} criterion
 mapping for the paper's own cells is inferred from empirical alignment, not stated by
 the paper; we mark every cross-paper comparison with the side it is valid on. (iv) The
-$t{=}150$ cell is a beyond-paper probe, not a reproduction claim. (v) PushT results are
-being re-derived end-to-end from public assets on independent hardware at the time of
-writing; the re-derivation gates (drafter-diagnostic and anchor-cell reproduction) are
-\TBD\ and will be reported.
+$t{=}150$ cell is a beyond-paper probe, not a reproduction claim. (v) All PushT results
+were re-derived end-to-end from public assets on independent hardware: the closed-loop
+anchor cells reproduce (baseline $94.6$ / oracle $92.6$ / $S{=}25$ $94.8$ / $S{=}10$
+$99.4$ \degc{20} against $93.4/93.4/95.3/98.4$), certifying the pipeline; offline
+drafter diagnostics are \emph{not} comparable across dense-file rebuilds and closed-loop
+anchors are the arbiter. (vi) Horizon-sweep populations are eligibility-defined;
+success-filtered and unfiltered populations give the same qualitative story (collapse
+vs.\ flat) at different absolute levels, are reported separately, and are never
+spliced.
 
 % ============================================================
 \section{Conclusion}
