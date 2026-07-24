@@ -22,6 +22,11 @@ writeup/*.log
 writeup/*.out
 writeup/*.blg
 writeup/*.synctex.gz
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.blg
+paper/*.synctex.gz
 
 # vjepa2 transplant: upstream clone (its own git repo, re-cloned per the
 # README pin) and encoded-latent artifacts (reproducible via encode_episodes)
