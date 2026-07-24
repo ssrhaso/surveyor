@@ -1,0 +1,60 @@
+=== unif-reacher t=100 seed=44 n=30 (unified c*-retire, budget=200) ===
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+[model] frozen LeWM (18.03M), device=cuda, training=False, subgoal=unified
+[gdm] planner from gdm_reacher_s10.pt: head=53.44M, N=3 WG=1 goal_cond=True T=1000 sampler=ddim/8-steps param=eps schedule=linear norm=standardize
+17:27:48 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+[episodes-file] reacher_gatev4c_route_t100_spec.json: 30 precomputed pairs (built for max_offset=100, seed=999, episode_min=8000) -- sampling bypassed; running at goal_offset=100
+[eval] start=random num_eval=30 goal_offset=100 budget=200 qpos_threshold=0.05 rad/joint
+[eval] episodes_idx[:5]=[8000, 8082, 8176, 8208, 8231] start_steps[:5]=[19, 54, 31, 46, 65]
+17:27:48 | INFO  | __init__.py | MUJOCO_GL=egl, attempting to import specified OpenGL backend.
+17:27:48 | INFO  | __init__.py | No OpenGL_accelerate module loaded: No module named 'OpenGL_accelerate'
+17:27:48 | INFO  | __init__.py | MuJoCo library version is: 3.10.0
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/envs/registration.py:729: UserWarning: [33mWARN: The environment is being initialised with render_mode='rgb_array' that is not in the possible render_modes ([]).[0m
+  logger.warn(
+[unified] c*-retire spec-accept: tau=0.2, retire window=10 steps; drafting only while the goal is out of certified reach
+CEM solve time: 3.9821 seconds
+CEM solve time: 6.4841 seconds
+CEM solve time: 3.8176 seconds
+CEM solve time: 6.4474 seconds
+CEM solve time: 3.5837 seconds
+CEM solve time: 6.4503 seconds
+CEM solve time: 3.0596 seconds
+CEM solve time: 5.8049 seconds
+CEM solve time: 2.1867 seconds
+CEM solve time: 4.7293 seconds
+CEM solve time: 1.7881 seconds
+CEM solve time: 4.2991 seconds
+CEM solve time: 1.5154 seconds
+CEM solve time: 3.4396 seconds
+CEM solve time: 1.2640 seconds
+CEM solve time: 2.7942 seconds
+CEM solve time: 0.7324 seconds
+CEM solve time: 2.3654 seconds
+CEM solve time: 0.7316 seconds
+CEM solve time: 2.3657 seconds
+CEM solve time: 0.6123 seconds
+CEM solve time: 1.9357 seconds
+CEM solve time: 0.6116 seconds
+CEM solve time: 1.7212 seconds
+CEM solve time: 0.6116 seconds
+CEM solve time: 1.7205 seconds
+CEM solve time: 0.6117 seconds
+CEM solve time: 1.7209 seconds
+CEM solve time: 0.6116 seconds
+CEM solve time: 1.7209 seconds
+CEM solve time: 0.4704 seconds
+CEM solve time: 1.7197 seconds
+CEM solve time: 0.4694 seconds
+CEM solve time: 1.7210 seconds
+CEM solve time: 0.3452 seconds
+CEM solve time: 1.5057 seconds
+CEM solve time: 0.3443 seconds
+CEM solve time: 1.5060 seconds
+CEM solve time: 0.2111 seconds
+CEM solve time: 1.2915 seconds
+[unified] tau=0.2 retired=29/30 (fired-at-first-replan=1, == the router fire test) retire_replan p10/p50/p90=2/4/10 c*_first p50=1.418 | spec: re-drafts=125 advances=45 rejects=85 call_ratio=0.735
+
+==== FF-JEPA eval summary (Reacher qpos_match) ====
+subgoal=unified num_eval=30 goal_offset=100 budget=200 seed=44 cem_seed=44 S=10
+  SR = 80.00%  (24/30)

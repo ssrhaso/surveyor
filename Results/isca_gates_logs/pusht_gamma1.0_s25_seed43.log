@@ -1,0 +1,57 @@
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+2026-07-12 19:40:21.275 | INFO     | stable_worldmodel.wm.utils:_resolve_hf:149 - Loading quentinll/lewm-pusht from local cache...
+2026-07-12 19:40:21.276 | INFO     | stable_worldmodel.wm.utils:_resolve_folder:137 - Loading checkpoint from folder /lustre/home/ha676/.stable_worldmodel/checkpoints/models--quentinll--lewm-pusht...
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/wm/utils.py:80: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  state_dict = torch.load(checkpoint_path, map_location='cpu')
+19:40:26 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+19:40:26 | INFO  | utils.py    | Created ViT-tiny from scratch with config: {'hidden_size': 192, 'num_hidden_layers': 12, 'num_attention_heads': 3, 'intermediate_size': 768, 'image_size': 224, 'patch_size': 14}
+[model] frozen LeWM (18.03M), device=cuda, training=False, subgoal=gdm
+[gdm] planner from gdm_stride25.pt: head=53.34M, N=3 WG=1 gamma=1.0 T=1000 sampler=ddim/50-steps param=eps schedule=linear norm=standardize
+19:40:27 | INFO  | __init__.py | Cached 'action' from '/lustre/home/ha676/data/pusht/pusht_expert_train.h5'
+19:40:27 | INFO  | __init__.py | Cached 'proprio' from '/lustre/home/ha676/data/pusht/pusht_expert_train.h5'
+19:40:27 | INFO  | __init__.py | Cached 'state' from '/lustre/home/ha676/data/pusht/pusht_expert_train.h5'
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/spaces/box.py:415: UserWarning: [33mWARN: Casting input x to numpy array.[0m
+  gym.logger.warn("Casting input x to numpy array.")
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/utils/passive_env_checker.py:157: UserWarning: [33mWARN: The obs returned by the `step()` method is not within the observation space.[0m
+  logger.warn(f"{pre} is not within the observation space.")
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/spaces/box.py:415: UserWarning: [33mWARN: Casting input x to numpy array.[0m
+  gym.logger.warn("Casting input x to numpy array.")
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/utils/passive_env_checker.py:157: UserWarning: [33mWARN: The obs returned by the `step()` method is not within the observation space.[0m
+  logger.warn(f"{pre} is not within the observation space.")
+[episodes-file] pusht.episodes150.json: 256 precomputed pairs (goal_offset=150, seed=42, eval_filter=None) -- sample_long/short bypassed
+[eval] mode=long start=final num_eval=256 goal_offset=150 budget=300 eval_filter=none
+[eval] episodes_idx[:5]=[636, 688, 700, 834, 850] start_steps[:5]=[7, 7, 7, 34, 34]
+[PIN] success = pos_diff<20 [block xy only (paper)] AND angle<20deg
+CEM solve time: 147.1692 seconds
+CEM solve time: 143.1029 seconds
+CEM solve time: 141.4024 seconds
+CEM solve time: 133.3277 seconds
+CEM solve time: 120.6397 seconds
+CEM solve time: 104.8984 seconds
+CEM solve time: 90.8427 seconds
+CEM solve time: 81.0037 seconds
+CEM solve time: 75.8313 seconds
+CEM solve time: 68.9130 seconds
+CEM solve time: 66.5936 seconds
+CEM solve time: 65.4680 seconds
+[RESULT] score=block angle=20deg  SR=56.64%  (145/256)
+[PIN] success = pos_diff<20 [block xy only (paper)] AND angle<5deg
+CEM solve time: 147.0636 seconds
+CEM solve time: 144.2292 seconds
+CEM solve time: 142.9749 seconds
+CEM solve time: 141.2169 seconds
+CEM solve time: 133.2817 seconds
+CEM solve time: 121.2152 seconds
+CEM solve time: 109.7480 seconds
+CEM solve time: 102.2548 seconds
+CEM solve time: 95.9591 seconds
+CEM solve time: 92.4710 seconds
+CEM solve time: 90.1824 seconds
+CEM solve time: 87.8564 seconds
+[RESULT] score=block angle=5deg  SR=42.97%  (110/256)
+
+==== FF-JEPA eval summary ====
+mode=long subgoal=gdm num_eval=256 seed=43 cem_seed=43 eval_filter=none
+  score=block   20deg :  56.64%  (145/256)
+  score=block    5deg :  42.97%  (110/256)

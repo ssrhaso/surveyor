@@ -1,0 +1,1110 @@
+file,header,env,subgoal,mode,n,seed,S,eval_filter,offset,budget,epfile,sr20,sr5,srq,call_ratio,tau,k
+klowjob_2271112_0.log,,reacher,gdm,,128,42,10,,100,200,reacher_klow.ep100.t0.json,,,95.31,,,
+klowjob_2271112_1.log,,reacher,gdm,,128,43,10,,100,200,reacher_klow.ep100.t1.json,,,96.88,,,
+klowjob_2271112_10.log,,reacher,specaccept,,128,44,10,,100,200,reacher_klow.ep100.t10.json,,,95.31,1.000,0.2,1
+klowjob_2271112_11.log,,reacher,specaccept,,128,45,10,,100,200,reacher_klow.ep100.t11.json,,,94.53,1.000,0.2,1
+klowjob_2271112_12.log,,reacher,specaccept,,128,42,10,,100,200,reacher_klow.ep100.t12.json,,,95.31,1.000,0.2,2
+klowjob_2271112_13.log,,reacher,specaccept,,128,43,10,,100,200,reacher_klow.ep100.t13.json,,,97.66,1.000,0.2,2
+klowjob_2271112_14.log,,reacher,specaccept,,128,44,10,,100,200,reacher_klow.ep100.t14.json,,,96.09,1.000,0.2,2
+klowjob_2271112_15.log,,reacher,specaccept,,128,45,10,,100,200,reacher_klow.ep100.t15.json,,,94.53,1.000,0.2,2
+klowjob_2271112_16.log,,pusht,gdm,long,256,42,,none,100,200,pusht.episodes150as100.json,56.25,43.36,,,,
+klowjob_2271112_17.log,,pusht,gdm,long,256,43,,none,100,200,pusht.episodes150as100.json,54.69,45.70,,,,
+klowjob_2271112_18.log,,pusht,gdm,long,256,44,,none,100,200,pusht.episodes150as100.json,54.30,41.02,,,,
+klowjob_2271112_19.log,,pusht,gdm,long,256,45,,none,100,200,pusht.episodes150as100.json,58.20,40.62,,,,
+klowjob_2271112_2.log,,reacher,gdm,,128,44,10,,100,200,reacher_klow.ep100.t2.json,,,95.31,,,
+klowjob_2271112_20.log,,pusht,gdm,long,256,42,,none,100,200,pusht.episodes150as100.json,53.12,46.09,,,,
+klowjob_2271112_21.log,,pusht,gdm,long,256,43,,none,100,200,pusht.episodes150as100.json,55.86,41.80,,,,
+klowjob_2271112_22.log,,pusht,gdm,long,256,44,,none,100,200,pusht.episodes150as100.json,53.52,44.92,,,,
+klowjob_2271112_23.log,,pusht,gdm,long,256,45,,none,100,200,pusht.episodes150as100.json,57.42,43.75,,,,
+klowjob_2271112_24.log,,pusht,specaccept,long,256,42,,none,100,200,pusht.episodes150as100.json,55.86,44.92,,1.000,0.2,1
+klowjob_2271112_25.log,,pusht,specaccept,long,256,43,,none,100,200,pusht.episodes150as100.json,53.52,41.80,,1.000,0.2,1
+klowjob_2271112_26.log,,pusht,specaccept,long,256,44,,none,100,200,pusht.episodes150as100.json,53.12,41.80,,1.000,0.2,1
+klowjob_2271112_27.log,,pusht,specaccept,long,256,45,,none,100,200,pusht.episodes150as100.json,56.25,44.53,,1.000,0.2,1
+klowjob_2271112_28.log,,pusht,specaccept,long,256,42,,none,100,200,pusht.episodes150as100.json,51.56,45.31,,1.000,0.2,2
+klowjob_2271112_29.log,,pusht,specaccept,long,256,43,,none,100,200,pusht.episodes150as100.json,55.86,43.75,,1.000,0.2,2
+klowjob_2271112_3.log,,reacher,gdm,,128,45,10,,100,200,reacher_klow.ep100.t3.json,,,92.97,,,
+klowjob_2271112_30.log,,pusht,specaccept,long,256,44,,none,100,200,pusht.episodes150as100.json,56.64,44.14,,1.000,0.2,2
+klowjob_2271112_31.log,,pusht,specaccept,long,256,45,,none,100,200,pusht.episodes150as100.json,58.20,44.53,,1.000,0.2,2
+klowjob_2271112_4.log,,reacher,gdm,,128,42,10,,100,200,reacher_klow.ep100.t4.json,,,95.31,,,
+klowjob_2271112_5.log,,reacher,gdm,,128,43,10,,100,200,reacher_klow.ep100.t5.json,,,96.88,,,
+klowjob_2271112_6.log,,reacher,gdm,,128,44,10,,100,200,reacher_klow.ep100.t6.json,,,95.31,,,
+klowjob_2271112_7.log,,reacher,gdm,,128,45,10,,100,200,reacher_klow.ep100.t7.json,,,93.75,,,
+klowjob_2271112_8.log,,reacher,specaccept,,128,42,10,,100,200,reacher_klow.ep100.t8.json,,,96.09,1.000,0.2,1
+klowjob_2271112_9.log,,reacher,specaccept,,128,43,10,,100,200,reacher_klow.ep100.t9.json,,,97.66,1.000,0.2,1
+pusht_auditjob_2270819_0.log,audit every-step k=8 (t150 test pop) seed=42,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,57.81,49.61,,,,
+pusht_auditjob_2270819_1.log,audit every-step k=8 (t150 test pop) seed=43,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,58.59,48.05,,,,
+pusht_auditjob_2270819_10.log,audit tau-selection on VAL: tau=0.30 seed=42,pusht,specaccept,long,256,42,,none,150,300,pusht.episodes150.val.json,63.28,56.64,,0.417,0.3,8
+pusht_auditjob_2270819_11.log,audit tau-selection on VAL: tau=0.30 seed=43,pusht,specaccept,long,256,43,,none,150,300,pusht.episodes150.val.json,64.06,57.81,,0.418,0.3,8
+pusht_auditjob_2270819_2.log,audit every-step k=8 (t150 test pop) seed=44,pusht,gdm,long,256,44,,none,150,300,pusht.episodes150.json,59.38,50.00,,,,
+pusht_auditjob_2270819_3.log,audit every-step k=8 (t150 test pop) seed=45,pusht,gdm,long,256,45,,none,150,300,pusht.episodes150.json,59.38,47.66,,,,
+pusht_auditjob_2270819_4.log,audit tau-selection on VAL: tau=0.15 seed=42,pusht,specaccept,long,256,42,,none,150,300,pusht.episodes150.val.json,63.67,55.08,,0.608,0.15,8
+pusht_auditjob_2270819_5.log,audit tau-selection on VAL: tau=0.15 seed=43,pusht,specaccept,long,256,43,,none,150,300,pusht.episodes150.val.json,63.28,54.30,,0.617,0.15,8
+pusht_auditjob_2270819_6.log,audit tau-selection on VAL: tau=0.20 seed=42,pusht,specaccept,long,256,42,,none,150,300,pusht.episodes150.val.json,63.67,56.64,,0.494,0.2,8
+pusht_auditjob_2270819_7.log,audit tau-selection on VAL: tau=0.20 seed=43,pusht,specaccept,long,256,43,,none,150,300,pusht.episodes150.val.json,65.23,54.30,,0.508,0.2,8
+pusht_auditjob_2270819_8.log,audit tau-selection on VAL: tau=0.25 seed=42,pusht,specaccept,long,256,42,,none,150,300,pusht.episodes150.val.json,63.67,55.47,,0.456,0.25,8
+pusht_auditjob_2270819_9.log,audit tau-selection on VAL: tau=0.25 seed=43,pusht,specaccept,long,256,43,,none,150,300,pusht.episodes150.val.json,63.67,56.25,,0.452,0.25,8
+pusht_gamma0.25_s10_seed42.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,56.64,42.58,,,,
+pusht_gamma0.25_s10_seed43.log,,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,57.42,44.53,,,,
+pusht_gamma0.25_s25_seed42.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,52.73,40.62,,,,
+pusht_gamma0.25_s25_seed43.log,,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,54.69,38.28,,,,
+pusht_gamma0.5_s10_seed42.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,59.38,46.88,,,,
+pusht_gamma0.5_s10_seed43.log,,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,57.03,44.14,,,,
+pusht_gamma0.5_s25_seed42.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,55.08,44.14,,,,
+pusht_gamma0.5_s25_seed43.log,,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,55.08,39.06,,,,
+pusht_gamma0.75_s10_seed42.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,59.38,48.05,,,,
+pusht_gamma0.75_s10_seed43.log,,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,57.81,51.17,,,,
+pusht_gamma0.75_s25_seed42.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,57.81,43.75,,,,
+pusht_gamma0.75_s25_seed43.log,,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,54.30,44.92,,,,
+pusht_gamma0_s10_seed42.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,56.64,42.58,,,,
+pusht_gamma0_s10_seed43.log,,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,57.81,44.14,,,,
+pusht_gamma0_s10_seed44.log,,pusht,gdm,long,256,44,,none,150,300,pusht.episodes150.json,56.64,41.41,,,,
+pusht_gamma0_s10_seed45.log,,pusht,gdm,long,256,45,,none,150,300,pusht.episodes150.json,55.47,39.84,,,,
+pusht_gamma0_s25_seed42.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,47.66,36.72,,,,
+pusht_gamma0_s25_seed43.log,,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,50.00,35.94,,,,
+pusht_gamma0_s25_seed44.log,,pusht,gdm,long,256,44,,none,150,300,pusht.episodes150.json,51.17,39.45,,,,
+pusht_gamma0_s25_seed45.log,,pusht,gdm,long,256,45,,none,150,300,pusht.episodes150.json,47.27,35.16,,,,
+pusht_gamma1.0_s10_seed42.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,57.81,47.66,,,,
+pusht_gamma1.0_s10_seed43.log,,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,59.38,51.17,,,,
+pusht_gamma1.0_s10_seed44.log,,pusht,gdm,long,256,44,,none,150,300,pusht.episodes150.json,59.77,50.39,,,,
+pusht_gamma1.0_s10_seed45.log,,pusht,gdm,long,256,45,,none,150,300,pusht.episodes150.json,59.38,48.05,,,,
+pusht_gamma1.0_s25_seed42.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,57.42,44.53,,,,
+pusht_gamma1.0_s25_seed43.log,,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,56.64,42.97,,,,
+pusht_gamma1.0_s25_seed44.log,,pusht,gdm,long,256,44,,none,150,300,pusht.episodes150.json,59.38,46.48,,,,
+pusht_gamma1.0_s25_seed45.log,,pusht,gdm,long,256,45,,none,150,300,pusht.episodes150.json,58.20,48.05,,,,
+pusht_gamma1.25_s10_seed42.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,60.55,50.00,,,,
+pusht_gamma1.25_s10_seed43.log,,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,58.20,49.61,,,,
+pusht_gamma1.25_s25_seed42.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,58.20,46.48,,,,
+pusht_gamma1.25_s25_seed43.log,,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,53.91,43.36,,,,
+pusht_gamma1.5_s10_seed42.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,55.47,42.19,,,,
+pusht_gamma1.5_s10_seed43.log,,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,53.12,42.97,,,,
+pusht_gamma1.5_s25_seed42.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,28.52,21.88,,,,
+pusht_gamma1.5_s25_seed43.log,,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,28.91,21.88,,,,
+pusht_gamma2.0_s10_seed42.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,8.98,3.52,,,,
+pusht_gamma2.0_s10_seed43.log,,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,7.81,3.52,,,,
+pusht_gamma2.0_s25_seed42.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,4.30,3.12,,,,
+pusht_gamma2.0_s25_seed43.log,,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,5.08,2.73,,,,
+pusht_gammajob_2270817_0.log,"gamma-sweep: gamma=0 S=10 RH=2 seed=42 (t150, budget 300, n=256)",pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,56.64,42.58,,,,
+pusht_gammajob_2270817_1.log,"gamma-sweep: gamma=0 S=10 RH=2 seed=43 (t150, budget 300, n=256)",pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,57.81,44.14,,,,
+pusht_gammajob_2270817_12.log,"gamma-sweep: gamma=0.25 S=25 RH=5 seed=42 (t150, budget 300, n=256)",pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,52.73,40.62,,,,
+pusht_gammajob_2270817_13.log,"gamma-sweep: gamma=0.25 S=25 RH=5 seed=43 (t150, budget 300, n=256)",pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,54.69,38.28,,,,
+pusht_gammajob_2270817_16.log,"gamma-sweep: gamma=0.5 S=10 RH=2 seed=42 (t150, budget 300, n=256)",pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,59.38,46.88,,,,
+pusht_gammajob_2270817_17.log,"gamma-sweep: gamma=0.5 S=10 RH=2 seed=43 (t150, budget 300, n=256)",pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,57.03,44.14,,,,
+pusht_gammajob_2270817_2.log,"gamma-sweep: gamma=0 S=10 RH=2 seed=44 (t150, budget 300, n=256)",pusht,gdm,long,256,44,,none,150,300,pusht.episodes150.json,56.64,41.41,,,,
+pusht_gammajob_2270817_20.log,"gamma-sweep: gamma=0.5 S=25 RH=5 seed=42 (t150, budget 300, n=256)",pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,55.08,44.14,,,,
+pusht_gammajob_2270817_21.log,"gamma-sweep: gamma=0.5 S=25 RH=5 seed=43 (t150, budget 300, n=256)",pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,55.08,39.06,,,,
+pusht_gammajob_2270817_24.log,"gamma-sweep: gamma=0.75 S=10 RH=2 seed=42 (t150, budget 300, n=256)",pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,59.38,48.05,,,,
+pusht_gammajob_2270817_25.log,"gamma-sweep: gamma=0.75 S=10 RH=2 seed=43 (t150, budget 300, n=256)",pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,57.81,51.17,,,,
+pusht_gammajob_2270817_28.log,"gamma-sweep: gamma=0.75 S=25 RH=5 seed=42 (t150, budget 300, n=256)",pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,57.81,43.75,,,,
+pusht_gammajob_2270817_29.log,"gamma-sweep: gamma=0.75 S=25 RH=5 seed=43 (t150, budget 300, n=256)",pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,54.30,44.92,,,,
+pusht_gammajob_2270817_3.log,"gamma-sweep: gamma=0 S=10 RH=2 seed=45 (t150, budget 300, n=256)",pusht,gdm,long,256,45,,none,150,300,pusht.episodes150.json,55.47,39.84,,,,
+pusht_gammajob_2270817_32.log,"gamma-sweep: gamma=1.0 S=10 RH=2 seed=42 (t150, budget 300, n=256)",pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,57.81,47.66,,,,
+pusht_gammajob_2270817_33.log,"gamma-sweep: gamma=1.0 S=10 RH=2 seed=43 (t150, budget 300, n=256)",pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,59.38,51.17,,,,
+pusht_gammajob_2270817_34.log,"gamma-sweep: gamma=1.0 S=10 RH=2 seed=44 (t150, budget 300, n=256)",pusht,gdm,long,256,44,,none,150,300,pusht.episodes150.json,59.77,50.39,,,,
+pusht_gammajob_2270817_35.log,"gamma-sweep: gamma=1.0 S=10 RH=2 seed=45 (t150, budget 300, n=256)",pusht,gdm,long,256,45,,none,150,300,pusht.episodes150.json,59.38,48.05,,,,
+pusht_gammajob_2270817_36.log,"gamma-sweep: gamma=1.0 S=25 RH=5 seed=42 (t150, budget 300, n=256)",pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,57.42,44.53,,,,
+pusht_gammajob_2270817_37.log,"gamma-sweep: gamma=1.0 S=25 RH=5 seed=43 (t150, budget 300, n=256)",pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,56.64,42.97,,,,
+pusht_gammajob_2270817_38.log,"gamma-sweep: gamma=1.0 S=25 RH=5 seed=44 (t150, budget 300, n=256)",pusht,gdm,long,256,44,,none,150,300,pusht.episodes150.json,59.38,46.48,,,,
+pusht_gammajob_2270817_39.log,"gamma-sweep: gamma=1.0 S=25 RH=5 seed=45 (t150, budget 300, n=256)",pusht,gdm,long,256,45,,none,150,300,pusht.episodes150.json,58.20,48.05,,,,
+pusht_gammajob_2270817_4.log,"gamma-sweep: gamma=0 S=25 RH=5 seed=42 (t150, budget 300, n=256)",pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,47.66,36.72,,,,
+pusht_gammajob_2270817_40.log,"gamma-sweep: gamma=1.25 S=10 RH=2 seed=42 (t150, budget 300, n=256)",pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,60.55,50.00,,,,
+pusht_gammajob_2270817_41.log,"gamma-sweep: gamma=1.25 S=10 RH=2 seed=43 (t150, budget 300, n=256)",pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,58.20,49.61,,,,
+pusht_gammajob_2270817_44.log,"gamma-sweep: gamma=1.25 S=25 RH=5 seed=42 (t150, budget 300, n=256)",pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,58.20,46.48,,,,
+pusht_gammajob_2270817_45.log,"gamma-sweep: gamma=1.25 S=25 RH=5 seed=43 (t150, budget 300, n=256)",pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,53.91,43.36,,,,
+pusht_gammajob_2270817_48.log,"gamma-sweep: gamma=1.5 S=10 RH=2 seed=42 (t150, budget 300, n=256)",pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,55.47,42.19,,,,
+pusht_gammajob_2270817_49.log,"gamma-sweep: gamma=1.5 S=10 RH=2 seed=43 (t150, budget 300, n=256)",pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,53.12,42.97,,,,
+pusht_gammajob_2270817_5.log,"gamma-sweep: gamma=0 S=25 RH=5 seed=43 (t150, budget 300, n=256)",pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,50.00,35.94,,,,
+pusht_gammajob_2270817_52.log,"gamma-sweep: gamma=1.5 S=25 RH=5 seed=42 (t150, budget 300, n=256)",pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,28.52,21.88,,,,
+pusht_gammajob_2270817_53.log,"gamma-sweep: gamma=1.5 S=25 RH=5 seed=43 (t150, budget 300, n=256)",pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,28.91,21.88,,,,
+pusht_gammajob_2270817_56.log,"gamma-sweep: gamma=2.0 S=10 RH=2 seed=42 (t150, budget 300, n=256)",pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,8.98,3.52,,,,
+pusht_gammajob_2270817_57.log,"gamma-sweep: gamma=2.0 S=10 RH=2 seed=43 (t150, budget 300, n=256)",pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,7.81,3.52,,,,
+pusht_gammajob_2270817_6.log,"gamma-sweep: gamma=0 S=25 RH=5 seed=44 (t150, budget 300, n=256)",pusht,gdm,long,256,44,,none,150,300,pusht.episodes150.json,51.17,39.45,,,,
+pusht_gammajob_2270817_60.log,"gamma-sweep: gamma=2.0 S=25 RH=5 seed=42 (t150, budget 300, n=256)",pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,4.30,3.12,,,,
+pusht_gammajob_2270817_61.log,"gamma-sweep: gamma=2.0 S=25 RH=5 seed=43 (t150, budget 300, n=256)",pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,5.08,2.73,,,,
+pusht_gammajob_2270817_7.log,"gamma-sweep: gamma=0 S=25 RH=5 seed=45 (t150, budget 300, n=256)",pusht,gdm,long,256,45,,none,150,300,pusht.episodes150.json,47.27,35.16,,,,
+pusht_gammajob_2270817_8.log,"gamma-sweep: gamma=0.25 S=10 RH=2 seed=42 (t150, budget 300, n=256)",pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,56.64,42.58,,,,
+pusht_gammajob_2270817_9.log,"gamma-sweep: gamma=0.25 S=10 RH=2 seed=43 (t150, budget 300, n=256)",pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,57.42,44.53,,,,
+pusht_gc_short_seed42.log,,pusht,gdm,short,256,42,,success5,25,50,,99.22,96.88,,,,
+pusht_gc_short_seed43.log,,pusht,gdm,short,256,43,,success5,25,50,,98.05,97.27,,,,
+pusht_gc_short_seed44.log,,pusht,gdm,short,256,44,,success5,25,50,,99.22,98.05,,,,
+pusht_gc_short_seed45.log,,pusht,gdm,short,256,45,,success5,25,50,,99.22,98.05,,,,
+pusht_gc_t150_seed42.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,58.98,57.03,,,,
+pusht_gc_t150_seed43.log,,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,60.16,53.91,,,,
+pusht_gc_t150_seed44.log,,pusht,gdm,long,256,44,,none,150,300,pusht.episodes150.json,61.72,55.08,,,,
+pusht_gc_t150_seed45.log,,pusht,gdm,long,256,45,,none,150,300,pusht.episodes150.json,59.38,56.64,,,,
+pusht_gcjob_2271178_0.log,gc-ablation: short seed=42,pusht,gdm,short,256,42,,success5,25,50,,99.22,96.88,,,,
+pusht_gcjob_2271178_1.log,gc-ablation: short seed=43,pusht,gdm,short,256,43,,success5,25,50,,98.05,97.27,,,,
+pusht_gcjob_2271178_2.log,gc-ablation: short seed=44,pusht,gdm,short,256,44,,success5,25,50,,99.22,98.05,,,,
+pusht_gcjob_2271178_3.log,gc-ablation: short seed=45,pusht,gdm,short,256,45,,success5,25,50,,99.22,98.05,,,,
+pusht_gcjob_2271178_4.log,gc-ablation: t150 seed=42,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,58.98,57.03,,,,
+pusht_gcjob_2271178_5.log,gc-ablation: t150 seed=43,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,60.16,53.91,,,,
+pusht_gcjob_2271178_6.log,gc-ablation: t150 seed=44,pusht,gdm,long,256,44,,none,150,300,pusht.episodes150.json,61.72,55.08,,,,
+pusht_gcjob_2271178_7.log,gc-ablation: t150 seed=45,pusht,gdm,long,256,45,,none,150,300,pusht.episodes150.json,59.38,56.64,,,,
+pusht_gdmk1_t100_seed42.log,,pusht,gdm,long,256,42,,none,100,200,pusht.episodes150as100.json,56.25,43.36,,,,
+pusht_gdmk1_t100_seed43.log,,pusht,gdm,long,256,43,,none,100,200,pusht.episodes150as100.json,54.69,45.70,,,,
+pusht_gdmk1_t100_seed44.log,,pusht,gdm,long,256,44,,none,100,200,pusht.episodes150as100.json,54.30,41.02,,,,
+pusht_gdmk1_t100_seed45.log,,pusht,gdm,long,256,45,,none,100,200,pusht.episodes150as100.json,58.20,40.62,,,,
+pusht_gdmk2_t100_seed42.log,,pusht,gdm,long,256,42,,none,100,200,pusht.episodes150as100.json,53.12,46.09,,,,
+pusht_gdmk2_t100_seed43.log,,pusht,gdm,long,256,43,,none,100,200,pusht.episodes150as100.json,55.86,41.80,,,,
+pusht_gdmk2_t100_seed44.log,,pusht,gdm,long,256,44,,none,100,200,pusht.episodes150as100.json,53.52,44.92,,,,
+pusht_gdmk2_t100_seed45.log,,pusht,gdm,long,256,45,,none,100,200,pusht.episodes150as100.json,57.42,43.75,,,,
+pusht_gdmk4_t100_seed42.log,,pusht,gdm,long,256,42,,none,100,200,pusht.episodes150as100.json,63.67,53.91,,,,
+pusht_gdmk4_t100_seed43.log,,pusht,gdm,long,256,43,,none,100,200,pusht.episodes150as100.json,64.06,50.39,,,,
+pusht_gdmk4_t100_seed44.log,,pusht,gdm,long,256,44,,none,100,200,pusht.episodes150as100.json,62.50,49.22,,,,
+pusht_gdmk4_t100_seed45.log,,pusht,gdm,long,256,45,,none,100,200,pusht.episodes150as100.json,62.89,50.00,,,,
+pusht_gdmk4_t150_seed42.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,57.81,46.88,,,,
+pusht_gdmk4_t150_seed43.log,,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,58.59,45.31,,,,
+pusht_gdmk4_t150_seed44.log,,pusht,gdm,long,256,44,,none,150,300,pusht.episodes150.json,60.16,47.66,,,,
+pusht_gdmk4_t150_seed45.log,,pusht,gdm,long,256,45,,none,150,300,pusht.episodes150.json,57.03,49.22,,,,
+pusht_gdmk8_t100_seed42.log,,pusht,gdm,long,256,42,,none,100,200,pusht.episodes150as100.json,64.45,53.91,,,,
+pusht_gdmk8_t100_seed43.log,,pusht,gdm,long,256,43,,none,100,200,pusht.episodes150as100.json,62.50,50.78,,,,
+pusht_gdmk8_t100_seed44.log,,pusht,gdm,long,256,44,,none,100,200,pusht.episodes150as100.json,64.45,53.91,,,,
+pusht_gdmk8_t100_seed45.log,,pusht,gdm,long,256,45,,none,100,200,pusht.episodes150as100.json,64.84,53.91,,,,
+pusht_gdmk8_t150_seed42.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,57.81,49.61,,,,
+pusht_gdmk8_t150_seed43.log,,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,58.59,48.05,,,,
+pusht_gdmk8_t150_seed44.log,,pusht,gdm,long,256,44,,none,150,300,pusht.episodes150.json,59.38,50.00,,,,
+pusht_gdmk8_t150_seed45.log,,pusht,gdm,long,256,45,,none,150,300,pusht.episodes150.json,59.38,47.66,,,,
+pusht_hz_2270740_0.log,pusht-horizon arm=baseline offset=25 budget=50 seed=42,pusht,baseline,long,256,42,,none,25,50,pusht.episodes150as25.json,94.14,90.23,,,,
+pusht_hz_2270740_1.log,pusht-horizon arm=baseline offset=25 budget=50 seed=43,pusht,baseline,long,256,43,,none,25,50,pusht.episodes150as25.json,96.88,90.23,,,,
+pusht_hz_2270740_10.log,pusht-horizon arm=s25gdm offset=25 budget=50 seed=42,pusht,gdm,long,256,42,,none,25,50,pusht.episodes150as25.json,86.72,80.08,,,,
+pusht_hz_2270740_11.log,pusht-horizon arm=s25gdm offset=25 budget=50 seed=43,pusht,gdm,long,256,43,,none,25,50,pusht.episodes150as25.json,88.67,81.64,,,,
+pusht_hz_2270740_12.log,pusht-horizon arm=s25gdm offset=50 budget=100 seed=42,pusht,gdm,long,256,42,,none,50,100,pusht.episodes150as50.json,78.91,62.11,,,,
+pusht_hz_2270740_13.log,pusht-horizon arm=s25gdm offset=50 budget=100 seed=43,pusht,gdm,long,256,43,,none,50,100,pusht.episodes150as50.json,76.56,62.89,,,,
+pusht_hz_2270740_14.log,pusht-horizon arm=s25gdm offset=75 budget=150 seed=42,pusht,gdm,long,256,42,,none,75,150,pusht.episodes150as75.json,69.14,55.08,,,,
+pusht_hz_2270740_15.log,pusht-horizon arm=s25gdm offset=75 budget=150 seed=43,pusht,gdm,long,256,43,,none,75,150,pusht.episodes150as75.json,72.66,57.81,,,,
+pusht_hz_2270740_16.log,pusht-horizon arm=s25gdm offset=100 budget=200 seed=42,pusht,gdm,long,256,42,,none,100,200,pusht.episodes150as100.json,65.62,49.61,,,,
+pusht_hz_2270740_17.log,pusht-horizon arm=s25gdm offset=100 budget=200 seed=43,pusht,gdm,long,256,43,,none,100,200,pusht.episodes150as100.json,66.80,50.00,,,,
+pusht_hz_2270740_18.log,pusht-horizon arm=s25gdm offset=150 budget=300 seed=42,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,55.47,43.36,,,,
+pusht_hz_2270740_19.log,pusht-horizon arm=s25gdm offset=150 budget=300 seed=43,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,56.25,43.36,,,,
+pusht_hz_2270740_2.log,pusht-horizon arm=baseline offset=50 budget=100 seed=42,pusht,baseline,long,256,42,,none,50,100,pusht.episodes150as50.json,70.70,59.38,,,,
+pusht_hz_2270740_20.log,pusht-horizon arm=s10gdm offset=25 budget=50 seed=42,pusht,gdm,long,256,42,,none,25,50,pusht.episodes150as25.json,87.11,82.03,,,,
+pusht_hz_2270740_21.log,pusht-horizon arm=s10gdm offset=25 budget=50 seed=43,pusht,gdm,long,256,43,,none,25,50,pusht.episodes150as25.json,87.11,83.59,,,,
+pusht_hz_2270740_22.log,pusht-horizon arm=s10gdm offset=50 budget=100 seed=42,pusht,gdm,long,256,42,,none,50,100,pusht.episodes150as50.json,79.69,64.45,,,,
+pusht_hz_2270740_23.log,pusht-horizon arm=s10gdm offset=50 budget=100 seed=43,pusht,gdm,long,256,43,,none,50,100,pusht.episodes150as50.json,80.08,68.36,,,,
+pusht_hz_2270740_24.log,pusht-horizon arm=s10gdm offset=75 budget=150 seed=42,pusht,gdm,long,256,42,,none,75,150,pusht.episodes150as75.json,72.66,59.38,,,,
+pusht_hz_2270740_25.log,pusht-horizon arm=s10gdm offset=75 budget=150 seed=43,pusht,gdm,long,256,43,,none,75,150,pusht.episodes150as75.json,69.92,58.20,,,,
+pusht_hz_2270740_26.log,pusht-horizon arm=s10gdm offset=100 budget=200 seed=42,pusht,gdm,long,256,42,,none,100,200,pusht.episodes150as100.json,64.45,53.91,,,,
+pusht_hz_2270740_27.log,pusht-horizon arm=s10gdm offset=100 budget=200 seed=43,pusht,gdm,long,256,43,,none,100,200,pusht.episodes150as100.json,64.84,53.52,,,,
+pusht_hz_2270740_28.log,pusht-horizon arm=s10gdm offset=150 budget=300 seed=42,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,59.77,49.22,,,,
+pusht_hz_2270740_29.log,pusht-horizon arm=s10gdm offset=150 budget=300 seed=43,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,59.38,47.66,,,,
+pusht_hz_2270740_3.log,pusht-horizon arm=baseline offset=50 budget=100 seed=43,pusht,baseline,long,256,43,,none,50,100,pusht.episodes150as50.json,72.27,58.98,,,,
+pusht_hz_2270740_30.log,pusht-horizon arm=s10spec offset=25 budget=50 seed=42,pusht,specaccept,long,256,42,,none,25,50,pusht.episodes150as25.json,87.89,82.81,,0.830,0.2,8
+pusht_hz_2270740_31.log,pusht-horizon arm=s10spec offset=25 budget=50 seed=43,pusht,specaccept,long,256,43,,none,25,50,pusht.episodes150as25.json,87.11,82.81,,0.839,0.2,8
+pusht_hz_2270740_32.log,pusht-horizon arm=s10spec offset=50 budget=100 seed=42,pusht,specaccept,long,256,42,,none,50,100,pusht.episodes150as50.json,79.30,67.58,,0.667,0.2,8
+pusht_hz_2270740_33.log,pusht-horizon arm=s10spec offset=50 budget=100 seed=43,pusht,specaccept,long,256,43,,none,50,100,pusht.episodes150as50.json,78.52,66.80,,0.651,0.2,8
+pusht_hz_2270740_34.log,pusht-horizon arm=s10spec offset=75 budget=150 seed=42,pusht,specaccept,long,256,42,,none,75,150,pusht.episodes150as75.json,70.70,60.94,,0.588,0.2,8
+pusht_hz_2270740_35.log,pusht-horizon arm=s10spec offset=75 budget=150 seed=43,pusht,specaccept,long,256,43,,none,75,150,pusht.episodes150as75.json,70.70,58.59,,0.577,0.2,8
+pusht_hz_2270740_36.log,pusht-horizon arm=s10spec offset=100 budget=200 seed=42,pusht,specaccept,long,256,42,,none,100,200,pusht.episodes150as100.json,64.84,48.83,,0.569,0.2,8
+pusht_hz_2270740_37.log,pusht-horizon arm=s10spec offset=100 budget=200 seed=43,pusht,specaccept,long,256,43,,none,100,200,pusht.episodes150as100.json,66.02,54.30,,0.550,0.2,8
+pusht_hz_2270740_38.log,pusht-horizon arm=s10spec offset=150 budget=300 seed=42,pusht,specaccept,long,256,42,,none,150,300,pusht.episodes150.json,58.59,48.05,,0.526,0.2,8
+pusht_hz_2270740_39.log,pusht-horizon arm=s10spec offset=150 budget=300 seed=43,pusht,specaccept,long,256,43,,none,150,300,pusht.episodes150.json,58.59,48.83,,0.510,0.2,8
+pusht_hz_2270740_4.log,pusht-horizon arm=baseline offset=75 budget=150 seed=42,pusht,baseline,long,256,42,,none,75,150,pusht.episodes150as75.json,57.42,39.06,,,,
+pusht_hz_2270740_5.log,pusht-horizon arm=baseline offset=75 budget=150 seed=43,pusht,baseline,long,256,43,,none,75,150,pusht.episodes150as75.json,55.08,36.72,,,,
+pusht_hz_2270740_6.log,pusht-horizon arm=baseline offset=100 budget=200 seed=42,pusht,baseline,long,256,42,,none,100,200,pusht.episodes150as100.json,36.33,24.61,,,,
+pusht_hz_2270740_7.log,pusht-horizon arm=baseline offset=100 budget=200 seed=43,pusht,baseline,long,256,43,,none,100,200,pusht.episodes150as100.json,33.98,26.17,,,,
+pusht_hz_2270740_8.log,pusht-horizon arm=baseline offset=150 budget=300 seed=42,pusht,baseline,long,256,42,,none,150,300,pusht.episodes150.json,14.06,7.03,,,,
+pusht_hz_2270740_9.log,pusht-horizon arm=baseline offset=150 budget=300 seed=43,pusht,baseline,long,256,43,,none,150,300,pusht.episodes150.json,13.28,7.81,,,,
+pusht_hz_baseline_t100_seed42.log,,pusht,baseline,long,256,42,,none,100,200,pusht.episodes150as100.json,36.33,24.61,,,,
+pusht_hz_baseline_t100_seed43.log,,pusht,baseline,long,256,43,,none,100,200,pusht.episodes150as100.json,33.98,26.17,,,,
+pusht_hz_baseline_t150_seed42.log,,pusht,baseline,long,256,42,,none,150,300,pusht.episodes150.json,14.06,7.03,,,,
+pusht_hz_baseline_t150_seed43.log,,pusht,baseline,long,256,43,,none,150,300,pusht.episodes150.json,13.28,7.81,,,,
+pusht_hz_baseline_t25_seed42.log,,pusht,baseline,long,256,42,,none,25,50,pusht.episodes150as25.json,94.14,90.23,,,,
+pusht_hz_baseline_t25_seed43.log,,pusht,baseline,long,256,43,,none,25,50,pusht.episodes150as25.json,96.88,90.23,,,,
+pusht_hz_baseline_t50_seed42.log,,pusht,baseline,long,256,42,,none,50,100,pusht.episodes150as50.json,70.70,59.38,,,,
+pusht_hz_baseline_t50_seed43.log,,pusht,baseline,long,256,43,,none,50,100,pusht.episodes150as50.json,72.27,58.98,,,,
+pusht_hz_baseline_t75_seed42.log,,pusht,baseline,long,256,42,,none,75,150,pusht.episodes150as75.json,57.42,39.06,,,,
+pusht_hz_baseline_t75_seed43.log,,pusht,baseline,long,256,43,,none,75,150,pusht.episodes150as75.json,55.08,36.72,,,,
+pusht_hz_s10gdm_t100_seed42.log,,pusht,gdm,long,256,42,,none,100,200,pusht.episodes150as100.json,64.45,53.91,,,,
+pusht_hz_s10gdm_t100_seed43.log,,pusht,gdm,long,256,43,,none,100,200,pusht.episodes150as100.json,64.84,53.52,,,,
+pusht_hz_s10gdm_t150_seed42.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,59.77,49.22,,,,
+pusht_hz_s10gdm_t150_seed43.log,,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,59.38,47.66,,,,
+pusht_hz_s10gdm_t25_seed42.log,,pusht,gdm,long,256,42,,none,25,50,pusht.episodes150as25.json,87.11,82.03,,,,
+pusht_hz_s10gdm_t25_seed43.log,,pusht,gdm,long,256,43,,none,25,50,pusht.episodes150as25.json,87.11,83.59,,,,
+pusht_hz_s10gdm_t50_seed42.log,,pusht,gdm,long,256,42,,none,50,100,pusht.episodes150as50.json,79.69,64.45,,,,
+pusht_hz_s10gdm_t50_seed43.log,,pusht,gdm,long,256,43,,none,50,100,pusht.episodes150as50.json,80.08,68.36,,,,
+pusht_hz_s10gdm_t75_seed42.log,,pusht,gdm,long,256,42,,none,75,150,pusht.episodes150as75.json,72.66,59.38,,,,
+pusht_hz_s10gdm_t75_seed43.log,,pusht,gdm,long,256,43,,none,75,150,pusht.episodes150as75.json,69.92,58.20,,,,
+pusht_hz_s10spec_t100_seed42.log,,pusht,specaccept,long,256,42,,none,100,200,pusht.episodes150as100.json,64.84,48.83,,0.569,0.2,8
+pusht_hz_s10spec_t100_seed43.log,,pusht,specaccept,long,256,43,,none,100,200,pusht.episodes150as100.json,66.02,54.30,,0.550,0.2,8
+pusht_hz_s10spec_t150_seed42.log,,pusht,specaccept,long,256,42,,none,150,300,pusht.episodes150.json,58.59,48.05,,0.526,0.2,8
+pusht_hz_s10spec_t150_seed43.log,,pusht,specaccept,long,256,43,,none,150,300,pusht.episodes150.json,58.59,48.83,,0.510,0.2,8
+pusht_hz_s10spec_t25_seed42.log,,pusht,specaccept,long,256,42,,none,25,50,pusht.episodes150as25.json,87.89,82.81,,0.830,0.2,8
+pusht_hz_s10spec_t25_seed43.log,,pusht,specaccept,long,256,43,,none,25,50,pusht.episodes150as25.json,87.11,82.81,,0.839,0.2,8
+pusht_hz_s10spec_t50_seed42.log,,pusht,specaccept,long,256,42,,none,50,100,pusht.episodes150as50.json,79.30,67.58,,0.667,0.2,8
+pusht_hz_s10spec_t50_seed43.log,,pusht,specaccept,long,256,43,,none,50,100,pusht.episodes150as50.json,78.52,66.80,,0.651,0.2,8
+pusht_hz_s10spec_t75_seed42.log,,pusht,specaccept,long,256,42,,none,75,150,pusht.episodes150as75.json,70.70,60.94,,0.588,0.2,8
+pusht_hz_s10spec_t75_seed43.log,,pusht,specaccept,long,256,43,,none,75,150,pusht.episodes150as75.json,70.70,58.59,,0.577,0.2,8
+pusht_hz_s25gdm_t100_seed42.log,,pusht,gdm,long,256,42,,none,100,200,pusht.episodes150as100.json,65.62,49.61,,,,
+pusht_hz_s25gdm_t100_seed43.log,,pusht,gdm,long,256,43,,none,100,200,pusht.episodes150as100.json,66.80,50.00,,,,
+pusht_hz_s25gdm_t150_seed42.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,55.47,43.36,,,,
+pusht_hz_s25gdm_t150_seed43.log,,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,56.25,43.36,,,,
+pusht_hz_s25gdm_t25_seed42.log,,pusht,gdm,long,256,42,,none,25,50,pusht.episodes150as25.json,86.72,80.08,,,,
+pusht_hz_s25gdm_t25_seed43.log,,pusht,gdm,long,256,43,,none,25,50,pusht.episodes150as25.json,88.67,81.64,,,,
+pusht_hz_s25gdm_t50_seed42.log,,pusht,gdm,long,256,42,,none,50,100,pusht.episodes150as50.json,78.91,62.11,,,,
+pusht_hz_s25gdm_t50_seed43.log,,pusht,gdm,long,256,43,,none,50,100,pusht.episodes150as50.json,76.56,62.89,,,,
+pusht_hz_s25gdm_t75_seed42.log,,pusht,gdm,long,256,42,,none,75,150,pusht.episodes150as75.json,69.14,55.08,,,,
+pusht_hz_s25gdm_t75_seed43.log,,pusht,gdm,long,256,43,,none,75,150,pusht.episodes150as75.json,72.66,57.81,,,,
+pusht_hzs5_2271135_0.log,pusht-hz-s5 arm=baseline offset=25 budget=50 seed=42,pusht,baseline,long,256,42,,none,25,50,pusht.episodes150s5as25.json,97.27,94.14,,,,
+pusht_hzs5_2271135_1.log,pusht-hz-s5 arm=baseline offset=25 budget=50 seed=43,pusht,baseline,long,256,43,,none,25,50,pusht.episodes150s5as25.json,98.83,96.48,,,,
+pusht_hzs5_2271135_10.log,pusht-hz-s5 arm=s25gdm offset=25 budget=50 seed=42,pusht,gdm,long,256,42,,none,25,50,pusht.episodes150s5as25.json,99.22,91.41,,,,
+pusht_hzs5_2271135_11.log,pusht-hz-s5 arm=s25gdm offset=25 budget=50 seed=43,pusht,gdm,long,256,43,,none,25,50,pusht.episodes150s5as25.json,98.83,94.92,,,,
+pusht_hzs5_2271135_12.log,pusht-hz-s5 arm=s25gdm offset=50 budget=100 seed=42,pusht,gdm,long,256,42,,none,50,100,pusht.episodes150s5as50.json,94.53,83.98,,,,
+pusht_hzs5_2271135_13.log,pusht-hz-s5 arm=s25gdm offset=50 budget=100 seed=43,pusht,gdm,long,256,43,,none,50,100,pusht.episodes150s5as50.json,93.75,85.94,,,,
+pusht_hzs5_2271135_14.log,pusht-hz-s5 arm=s25gdm offset=75 budget=150 seed=42,pusht,gdm,long,256,42,,none,75,150,pusht.episodes150s5as75.json,94.92,81.25,,,,
+pusht_hzs5_2271135_15.log,pusht-hz-s5 arm=s25gdm offset=75 budget=150 seed=43,pusht,gdm,long,256,43,,none,75,150,pusht.episodes150s5as75.json,96.88,83.20,,,,
+pusht_hzs5_2271135_16.log,pusht-hz-s5 arm=s25gdm offset=100 budget=200 seed=42,pusht,gdm,long,256,42,,none,100,200,pusht.episodes150s5as100.json,96.09,84.77,,,,
+pusht_hzs5_2271135_17.log,pusht-hz-s5 arm=s25gdm offset=100 budget=200 seed=43,pusht,gdm,long,256,43,,none,100,200,pusht.episodes150s5as100.json,95.31,87.50,,,,
+pusht_hzs5_2271135_18.log,pusht-hz-s5 arm=s25gdm offset=150 budget=300 seed=42,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150s5.json,93.75,84.38,,,,
+pusht_hzs5_2271135_19.log,pusht-hz-s5 arm=s25gdm offset=150 budget=300 seed=43,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150s5.json,94.14,86.72,,,,
+pusht_hzs5_2271135_2.log,pusht-hz-s5 arm=baseline offset=50 budget=100 seed=42,pusht,baseline,long,256,42,,none,50,100,pusht.episodes150s5as50.json,58.20,46.48,,,,
+pusht_hzs5_2271135_20.log,pusht-hz-s5 arm=s10gdm offset=25 budget=50 seed=42,pusht,gdm,long,256,42,,none,25,50,pusht.episodes150s5as25.json,99.61,97.27,,,,
+pusht_hzs5_2271135_21.log,pusht-hz-s5 arm=s10gdm offset=25 budget=50 seed=43,pusht,gdm,long,256,43,,none,25,50,pusht.episodes150s5as25.json,99.61,97.66,,,,
+pusht_hzs5_2271135_22.log,pusht-hz-s5 arm=s10gdm offset=50 budget=100 seed=42,pusht,gdm,long,256,42,,none,50,100,pusht.episodes150s5as50.json,99.22,92.58,,,,
+pusht_hzs5_2271135_23.log,pusht-hz-s5 arm=s10gdm offset=50 budget=100 seed=43,pusht,gdm,long,256,43,,none,50,100,pusht.episodes150s5as50.json,98.83,94.92,,,,
+pusht_hzs5_2271135_24.log,pusht-hz-s5 arm=s10gdm offset=75 budget=150 seed=42,pusht,gdm,long,256,42,,none,75,150,pusht.episodes150s5as75.json,98.44,94.14,,,,
+pusht_hzs5_2271135_25.log,pusht-hz-s5 arm=s10gdm offset=75 budget=150 seed=43,pusht,gdm,long,256,43,,none,75,150,pusht.episodes150s5as75.json,97.66,96.09,,,,
+pusht_hzs5_2271135_26.log,pusht-hz-s5 arm=s10gdm offset=100 budget=200 seed=42,pusht,gdm,long,256,42,,none,100,200,pusht.episodes150s5as100.json,98.44,96.09,,,,
+pusht_hzs5_2271135_27.log,pusht-hz-s5 arm=s10gdm offset=100 budget=200 seed=43,pusht,gdm,long,256,43,,none,100,200,pusht.episodes150s5as100.json,97.66,92.58,,,,
+pusht_hzs5_2271135_28.log,pusht-hz-s5 arm=s10gdm offset=150 budget=300 seed=42,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150s5.json,97.66,96.88,,,,
+pusht_hzs5_2271135_29.log,pusht-hz-s5 arm=s10gdm offset=150 budget=300 seed=43,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150s5.json,99.22,96.09,,,,
+pusht_hzs5_2271135_3.log,pusht-hz-s5 arm=baseline offset=50 budget=100 seed=43,pusht,baseline,long,256,43,,none,50,100,pusht.episodes150s5as50.json,62.50,51.17,,,,
+pusht_hzs5_2271135_30.log,pusht-hz-s5 arm=s10spec offset=25 budget=50 seed=42,pusht,specaccept,long,256,42,,none,25,50,pusht.episodes150s5as25.json,99.61,96.09,,0.835,0.2,8
+pusht_hzs5_2271135_31.log,pusht-hz-s5 arm=s10spec offset=25 budget=50 seed=43,pusht,specaccept,long,256,43,,none,25,50,pusht.episodes150s5as25.json,99.61,97.27,,0.867,0.2,8
+pusht_hzs5_2271135_32.log,pusht-hz-s5 arm=s10spec offset=50 budget=100 seed=42,pusht,specaccept,long,256,42,,none,50,100,pusht.episodes150s5as50.json,98.05,92.97,,0.621,0.2,8
+pusht_hzs5_2271135_33.log,pusht-hz-s5 arm=s10spec offset=50 budget=100 seed=43,pusht,specaccept,long,256,43,,none,50,100,pusht.episodes150s5as50.json,96.09,92.97,,0.612,0.2,8
+pusht_hzs5_2271135_34.log,pusht-hz-s5 arm=s10spec offset=75 budget=150 seed=42,pusht,specaccept,long,256,42,,none,75,150,pusht.episodes150s5as75.json,97.66,92.97,,0.559,0.2,8
+pusht_hzs5_2271135_35.log,pusht-hz-s5 arm=s10spec offset=75 budget=150 seed=43,pusht,specaccept,long,256,43,,none,75,150,pusht.episodes150s5as75.json,97.27,93.36,,0.566,0.2,8
+pusht_hzs5_2271135_36.log,pusht-hz-s5 arm=s10spec offset=100 budget=200 seed=42,pusht,specaccept,long,256,42,,none,100,200,pusht.episodes150s5as100.json,99.22,94.53,,0.531,0.2,8
+pusht_hzs5_2271135_37.log,pusht-hz-s5 arm=s10spec offset=100 budget=200 seed=43,pusht,specaccept,long,256,43,,none,100,200,pusht.episodes150s5as100.json,99.22,96.88,,0.541,0.2,8
+pusht_hzs5_2271135_38.log,pusht-hz-s5 arm=s10spec offset=150 budget=300 seed=42,pusht,specaccept,long,256,42,,none,150,300,pusht.episodes150s5.json,98.83,96.88,,0.534,0.2,8
+pusht_hzs5_2271135_39.log,pusht-hz-s5 arm=s10spec offset=150 budget=300 seed=43,pusht,specaccept,long,256,43,,none,150,300,pusht.episodes150s5.json,98.83,96.88,,0.538,0.2,8
+pusht_hzs5_2271135_4.log,pusht-hz-s5 arm=baseline offset=75 budget=150 seed=42,pusht,baseline,long,256,42,,none,75,150,pusht.episodes150s5as75.json,42.97,28.12,,,,
+pusht_hzs5_2271135_5.log,pusht-hz-s5 arm=baseline offset=75 budget=150 seed=43,pusht,baseline,long,256,43,,none,75,150,pusht.episodes150s5as75.json,42.19,28.91,,,,
+pusht_hzs5_2271135_6.log,pusht-hz-s5 arm=baseline offset=100 budget=200 seed=42,pusht,baseline,long,256,42,,none,100,200,pusht.episodes150s5as100.json,14.06,5.86,,,,
+pusht_hzs5_2271135_7.log,pusht-hz-s5 arm=baseline offset=100 budget=200 seed=43,pusht,baseline,long,256,43,,none,100,200,pusht.episodes150s5as100.json,11.33,4.69,,,,
+pusht_hzs5_2271135_8.log,pusht-hz-s5 arm=baseline offset=150 budget=300 seed=42,pusht,baseline,long,256,42,,none,150,300,pusht.episodes150s5.json,2.73,1.95,,,,
+pusht_hzs5_2271135_9.log,pusht-hz-s5 arm=baseline offset=150 budget=300 seed=43,pusht,baseline,long,256,43,,none,150,300,pusht.episodes150s5.json,2.73,1.95,,,,
+pusht_hzs5_baseline_t100_seed42.log,,pusht,baseline,long,256,42,,none,100,200,pusht.episodes150s5as100.json,14.06,5.86,,,,
+pusht_hzs5_baseline_t100_seed43.log,,pusht,baseline,long,256,43,,none,100,200,pusht.episodes150s5as100.json,11.33,4.69,,,,
+pusht_hzs5_baseline_t150_seed42.log,,pusht,baseline,long,256,42,,none,150,300,pusht.episodes150s5.json,2.73,1.95,,,,
+pusht_hzs5_baseline_t150_seed43.log,,pusht,baseline,long,256,43,,none,150,300,pusht.episodes150s5.json,2.73,1.95,,,,
+pusht_hzs5_baseline_t25_seed42.log,,pusht,baseline,long,256,42,,none,25,50,pusht.episodes150s5as25.json,97.27,94.14,,,,
+pusht_hzs5_baseline_t25_seed43.log,,pusht,baseline,long,256,43,,none,25,50,pusht.episodes150s5as25.json,98.83,96.48,,,,
+pusht_hzs5_baseline_t50_seed42.log,,pusht,baseline,long,256,42,,none,50,100,pusht.episodes150s5as50.json,58.20,46.48,,,,
+pusht_hzs5_baseline_t50_seed43.log,,pusht,baseline,long,256,43,,none,50,100,pusht.episodes150s5as50.json,62.50,51.17,,,,
+pusht_hzs5_baseline_t75_seed42.log,,pusht,baseline,long,256,42,,none,75,150,pusht.episodes150s5as75.json,42.97,28.12,,,,
+pusht_hzs5_baseline_t75_seed43.log,,pusht,baseline,long,256,43,,none,75,150,pusht.episodes150s5as75.json,42.19,28.91,,,,
+pusht_hzs5_s10gdm_t100_seed42.log,,pusht,gdm,long,256,42,,none,100,200,pusht.episodes150s5as100.json,98.44,96.09,,,,
+pusht_hzs5_s10gdm_t100_seed43.log,,pusht,gdm,long,256,43,,none,100,200,pusht.episodes150s5as100.json,97.66,92.58,,,,
+pusht_hzs5_s10gdm_t150_seed42.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150s5.json,97.66,96.88,,,,
+pusht_hzs5_s10gdm_t150_seed43.log,,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150s5.json,99.22,96.09,,,,
+pusht_hzs5_s10gdm_t25_seed42.log,,pusht,gdm,long,256,42,,none,25,50,pusht.episodes150s5as25.json,99.61,97.27,,,,
+pusht_hzs5_s10gdm_t25_seed43.log,,pusht,gdm,long,256,43,,none,25,50,pusht.episodes150s5as25.json,99.61,97.66,,,,
+pusht_hzs5_s10gdm_t50_seed42.log,,pusht,gdm,long,256,42,,none,50,100,pusht.episodes150s5as50.json,99.22,92.58,,,,
+pusht_hzs5_s10gdm_t50_seed43.log,,pusht,gdm,long,256,43,,none,50,100,pusht.episodes150s5as50.json,98.83,94.92,,,,
+pusht_hzs5_s10gdm_t75_seed42.log,,pusht,gdm,long,256,42,,none,75,150,pusht.episodes150s5as75.json,98.44,94.14,,,,
+pusht_hzs5_s10gdm_t75_seed43.log,,pusht,gdm,long,256,43,,none,75,150,pusht.episodes150s5as75.json,97.66,96.09,,,,
+pusht_hzs5_s10spec_t100_seed42.log,,pusht,specaccept,long,256,42,,none,100,200,pusht.episodes150s5as100.json,99.22,94.53,,0.531,0.2,8
+pusht_hzs5_s10spec_t100_seed43.log,,pusht,specaccept,long,256,43,,none,100,200,pusht.episodes150s5as100.json,99.22,96.88,,0.541,0.2,8
+pusht_hzs5_s10spec_t150_seed42.log,,pusht,specaccept,long,256,42,,none,150,300,pusht.episodes150s5.json,98.83,96.88,,0.534,0.2,8
+pusht_hzs5_s10spec_t150_seed43.log,,pusht,specaccept,long,256,43,,none,150,300,pusht.episodes150s5.json,98.83,96.88,,0.538,0.2,8
+pusht_hzs5_s10spec_t25_seed42.log,,pusht,specaccept,long,256,42,,none,25,50,pusht.episodes150s5as25.json,99.61,96.09,,0.835,0.2,8
+pusht_hzs5_s10spec_t25_seed43.log,,pusht,specaccept,long,256,43,,none,25,50,pusht.episodes150s5as25.json,99.61,97.27,,0.867,0.2,8
+pusht_hzs5_s10spec_t50_seed42.log,,pusht,specaccept,long,256,42,,none,50,100,pusht.episodes150s5as50.json,98.05,92.97,,0.621,0.2,8
+pusht_hzs5_s10spec_t50_seed43.log,,pusht,specaccept,long,256,43,,none,50,100,pusht.episodes150s5as50.json,96.09,92.97,,0.612,0.2,8
+pusht_hzs5_s10spec_t75_seed42.log,,pusht,specaccept,long,256,42,,none,75,150,pusht.episodes150s5as75.json,97.66,92.97,,0.559,0.2,8
+pusht_hzs5_s10spec_t75_seed43.log,,pusht,specaccept,long,256,43,,none,75,150,pusht.episodes150s5as75.json,97.27,93.36,,0.566,0.2,8
+pusht_hzs5_s25gdm_t100_seed42.log,,pusht,gdm,long,256,42,,none,100,200,pusht.episodes150s5as100.json,96.09,84.77,,,,
+pusht_hzs5_s25gdm_t100_seed43.log,,pusht,gdm,long,256,43,,none,100,200,pusht.episodes150s5as100.json,95.31,87.50,,,,
+pusht_hzs5_s25gdm_t150_seed42.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150s5.json,93.75,84.38,,,,
+pusht_hzs5_s25gdm_t150_seed43.log,,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150s5.json,94.14,86.72,,,,
+pusht_hzs5_s25gdm_t25_seed42.log,,pusht,gdm,long,256,42,,none,25,50,pusht.episodes150s5as25.json,99.22,91.41,,,,
+pusht_hzs5_s25gdm_t25_seed43.log,,pusht,gdm,long,256,43,,none,25,50,pusht.episodes150s5as25.json,98.83,94.92,,,,
+pusht_hzs5_s25gdm_t50_seed42.log,,pusht,gdm,long,256,42,,none,50,100,pusht.episodes150s5as50.json,94.53,83.98,,,,
+pusht_hzs5_s25gdm_t50_seed43.log,,pusht,gdm,long,256,43,,none,50,100,pusht.episodes150s5as50.json,93.75,85.94,,,,
+pusht_hzs5_s25gdm_t75_seed42.log,,pusht,gdm,long,256,42,,none,75,150,pusht.episodes150s5as75.json,94.92,81.25,,,,
+pusht_hzs5_s25gdm_t75_seed43.log,,pusht,gdm,long,256,43,,none,75,150,pusht.episodes150s5as75.json,96.88,83.20,,,,
+pusht_k100job_2271077_0.log,pusht k-anchor t100: gdmk4 seed=42,pusht,gdm,long,256,42,,none,100,200,pusht.episodes150as100.json,63.67,53.91,,,,
+pusht_k100job_2271077_1.log,pusht k-anchor t100: gdmk4 seed=43,pusht,gdm,long,256,43,,none,100,200,pusht.episodes150as100.json,64.06,50.39,,,,
+pusht_k100job_2271077_10.log,pusht k-anchor t100: speck4 seed=44,pusht,specaccept,long,256,44,,none,100,200,pusht.episodes150as100.json,66.02,53.91,,0.573,0.2,4
+pusht_k100job_2271077_11.log,pusht k-anchor t100: speck4 seed=45,pusht,specaccept,long,256,45,,none,100,200,pusht.episodes150as100.json,64.84,52.34,,0.578,0.2,4
+pusht_k100job_2271077_12.log,pusht k-anchor t100: speck8 seed=42,pusht,specaccept,long,256,42,,none,100,200,pusht.episodes150as100.json,62.89,53.91,,0.568,0.2,8
+pusht_k100job_2271077_13.log,pusht k-anchor t100: speck8 seed=43,pusht,specaccept,long,256,43,,none,100,200,pusht.episodes150as100.json,64.45,53.12,,0.551,0.2,8
+pusht_k100job_2271077_14.log,pusht k-anchor t100: speck8 seed=44,pusht,specaccept,long,256,44,,none,100,200,pusht.episodes150as100.json,63.28,53.91,,0.559,0.2,8
+pusht_k100job_2271077_15.log,pusht k-anchor t100: speck8 seed=45,pusht,specaccept,long,256,45,,none,100,200,pusht.episodes150as100.json,62.50,52.34,,0.566,0.2,8
+pusht_k100job_2271077_2.log,pusht k-anchor t100: gdmk4 seed=44,pusht,gdm,long,256,44,,none,100,200,pusht.episodes150as100.json,62.50,49.22,,,,
+pusht_k100job_2271077_3.log,pusht k-anchor t100: gdmk4 seed=45,pusht,gdm,long,256,45,,none,100,200,pusht.episodes150as100.json,62.89,50.00,,,,
+pusht_k100job_2271077_4.log,pusht k-anchor t100: gdmk8 seed=42,pusht,gdm,long,256,42,,none,100,200,pusht.episodes150as100.json,64.45,53.91,,,,
+pusht_k100job_2271077_5.log,pusht k-anchor t100: gdmk8 seed=43,pusht,gdm,long,256,43,,none,100,200,pusht.episodes150as100.json,62.50,50.78,,,,
+pusht_k100job_2271077_6.log,pusht k-anchor t100: gdmk8 seed=44,pusht,gdm,long,256,44,,none,100,200,pusht.episodes150as100.json,64.45,53.91,,,,
+pusht_k100job_2271077_7.log,pusht k-anchor t100: gdmk8 seed=45,pusht,gdm,long,256,45,,none,100,200,pusht.episodes150as100.json,64.84,53.91,,,,
+pusht_k100job_2271077_8.log,pusht k-anchor t100: speck4 seed=42,pusht,specaccept,long,256,42,,none,100,200,pusht.episodes150as100.json,64.06,51.56,,0.577,0.2,4
+pusht_k100job_2271077_9.log,pusht k-anchor t100: speck4 seed=43,pusht,specaccept,long,256,43,,none,100,200,pusht.episodes150as100.json,65.23,50.78,,0.571,0.2,4
+pusht_k4job_2271066_0.log,pusht k=4: gdmk4 seed=42 (t150),pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,57.81,46.88,,,,
+pusht_k4job_2271066_1.log,pusht k=4: gdmk4 seed=43 (t150),pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,58.59,45.31,,,,
+pusht_k4job_2271066_2.log,pusht k=4: gdmk4 seed=44 (t150),pusht,gdm,long,256,44,,none,150,300,pusht.episodes150.json,60.16,47.66,,,,
+pusht_k4job_2271066_3.log,pusht k=4: gdmk4 seed=45 (t150),pusht,gdm,long,256,45,,none,150,300,pusht.episodes150.json,57.03,49.22,,,,
+pusht_k4job_2271066_4.log,pusht k=4: speck4 seed=42 (t150),pusht,specaccept,long,256,42,,none,150,300,pusht.episodes150.json,60.55,50.00,,0.530,0.2,4
+pusht_k4job_2271066_5.log,pusht k=4: speck4 seed=43 (t150),pusht,specaccept,long,256,43,,none,150,300,pusht.episodes150.json,56.25,48.83,,0.526,0.2,4
+pusht_k4job_2271066_6.log,pusht k=4: speck4 seed=44 (t150),pusht,specaccept,long,256,44,,none,150,300,pusht.episodes150.json,60.55,49.22,,0.526,0.2,4
+pusht_k4job_2271066_7.log,pusht k=4: speck4 seed=45 (t150),pusht,specaccept,long,256,45,,none,150,300,pusht.episodes150.json,58.20,47.27,,0.522,0.2,4
+pusht_offaxis_tau0.10_k4_seed42.log,,pusht,specaccept,long,256,42,,none,100,200,pusht.episodes150as100.json,64.06,52.73,,0.869,0.1,4
+pusht_offaxis_tau0.10_k4_seed43.log,,pusht,specaccept,long,256,43,,none,100,200,pusht.episodes150as100.json,64.06,50.39,,0.876,0.1,4
+pusht_offaxis_tau0.30_k4_seed42.log,,pusht,specaccept,long,256,42,,none,100,200,pusht.episodes150as100.json,66.41,53.12,,0.477,0.3,4
+pusht_offaxis_tau0.30_k4_seed43.log,,pusht,specaccept,long,256,43,,none,100,200,pusht.episodes150as100.json,63.67,54.30,,0.466,0.3,4
+pusht_offaxisjob_2271116_0.log,off-axis: tau=0.30 k=4 seed=42 (t100),pusht,specaccept,long,256,42,,none,100,200,pusht.episodes150as100.json,66.41,53.12,,0.477,0.3,4
+pusht_offaxisjob_2271116_1.log,off-axis: tau=0.30 k=4 seed=43 (t100),pusht,specaccept,long,256,43,,none,100,200,pusht.episodes150as100.json,63.67,54.30,,0.466,0.3,4
+pusht_offaxisjob_2271116_2.log,off-axis: tau=0.10 k=4 seed=42 (t100),pusht,specaccept,long,256,42,,none,100,200,pusht.episodes150as100.json,64.06,52.73,,0.869,0.1,4
+pusht_offaxisjob_2271116_3.log,off-axis: tau=0.10 k=4 seed=43 (t100),pusht,specaccept,long,256,43,,none,100,200,pusht.episodes150as100.json,64.06,50.39,,0.876,0.1,4
+pusht_repl_2270737_0.log,"replication arm=baseline seed=42 (short, success5, n=256)",pusht,baseline,short,256,42,,success5,25,50,,93.36,86.33,,,,
+pusht_repl_2270737_1.log,"replication arm=baseline seed=43 (short, success5, n=256)",pusht,baseline,short,256,43,,success5,25,50,,92.19,84.38,,,,
+pusht_repl_2270737_10.log,"replication arm=s10gdm seed=42 (short, success5, n=256)",pusht,gdm,short,256,42,,success5,25,50,,98.83,92.97,,,,
+pusht_repl_2270737_11.log,"replication arm=s10gdm seed=43 (short, success5, n=256)",pusht,gdm,short,256,43,,success5,25,50,,100.00,92.58,,,,
+pusht_repl_2270737_12.log,"replication arm=s10gdm seed=44 (short, success5, n=256)",pusht,gdm,short,256,44,,success5,25,50,,99.61,96.09,,,,
+pusht_repl_2270737_13.log,"replication arm=s10gdm seed=45 (short, success5, n=256)",pusht,gdm,short,256,45,,success5,25,50,,99.22,95.31,,,,
+pusht_repl_2270737_14.log,"replication arm=s10spec seed=42 (short, success5, n=256)",pusht,specaccept,short,256,42,,success5,25,50,,98.44,93.36,,0.750,0.2,8
+pusht_repl_2270737_15.log,"replication arm=s10spec seed=43 (short, success5, n=256)",pusht,specaccept,short,256,43,,success5,25,50,,99.61,92.58,,0.736,0.2,8
+pusht_repl_2270737_16.log,"replication arm=s10spec seed=44 (short, success5, n=256)",pusht,specaccept,short,256,44,,success5,25,50,,99.22,94.53,,0.736,0.2,8
+pusht_repl_2270737_17.log,"replication arm=s10spec seed=45 (short, success5, n=256)",pusht,specaccept,short,256,45,,success5,25,50,,100.00,92.58,,0.731,0.2,8
+pusht_repl_2270737_2.log,"replication arm=baseline seed=44 (short, success5, n=256)",pusht,baseline,short,256,44,,success5,25,50,,96.48,89.06,,,,
+pusht_repl_2270737_3.log,"replication arm=baseline seed=45 (short, success5, n=256)",pusht,baseline,short,256,45,,success5,25,50,,96.48,87.89,,,,
+pusht_repl_2270737_4.log,"replication arm=oracle seed=42 (short, success5, n=256)",pusht,oracle,short,256,42,,success5,25,50,,93.36,85.94,,,,
+pusht_repl_2270737_5.log,"replication arm=oracle seed=43 (short, success5, n=256)",pusht,oracle,short,256,43,,success5,25,50,,91.80,82.03,,,,
+pusht_repl_2270737_6.log,"replication arm=s25gdm seed=42 (short, success5, n=256)",pusht,gdm,short,256,42,,success5,25,50,,94.14,84.38,,,,
+pusht_repl_2270737_7.log,"replication arm=s25gdm seed=43 (short, success5, n=256)",pusht,gdm,short,256,43,,success5,25,50,,92.19,80.08,,,,
+pusht_repl_2270737_8.log,"replication arm=s25gdm seed=44 (short, success5, n=256)",pusht,gdm,short,256,44,,success5,25,50,,97.27,83.98,,,,
+pusht_repl_2270737_9.log,"replication arm=s25gdm seed=45 (short, success5, n=256)",pusht,gdm,short,256,45,,success5,25,50,,95.70,82.81,,,,
+pusht_repl_baseline_seed42.log,,pusht,baseline,short,256,42,,success5,25,50,,93.36,86.33,,,,
+pusht_repl_baseline_seed43.log,,pusht,baseline,short,256,43,,success5,25,50,,92.19,84.38,,,,
+pusht_repl_baseline_seed44.log,,pusht,baseline,short,256,44,,success5,25,50,,96.48,89.06,,,,
+pusht_repl_baseline_seed45.log,,pusht,baseline,short,256,45,,success5,25,50,,96.48,87.89,,,,
+pusht_repl_oracle_seed42.log,,pusht,oracle,short,256,42,,success5,25,50,,93.36,85.94,,,,
+pusht_repl_oracle_seed43.log,,pusht,oracle,short,256,43,,success5,25,50,,91.80,82.03,,,,
+pusht_repl_s10gdm_seed42.log,,pusht,gdm,short,256,42,,success5,25,50,,98.83,92.97,,,,
+pusht_repl_s10gdm_seed43.log,,pusht,gdm,short,256,43,,success5,25,50,,100.00,92.58,,,,
+pusht_repl_s10gdm_seed44.log,,pusht,gdm,short,256,44,,success5,25,50,,99.61,96.09,,,,
+pusht_repl_s10gdm_seed45.log,,pusht,gdm,short,256,45,,success5,25,50,,99.22,95.31,,,,
+pusht_repl_s10spec_seed42.log,,pusht,specaccept,short,256,42,,success5,25,50,,98.44,93.36,,0.750,0.2,8
+pusht_repl_s10spec_seed43.log,,pusht,specaccept,short,256,43,,success5,25,50,,99.61,92.58,,0.736,0.2,8
+pusht_repl_s10spec_seed44.log,,pusht,specaccept,short,256,44,,success5,25,50,,99.22,94.53,,0.736,0.2,8
+pusht_repl_s10spec_seed45.log,,pusht,specaccept,short,256,45,,success5,25,50,,100.00,92.58,,0.731,0.2,8
+pusht_repl_s25gdm_seed42.log,,pusht,gdm,short,256,42,,success5,25,50,,94.14,84.38,,,,
+pusht_repl_s25gdm_seed43.log,,pusht,gdm,short,256,43,,success5,25,50,,92.19,80.08,,,,
+pusht_repl_s25gdm_seed44.log,,pusht,gdm,short,256,44,,success5,25,50,,97.27,83.98,,,,
+pusht_repl_s25gdm_seed45.log,,pusht,gdm,short,256,45,,success5,25,50,,95.70,82.81,,,,
+pusht_rh1_short_seed42.log,,pusht,baseline,short,256,42,,success5,25,50,,81.25,72.66,,,,
+pusht_rh1_short_seed43.log,,pusht,baseline,short,256,43,,success5,25,50,,78.91,68.36,,,,
+pusht_rh1_short_seed44.log,,pusht,baseline,short,256,44,,success5,25,50,,84.38,73.44,,,,
+pusht_rh1_short_seed45.log,,pusht,baseline,short,256,45,,success5,25,50,,82.81,70.31,,,,
+pusht_rh1_t100_seed42.log,,pusht,baseline,long,256,42,,none,100,200,pusht.episodes150as100.json,17.58,11.33,,,,
+pusht_rh1_t100_seed43.log,,pusht,baseline,long,256,43,,none,100,200,pusht.episodes150as100.json,18.36,12.50,,,,
+pusht_rh1_t150_seed42.log,,pusht,baseline,long,256,42,,none,150,300,pusht.episodes150.json,4.30,2.73,,,,
+pusht_rh1_t150_seed43.log,,pusht,baseline,long,256,43,,none,150,300,pusht.episodes150.json,3.91,2.73,,,,
+pusht_rh1_t25_seed42.log,,pusht,baseline,long,256,42,,none,25,50,pusht.episodes150as25.json,88.28,82.81,,,,
+pusht_rh1_t25_seed43.log,,pusht,baseline,long,256,43,,none,25,50,pusht.episodes150as25.json,88.28,84.38,,,,
+pusht_rh1_t50_seed42.log,,pusht,baseline,long,256,42,,none,50,100,pusht.episodes150as50.json,55.86,41.80,,,,
+pusht_rh1_t50_seed43.log,,pusht,baseline,long,256,43,,none,50,100,pusht.episodes150as50.json,59.38,42.97,,,,
+pusht_rh1_t75_seed42.log,,pusht,baseline,long,256,42,,none,75,150,pusht.episodes150as75.json,35.94,19.92,,,,
+pusht_rh1_t75_seed43.log,,pusht,baseline,long,256,43,,none,75,150,pusht.episodes150as75.json,35.55,20.31,,,,
+pusht_rh2_short_seed42.log,,pusht,baseline,short,256,42,,success5,25,50,,91.41,82.42,,,,
+pusht_rh2_short_seed43.log,,pusht,baseline,short,256,43,,success5,25,50,,91.80,85.55,,,,
+pusht_rh2_short_seed44.log,,pusht,baseline,short,256,44,,success5,25,50,,94.92,87.89,,,,
+pusht_rh2_short_seed45.log,,pusht,baseline,short,256,45,,success5,25,50,,95.31,86.72,,,,
+pusht_rh2_t100_seed42.log,,pusht,baseline,long,256,42,,none,100,200,pusht.episodes150as100.json,27.73,17.58,,,,
+pusht_rh2_t100_seed43.log,,pusht,baseline,long,256,43,,none,100,200,pusht.episodes150as100.json,24.61,16.80,,,,
+pusht_rh2_t150_seed42.log,,pusht,baseline,long,256,42,,none,150,300,pusht.episodes150.json,8.98,5.86,,,,
+pusht_rh2_t150_seed43.log,,pusht,baseline,long,256,43,,none,150,300,pusht.episodes150.json,10.55,6.25,,,,
+pusht_rh2_t25_seed42.log,,pusht,baseline,long,256,42,,none,25,50,pusht.episodes150as25.json,96.48,91.02,,,,
+pusht_rh2_t25_seed43.log,,pusht,baseline,long,256,43,,none,25,50,pusht.episodes150as25.json,96.09,88.67,,,,
+pusht_rh2_t50_seed42.log,,pusht,baseline,long,256,42,,none,50,100,pusht.episodes150as50.json,66.41,47.27,,,,
+pusht_rh2_t50_seed43.log,,pusht,baseline,long,256,43,,none,50,100,pusht.episodes150as50.json,66.02,51.95,,,,
+pusht_rh2_t75_seed42.log,,pusht,baseline,long,256,42,,none,75,150,pusht.episodes150as75.json,46.09,33.20,,,,
+pusht_rh2_t75_seed43.log,,pusht,baseline,long,256,43,,none,75,150,pusht.episodes150as75.json,48.05,30.86,,,,
+pusht_rhjob_2270744_0.log,pusht rh-sweep: short protocol RH=1 seed=42,pusht,baseline,short,256,42,,success5,25,50,,81.25,72.66,,,,
+pusht_rhjob_2270744_1.log,pusht rh-sweep: short protocol RH=1 seed=43,pusht,baseline,short,256,43,,success5,25,50,,78.91,68.36,,,,
+pusht_rhjob_2270744_10.log,pusht rh-sweep: horizon RH=1 t=50 budget=100 seed=42,pusht,baseline,long,256,42,,none,50,100,pusht.episodes150as50.json,55.86,41.80,,,,
+pusht_rhjob_2270744_11.log,pusht rh-sweep: horizon RH=1 t=50 budget=100 seed=43,pusht,baseline,long,256,43,,none,50,100,pusht.episodes150as50.json,59.38,42.97,,,,
+pusht_rhjob_2270744_12.log,pusht rh-sweep: horizon RH=1 t=75 budget=150 seed=42,pusht,baseline,long,256,42,,none,75,150,pusht.episodes150as75.json,35.94,19.92,,,,
+pusht_rhjob_2270744_13.log,pusht rh-sweep: horizon RH=1 t=75 budget=150 seed=43,pusht,baseline,long,256,43,,none,75,150,pusht.episodes150as75.json,35.55,20.31,,,,
+pusht_rhjob_2270744_14.log,pusht rh-sweep: horizon RH=1 t=100 budget=200 seed=42,pusht,baseline,long,256,42,,none,100,200,pusht.episodes150as100.json,17.58,11.33,,,,
+pusht_rhjob_2270744_15.log,pusht rh-sweep: horizon RH=1 t=100 budget=200 seed=43,pusht,baseline,long,256,43,,none,100,200,pusht.episodes150as100.json,18.36,12.50,,,,
+pusht_rhjob_2270744_16.log,pusht rh-sweep: horizon RH=1 t=150 budget=300 seed=42,pusht,baseline,long,256,42,,none,150,300,pusht.episodes150.json,4.30,2.73,,,,
+pusht_rhjob_2270744_17.log,pusht rh-sweep: horizon RH=1 t=150 budget=300 seed=43,pusht,baseline,long,256,43,,none,150,300,pusht.episodes150.json,3.91,2.73,,,,
+pusht_rhjob_2270744_18.log,pusht rh-sweep: horizon RH=2 t=25 budget=50 seed=42,pusht,baseline,long,256,42,,none,25,50,pusht.episodes150as25.json,96.48,91.02,,,,
+pusht_rhjob_2270744_19.log,pusht rh-sweep: horizon RH=2 t=25 budget=50 seed=43,pusht,baseline,long,256,43,,none,25,50,pusht.episodes150as25.json,96.09,88.67,,,,
+pusht_rhjob_2270744_2.log,pusht rh-sweep: short protocol RH=1 seed=44,pusht,baseline,short,256,44,,success5,25,50,,84.38,73.44,,,,
+pusht_rhjob_2270744_20.log,pusht rh-sweep: horizon RH=2 t=50 budget=100 seed=42,pusht,baseline,long,256,42,,none,50,100,pusht.episodes150as50.json,66.41,47.27,,,,
+pusht_rhjob_2270744_21.log,pusht rh-sweep: horizon RH=2 t=50 budget=100 seed=43,pusht,baseline,long,256,43,,none,50,100,pusht.episodes150as50.json,66.02,51.95,,,,
+pusht_rhjob_2270744_22.log,pusht rh-sweep: horizon RH=2 t=75 budget=150 seed=42,pusht,baseline,long,256,42,,none,75,150,pusht.episodes150as75.json,46.09,33.20,,,,
+pusht_rhjob_2270744_23.log,pusht rh-sweep: horizon RH=2 t=75 budget=150 seed=43,pusht,baseline,long,256,43,,none,75,150,pusht.episodes150as75.json,48.05,30.86,,,,
+pusht_rhjob_2270744_24.log,pusht rh-sweep: horizon RH=2 t=100 budget=200 seed=42,pusht,baseline,long,256,42,,none,100,200,pusht.episodes150as100.json,27.73,17.58,,,,
+pusht_rhjob_2270744_25.log,pusht rh-sweep: horizon RH=2 t=100 budget=200 seed=43,pusht,baseline,long,256,43,,none,100,200,pusht.episodes150as100.json,24.61,16.80,,,,
+pusht_rhjob_2270744_26.log,pusht rh-sweep: horizon RH=2 t=150 budget=300 seed=42,pusht,baseline,long,256,42,,none,150,300,pusht.episodes150.json,8.98,5.86,,,,
+pusht_rhjob_2270744_27.log,pusht rh-sweep: horizon RH=2 t=150 budget=300 seed=43,pusht,baseline,long,256,43,,none,150,300,pusht.episodes150.json,10.55,6.25,,,,
+pusht_rhjob_2270744_3.log,pusht rh-sweep: short protocol RH=1 seed=45,pusht,baseline,short,256,45,,success5,25,50,,82.81,70.31,,,,
+pusht_rhjob_2270744_4.log,pusht rh-sweep: short protocol RH=2 seed=42,pusht,baseline,short,256,42,,success5,25,50,,91.41,82.42,,,,
+pusht_rhjob_2270744_5.log,pusht rh-sweep: short protocol RH=2 seed=43,pusht,baseline,short,256,43,,success5,25,50,,91.80,85.55,,,,
+pusht_rhjob_2270744_6.log,pusht rh-sweep: short protocol RH=2 seed=44,pusht,baseline,short,256,44,,success5,25,50,,94.92,87.89,,,,
+pusht_rhjob_2270744_7.log,pusht rh-sweep: short protocol RH=2 seed=45,pusht,baseline,short,256,45,,success5,25,50,,95.31,86.72,,,,
+pusht_rhjob_2270744_8.log,pusht rh-sweep: horizon RH=1 t=25 budget=50 seed=42,pusht,baseline,long,256,42,,none,25,50,pusht.episodes150as25.json,88.28,82.81,,,,
+pusht_rhjob_2270744_9.log,pusht rh-sweep: horizon RH=1 t=25 budget=50 seed=43,pusht,baseline,long,256,43,,none,25,50,pusht.episodes150as25.json,88.28,84.38,,,,
+pusht_s15_short_seed42.log,,pusht,gdm,short,256,42,,success5,25,50,,97.66,90.62,,,,
+pusht_s15_short_seed43.log,,pusht,gdm,short,256,43,,success5,25,50,,98.83,90.23,,,,
+pusht_s15_short_seed44.log,,pusht,gdm,short,256,44,,success5,25,50,,98.05,94.92,,,,
+pusht_s15_short_seed45.log,,pusht,gdm,short,256,45,,success5,25,50,,99.22,91.41,,,,
+pusht_s15_t150_seed42.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,59.38,49.22,,,,
+pusht_s15_t150_seed43.log,,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,58.59,48.83,,,,
+pusht_s15_t150_seed44.log,,pusht,gdm,long,256,44,,none,150,300,pusht.episodes150.json,57.03,48.44,,,,
+pusht_s15_t150_seed45.log,,pusht,gdm,long,256,45,,none,150,300,pusht.episodes150.json,58.20,48.83,,,,
+pusht_s5_short_seed42.log,,pusht,gdm,short,256,42,,success5,25,50,,98.44,93.75,,,,
+pusht_s5_short_seed43.log,,pusht,gdm,short,256,43,,success5,25,50,,98.83,91.80,,,,
+pusht_s5_short_seed44.log,,pusht,gdm,short,256,44,,success5,25,50,,98.83,92.97,,,,
+pusht_s5_short_seed45.log,,pusht,gdm,short,256,45,,success5,25,50,,98.44,94.53,,,,
+pusht_s5_t150_seed42.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,54.30,46.88,,,,
+pusht_s5_t150_seed43.log,,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,56.25,50.39,,,,
+pusht_s5_t150_seed44.log,,pusht,gdm,long,256,44,,none,150,300,pusht.episodes150.json,55.08,48.44,,,,
+pusht_s5_t150_seed45.log,,pusht,gdm,long,256,45,,none,150,300,pusht.episodes150.json,55.47,49.22,,,,
+pusht_scurve_ev_2271079_0.log,s-curve eval: S=15 t150 seed=42,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,59.38,49.22,,,,
+pusht_scurve_ev_2271079_1.log,s-curve eval: S=15 t150 seed=43,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,58.59,48.83,,,,
+pusht_scurve_ev_2271079_10.log,s-curve eval: S=5 t150 seed=44,pusht,gdm,long,256,44,,none,150,300,pusht.episodes150.json,55.08,48.44,,,,
+pusht_scurve_ev_2271079_11.log,s-curve eval: S=5 t150 seed=45,pusht,gdm,long,256,45,,none,150,300,pusht.episodes150.json,55.47,49.22,,,,
+pusht_scurve_ev_2271079_12.log,s-curve eval: S=5 native short seed=42,pusht,gdm,short,256,42,,success5,25,50,,98.44,93.75,,,,
+pusht_scurve_ev_2271079_13.log,s-curve eval: S=5 native short seed=43,pusht,gdm,short,256,43,,success5,25,50,,98.83,91.80,,,,
+pusht_scurve_ev_2271079_14.log,s-curve eval: S=5 native short seed=44,pusht,gdm,short,256,44,,success5,25,50,,98.83,92.97,,,,
+pusht_scurve_ev_2271079_15.log,s-curve eval: S=5 native short seed=45,pusht,gdm,short,256,45,,success5,25,50,,98.44,94.53,,,,
+pusht_scurve_ev_2271079_2.log,s-curve eval: S=15 t150 seed=44,pusht,gdm,long,256,44,,none,150,300,pusht.episodes150.json,57.03,48.44,,,,
+pusht_scurve_ev_2271079_3.log,s-curve eval: S=15 t150 seed=45,pusht,gdm,long,256,45,,none,150,300,pusht.episodes150.json,58.20,48.83,,,,
+pusht_scurve_ev_2271079_4.log,s-curve eval: S=15 native short seed=42,pusht,gdm,short,256,42,,success5,25,50,,97.66,90.62,,,,
+pusht_scurve_ev_2271079_5.log,s-curve eval: S=15 native short seed=43,pusht,gdm,short,256,43,,success5,25,50,,98.83,90.23,,,,
+pusht_scurve_ev_2271079_6.log,s-curve eval: S=15 native short seed=44,pusht,gdm,short,256,44,,success5,25,50,,98.05,94.92,,,,
+pusht_scurve_ev_2271079_7.log,s-curve eval: S=15 native short seed=45,pusht,gdm,short,256,45,,success5,25,50,,99.22,91.41,,,,
+pusht_scurve_ev_2271079_8.log,s-curve eval: S=5 t150 seed=42,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,54.30,46.88,,,,
+pusht_scurve_ev_2271079_9.log,s-curve eval: S=5 t150 seed=43,pusht,gdm,long,256,43,,none,150,300,pusht.episodes150.json,56.25,50.39,,,,
+pusht_smoke_2270733.log,BASELINE n=32 short (validates env + encoder + harness + scoring),pusht,baseline,short,32,42,,none,25,50,,96.88,84.38,,,,
+pusht_speck1_t100_seed42.log,,pusht,specaccept,long,256,42,,none,100,200,pusht.episodes150as100.json,55.86,44.92,,1.000,0.2,1
+pusht_speck1_t100_seed43.log,,pusht,specaccept,long,256,43,,none,100,200,pusht.episodes150as100.json,53.52,41.80,,1.000,0.2,1
+pusht_speck1_t100_seed44.log,,pusht,specaccept,long,256,44,,none,100,200,pusht.episodes150as100.json,53.12,41.80,,1.000,0.2,1
+pusht_speck1_t100_seed45.log,,pusht,specaccept,long,256,45,,none,100,200,pusht.episodes150as100.json,56.25,44.53,,1.000,0.2,1
+pusht_speck2_t100_seed42.log,,pusht,specaccept,long,256,42,,none,100,200,pusht.episodes150as100.json,51.56,45.31,,1.000,0.2,2
+pusht_speck2_t100_seed43.log,,pusht,specaccept,long,256,43,,none,100,200,pusht.episodes150as100.json,55.86,43.75,,1.000,0.2,2
+pusht_speck2_t100_seed44.log,,pusht,specaccept,long,256,44,,none,100,200,pusht.episodes150as100.json,56.64,44.14,,1.000,0.2,2
+pusht_speck2_t100_seed45.log,,pusht,specaccept,long,256,45,,none,100,200,pusht.episodes150as100.json,58.20,44.53,,1.000,0.2,2
+pusht_speck4_t100_seed42.log,,pusht,specaccept,long,256,42,,none,100,200,pusht.episodes150as100.json,64.06,51.56,,0.577,0.2,4
+pusht_speck4_t100_seed43.log,,pusht,specaccept,long,256,43,,none,100,200,pusht.episodes150as100.json,65.23,50.78,,0.571,0.2,4
+pusht_speck4_t100_seed44.log,,pusht,specaccept,long,256,44,,none,100,200,pusht.episodes150as100.json,66.02,53.91,,0.573,0.2,4
+pusht_speck4_t100_seed45.log,,pusht,specaccept,long,256,45,,none,100,200,pusht.episodes150as100.json,64.84,52.34,,0.578,0.2,4
+pusht_speck4_t150_seed42.log,,pusht,specaccept,long,256,42,,none,150,300,pusht.episodes150.json,60.55,50.00,,0.530,0.2,4
+pusht_speck4_t150_seed43.log,,pusht,specaccept,long,256,43,,none,150,300,pusht.episodes150.json,56.25,48.83,,0.526,0.2,4
+pusht_speck4_t150_seed44.log,,pusht,specaccept,long,256,44,,none,150,300,pusht.episodes150.json,60.55,49.22,,0.526,0.2,4
+pusht_speck4_t150_seed45.log,,pusht,specaccept,long,256,45,,none,150,300,pusht.episodes150.json,58.20,47.27,,0.522,0.2,4
+pusht_speck8_t100_seed42.log,,pusht,specaccept,long,256,42,,none,100,200,pusht.episodes150as100.json,62.89,53.91,,0.568,0.2,8
+pusht_speck8_t100_seed43.log,,pusht,specaccept,long,256,43,,none,100,200,pusht.episodes150as100.json,64.45,53.12,,0.551,0.2,8
+pusht_speck8_t100_seed44.log,,pusht,specaccept,long,256,44,,none,100,200,pusht.episodes150as100.json,63.28,53.91,,0.559,0.2,8
+pusht_speck8_t100_seed45.log,,pusht,specaccept,long,256,45,,none,100,200,pusht.episodes150as100.json,62.50,52.34,,0.566,0.2,8
+pusht_timing_s10_k50.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,59.77,49.22,,,,
+pusht_timing_s10_k8.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,59.38,48.44,,,,
+pusht_timing_s10_spec.log,,pusht,specaccept,long,256,42,,none,150,300,pusht.episodes150.json,58.59,50.78,,0.510,0.2,8
+pusht_timing_s25_k50.log,,pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,58.20,42.97,,,,
+pusht_timingjob_2270820_0.log,"timing arm=s25_k50 (t150, budget 300, n=256, seed 42)",pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,58.20,42.97,,,,
+pusht_timingjob_2270820_1.log,"timing arm=s10_k50 (t150, budget 300, n=256, seed 42)",pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,59.77,49.22,,,,
+pusht_timingjob_2270820_2.log,"timing arm=s10_spec (t150, budget 300, n=256, seed 42)",pusht,specaccept,long,256,42,,none,150,300,pusht.episodes150.json,58.59,50.78,,0.510,0.2,8
+pusht_timingjob_2270820_3.log,"timing arm=s10_k8 (t150, budget 300, n=256, seed 42)",pusht,gdm,long,256,42,,none,150,300,pusht.episodes150.json,59.38,48.44,,,,
+pusht_valtau0.15_seed42.log,,pusht,specaccept,long,256,42,,none,150,300,pusht.episodes150.val.json,63.67,55.08,,0.608,0.15,8
+pusht_valtau0.15_seed43.log,,pusht,specaccept,long,256,43,,none,150,300,pusht.episodes150.val.json,63.28,54.30,,0.617,0.15,8
+pusht_valtau0.20_seed42.log,,pusht,specaccept,long,256,42,,none,150,300,pusht.episodes150.val.json,63.67,56.64,,0.494,0.2,8
+pusht_valtau0.20_seed43.log,,pusht,specaccept,long,256,43,,none,150,300,pusht.episodes150.val.json,65.23,54.30,,0.508,0.2,8
+pusht_valtau0.25_seed42.log,,pusht,specaccept,long,256,42,,none,150,300,pusht.episodes150.val.json,63.67,55.47,,0.456,0.25,8
+pusht_valtau0.25_seed43.log,,pusht,specaccept,long,256,43,,none,150,300,pusht.episodes150.val.json,63.67,56.25,,0.452,0.25,8
+pusht_valtau0.30_seed42.log,,pusht,specaccept,long,256,42,,none,150,300,pusht.episodes150.val.json,63.28,56.64,,0.417,0.3,8
+pusht_valtau0.30_seed43.log,,pusht,specaccept,long,256,43,,none,150,300,pusht.episodes150.val.json,64.06,57.81,,0.418,0.3,8
+reacher_arms_2270237_0.log,arm=baseline subgoal=baseline ckpt=none horizon=receding=5 k=50 seed=42,reacher,baseline,,128,42,25,,25,50,,,,85.16,,,
+reacher_arms_2270237_1.log,arm=baseline subgoal=baseline ckpt=none horizon=receding=5 k=50 seed=43,reacher,baseline,,128,43,25,,25,50,,,,85.94,,,
+reacher_arms_2270237_10.log,arm=s15gdm subgoal=gdm ckpt=gdm_reacher_s15.pt horizon=receding=3 k=50 seed=44,reacher,gdm,,128,44,15,,25,50,,,,52.34,,,
+reacher_arms_2270237_11.log,arm=s15gdm subgoal=gdm ckpt=gdm_reacher_s15.pt horizon=receding=3 k=50 seed=45,reacher,gdm,,128,45,15,,25,50,,,,52.34,,,
+reacher_arms_2270237_12.log,arm=s10gdm subgoal=gdm ckpt=gdm_reacher_s10.pt horizon=receding=2 k=50 seed=42,reacher,gdm,,128,42,10,,25,50,,,,55.47,,,
+reacher_arms_2270237_13.log,arm=s10gdm subgoal=gdm ckpt=gdm_reacher_s10.pt horizon=receding=2 k=50 seed=43,reacher,gdm,,128,43,10,,25,50,,,,60.94,,,
+reacher_arms_2270237_14.log,arm=s10gdm subgoal=gdm ckpt=gdm_reacher_s10.pt horizon=receding=2 k=50 seed=44,reacher,gdm,,128,44,10,,25,50,,,,65.62,,,
+reacher_arms_2270237_15.log,arm=s10gdm subgoal=gdm ckpt=gdm_reacher_s10.pt horizon=receding=2 k=50 seed=45,reacher,gdm,,128,45,10,,25,50,,,,60.16,,,
+reacher_arms_2270237_16.log,arm=s5gdm subgoal=gdm ckpt=gdm_reacher_s5.pt horizon=receding=1 k=50 seed=42,reacher,gdm,,128,42,5,,25,50,,,,53.12,,,
+reacher_arms_2270237_17.log,arm=s5gdm subgoal=gdm ckpt=gdm_reacher_s5.pt horizon=receding=1 k=50 seed=43,reacher,gdm,,128,43,5,,25,50,,,,51.56,,,
+reacher_arms_2270237_18.log,arm=s5gdm subgoal=gdm ckpt=gdm_reacher_s5.pt horizon=receding=1 k=50 seed=44,reacher,gdm,,128,44,5,,25,50,,,,52.34,,,
+reacher_arms_2270237_19.log,arm=s5gdm subgoal=gdm ckpt=gdm_reacher_s5.pt horizon=receding=1 k=50 seed=45,reacher,gdm,,128,45,5,,25,50,,,,53.12,,,
+reacher_arms_2270237_2.log,arm=baseline subgoal=baseline ckpt=none horizon=receding=5 k=50 seed=44,reacher,baseline,,128,44,25,,25,50,,,,85.16,,,
+reacher_arms_2270237_20.log,arm=s25spec subgoal=specaccept ckpt=gdm_reacher_s25.pt horizon=receding=5 k=8 seed=42,reacher,specaccept,,128,42,25,,25,50,,,,57.81,0.898,0.2,8
+reacher_arms_2270237_21.log,arm=s25spec subgoal=specaccept ckpt=gdm_reacher_s25.pt horizon=receding=5 k=8 seed=43,reacher,specaccept,,128,43,25,,25,50,,,,66.41,0.912,0.2,8
+reacher_arms_2270237_22.log,arm=s25spec subgoal=specaccept ckpt=gdm_reacher_s25.pt horizon=receding=5 k=8 seed=44,reacher,specaccept,,128,44,25,,25,50,,,,60.94,0.859,0.2,8
+reacher_arms_2270237_23.log,arm=s25spec subgoal=specaccept ckpt=gdm_reacher_s25.pt horizon=receding=5 k=8 seed=45,reacher,specaccept,,128,45,25,,25,50,,,,53.91,0.853,0.2,8
+reacher_arms_2270237_24.log,arm=s15spec subgoal=specaccept ckpt=gdm_reacher_s15.pt horizon=receding=3 k=8 seed=42,reacher,specaccept,,128,42,15,,25,50,,,,60.16,0.738,0.2,8
+reacher_arms_2270237_25.log,arm=s15spec subgoal=specaccept ckpt=gdm_reacher_s15.pt horizon=receding=3 k=8 seed=43,reacher,specaccept,,128,43,15,,25,50,,,,63.28,0.744,0.2,8
+reacher_arms_2270237_26.log,arm=s15spec subgoal=specaccept ckpt=gdm_reacher_s15.pt horizon=receding=3 k=8 seed=44,reacher,specaccept,,128,44,15,,25,50,,,,53.12,0.710,0.2,8
+reacher_arms_2270237_27.log,arm=s15spec subgoal=specaccept ckpt=gdm_reacher_s15.pt horizon=receding=3 k=8 seed=45,reacher,specaccept,,128,45,15,,25,50,,,,67.19,0.716,0.2,8
+reacher_arms_2270237_28.log,arm=s10spec subgoal=specaccept ckpt=gdm_reacher_s10.pt horizon=receding=2 k=8 seed=42,reacher,specaccept,,128,42,10,,25,50,,,,57.81,0.694,0.2,8
+reacher_arms_2270237_29.log,arm=s10spec subgoal=specaccept ckpt=gdm_reacher_s10.pt horizon=receding=2 k=8 seed=43,reacher,specaccept,,128,43,10,,25,50,,,,57.81,0.667,0.2,8
+reacher_arms_2270237_3.log,arm=baseline subgoal=baseline ckpt=none horizon=receding=5 k=50 seed=45,reacher,baseline,,128,45,25,,25,50,,,,79.69,,,
+reacher_arms_2270237_30.log,arm=s10spec subgoal=specaccept ckpt=gdm_reacher_s10.pt horizon=receding=2 k=8 seed=44,reacher,specaccept,,128,44,10,,25,50,,,,58.59,0.653,0.2,8
+reacher_arms_2270237_31.log,arm=s10spec subgoal=specaccept ckpt=gdm_reacher_s10.pt horizon=receding=2 k=8 seed=45,reacher,specaccept,,128,45,10,,25,50,,,,60.16,0.663,0.2,8
+reacher_arms_2270237_32.log,arm=s5spec subgoal=specaccept ckpt=gdm_reacher_s5.pt horizon=receding=1 k=8 seed=42,reacher,specaccept,,128,42,5,,25,50,,,,47.66,0.608,0.2,8
+reacher_arms_2270237_33.log,arm=s5spec subgoal=specaccept ckpt=gdm_reacher_s5.pt horizon=receding=1 k=8 seed=43,reacher,specaccept,,128,43,5,,25,50,,,,51.56,0.583,0.2,8
+reacher_arms_2270237_34.log,arm=s5spec subgoal=specaccept ckpt=gdm_reacher_s5.pt horizon=receding=1 k=8 seed=44,reacher,specaccept,,128,44,5,,25,50,,,,44.53,0.589,0.2,8
+reacher_arms_2270237_35.log,arm=s5spec subgoal=specaccept ckpt=gdm_reacher_s5.pt horizon=receding=1 k=8 seed=45,reacher,specaccept,,128,45,5,,25,50,,,,40.62,0.574,0.2,8
+reacher_arms_2270237_4.log,arm=s25gdm subgoal=gdm ckpt=gdm_reacher_s25.pt horizon=receding=5 k=50 seed=42,reacher,gdm,,128,42,25,,25,50,,,,52.34,,,
+reacher_arms_2270237_5.log,arm=s25gdm subgoal=gdm ckpt=gdm_reacher_s25.pt horizon=receding=5 k=50 seed=43,reacher,gdm,,128,43,25,,25,50,,,,56.25,,,
+reacher_arms_2270237_6.log,arm=s25gdm subgoal=gdm ckpt=gdm_reacher_s25.pt horizon=receding=5 k=50 seed=44,reacher,gdm,,128,44,25,,25,50,,,,53.12,,,
+reacher_arms_2270237_7.log,arm=s25gdm subgoal=gdm ckpt=gdm_reacher_s25.pt horizon=receding=5 k=50 seed=45,reacher,gdm,,128,45,25,,25,50,,,,53.91,,,
+reacher_arms_2270237_8.log,arm=s15gdm subgoal=gdm ckpt=gdm_reacher_s15.pt horizon=receding=3 k=50 seed=42,reacher,gdm,,128,42,15,,25,50,,,,57.81,,,
+reacher_arms_2270237_9.log,arm=s15gdm subgoal=gdm ckpt=gdm_reacher_s15.pt horizon=receding=3 k=50 seed=43,reacher,gdm,,128,43,15,,25,50,,,,55.47,,,
+reacher_arms_baseline_seed42.log,,reacher,baseline,,128,42,25,,25,50,,,,85.16,,,
+reacher_arms_baseline_seed43.log,,reacher,baseline,,128,43,25,,25,50,,,,85.94,,,
+reacher_arms_baseline_seed44.log,,reacher,baseline,,128,44,25,,25,50,,,,85.16,,,
+reacher_arms_baseline_seed45.log,,reacher,baseline,,128,45,25,,25,50,,,,79.69,,,
+reacher_arms_s10gdm_seed42.log,,reacher,gdm,,128,42,10,,25,50,,,,55.47,,,
+reacher_arms_s10gdm_seed43.log,,reacher,gdm,,128,43,10,,25,50,,,,60.94,,,
+reacher_arms_s10gdm_seed44.log,,reacher,gdm,,128,44,10,,25,50,,,,65.62,,,
+reacher_arms_s10gdm_seed45.log,,reacher,gdm,,128,45,10,,25,50,,,,60.16,,,
+reacher_arms_s10spec_seed42.log,,reacher,specaccept,,128,42,10,,25,50,,,,57.81,0.694,0.2,8
+reacher_arms_s10spec_seed43.log,,reacher,specaccept,,128,43,10,,25,50,,,,57.81,0.667,0.2,8
+reacher_arms_s10spec_seed44.log,,reacher,specaccept,,128,44,10,,25,50,,,,58.59,0.653,0.2,8
+reacher_arms_s10spec_seed45.log,,reacher,specaccept,,128,45,10,,25,50,,,,60.16,0.663,0.2,8
+reacher_arms_s15gdm_seed42.log,,reacher,gdm,,128,42,15,,25,50,,,,57.81,,,
+reacher_arms_s15gdm_seed43.log,,reacher,gdm,,128,43,15,,25,50,,,,55.47,,,
+reacher_arms_s15gdm_seed44.log,,reacher,gdm,,128,44,15,,25,50,,,,52.34,,,
+reacher_arms_s15gdm_seed45.log,,reacher,gdm,,128,45,15,,25,50,,,,52.34,,,
+reacher_arms_s15spec_seed42.log,,reacher,specaccept,,128,42,15,,25,50,,,,60.16,0.738,0.2,8
+reacher_arms_s15spec_seed43.log,,reacher,specaccept,,128,43,15,,25,50,,,,63.28,0.744,0.2,8
+reacher_arms_s15spec_seed44.log,,reacher,specaccept,,128,44,15,,25,50,,,,53.12,0.710,0.2,8
+reacher_arms_s15spec_seed45.log,,reacher,specaccept,,128,45,15,,25,50,,,,67.19,0.716,0.2,8
+reacher_arms_s25gdm_seed42.log,,reacher,gdm,,128,42,25,,25,50,,,,52.34,,,
+reacher_arms_s25gdm_seed43.log,,reacher,gdm,,128,43,25,,25,50,,,,56.25,,,
+reacher_arms_s25gdm_seed44.log,,reacher,gdm,,128,44,25,,25,50,,,,53.12,,,
+reacher_arms_s25gdm_seed45.log,,reacher,gdm,,128,45,25,,25,50,,,,53.91,,,
+reacher_arms_s25spec_seed42.log,,reacher,specaccept,,128,42,25,,25,50,,,,57.81,0.898,0.2,8
+reacher_arms_s25spec_seed43.log,,reacher,specaccept,,128,43,25,,25,50,,,,66.41,0.912,0.2,8
+reacher_arms_s25spec_seed44.log,,reacher,specaccept,,128,44,25,,25,50,,,,60.94,0.859,0.2,8
+reacher_arms_s25spec_seed45.log,,reacher,specaccept,,128,45,25,,25,50,,,,53.91,0.853,0.2,8
+reacher_arms_s5gdm_seed42.log,,reacher,gdm,,128,42,5,,25,50,,,,53.12,,,
+reacher_arms_s5gdm_seed43.log,,reacher,gdm,,128,43,5,,25,50,,,,51.56,,,
+reacher_arms_s5gdm_seed44.log,,reacher,gdm,,128,44,5,,25,50,,,,52.34,,,
+reacher_arms_s5gdm_seed45.log,,reacher,gdm,,128,45,5,,25,50,,,,53.12,,,
+reacher_arms_s5spec_seed42.log,,reacher,specaccept,,128,42,5,,25,50,,,,47.66,0.608,0.2,8
+reacher_arms_s5spec_seed43.log,,reacher,specaccept,,128,43,5,,25,50,,,,51.56,0.583,0.2,8
+reacher_arms_s5spec_seed44.log,,reacher,specaccept,,128,44,5,,25,50,,,,44.53,0.589,0.2,8
+reacher_arms_s5spec_seed45.log,,reacher,specaccept,,128,45,5,,25,50,,,,40.62,0.574,0.2,8
+reacher_audit2job_2271051_0.log,audit2 lerp frac=0.25 t100 seed=42,reacher,lerp,,128,42,10,,100,200,reacher_audit2.ep100.t0.json,,,33.59,,,
+reacher_audit2job_2271051_1.log,audit2 lerp frac=0.25 t100 seed=43,reacher,lerp,,128,43,10,,100,200,reacher_audit2.ep100.t1.json,,,32.81,,,
+reacher_audit2job_2271051_10.log,audit2 lerp frac=0.75 t100 seed=44,reacher,lerp,,128,44,10,,100,200,reacher_audit2.ep100.t10.json,,,53.91,,,
+reacher_audit2job_2271051_11.log,audit2 lerp frac=0.75 t100 seed=45,reacher,lerp,,128,45,10,,100,200,reacher_audit2.ep100.t11.json,,,54.69,,,
+reacher_audit2job_2271051_12.log,audit2 every-step k=4 t100 seed=42,reacher,gdm,,128,42,10,,100,200,reacher_audit2.ep100.t12.json,,,97.66,,,
+reacher_audit2job_2271051_13.log,audit2 every-step k=4 t100 seed=43,reacher,gdm,,128,43,10,,100,200,reacher_audit2.ep100.t13.json,,,96.09,,,
+reacher_audit2job_2271051_14.log,audit2 every-step k=4 t100 seed=44,reacher,gdm,,128,44,10,,100,200,reacher_audit2.ep100.t14.json,,,95.31,,,
+reacher_audit2job_2271051_15.log,audit2 every-step k=4 t100 seed=45,reacher,gdm,,128,45,10,,100,200,reacher_audit2.ep100.t15.json,,,95.31,,,
+reacher_audit2job_2271051_2.log,audit2 lerp frac=0.25 t100 seed=44,reacher,lerp,,128,44,10,,100,200,reacher_audit2.ep100.t2.json,,,34.38,,,
+reacher_audit2job_2271051_3.log,audit2 lerp frac=0.25 t100 seed=45,reacher,lerp,,128,45,10,,100,200,reacher_audit2.ep100.t3.json,,,32.81,,,
+reacher_audit2job_2271051_4.log,audit2 lerp frac=0.5 t100 seed=42,reacher,lerp,,128,42,10,,100,200,reacher_audit2.ep100.t4.json,,,44.53,,,
+reacher_audit2job_2271051_5.log,audit2 lerp frac=0.5 t100 seed=43,reacher,lerp,,128,43,10,,100,200,reacher_audit2.ep100.t5.json,,,43.75,,,
+reacher_audit2job_2271051_6.log,audit2 lerp frac=0.5 t100 seed=44,reacher,lerp,,128,44,10,,100,200,reacher_audit2.ep100.t6.json,,,42.97,,,
+reacher_audit2job_2271051_7.log,audit2 lerp frac=0.5 t100 seed=45,reacher,lerp,,128,45,10,,100,200,reacher_audit2.ep100.t7.json,,,43.75,,,
+reacher_audit2job_2271051_8.log,audit2 lerp frac=0.75 t100 seed=42,reacher,lerp,,128,42,10,,100,200,reacher_audit2.ep100.t8.json,,,57.03,,,
+reacher_audit2job_2271051_9.log,audit2 lerp frac=0.75 t100 seed=43,reacher,lerp,,128,43,10,,100,200,reacher_audit2.ep100.t9.json,,,55.47,,,
+reacher_auditjob_2270818_0.log,audit lerp frac=0.25 seed=42 (native t25),reacher,lerp,,128,42,10,,25,50,,,,21.09,,,
+reacher_auditjob_2270818_1.log,audit lerp frac=0.25 seed=43 (native t25),reacher,lerp,,128,43,10,,25,50,,,,28.91,,,
+reacher_auditjob_2270818_10.log,audit lerp frac=1.0 seed=44 (native t25),reacher,lerp,,128,44,10,,25,50,,,,93.75,,,
+reacher_auditjob_2270818_11.log,audit lerp frac=1.0 seed=45 (native t25),reacher,lerp,,128,45,10,,25,50,,,,94.53,,,
+reacher_auditjob_2270818_12.log,audit every-step k=8 t100 seed=42,reacher,gdm,,128,42,10,,100,200,reacher_audit.ep100.t12.json,,,95.31,,,
+reacher_auditjob_2270818_13.log,audit every-step k=8 t100 seed=43,reacher,gdm,,128,43,10,,100,200,reacher_audit.ep100.t13.json,,,96.88,,,
+reacher_auditjob_2270818_14.log,audit every-step k=8 t100 seed=44,reacher,gdm,,128,44,10,,100,200,reacher_audit.ep100.t14.json,,,93.75,,,
+reacher_auditjob_2270818_15.log,audit every-step k=8 t100 seed=45,reacher,gdm,,128,45,10,,100,200,reacher_audit.ep100.t15.json,,,93.75,,,
+reacher_auditjob_2270818_16.log,audit every-step k=8 native t25 seed=42,reacher,gdm,,128,42,10,,25,50,,,,64.84,,,
+reacher_auditjob_2270818_17.log,audit every-step k=8 native t25 seed=43,reacher,gdm,,128,43,10,,25,50,,,,71.88,,,
+reacher_auditjob_2270818_18.log,audit every-step k=8 native t25 seed=44,reacher,gdm,,128,44,10,,25,50,,,,73.44,,,
+reacher_auditjob_2270818_19.log,audit every-step k=8 native t25 seed=45,reacher,gdm,,128,45,10,,25,50,,,,65.62,,,
+reacher_auditjob_2270818_2.log,audit lerp frac=0.25 seed=44 (native t25),reacher,lerp,,128,44,10,,25,50,,,,22.66,,,
+reacher_auditjob_2270818_3.log,audit lerp frac=0.25 seed=45 (native t25),reacher,lerp,,128,45,10,,25,50,,,,14.84,,,
+reacher_auditjob_2270818_4.log,audit lerp frac=0.5 seed=42 (native t25),reacher,lerp,,128,42,10,,25,50,,,,69.53,,,
+reacher_auditjob_2270818_5.log,audit lerp frac=0.5 seed=43 (native t25),reacher,lerp,,128,43,10,,25,50,,,,74.22,,,
+reacher_auditjob_2270818_6.log,audit lerp frac=0.5 seed=44 (native t25),reacher,lerp,,128,44,10,,25,50,,,,74.22,,,
+reacher_auditjob_2270818_7.log,audit lerp frac=0.5 seed=45 (native t25),reacher,lerp,,128,45,10,,25,50,,,,64.84,,,
+reacher_auditjob_2270818_8.log,audit lerp frac=1.0 seed=42 (native t25),reacher,lerp,,128,42,10,,25,50,,,,95.31,,,
+reacher_auditjob_2270818_9.log,audit lerp frac=1.0 seed=43 (native t25),reacher,lerp,,128,43,10,,25,50,,,,98.44,,,
+reacher_frontier_tau0.1_k16_seed42.log,,reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.frontier.t4.json,,,92.97,0.820,0.1,16
+reacher_frontier_tau0.1_k16_seed43.log,,reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.frontier.t5.json,,,92.97,0.816,0.1,16
+reacher_frontier_tau0.1_k4_seed42.log,,reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.frontier.t0.json,,,96.88,0.826,0.1,4
+reacher_frontier_tau0.1_k4_seed43.log,,reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.frontier.t1.json,,,95.31,0.849,0.1,4
+reacher_frontier_tau0.1_k4_seed44.log,,reacher,specaccept,,128,44,10,,100,200,reacher_strong.ep100.t14.json,,,95.31,0.832,0.1,4
+reacher_frontier_tau0.1_k4_seed45.log,,reacher,specaccept,,128,45,10,,100,200,reacher_strong.ep100.t15.json,,,96.09,0.842,0.1,4
+reacher_frontier_tau0.1_k8_seed42.log,,reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.frontier.t2.json,,,91.41,0.822,0.1,8
+reacher_frontier_tau0.1_k8_seed43.log,,reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.frontier.t3.json,,,95.31,0.824,0.1,8
+reacher_frontier_tau0.2_k16_seed42.log,,reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.frontier.t10.json,,,92.97,0.632,0.2,16
+reacher_frontier_tau0.2_k16_seed43.log,,reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.frontier.t11.json,,,92.19,0.643,0.2,16
+reacher_frontier_tau0.2_k4_seed42.log,,reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.frontier.t6.json,,,94.53,0.634,0.2,4
+reacher_frontier_tau0.2_k4_seed43.log,,reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.frontier.t7.json,,,96.88,0.641,0.2,4
+reacher_frontier_tau0.2_k4_seed44.log,,reacher,specaccept,,128,44,10,,100,200,reacher_strong.ep100.t12.json,,,94.53,0.611,0.2,4
+reacher_frontier_tau0.2_k4_seed45.log,,reacher,specaccept,,128,45,10,,100,200,reacher_strong.ep100.t13.json,,,96.09,0.624,0.2,4
+reacher_frontier_tau0.2_k8_seed42.log,,reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.frontier.t8.json,,,92.97,0.596,0.2,8
+reacher_frontier_tau0.2_k8_seed43.log,,reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.frontier.t9.json,,,93.75,0.621,0.2,8
+reacher_frontier_tau0.3_k16_seed42.log,,reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.frontier.t16.json,,,85.16,0.513,0.3,16
+reacher_frontier_tau0.3_k16_seed43.log,,reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.frontier.t17.json,,,88.28,0.515,0.3,16
+reacher_frontier_tau0.3_k4_seed42.log,,reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.frontier.t12.json,,,92.19,0.506,0.3,4
+reacher_frontier_tau0.3_k4_seed43.log,,reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.frontier.t13.json,,,96.09,0.528,0.3,4
+reacher_frontier_tau0.3_k8_seed42.log,,reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.frontier.t14.json,,,92.19,0.511,0.3,8
+reacher_frontier_tau0.3_k8_seed43.log,,reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.frontier.t15.json,,,91.41,0.523,0.3,8
+reacher_frontier_tau0.4_k16_seed42.log,,reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.frontier.t22.json,,,82.81,0.453,0.4,16
+reacher_frontier_tau0.4_k16_seed43.log,,reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.frontier.t23.json,,,87.50,0.459,0.4,16
+reacher_frontier_tau0.4_k4_seed42.log,,reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.frontier.t18.json,,,90.62,0.447,0.4,4
+reacher_frontier_tau0.4_k4_seed43.log,,reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.frontier.t19.json,,,89.84,0.476,0.4,4
+reacher_frontier_tau0.4_k8_seed42.log,,reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.frontier.t20.json,,,89.84,0.452,0.4,8
+reacher_frontier_tau0.4_k8_seed43.log,,reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.frontier.t21.json,,,90.62,0.461,0.4,8
+reacher_frontierjob_2270577_0.log,"frontier: s10spec tau=0.1 k=4 seed=42 (t100, budget 200)",reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.frontier.t0.json,,,96.88,0.826,0.1,4
+reacher_frontierjob_2270577_1.log,"frontier: s10spec tau=0.1 k=4 seed=43 (t100, budget 200)",reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.frontier.t1.json,,,95.31,0.849,0.1,4
+reacher_frontierjob_2270577_10.log,"frontier: s10spec tau=0.2 k=16 seed=42 (t100, budget 200)",reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.frontier.t10.json,,,92.97,0.632,0.2,16
+reacher_frontierjob_2270577_11.log,"frontier: s10spec tau=0.2 k=16 seed=43 (t100, budget 200)",reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.frontier.t11.json,,,92.19,0.643,0.2,16
+reacher_frontierjob_2270577_12.log,"frontier: s10spec tau=0.3 k=4 seed=42 (t100, budget 200)",reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.frontier.t12.json,,,92.19,0.506,0.3,4
+reacher_frontierjob_2270577_13.log,"frontier: s10spec tau=0.3 k=4 seed=43 (t100, budget 200)",reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.frontier.t13.json,,,96.09,0.528,0.3,4
+reacher_frontierjob_2270577_14.log,"frontier: s10spec tau=0.3 k=8 seed=42 (t100, budget 200)",reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.frontier.t14.json,,,92.19,0.511,0.3,8
+reacher_frontierjob_2270577_15.log,"frontier: s10spec tau=0.3 k=8 seed=43 (t100, budget 200)",reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.frontier.t15.json,,,91.41,0.523,0.3,8
+reacher_frontierjob_2270577_16.log,"frontier: s10spec tau=0.3 k=16 seed=42 (t100, budget 200)",reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.frontier.t16.json,,,85.16,0.513,0.3,16
+reacher_frontierjob_2270577_17.log,"frontier: s10spec tau=0.3 k=16 seed=43 (t100, budget 200)",reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.frontier.t17.json,,,88.28,0.515,0.3,16
+reacher_frontierjob_2270577_18.log,"frontier: s10spec tau=0.4 k=4 seed=42 (t100, budget 200)",reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.frontier.t18.json,,,90.62,0.447,0.4,4
+reacher_frontierjob_2270577_19.log,"frontier: s10spec tau=0.4 k=4 seed=43 (t100, budget 200)",reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.frontier.t19.json,,,89.84,0.476,0.4,4
+reacher_frontierjob_2270577_2.log,"frontier: s10spec tau=0.1 k=8 seed=42 (t100, budget 200)",reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.frontier.t2.json,,,91.41,0.822,0.1,8
+reacher_frontierjob_2270577_20.log,"frontier: s10spec tau=0.4 k=8 seed=42 (t100, budget 200)",reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.frontier.t20.json,,,89.84,0.452,0.4,8
+reacher_frontierjob_2270577_21.log,"frontier: s10spec tau=0.4 k=8 seed=43 (t100, budget 200)",reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.frontier.t21.json,,,90.62,0.461,0.4,8
+reacher_frontierjob_2270577_22.log,"frontier: s10spec tau=0.4 k=16 seed=42 (t100, budget 200)",reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.frontier.t22.json,,,82.81,0.453,0.4,16
+reacher_frontierjob_2270577_23.log,"frontier: s10spec tau=0.4 k=16 seed=43 (t100, budget 200)",reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.frontier.t23.json,,,87.50,0.459,0.4,16
+reacher_frontierjob_2270577_3.log,"frontier: s10spec tau=0.1 k=8 seed=43 (t100, budget 200)",reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.frontier.t3.json,,,95.31,0.824,0.1,8
+reacher_frontierjob_2270577_4.log,"frontier: s10spec tau=0.1 k=16 seed=42 (t100, budget 200)",reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.frontier.t4.json,,,92.97,0.820,0.1,16
+reacher_frontierjob_2270577_5.log,"frontier: s10spec tau=0.1 k=16 seed=43 (t100, budget 200)",reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.frontier.t5.json,,,92.97,0.816,0.1,16
+reacher_frontierjob_2270577_6.log,"frontier: s10spec tau=0.2 k=4 seed=42 (t100, budget 200)",reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.frontier.t6.json,,,94.53,0.634,0.2,4
+reacher_frontierjob_2270577_7.log,"frontier: s10spec tau=0.2 k=4 seed=43 (t100, budget 200)",reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.frontier.t7.json,,,96.88,0.641,0.2,4
+reacher_frontierjob_2270577_8.log,"frontier: s10spec tau=0.2 k=8 seed=42 (t100, budget 200)",reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.frontier.t8.json,,,92.97,0.596,0.2,8
+reacher_frontierjob_2270577_9.log,"frontier: s10spec tau=0.2 k=8 seed=43 (t100, budget 200)",reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.frontier.t9.json,,,93.75,0.621,0.2,8
+reacher_gate_t100_seed42.log,,reacher,specaccept,,128,42,10,,100,200,reacher_gate.ep100.t4.json,,,82.03,0.830,0.2,8
+reacher_gate_t100_seed43.log,,reacher,specaccept,,128,43,10,,100,200,reacher_gate.ep100.t5.json,,,83.59,0.805,0.2,8
+reacher_gate_t150_seed42.log,,reacher,specaccept,,128,42,10,,150,300,reacher_gate.ep150.t6.json,,,81.25,0.792,0.2,8
+reacher_gate_t150_seed43.log,,reacher,specaccept,,128,43,10,,150,300,reacher_gate.ep150.t7.json,,,78.91,0.794,0.2,8
+reacher_gate_t25_seed42.log,,reacher,specaccept,,128,42,10,,25,50,,,,90.62,0.857,0.2,8
+reacher_gate_t25_seed43.log,,reacher,specaccept,,128,43,10,,25,50,,,,93.75,0.851,0.2,8
+reacher_gate_t25_seed44.log,,reacher,specaccept,,128,44,10,,25,50,,,,90.62,0.830,0.2,8
+reacher_gate_t25_seed45.log,,reacher,specaccept,,128,45,10,,25,50,,,,91.41,0.877,0.2,8
+reacher_gatejob_2270643_0.log,goal-gate t25 native seed=42,reacher,specaccept,,128,42,10,,25,50,,,,90.62,0.857,0.2,8
+reacher_gatejob_2270643_1.log,goal-gate t25 native seed=43,reacher,specaccept,,128,43,10,,25,50,,,,93.75,0.851,0.2,8
+reacher_gatejob_2270643_2.log,goal-gate t25 native seed=44,reacher,specaccept,,128,44,10,,25,50,,,,90.62,0.830,0.2,8
+reacher_gatejob_2270643_3.log,goal-gate t25 native seed=45,reacher,specaccept,,128,45,10,,25,50,,,,91.41,0.877,0.2,8
+reacher_gatejob_2270643_4.log,goal-gate t100 (max-offset-100 pop) seed=42,reacher,specaccept,,128,42,10,,100,200,reacher_gate.ep100.t4.json,,,82.03,0.830,0.2,8
+reacher_gatejob_2270643_5.log,goal-gate t100 (max-offset-100 pop) seed=43,reacher,specaccept,,128,43,10,,100,200,reacher_gate.ep100.t5.json,,,83.59,0.805,0.2,8
+reacher_gatejob_2270643_6.log,goal-gate t150 (max-offset-150 pop) seed=42,reacher,specaccept,,128,42,10,,150,300,reacher_gate.ep150.t6.json,,,81.25,0.792,0.2,8
+reacher_gatejob_2270643_7.log,goal-gate t150 (max-offset-150 pop) seed=43,reacher,specaccept,,128,43,10,,150,300,reacher_gate.ep150.t7.json,,,78.91,0.794,0.2,8
+reacher_gdmk1_t100_seed42.log,,reacher,gdm,,128,42,10,,100,200,reacher_klow.ep100.t0.json,,,95.31,,,
+reacher_gdmk1_t100_seed43.log,,reacher,gdm,,128,43,10,,100,200,reacher_klow.ep100.t1.json,,,96.88,,,
+reacher_gdmk1_t100_seed44.log,,reacher,gdm,,128,44,10,,100,200,reacher_klow.ep100.t2.json,,,95.31,,,
+reacher_gdmk1_t100_seed45.log,,reacher,gdm,,128,45,10,,100,200,reacher_klow.ep100.t3.json,,,92.97,,,
+reacher_gdmk2_t100_seed42.log,,reacher,gdm,,128,42,10,,100,200,reacher_klow.ep100.t4.json,,,95.31,,,
+reacher_gdmk2_t100_seed43.log,,reacher,gdm,,128,43,10,,100,200,reacher_klow.ep100.t5.json,,,96.88,,,
+reacher_gdmk2_t100_seed44.log,,reacher,gdm,,128,44,10,,100,200,reacher_klow.ep100.t6.json,,,95.31,,,
+reacher_gdmk2_t100_seed45.log,,reacher,gdm,,128,45,10,,100,200,reacher_klow.ep100.t7.json,,,93.75,,,
+reacher_gdmk4_t100_seed42.log,,reacher,gdm,,128,42,10,,100,200,reacher_audit2.ep100.t12.json,,,97.66,,,
+reacher_gdmk4_t100_seed43.log,,reacher,gdm,,128,43,10,,100,200,reacher_audit2.ep100.t13.json,,,96.09,,,
+reacher_gdmk4_t100_seed44.log,,reacher,gdm,,128,44,10,,100,200,reacher_audit2.ep100.t14.json,,,95.31,,,
+reacher_gdmk4_t100_seed45.log,,reacher,gdm,,128,45,10,,100,200,reacher_audit2.ep100.t15.json,,,95.31,,,
+reacher_gdmk8_t100_seed42.log,,reacher,gdm,,128,42,10,,100,200,reacher_audit.ep100.t12.json,,,95.31,,,
+reacher_gdmk8_t100_seed43.log,,reacher,gdm,,128,43,10,,100,200,reacher_audit.ep100.t13.json,,,96.88,,,
+reacher_gdmk8_t100_seed44.log,,reacher,gdm,,128,44,10,,100,200,reacher_audit.ep100.t14.json,,,93.75,,,
+reacher_gdmk8_t100_seed45.log,,reacher,gdm,,128,45,10,,100,200,reacher_audit.ep100.t15.json,,,93.75,,,
+reacher_gdmk8_t25_seed42.log,,reacher,gdm,,128,42,10,,25,50,,,,64.84,,,
+reacher_gdmk8_t25_seed43.log,,reacher,gdm,,128,43,10,,25,50,,,,71.88,,,
+reacher_gdmk8_t25_seed44.log,,reacher,gdm,,128,44,10,,25,50,,,,73.44,,,
+reacher_gdmk8_t25_seed45.log,,reacher,gdm,,128,45,10,,25,50,,,,65.62,,,
+reacher_gf_t100_seed42.log,,reacher,gdm,,128,42,10,,100,200,reacher_gf.ep100.t2.json,,,7.03,,,
+reacher_gf_t100_seed43.log,,reacher,gdm,,128,43,10,,100,200,reacher_gf.ep100.t3.json,,,10.16,,,
+reacher_gf_t150_seed42.log,,reacher,gdm,,128,42,10,,150,300,reacher_gf.ep150.t4.json,,,10.94,,,
+reacher_gf_t150_seed43.log,,reacher,gdm,,128,43,10,,150,300,reacher_gf.ep150.t5.json,,,11.72,,,
+reacher_gf_t25_seed42.log,,reacher,gdm,,128,42,10,,25,50,,,,11.72,,,
+reacher_gf_t25_seed43.log,,reacher,gdm,,128,43,10,,25,50,,,,8.59,,,
+reacher_gfeval_2270703_0.log,goal-free gdm t25 native seed=42,reacher,gdm,,128,42,10,,25,50,,,,11.72,,,
+reacher_gfeval_2270703_1.log,goal-free gdm t25 native seed=43,reacher,gdm,,128,43,10,,25,50,,,,8.59,,,
+reacher_gfeval_2270703_2.log,goal-free gdm t100 seed=42,reacher,gdm,,128,42,10,,100,200,reacher_gf.ep100.t2.json,,,7.03,,,
+reacher_gfeval_2270703_3.log,goal-free gdm t100 seed=43,reacher,gdm,,128,43,10,,100,200,reacher_gf.ep100.t3.json,,,10.16,,,
+reacher_gfeval_2270703_4.log,goal-free gdm t150 seed=42,reacher,gdm,,128,42,10,,150,300,reacher_gf.ep150.t4.json,,,10.94,,,
+reacher_gfeval_2270703_5.log,goal-free gdm t150 seed=43,reacher,gdm,,128,43,10,,150,300,reacher_gf.ep150.t5.json,,,11.72,,,
+reacher_horizon_2270238_0.log,"arm=s25gdm offset=25 seed=42 (budgets: 2t=50, vlwm=50)",reacher,gdm,,128,42,25,,25,50,reacher_horizon.ep.t0.json,,,54.69,,,
+reacher_horizon_2270238_1.log,"arm=s25gdm offset=25 seed=43 (budgets: 2t=50, vlwm=50)",reacher,gdm,,128,43,25,,25,50,reacher_horizon.ep.t1.json,,,56.25,,,
+reacher_horizon_2270238_10.log,"arm=s10gdm offset=50 seed=42 (budgets: 2t=100, vlwm=50)",reacher,gdm,,128,42,10,,50,100,reacher_horizon.ep.t10.json,,,76.56,,,
+reacher_horizon_2270238_10.log,"arm=s10gdm offset=50 seed=42 (budgets: 2t=100, vlwm=50)",reacher,gdm,,128,42,10,,50,50,reacher_horizon.ep.t10.json,,,50.00,,,
+reacher_horizon_2270238_11.log,"arm=s10gdm offset=50 seed=43 (budgets: 2t=100, vlwm=50)",reacher,gdm,,128,43,10,,50,100,reacher_horizon.ep.t11.json,,,82.81,,,
+reacher_horizon_2270238_11.log,"arm=s10gdm offset=50 seed=43 (budgets: 2t=100, vlwm=50)",reacher,gdm,,128,43,10,,50,50,reacher_horizon.ep.t11.json,,,50.00,,,
+reacher_horizon_2270238_12.log,"arm=s10gdm offset=75 seed=42 (budgets: 2t=150, vlwm=50)",reacher,gdm,,128,42,10,,75,150,reacher_horizon.ep.t12.json,,,92.19,,,
+reacher_horizon_2270238_12.log,"arm=s10gdm offset=75 seed=42 (budgets: 2t=150, vlwm=50)",reacher,gdm,,128,42,10,,75,50,reacher_horizon.ep.t12.json,,,49.22,,,
+reacher_horizon_2270238_13.log,"arm=s10gdm offset=75 seed=43 (budgets: 2t=150, vlwm=50)",reacher,gdm,,128,43,10,,75,150,reacher_horizon.ep.t13.json,,,88.28,,,
+reacher_horizon_2270238_13.log,"arm=s10gdm offset=75 seed=43 (budgets: 2t=150, vlwm=50)",reacher,gdm,,128,43,10,,75,50,reacher_horizon.ep.t13.json,,,53.12,,,
+reacher_horizon_2270238_14.log,"arm=s10gdm offset=100 seed=42 (budgets: 2t=200, vlwm=50)",reacher,gdm,,128,42,10,,100,200,reacher_horizon.ep.t14.json,,,89.84,,,
+reacher_horizon_2270238_14.log,"arm=s10gdm offset=100 seed=42 (budgets: 2t=200, vlwm=50)",reacher,gdm,,128,42,10,,100,50,reacher_horizon.ep.t14.json,,,42.19,,,
+reacher_horizon_2270238_15.log,"arm=s10gdm offset=100 seed=43 (budgets: 2t=200, vlwm=50)",reacher,gdm,,128,43,10,,100,200,reacher_horizon.ep.t15.json,,,93.75,,,
+reacher_horizon_2270238_15.log,"arm=s10gdm offset=100 seed=43 (budgets: 2t=200, vlwm=50)",reacher,gdm,,128,43,10,,100,50,reacher_horizon.ep.t15.json,,,39.84,,,
+reacher_horizon_2270238_16.log,"arm=s10spec offset=25 seed=42 (budgets: 2t=50, vlwm=50)",reacher,specaccept,,128,42,10,,25,50,reacher_horizon.ep.t16.json,,,54.69,0.636,0.2,8
+reacher_horizon_2270238_17.log,"arm=s10spec offset=25 seed=43 (budgets: 2t=50, vlwm=50)",reacher,specaccept,,128,43,10,,25,50,reacher_horizon.ep.t17.json,,,53.91,0.660,0.2,8
+reacher_horizon_2270238_18.log,"arm=s10spec offset=50 seed=42 (budgets: 2t=100, vlwm=50)",reacher,specaccept,,128,42,10,,50,100,reacher_horizon.ep.t18.json,,,80.47,0.680,0.2,8
+reacher_horizon_2270238_18.log,"arm=s10spec offset=50 seed=42 (budgets: 2t=100, vlwm=50)",reacher,specaccept,,128,42,10,,50,50,reacher_horizon.ep.t18.json,,,44.53,0.680,0.2,8
+reacher_horizon_2270238_19.log,"arm=s10spec offset=50 seed=43 (budgets: 2t=100, vlwm=50)",reacher,specaccept,,128,43,10,,50,100,reacher_horizon.ep.t19.json,,,78.12,0.678,0.2,8
+reacher_horizon_2270238_19.log,"arm=s10spec offset=50 seed=43 (budgets: 2t=100, vlwm=50)",reacher,specaccept,,128,43,10,,50,50,reacher_horizon.ep.t19.json,,,46.88,0.678,0.2,8
+reacher_horizon_2270238_2.log,"arm=s25gdm offset=50 seed=42 (budgets: 2t=100, vlwm=50)",reacher,gdm,,128,42,25,,50,100,reacher_horizon.ep.t2.json,,,81.25,,,
+reacher_horizon_2270238_2.log,"arm=s25gdm offset=50 seed=42 (budgets: 2t=100, vlwm=50)",reacher,gdm,,128,42,25,,50,50,reacher_horizon.ep.t2.json,,,45.31,,,
+reacher_horizon_2270238_20.log,"arm=s10spec offset=75 seed=42 (budgets: 2t=150, vlwm=50)",reacher,specaccept,,128,42,10,,75,150,reacher_horizon.ep.t20.json,,,89.06,0.691,0.2,8
+reacher_horizon_2270238_20.log,"arm=s10spec offset=75 seed=42 (budgets: 2t=150, vlwm=50)",reacher,specaccept,,128,42,10,,75,50,reacher_horizon.ep.t20.json,,,48.44,0.691,0.2,8
+reacher_horizon_2270238_21.log,"arm=s10spec offset=75 seed=43 (budgets: 2t=150, vlwm=50)",reacher,specaccept,,128,43,10,,75,150,reacher_horizon.ep.t21.json,,,89.84,0.648,0.2,8
+reacher_horizon_2270238_21.log,"arm=s10spec offset=75 seed=43 (budgets: 2t=150, vlwm=50)",reacher,specaccept,,128,43,10,,75,50,reacher_horizon.ep.t21.json,,,43.75,0.648,0.2,8
+reacher_horizon_2270238_22.log,"arm=s10spec offset=100 seed=42 (budgets: 2t=200, vlwm=50)",reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.t22.json,,,87.50,0.661,0.2,8
+reacher_horizon_2270238_22.log,"arm=s10spec offset=100 seed=42 (budgets: 2t=200, vlwm=50)",reacher,specaccept,,128,42,10,,100,50,reacher_horizon.ep.t22.json,,,32.81,0.661,0.2,8
+reacher_horizon_2270238_23.log,"arm=s10spec offset=100 seed=43 (budgets: 2t=200, vlwm=50)",reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.t23.json,,,88.28,0.675,0.2,8
+reacher_horizon_2270238_23.log,"arm=s10spec offset=100 seed=43 (budgets: 2t=200, vlwm=50)",reacher,specaccept,,128,43,10,,100,50,reacher_horizon.ep.t23.json,,,28.91,0.675,0.2,8
+reacher_horizon_2270238_3.log,"arm=s25gdm offset=50 seed=43 (budgets: 2t=100, vlwm=50)",reacher,gdm,,128,43,25,,50,100,reacher_horizon.ep.t3.json,,,76.56,,,
+reacher_horizon_2270238_3.log,"arm=s25gdm offset=50 seed=43 (budgets: 2t=100, vlwm=50)",reacher,gdm,,128,43,25,,50,50,reacher_horizon.ep.t3.json,,,42.97,,,
+reacher_horizon_2270238_4.log,"arm=s25gdm offset=75 seed=42 (budgets: 2t=150, vlwm=50)",reacher,gdm,,128,42,25,,75,150,reacher_horizon.ep.t4.json,,,89.06,,,
+reacher_horizon_2270238_4.log,"arm=s25gdm offset=75 seed=42 (budgets: 2t=150, vlwm=50)",reacher,gdm,,128,42,25,,75,50,reacher_horizon.ep.t4.json,,,44.53,,,
+reacher_horizon_2270238_5.log,"arm=s25gdm offset=75 seed=43 (budgets: 2t=150, vlwm=50)",reacher,gdm,,128,43,25,,75,150,reacher_horizon.ep.t5.json,,,90.62,,,
+reacher_horizon_2270238_5.log,"arm=s25gdm offset=75 seed=43 (budgets: 2t=150, vlwm=50)",reacher,gdm,,128,43,25,,75,50,reacher_horizon.ep.t5.json,,,46.88,,,
+reacher_horizon_2270238_6.log,"arm=s25gdm offset=100 seed=42 (budgets: 2t=200, vlwm=50)",reacher,gdm,,128,42,25,,100,200,reacher_horizon.ep.t6.json,,,88.28,,,
+reacher_horizon_2270238_6.log,"arm=s25gdm offset=100 seed=42 (budgets: 2t=200, vlwm=50)",reacher,gdm,,128,42,25,,100,50,reacher_horizon.ep.t6.json,,,39.06,,,
+reacher_horizon_2270238_7.log,"arm=s25gdm offset=100 seed=43 (budgets: 2t=200, vlwm=50)",reacher,gdm,,128,43,25,,100,200,reacher_horizon.ep.t7.json,,,90.62,,,
+reacher_horizon_2270238_7.log,"arm=s25gdm offset=100 seed=43 (budgets: 2t=200, vlwm=50)",reacher,gdm,,128,43,25,,100,50,reacher_horizon.ep.t7.json,,,36.72,,,
+reacher_horizon_2270238_8.log,"arm=s10gdm offset=25 seed=42 (budgets: 2t=50, vlwm=50)",reacher,gdm,,128,42,10,,25,50,reacher_horizon.ep.t8.json,,,59.38,,,
+reacher_horizon_2270238_9.log,"arm=s10gdm offset=25 seed=43 (budgets: 2t=50, vlwm=50)",reacher,gdm,,128,43,10,,25,50,reacher_horizon.ep.t9.json,,,60.16,,,
+reacher_horizon_baseline_t100_seed42.log,,reacher,baseline,,128,42,25,,100,200,reacher_horizon.ep.base.t6.json,,,83.59,,,
+reacher_horizon_baseline_t100_seed42.log,,reacher,baseline,,128,42,25,,100,50,reacher_horizon.ep.base.t6.json,,,65.62,,,
+reacher_horizon_baseline_t100_seed43.log,,reacher,baseline,,128,43,25,,100,200,reacher_horizon.ep.base.t7.json,,,82.03,,,
+reacher_horizon_baseline_t100_seed43.log,,reacher,baseline,,128,43,25,,100,50,reacher_horizon.ep.base.t7.json,,,64.06,,,
+reacher_horizon_baseline_t100_seed44.log,,reacher,baseline,,128,44,25,,100,200,reacher_horizon.ep.ext.t2.json,,,83.59,,,
+reacher_horizon_baseline_t100_seed45.log,,reacher,baseline,,128,45,25,,100,200,reacher_horizon.ep.ext.t3.json,,,83.59,,,
+reacher_horizon_baseline_t25_seed42.log,,reacher,baseline,,128,42,25,,25,50,reacher_horizon.ep.base.t0.json,,,85.16,,,
+reacher_horizon_baseline_t25_seed43.log,,reacher,baseline,,128,43,25,,25,50,reacher_horizon.ep.base.t1.json,,,81.25,,,
+reacher_horizon_baseline_t50_seed42.log,,reacher,baseline,,128,42,25,,50,100,reacher_horizon.ep.base.t2.json,,,92.19,,,
+reacher_horizon_baseline_t50_seed42.log,,reacher,baseline,,128,42,25,,50,50,reacher_horizon.ep.base.t2.json,,,73.44,,,
+reacher_horizon_baseline_t50_seed43.log,,reacher,baseline,,128,43,25,,50,100,reacher_horizon.ep.base.t3.json,,,91.41,,,
+reacher_horizon_baseline_t50_seed43.log,,reacher,baseline,,128,43,25,,50,50,reacher_horizon.ep.base.t3.json,,,79.69,,,
+reacher_horizon_baseline_t75_seed42.log,,reacher,baseline,,128,42,25,,75,150,reacher_horizon.ep.base.t4.json,,,88.28,,,
+reacher_horizon_baseline_t75_seed42.log,,reacher,baseline,,128,42,25,,75,50,reacher_horizon.ep.base.t4.json,,,71.09,,,
+reacher_horizon_baseline_t75_seed43.log,,reacher,baseline,,128,43,25,,75,150,reacher_horizon.ep.base.t5.json,,,89.84,,,
+reacher_horizon_baseline_t75_seed43.log,,reacher,baseline,,128,43,25,,75,50,reacher_horizon.ep.base.t5.json,,,73.44,,,
+reacher_horizon_baseline_t75_seed44.log,,reacher,baseline,,128,44,25,,75,150,reacher_horizon.ep.ext.t0.json,,,89.06,,,
+reacher_horizon_baseline_t75_seed45.log,,reacher,baseline,,128,45,25,,75,150,reacher_horizon.ep.ext.t1.json,,,89.06,,,
+reacher_horizon_s10gdm_t100_2t_seed42.log,,reacher,gdm,,128,42,10,,100,200,reacher_horizon.ep.t14.json,,,89.84,,,
+reacher_horizon_s10gdm_t100_2t_seed43.log,,reacher,gdm,,128,43,10,,100,200,reacher_horizon.ep.t15.json,,,93.75,,,
+reacher_horizon_s10gdm_t100_b50_seed42.log,,reacher,gdm,,128,42,10,,100,50,reacher_horizon.ep.t14.json,,,42.19,,,
+reacher_horizon_s10gdm_t100_b50_seed43.log,,reacher,gdm,,128,43,10,,100,50,reacher_horizon.ep.t15.json,,,39.84,,,
+reacher_horizon_s10gdm_t100_seed42.log,,reacher,gdm,,128,42,10,,100,200,reacher_horizon.ep.t14.json,,,89.84,,,
+reacher_horizon_s10gdm_t100_seed42.log,,reacher,gdm,,128,42,10,,100,50,reacher_horizon.ep.t14.json,,,42.19,,,
+reacher_horizon_s10gdm_t100_seed43.log,,reacher,gdm,,128,43,10,,100,200,reacher_horizon.ep.t15.json,,,93.75,,,
+reacher_horizon_s10gdm_t100_seed43.log,,reacher,gdm,,128,43,10,,100,50,reacher_horizon.ep.t15.json,,,39.84,,,
+reacher_horizon_s10gdm_t100_seed44.log,,reacher,gdm,,128,44,10,,100,200,reacher_horizon.ep.ext.t6.json,,,89.84,,,
+reacher_horizon_s10gdm_t100_seed45.log,,reacher,gdm,,128,45,10,,100,200,reacher_horizon.ep.ext.t7.json,,,89.84,,,
+reacher_horizon_s10gdm_t25_2t_seed42.log,,reacher,gdm,,128,42,10,,25,50,reacher_horizon.ep.t8.json,,,59.38,,,
+reacher_horizon_s10gdm_t25_2t_seed43.log,,reacher,gdm,,128,43,10,,25,50,reacher_horizon.ep.t9.json,,,60.16,,,
+reacher_horizon_s10gdm_t25_seed42.log,,reacher,gdm,,128,42,10,,25,50,reacher_horizon.ep.t8.json,,,59.38,,,
+reacher_horizon_s10gdm_t25_seed43.log,,reacher,gdm,,128,43,10,,25,50,reacher_horizon.ep.t9.json,,,60.16,,,
+reacher_horizon_s10gdm_t50_2t_seed42.log,,reacher,gdm,,128,42,10,,50,100,reacher_horizon.ep.t10.json,,,76.56,,,
+reacher_horizon_s10gdm_t50_2t_seed43.log,,reacher,gdm,,128,43,10,,50,100,reacher_horizon.ep.t11.json,,,82.81,,,
+reacher_horizon_s10gdm_t50_b50_seed42.log,,reacher,gdm,,128,42,10,,50,50,reacher_horizon.ep.t10.json,,,50.00,,,
+reacher_horizon_s10gdm_t50_b50_seed43.log,,reacher,gdm,,128,43,10,,50,50,reacher_horizon.ep.t11.json,,,50.00,,,
+reacher_horizon_s10gdm_t50_seed42.log,,reacher,gdm,,128,42,10,,50,100,reacher_horizon.ep.t10.json,,,76.56,,,
+reacher_horizon_s10gdm_t50_seed42.log,,reacher,gdm,,128,42,10,,50,50,reacher_horizon.ep.t10.json,,,50.00,,,
+reacher_horizon_s10gdm_t50_seed43.log,,reacher,gdm,,128,43,10,,50,100,reacher_horizon.ep.t11.json,,,82.81,,,
+reacher_horizon_s10gdm_t50_seed43.log,,reacher,gdm,,128,43,10,,50,50,reacher_horizon.ep.t11.json,,,50.00,,,
+reacher_horizon_s10gdm_t75_2t_seed42.log,,reacher,gdm,,128,42,10,,75,150,reacher_horizon.ep.t12.json,,,92.19,,,
+reacher_horizon_s10gdm_t75_2t_seed43.log,,reacher,gdm,,128,43,10,,75,150,reacher_horizon.ep.t13.json,,,88.28,,,
+reacher_horizon_s10gdm_t75_b50_seed42.log,,reacher,gdm,,128,42,10,,75,50,reacher_horizon.ep.t12.json,,,49.22,,,
+reacher_horizon_s10gdm_t75_b50_seed43.log,,reacher,gdm,,128,43,10,,75,50,reacher_horizon.ep.t13.json,,,53.12,,,
+reacher_horizon_s10gdm_t75_seed42.log,,reacher,gdm,,128,42,10,,75,150,reacher_horizon.ep.t12.json,,,92.19,,,
+reacher_horizon_s10gdm_t75_seed42.log,,reacher,gdm,,128,42,10,,75,50,reacher_horizon.ep.t12.json,,,49.22,,,
+reacher_horizon_s10gdm_t75_seed43.log,,reacher,gdm,,128,43,10,,75,150,reacher_horizon.ep.t13.json,,,88.28,,,
+reacher_horizon_s10gdm_t75_seed43.log,,reacher,gdm,,128,43,10,,75,50,reacher_horizon.ep.t13.json,,,53.12,,,
+reacher_horizon_s10gdm_t75_seed44.log,,reacher,gdm,,128,44,10,,75,150,reacher_horizon.ep.ext.t4.json,,,90.62,,,
+reacher_horizon_s10gdm_t75_seed45.log,,reacher,gdm,,128,45,10,,75,150,reacher_horizon.ep.ext.t5.json,,,89.84,,,
+reacher_horizon_s10spec_t100_2t_seed42.log,,reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.t22.json,,,87.50,0.601,0.2,8
+reacher_horizon_s10spec_t100_2t_seed43.log,,reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.t23.json,,,88.28,0.612,0.2,8
+reacher_horizon_s10spec_t100_b50_seed42.log,,reacher,specaccept,,128,42,10,,100,50,reacher_horizon.ep.t22.json,,,32.81,0.661,0.2,8
+reacher_horizon_s10spec_t100_b50_seed43.log,,reacher,specaccept,,128,43,10,,100,50,reacher_horizon.ep.t23.json,,,28.91,0.675,0.2,8
+reacher_horizon_s10spec_t100_seed42.log,,reacher,specaccept,,128,42,10,,100,200,reacher_horizon.ep.t22.json,,,87.50,0.661,0.2,8
+reacher_horizon_s10spec_t100_seed42.log,,reacher,specaccept,,128,42,10,,100,50,reacher_horizon.ep.t22.json,,,32.81,0.661,0.2,8
+reacher_horizon_s10spec_t100_seed43.log,,reacher,specaccept,,128,43,10,,100,200,reacher_horizon.ep.t23.json,,,88.28,0.675,0.2,8
+reacher_horizon_s10spec_t100_seed43.log,,reacher,specaccept,,128,43,10,,100,50,reacher_horizon.ep.t23.json,,,28.91,0.675,0.2,8
+reacher_horizon_s10spec_t100_seed44.log,,reacher,specaccept,,128,44,10,,100,200,reacher_horizon.ep.ext.t10.json,,,92.97,0.631,0.2,8
+reacher_horizon_s10spec_t100_seed45.log,,reacher,specaccept,,128,45,10,,100,200,reacher_horizon.ep.ext.t11.json,,,95.31,0.606,0.2,8
+reacher_horizon_s10spec_t25_2t_seed42.log,,reacher,specaccept,,128,42,10,,25,50,reacher_horizon.ep.t16.json,,,54.69,0.636,0.2,8
+reacher_horizon_s10spec_t25_2t_seed43.log,,reacher,specaccept,,128,43,10,,25,50,reacher_horizon.ep.t17.json,,,53.91,0.660,0.2,8
+reacher_horizon_s10spec_t25_seed42.log,,reacher,specaccept,,128,42,10,,25,50,reacher_horizon.ep.t16.json,,,54.69,0.636,0.2,8
+reacher_horizon_s10spec_t25_seed43.log,,reacher,specaccept,,128,43,10,,25,50,reacher_horizon.ep.t17.json,,,53.91,0.660,0.2,8
+reacher_horizon_s10spec_t50_2t_seed42.log,,reacher,specaccept,,128,42,10,,50,100,reacher_horizon.ep.t18.json,,,80.47,0.634,0.2,8
+reacher_horizon_s10spec_t50_2t_seed43.log,,reacher,specaccept,,128,43,10,,50,100,reacher_horizon.ep.t19.json,,,78.12,0.627,0.2,8
+reacher_horizon_s10spec_t50_b50_seed42.log,,reacher,specaccept,,128,42,10,,50,50,reacher_horizon.ep.t18.json,,,44.53,0.680,0.2,8
+reacher_horizon_s10spec_t50_b50_seed43.log,,reacher,specaccept,,128,43,10,,50,50,reacher_horizon.ep.t19.json,,,46.88,0.678,0.2,8
+reacher_horizon_s10spec_t50_seed42.log,,reacher,specaccept,,128,42,10,,50,100,reacher_horizon.ep.t18.json,,,80.47,0.680,0.2,8
+reacher_horizon_s10spec_t50_seed42.log,,reacher,specaccept,,128,42,10,,50,50,reacher_horizon.ep.t18.json,,,44.53,0.680,0.2,8
+reacher_horizon_s10spec_t50_seed43.log,,reacher,specaccept,,128,43,10,,50,100,reacher_horizon.ep.t19.json,,,78.12,0.678,0.2,8
+reacher_horizon_s10spec_t50_seed43.log,,reacher,specaccept,,128,43,10,,50,50,reacher_horizon.ep.t19.json,,,46.88,0.678,0.2,8
+reacher_horizon_s10spec_t75_2t_seed42.log,,reacher,specaccept,,128,42,10,,75,150,reacher_horizon.ep.t20.json,,,89.06,0.642,0.2,8
+reacher_horizon_s10spec_t75_2t_seed43.log,,reacher,specaccept,,128,43,10,,75,150,reacher_horizon.ep.t21.json,,,89.84,0.600,0.2,8
+reacher_horizon_s10spec_t75_b50_seed42.log,,reacher,specaccept,,128,42,10,,75,50,reacher_horizon.ep.t20.json,,,48.44,0.691,0.2,8
+reacher_horizon_s10spec_t75_b50_seed43.log,,reacher,specaccept,,128,43,10,,75,50,reacher_horizon.ep.t21.json,,,43.75,0.648,0.2,8
+reacher_horizon_s10spec_t75_seed42.log,,reacher,specaccept,,128,42,10,,75,150,reacher_horizon.ep.t20.json,,,89.06,0.691,0.2,8
+reacher_horizon_s10spec_t75_seed42.log,,reacher,specaccept,,128,42,10,,75,50,reacher_horizon.ep.t20.json,,,48.44,0.691,0.2,8
+reacher_horizon_s10spec_t75_seed43.log,,reacher,specaccept,,128,43,10,,75,150,reacher_horizon.ep.t21.json,,,89.84,0.648,0.2,8
+reacher_horizon_s10spec_t75_seed43.log,,reacher,specaccept,,128,43,10,,75,50,reacher_horizon.ep.t21.json,,,43.75,0.648,0.2,8
+reacher_horizon_s10spec_t75_seed44.log,,reacher,specaccept,,128,44,10,,75,150,reacher_horizon.ep.ext.t8.json,,,90.62,0.632,0.2,8
+reacher_horizon_s10spec_t75_seed45.log,,reacher,specaccept,,128,45,10,,75,150,reacher_horizon.ep.ext.t9.json,,,90.62,0.625,0.2,8
+reacher_horizon_s25gdm_t100_2t_seed42.log,,reacher,gdm,,128,42,25,,100,200,reacher_horizon.ep.t6.json,,,88.28,,,
+reacher_horizon_s25gdm_t100_2t_seed43.log,,reacher,gdm,,128,43,25,,100,200,reacher_horizon.ep.t7.json,,,90.62,,,
+reacher_horizon_s25gdm_t100_b50_seed42.log,,reacher,gdm,,128,42,25,,100,50,reacher_horizon.ep.t6.json,,,39.06,,,
+reacher_horizon_s25gdm_t100_b50_seed43.log,,reacher,gdm,,128,43,25,,100,50,reacher_horizon.ep.t7.json,,,36.72,,,
+reacher_horizon_s25gdm_t100_seed42.log,,reacher,gdm,,128,42,25,,100,200,reacher_horizon.ep.t6.json,,,88.28,,,
+reacher_horizon_s25gdm_t100_seed42.log,,reacher,gdm,,128,42,25,,100,50,reacher_horizon.ep.t6.json,,,39.06,,,
+reacher_horizon_s25gdm_t100_seed43.log,,reacher,gdm,,128,43,25,,100,200,reacher_horizon.ep.t7.json,,,90.62,,,
+reacher_horizon_s25gdm_t100_seed43.log,,reacher,gdm,,128,43,25,,100,50,reacher_horizon.ep.t7.json,,,36.72,,,
+reacher_horizon_s25gdm_t25_2t_seed42.log,,reacher,gdm,,128,42,25,,25,50,reacher_horizon.ep.t0.json,,,54.69,,,
+reacher_horizon_s25gdm_t25_2t_seed43.log,,reacher,gdm,,128,43,25,,25,50,reacher_horizon.ep.t1.json,,,56.25,,,
+reacher_horizon_s25gdm_t25_seed42.log,,reacher,gdm,,128,42,25,,25,50,reacher_horizon.ep.t0.json,,,54.69,,,
+reacher_horizon_s25gdm_t25_seed43.log,,reacher,gdm,,128,43,25,,25,50,reacher_horizon.ep.t1.json,,,56.25,,,
+reacher_horizon_s25gdm_t50_2t_seed42.log,,reacher,gdm,,128,42,25,,50,100,reacher_horizon.ep.t2.json,,,81.25,,,
+reacher_horizon_s25gdm_t50_2t_seed43.log,,reacher,gdm,,128,43,25,,50,100,reacher_horizon.ep.t3.json,,,76.56,,,
+reacher_horizon_s25gdm_t50_b50_seed42.log,,reacher,gdm,,128,42,25,,50,50,reacher_horizon.ep.t2.json,,,45.31,,,
+reacher_horizon_s25gdm_t50_b50_seed43.log,,reacher,gdm,,128,43,25,,50,50,reacher_horizon.ep.t3.json,,,42.97,,,
+reacher_horizon_s25gdm_t50_seed42.log,,reacher,gdm,,128,42,25,,50,100,reacher_horizon.ep.t2.json,,,81.25,,,
+reacher_horizon_s25gdm_t50_seed42.log,,reacher,gdm,,128,42,25,,50,50,reacher_horizon.ep.t2.json,,,45.31,,,
+reacher_horizon_s25gdm_t50_seed43.log,,reacher,gdm,,128,43,25,,50,100,reacher_horizon.ep.t3.json,,,76.56,,,
+reacher_horizon_s25gdm_t50_seed43.log,,reacher,gdm,,128,43,25,,50,50,reacher_horizon.ep.t3.json,,,42.97,,,
+reacher_horizon_s25gdm_t75_2t_seed42.log,,reacher,gdm,,128,42,25,,75,150,reacher_horizon.ep.t4.json,,,89.06,,,
+reacher_horizon_s25gdm_t75_2t_seed43.log,,reacher,gdm,,128,43,25,,75,150,reacher_horizon.ep.t5.json,,,90.62,,,
+reacher_horizon_s25gdm_t75_b50_seed42.log,,reacher,gdm,,128,42,25,,75,50,reacher_horizon.ep.t4.json,,,44.53,,,
+reacher_horizon_s25gdm_t75_b50_seed43.log,,reacher,gdm,,128,43,25,,75,50,reacher_horizon.ep.t5.json,,,46.88,,,
+reacher_horizon_s25gdm_t75_seed42.log,,reacher,gdm,,128,42,25,,75,150,reacher_horizon.ep.t4.json,,,89.06,,,
+reacher_horizon_s25gdm_t75_seed42.log,,reacher,gdm,,128,42,25,,75,50,reacher_horizon.ep.t4.json,,,44.53,,,
+reacher_horizon_s25gdm_t75_seed43.log,,reacher,gdm,,128,43,25,,75,150,reacher_horizon.ep.t5.json,,,90.62,,,
+reacher_horizon_s25gdm_t75_seed43.log,,reacher,gdm,,128,43,25,,75,50,reacher_horizon.ep.t5.json,,,46.88,,,
+reacher_hz150_baseline_t100_seed42.log,,reacher,baseline,,128,42,25,,100,200,reacher_horizon150.ep.t0.json,,,82.81,,,
+reacher_hz150_baseline_t100_seed43.log,,reacher,baseline,,128,43,25,,100,200,reacher_horizon150.ep.t1.json,,,81.25,,,
+reacher_hz150_baseline_t100_seed44.log,,reacher,baseline,,128,44,25,,100,200,reacher_horizon150.ep.t2.json,,,83.59,,,
+reacher_hz150_baseline_t100_seed45.log,,reacher,baseline,,128,45,25,,100,200,reacher_horizon150.ep.t3.json,,,85.16,,,
+reacher_hz150_baseline_t125_seed42.log,,reacher,baseline,,128,42,25,,125,250,reacher_horizon150.ep.t4.json,,,81.25,,,
+reacher_hz150_baseline_t125_seed43.log,,reacher,baseline,,128,43,25,,125,250,reacher_horizon150.ep.t5.json,,,81.25,,,
+reacher_hz150_baseline_t125_seed44.log,,reacher,baseline,,128,44,25,,125,250,reacher_horizon150.ep.t6.json,,,82.03,,,
+reacher_hz150_baseline_t125_seed45.log,,reacher,baseline,,128,45,25,,125,250,reacher_horizon150.ep.t7.json,,,81.25,,,
+reacher_hz150_baseline_t150_seed42.log,,reacher,baseline,,128,42,25,,150,300,reacher_horizon150.ep.t8.json,,,76.56,,,
+reacher_hz150_baseline_t150_seed43.log,,reacher,baseline,,128,43,25,,150,300,reacher_horizon150.ep.t9.json,,,76.56,,,
+reacher_hz150_baseline_t150_seed44.log,,reacher,baseline,,128,44,25,,150,300,reacher_horizon150.ep.t10.json,,,75.78,,,
+reacher_hz150_baseline_t150_seed45.log,,reacher,baseline,,128,45,25,,150,300,reacher_horizon150.ep.t11.json,,,75.00,,,
+reacher_hz150_s10gdm_t100_seed42.log,,reacher,gdm,,128,42,10,,100,200,reacher_horizon150.ep.t12.json,,,95.31,,,
+reacher_hz150_s10gdm_t100_seed43.log,,reacher,gdm,,128,43,10,,100,200,reacher_horizon150.ep.t13.json,,,93.75,,,
+reacher_hz150_s10gdm_t100_seed44.log,,reacher,gdm,,128,44,10,,100,200,reacher_horizon150.ep.t14.json,,,95.31,,,
+reacher_hz150_s10gdm_t100_seed45.log,,reacher,gdm,,128,45,10,,100,200,reacher_horizon150.ep.t15.json,,,93.75,,,
+reacher_hz150_s10gdm_t125_seed42.log,,reacher,gdm,,128,42,10,,125,250,reacher_horizon150.ep.t16.json,,,91.41,,,
+reacher_hz150_s10gdm_t125_seed43.log,,reacher,gdm,,128,43,10,,125,250,reacher_horizon150.ep.t17.json,,,92.19,,,
+reacher_hz150_s10gdm_t125_seed44.log,,reacher,gdm,,128,44,10,,125,250,reacher_horizon150.ep.t18.json,,,93.75,,,
+reacher_hz150_s10gdm_t125_seed45.log,,reacher,gdm,,128,45,10,,125,250,reacher_horizon150.ep.t19.json,,,95.31,,,
+reacher_hz150_s10gdm_t150_seed42.log,,reacher,gdm,,128,42,10,,150,300,reacher_horizon150.ep.t20.json,,,96.09,,,
+reacher_hz150_s10gdm_t150_seed43.log,,reacher,gdm,,128,43,10,,150,300,reacher_horizon150.ep.t21.json,,,95.31,,,
+reacher_hz150_s10gdm_t150_seed44.log,,reacher,gdm,,128,44,10,,150,300,reacher_horizon150.ep.t22.json,,,94.53,,,
+reacher_hz150_s10gdm_t150_seed45.log,,reacher,gdm,,128,45,10,,150,300,reacher_horizon150.ep.t23.json,,,94.53,,,
+reacher_hz150_s10spec_t100_seed42.log,,reacher,specaccept,,128,42,10,,100,200,reacher_horizon150.ep.t24.json,,,93.75,0.623,0.2,8
+reacher_hz150_s10spec_t100_seed43.log,,reacher,specaccept,,128,43,10,,100,200,reacher_horizon150.ep.t25.json,,,96.09,0.639,0.2,8
+reacher_hz150_s10spec_t100_seed44.log,,reacher,specaccept,,128,44,10,,100,200,reacher_horizon150.ep.t26.json,,,93.75,0.637,0.2,8
+reacher_hz150_s10spec_t100_seed45.log,,reacher,specaccept,,128,45,10,,100,200,reacher_horizon150.ep.t27.json,,,94.53,0.630,0.2,8
+reacher_hz150_s10spec_t125_seed42.log,,reacher,specaccept,,128,42,10,,125,250,reacher_horizon150.ep.t28.json,,,92.97,0.603,0.2,8
+reacher_hz150_s10spec_t125_seed43.log,,reacher,specaccept,,128,43,10,,125,250,reacher_horizon150.ep.t29.json,,,92.19,0.628,0.2,8
+reacher_hz150_s10spec_t125_seed44.log,,reacher,specaccept,,128,44,10,,125,250,reacher_horizon150.ep.t30.json,,,93.75,0.625,0.2,8
+reacher_hz150_s10spec_t125_seed45.log,,reacher,specaccept,,128,45,10,,125,250,reacher_horizon150.ep.t31.json,,,93.75,0.619,0.2,8
+reacher_hz150_s10spec_t150_seed42.log,,reacher,specaccept,,128,42,10,,150,300,reacher_horizon150.ep.t32.json,,,93.75,0.634,0.2,8
+reacher_hz150_s10spec_t150_seed43.log,,reacher,specaccept,,128,43,10,,150,300,reacher_horizon150.ep.t33.json,,,95.31,0.617,0.2,8
+reacher_hz150_s10spec_t150_seed44.log,,reacher,specaccept,,128,44,10,,150,300,reacher_horizon150.ep.t34.json,,,93.75,0.627,0.2,8
+reacher_hz150_s10spec_t150_seed45.log,,reacher,specaccept,,128,45,10,,150,300,reacher_horizon150.ep.t35.json,,,92.97,0.615,0.2,8
+reacher_hz150job_2270576_0.log,"arm=baseline offset=100 seed=42 (2t budget=200, pop=max150)",reacher,baseline,,128,42,25,,100,200,reacher_horizon150.ep.t0.json,,,82.81,,,
+reacher_hz150job_2270576_1.log,"arm=baseline offset=100 seed=43 (2t budget=200, pop=max150)",reacher,baseline,,128,43,25,,100,200,reacher_horizon150.ep.t1.json,,,81.25,,,
+reacher_hz150job_2270576_10.log,"arm=baseline offset=150 seed=44 (2t budget=300, pop=max150)",reacher,baseline,,128,44,25,,150,300,reacher_horizon150.ep.t10.json,,,75.78,,,
+reacher_hz150job_2270576_11.log,"arm=baseline offset=150 seed=45 (2t budget=300, pop=max150)",reacher,baseline,,128,45,25,,150,300,reacher_horizon150.ep.t11.json,,,75.00,,,
+reacher_hz150job_2270576_12.log,"arm=s10gdm offset=100 seed=42 (2t budget=200, pop=max150)",reacher,gdm,,128,42,10,,100,200,reacher_horizon150.ep.t12.json,,,95.31,,,
+reacher_hz150job_2270576_13.log,"arm=s10gdm offset=100 seed=43 (2t budget=200, pop=max150)",reacher,gdm,,128,43,10,,100,200,reacher_horizon150.ep.t13.json,,,93.75,,,
+reacher_hz150job_2270576_14.log,"arm=s10gdm offset=100 seed=44 (2t budget=200, pop=max150)",reacher,gdm,,128,44,10,,100,200,reacher_horizon150.ep.t14.json,,,95.31,,,
+reacher_hz150job_2270576_15.log,"arm=s10gdm offset=100 seed=45 (2t budget=200, pop=max150)",reacher,gdm,,128,45,10,,100,200,reacher_horizon150.ep.t15.json,,,93.75,,,
+reacher_hz150job_2270576_16.log,"arm=s10gdm offset=125 seed=42 (2t budget=250, pop=max150)",reacher,gdm,,128,42,10,,125,250,reacher_horizon150.ep.t16.json,,,91.41,,,
+reacher_hz150job_2270576_17.log,"arm=s10gdm offset=125 seed=43 (2t budget=250, pop=max150)",reacher,gdm,,128,43,10,,125,250,reacher_horizon150.ep.t17.json,,,92.19,,,
+reacher_hz150job_2270576_18.log,"arm=s10gdm offset=125 seed=44 (2t budget=250, pop=max150)",reacher,gdm,,128,44,10,,125,250,reacher_horizon150.ep.t18.json,,,93.75,,,
+reacher_hz150job_2270576_19.log,"arm=s10gdm offset=125 seed=45 (2t budget=250, pop=max150)",reacher,gdm,,128,45,10,,125,250,reacher_horizon150.ep.t19.json,,,95.31,,,
+reacher_hz150job_2270576_2.log,"arm=baseline offset=100 seed=44 (2t budget=200, pop=max150)",reacher,baseline,,128,44,25,,100,200,reacher_horizon150.ep.t2.json,,,83.59,,,
+reacher_hz150job_2270576_20.log,"arm=s10gdm offset=150 seed=42 (2t budget=300, pop=max150)",reacher,gdm,,128,42,10,,150,300,reacher_horizon150.ep.t20.json,,,96.09,,,
+reacher_hz150job_2270576_21.log,"arm=s10gdm offset=150 seed=43 (2t budget=300, pop=max150)",reacher,gdm,,128,43,10,,150,300,reacher_horizon150.ep.t21.json,,,95.31,,,
+reacher_hz150job_2270576_22.log,"arm=s10gdm offset=150 seed=44 (2t budget=300, pop=max150)",reacher,gdm,,128,44,10,,150,300,reacher_horizon150.ep.t22.json,,,94.53,,,
+reacher_hz150job_2270576_23.log,"arm=s10gdm offset=150 seed=45 (2t budget=300, pop=max150)",reacher,gdm,,128,45,10,,150,300,reacher_horizon150.ep.t23.json,,,94.53,,,
+reacher_hz150job_2270576_24.log,"arm=s10spec offset=100 seed=42 (2t budget=200, pop=max150)",reacher,specaccept,,128,42,10,,100,200,reacher_horizon150.ep.t24.json,,,93.75,0.623,0.2,8
+reacher_hz150job_2270576_25.log,"arm=s10spec offset=100 seed=43 (2t budget=200, pop=max150)",reacher,specaccept,,128,43,10,,100,200,reacher_horizon150.ep.t25.json,,,96.09,0.639,0.2,8
+reacher_hz150job_2270576_26.log,"arm=s10spec offset=100 seed=44 (2t budget=200, pop=max150)",reacher,specaccept,,128,44,10,,100,200,reacher_horizon150.ep.t26.json,,,93.75,0.637,0.2,8
+reacher_hz150job_2270576_27.log,"arm=s10spec offset=100 seed=45 (2t budget=200, pop=max150)",reacher,specaccept,,128,45,10,,100,200,reacher_horizon150.ep.t27.json,,,94.53,0.630,0.2,8
+reacher_hz150job_2270576_28.log,"arm=s10spec offset=125 seed=42 (2t budget=250, pop=max150)",reacher,specaccept,,128,42,10,,125,250,reacher_horizon150.ep.t28.json,,,92.97,0.603,0.2,8
+reacher_hz150job_2270576_29.log,"arm=s10spec offset=125 seed=43 (2t budget=250, pop=max150)",reacher,specaccept,,128,43,10,,125,250,reacher_horizon150.ep.t29.json,,,92.19,0.628,0.2,8
+reacher_hz150job_2270576_3.log,"arm=baseline offset=100 seed=45 (2t budget=200, pop=max150)",reacher,baseline,,128,45,25,,100,200,reacher_horizon150.ep.t3.json,,,85.16,,,
+reacher_hz150job_2270576_30.log,"arm=s10spec offset=125 seed=44 (2t budget=250, pop=max150)",reacher,specaccept,,128,44,10,,125,250,reacher_horizon150.ep.t30.json,,,93.75,0.625,0.2,8
+reacher_hz150job_2270576_31.log,"arm=s10spec offset=125 seed=45 (2t budget=250, pop=max150)",reacher,specaccept,,128,45,10,,125,250,reacher_horizon150.ep.t31.json,,,93.75,0.619,0.2,8
+reacher_hz150job_2270576_32.log,"arm=s10spec offset=150 seed=42 (2t budget=300, pop=max150)",reacher,specaccept,,128,42,10,,150,300,reacher_horizon150.ep.t32.json,,,93.75,0.634,0.2,8
+reacher_hz150job_2270576_33.log,"arm=s10spec offset=150 seed=43 (2t budget=300, pop=max150)",reacher,specaccept,,128,43,10,,150,300,reacher_horizon150.ep.t33.json,,,95.31,0.617,0.2,8
+reacher_hz150job_2270576_34.log,"arm=s10spec offset=150 seed=44 (2t budget=300, pop=max150)",reacher,specaccept,,128,44,10,,150,300,reacher_horizon150.ep.t34.json,,,93.75,0.627,0.2,8
+reacher_hz150job_2270576_35.log,"arm=s10spec offset=150 seed=45 (2t budget=300, pop=max150)",reacher,specaccept,,128,45,10,,150,300,reacher_horizon150.ep.t35.json,,,92.97,0.615,0.2,8
+reacher_hz150job_2270576_4.log,"arm=baseline offset=125 seed=42 (2t budget=250, pop=max150)",reacher,baseline,,128,42,25,,125,250,reacher_horizon150.ep.t4.json,,,81.25,,,
+reacher_hz150job_2270576_5.log,"arm=baseline offset=125 seed=43 (2t budget=250, pop=max150)",reacher,baseline,,128,43,25,,125,250,reacher_horizon150.ep.t5.json,,,81.25,,,
+reacher_hz150job_2270576_6.log,"arm=baseline offset=125 seed=44 (2t budget=250, pop=max150)",reacher,baseline,,128,44,25,,125,250,reacher_horizon150.ep.t6.json,,,82.03,,,
+reacher_hz150job_2270576_7.log,"arm=baseline offset=125 seed=45 (2t budget=250, pop=max150)",reacher,baseline,,128,45,25,,125,250,reacher_horizon150.ep.t7.json,,,81.25,,,
+reacher_hz150job_2270576_8.log,"arm=baseline offset=150 seed=42 (2t budget=300, pop=max150)",reacher,baseline,,128,42,25,,150,300,reacher_horizon150.ep.t8.json,,,76.56,,,
+reacher_hz150job_2270576_9.log,"arm=baseline offset=150 seed=43 (2t budget=300, pop=max150)",reacher,baseline,,128,43,25,,150,300,reacher_horizon150.ep.t9.json,,,76.56,,,
+reacher_hzbase_2270556_0.log,"arm=baseline offset=25 seed=42 (budgets: 2t=50, vlwm=50)",reacher,baseline,,128,42,25,,25,50,reacher_horizon.ep.base.t0.json,,,85.16,,,
+reacher_hzbase_2270556_1.log,"arm=baseline offset=25 seed=43 (budgets: 2t=50, vlwm=50)",reacher,baseline,,128,43,25,,25,50,reacher_horizon.ep.base.t1.json,,,81.25,,,
+reacher_hzbase_2270556_2.log,"arm=baseline offset=50 seed=42 (budgets: 2t=100, vlwm=50)",reacher,baseline,,128,42,25,,50,100,reacher_horizon.ep.base.t2.json,,,92.19,,,
+reacher_hzbase_2270556_2.log,"arm=baseline offset=50 seed=42 (budgets: 2t=100, vlwm=50)",reacher,baseline,,128,42,25,,50,50,reacher_horizon.ep.base.t2.json,,,73.44,,,
+reacher_hzbase_2270556_3.log,"arm=baseline offset=50 seed=43 (budgets: 2t=100, vlwm=50)",reacher,baseline,,128,43,25,,50,100,reacher_horizon.ep.base.t3.json,,,91.41,,,
+reacher_hzbase_2270556_3.log,"arm=baseline offset=50 seed=43 (budgets: 2t=100, vlwm=50)",reacher,baseline,,128,43,25,,50,50,reacher_horizon.ep.base.t3.json,,,79.69,,,
+reacher_hzbase_2270556_4.log,"arm=baseline offset=75 seed=42 (budgets: 2t=150, vlwm=50)",reacher,baseline,,128,42,25,,75,150,reacher_horizon.ep.base.t4.json,,,88.28,,,
+reacher_hzbase_2270556_4.log,"arm=baseline offset=75 seed=42 (budgets: 2t=150, vlwm=50)",reacher,baseline,,128,42,25,,75,50,reacher_horizon.ep.base.t4.json,,,71.09,,,
+reacher_hzbase_2270556_5.log,"arm=baseline offset=75 seed=43 (budgets: 2t=150, vlwm=50)",reacher,baseline,,128,43,25,,75,150,reacher_horizon.ep.base.t5.json,,,89.84,,,
+reacher_hzbase_2270556_5.log,"arm=baseline offset=75 seed=43 (budgets: 2t=150, vlwm=50)",reacher,baseline,,128,43,25,,75,50,reacher_horizon.ep.base.t5.json,,,73.44,,,
+reacher_hzbase_2270556_6.log,"arm=baseline offset=100 seed=42 (budgets: 2t=200, vlwm=50)",reacher,baseline,,128,42,25,,100,200,reacher_horizon.ep.base.t6.json,,,83.59,,,
+reacher_hzbase_2270556_6.log,"arm=baseline offset=100 seed=42 (budgets: 2t=200, vlwm=50)",reacher,baseline,,128,42,25,,100,50,reacher_horizon.ep.base.t6.json,,,65.62,,,
+reacher_hzbase_2270556_7.log,"arm=baseline offset=100 seed=43 (budgets: 2t=200, vlwm=50)",reacher,baseline,,128,43,25,,100,200,reacher_horizon.ep.base.t7.json,,,82.03,,,
+reacher_hzbase_2270556_7.log,"arm=baseline offset=100 seed=43 (budgets: 2t=200, vlwm=50)",reacher,baseline,,128,43,25,,100,50,reacher_horizon.ep.base.t7.json,,,64.06,,,
+reacher_hzext_2270564_0.log,arm=baseline offset=75 seed=44 (2t budget=150),reacher,baseline,,128,44,25,,75,150,reacher_horizon.ep.ext.t0.json,,,89.06,,,
+reacher_hzext_2270564_1.log,arm=baseline offset=75 seed=45 (2t budget=150),reacher,baseline,,128,45,25,,75,150,reacher_horizon.ep.ext.t1.json,,,89.06,,,
+reacher_hzext_2270564_10.log,arm=s10spec offset=100 seed=44 (2t budget=200),reacher,specaccept,,128,44,10,,100,200,reacher_horizon.ep.ext.t10.json,,,92.97,0.631,0.2,8
+reacher_hzext_2270564_11.log,arm=s10spec offset=100 seed=45 (2t budget=200),reacher,specaccept,,128,45,10,,100,200,reacher_horizon.ep.ext.t11.json,,,95.31,0.606,0.2,8
+reacher_hzext_2270564_2.log,arm=baseline offset=100 seed=44 (2t budget=200),reacher,baseline,,128,44,25,,100,200,reacher_horizon.ep.ext.t2.json,,,83.59,,,
+reacher_hzext_2270564_3.log,arm=baseline offset=100 seed=45 (2t budget=200),reacher,baseline,,128,45,25,,100,200,reacher_horizon.ep.ext.t3.json,,,83.59,,,
+reacher_hzext_2270564_4.log,arm=s10gdm offset=75 seed=44 (2t budget=150),reacher,gdm,,128,44,10,,75,150,reacher_horizon.ep.ext.t4.json,,,90.62,,,
+reacher_hzext_2270564_5.log,arm=s10gdm offset=75 seed=45 (2t budget=150),reacher,gdm,,128,45,10,,75,150,reacher_horizon.ep.ext.t5.json,,,89.84,,,
+reacher_hzext_2270564_6.log,arm=s10gdm offset=100 seed=44 (2t budget=200),reacher,gdm,,128,44,10,,100,200,reacher_horizon.ep.ext.t6.json,,,89.84,,,
+reacher_hzext_2270564_7.log,arm=s10gdm offset=100 seed=45 (2t budget=200),reacher,gdm,,128,45,10,,100,200,reacher_horizon.ep.ext.t7.json,,,89.84,,,
+reacher_hzext_2270564_8.log,arm=s10spec offset=75 seed=44 (2t budget=150),reacher,specaccept,,128,44,10,,75,150,reacher_horizon.ep.ext.t8.json,,,90.62,0.632,0.2,8
+reacher_hzext_2270564_9.log,arm=s10spec offset=75 seed=45 (2t budget=150),reacher,specaccept,,128,45,10,,75,150,reacher_horizon.ep.ext.t9.json,,,90.62,0.625,0.2,8
+reacher_lerp0.25_t100_seed42.log,,reacher,lerp,,128,42,10,,100,200,reacher_audit2.ep100.t0.json,,,33.59,,,
+reacher_lerp0.25_t100_seed43.log,,reacher,lerp,,128,43,10,,100,200,reacher_audit2.ep100.t1.json,,,32.81,,,
+reacher_lerp0.25_t100_seed44.log,,reacher,lerp,,128,44,10,,100,200,reacher_audit2.ep100.t2.json,,,34.38,,,
+reacher_lerp0.25_t100_seed45.log,,reacher,lerp,,128,45,10,,100,200,reacher_audit2.ep100.t3.json,,,32.81,,,
+reacher_lerp0.25_t25_seed42.log,,reacher,lerp,,128,42,10,,25,50,,,,21.09,,,
+reacher_lerp0.25_t25_seed43.log,,reacher,lerp,,128,43,10,,25,50,,,,28.91,,,
+reacher_lerp0.25_t25_seed44.log,,reacher,lerp,,128,44,10,,25,50,,,,22.66,,,
+reacher_lerp0.25_t25_seed45.log,,reacher,lerp,,128,45,10,,25,50,,,,14.84,,,
+reacher_lerp0.5_t100_seed42.log,,reacher,lerp,,128,42,10,,100,200,reacher_audit2.ep100.t4.json,,,44.53,,,
+reacher_lerp0.5_t100_seed43.log,,reacher,lerp,,128,43,10,,100,200,reacher_audit2.ep100.t5.json,,,43.75,,,
+reacher_lerp0.5_t100_seed44.log,,reacher,lerp,,128,44,10,,100,200,reacher_audit2.ep100.t6.json,,,42.97,,,
+reacher_lerp0.5_t100_seed45.log,,reacher,lerp,,128,45,10,,100,200,reacher_audit2.ep100.t7.json,,,43.75,,,
+reacher_lerp0.5_t25_seed42.log,,reacher,lerp,,128,42,10,,25,50,,,,69.53,,,
+reacher_lerp0.5_t25_seed43.log,,reacher,lerp,,128,43,10,,25,50,,,,74.22,,,
+reacher_lerp0.5_t25_seed44.log,,reacher,lerp,,128,44,10,,25,50,,,,74.22,,,
+reacher_lerp0.5_t25_seed45.log,,reacher,lerp,,128,45,10,,25,50,,,,64.84,,,
+reacher_lerp0.75_t100_seed42.log,,reacher,lerp,,128,42,10,,100,200,reacher_audit2.ep100.t8.json,,,57.03,,,
+reacher_lerp0.75_t100_seed43.log,,reacher,lerp,,128,43,10,,100,200,reacher_audit2.ep100.t9.json,,,55.47,,,
+reacher_lerp0.75_t100_seed44.log,,reacher,lerp,,128,44,10,,100,200,reacher_audit2.ep100.t10.json,,,53.91,,,
+reacher_lerp0.75_t100_seed45.log,,reacher,lerp,,128,45,10,,100,200,reacher_audit2.ep100.t11.json,,,54.69,,,
+reacher_lerp1.0_t25_seed42.log,,reacher,lerp,,128,42,10,,25,50,,,,95.31,,,
+reacher_lerp1.0_t25_seed43.log,,reacher,lerp,,128,43,10,,25,50,,,,98.44,,,
+reacher_lerp1.0_t25_seed44.log,,reacher,lerp,,128,44,10,,25,50,,,,93.75,,,
+reacher_lerp1.0_t25_seed45.log,,reacher,lerp,,128,45,10,,25,50,,,,94.53,,,
+reacher_oracle_t25_seed42.log,,reacher,oracle,,128,42,25,,25,50,,,,84.38,,,
+reacher_oracle_t25_seed43.log,,reacher,oracle,,128,43,25,,25,50,,,,85.16,,,
+reacher_oracle_t25_seed44.log,,reacher,oracle,,128,44,25,,25,50,,,,82.81,,,
+reacher_oracle_t25_seed45.log,,reacher,oracle,,128,45,25,,25,50,,,,84.38,,,
+reacher_oraclejob_2270813_0.log,oracle full-power: t25 native seed=42 n=128,reacher,oracle,,128,42,25,,25,50,,,,84.38,,,
+reacher_oraclejob_2270813_1.log,oracle full-power: t25 native seed=43 n=128,reacher,oracle,,128,43,25,,25,50,,,,85.16,,,
+reacher_oraclejob_2270813_2.log,oracle full-power: t25 native seed=44 n=128,reacher,oracle,,128,44,25,,25,50,,,,82.81,,,
+reacher_oraclejob_2270813_3.log,oracle full-power: t25 native seed=45 n=128,reacher,oracle,,128,45,25,,25,50,,,,84.38,,,
+reacher_rh1_t100_seed42.log,,reacher,baseline,,128,42,5,,100,200,reacher_strong.ep100.t4.json,,,50.78,,,
+reacher_rh1_t100_seed43.log,,reacher,baseline,,128,43,5,,100,200,reacher_strong.ep100.t5.json,,,51.56,,,
+reacher_rh1_t150_seed42.log,,reacher,baseline,,128,42,5,,150,300,reacher_strong.ep150.t6.json,,,44.53,,,
+reacher_rh1_t150_seed43.log,,reacher,baseline,,128,43,5,,150,300,reacher_strong.ep150.t7.json,,,47.66,,,
+reacher_rh1_t25_seed42.log,,reacher,baseline,,128,42,5,,25,50,,,,92.19,,,
+reacher_rh1_t25_seed43.log,,reacher,baseline,,128,43,5,,25,50,,,,92.19,,,
+reacher_rh1_t25_seed44.log,,reacher,baseline,,128,44,5,,25,50,,,,90.62,,,
+reacher_rh1_t25_seed45.log,,reacher,baseline,,128,45,5,,25,50,,,,91.41,,,
+reacher_rh2_t100_seed42.log,,reacher,baseline,,128,42,10,,100,200,reacher_rh2.ep100.t4.json,,,66.41,,,
+reacher_rh2_t100_seed43.log,,reacher,baseline,,128,43,10,,100,200,reacher_rh2.ep100.t5.json,,,68.75,,,
+reacher_rh2_t100_seed44.log,,reacher,baseline,,128,44,10,,100,200,reacher_strong.ep100.t8.json,,,65.62,,,
+reacher_rh2_t100_seed45.log,,reacher,baseline,,128,45,10,,100,200,reacher_strong.ep100.t9.json,,,65.62,,,
+reacher_rh2_t150_seed42.log,,reacher,baseline,,128,42,10,,150,300,reacher_rh2.ep150.t6.json,,,62.50,,,
+reacher_rh2_t150_seed43.log,,reacher,baseline,,128,43,10,,150,300,reacher_rh2.ep150.t7.json,,,63.28,,,
+reacher_rh2_t150_seed44.log,,reacher,baseline,,128,44,10,,150,300,reacher_strong.ep150.t10.json,,,61.72,,,
+reacher_rh2_t150_seed45.log,,reacher,baseline,,128,45,10,,150,300,reacher_strong.ep150.t11.json,,,61.72,,,
+reacher_rh2_t25_seed42.log,,reacher,baseline,,128,42,10,,25,50,,,,94.53,,,
+reacher_rh2_t25_seed43.log,,reacher,baseline,,128,43,10,,25,50,,,,98.44,,,
+reacher_rh2_t25_seed44.log,,reacher,baseline,,128,44,10,,25,50,,,,94.53,,,
+reacher_rh2_t25_seed45.log,,reacher,baseline,,128,45,10,,25,50,,,,95.31,,,
+reacher_rh2job_2270701_0.log,baseline RH=2 t25 native seed=42,reacher,baseline,,128,42,10,,25,50,,,,94.53,,,
+reacher_rh2job_2270701_1.log,baseline RH=2 t25 native seed=43,reacher,baseline,,128,43,10,,25,50,,,,98.44,,,
+reacher_rh2job_2270701_2.log,baseline RH=2 t25 native seed=44,reacher,baseline,,128,44,10,,25,50,,,,94.53,,,
+reacher_rh2job_2270701_3.log,baseline RH=2 t25 native seed=45,reacher,baseline,,128,45,10,,25,50,,,,95.31,,,
+reacher_rh2job_2270701_4.log,baseline RH=2 t100 seed=42,reacher,baseline,,128,42,10,,100,200,reacher_rh2.ep100.t4.json,,,66.41,,,
+reacher_rh2job_2270701_5.log,baseline RH=2 t100 seed=43,reacher,baseline,,128,43,10,,100,200,reacher_rh2.ep100.t5.json,,,68.75,,,
+reacher_rh2job_2270701_6.log,baseline RH=2 t150 seed=42,reacher,baseline,,128,42,10,,150,300,reacher_rh2.ep150.t6.json,,,62.50,,,
+reacher_rh2job_2270701_7.log,baseline RH=2 t150 seed=43,reacher,baseline,,128,43,10,,150,300,reacher_rh2.ep150.t7.json,,,63.28,,,
+reacher_s15_t100_seed42.log,,reacher,gdm,,128,42,15,,100,200,reacher_slong.ep150.t8.json,,,94.53,,,
+reacher_s15_t100_seed43.log,,reacher,gdm,,128,43,15,,100,200,reacher_slong.ep150.t9.json,,,95.31,,,
+reacher_s15_t100_seed44.log,,reacher,gdm,,128,44,15,,100,200,reacher_slong.ep150.t10.json,,,92.97,,,
+reacher_s15_t100_seed45.log,,reacher,gdm,,128,45,15,,100,200,reacher_slong.ep150.t11.json,,,92.97,,,
+reacher_s15_t150_seed42.log,,reacher,gdm,,128,42,15,,150,300,reacher_slong.ep150.t12.json,,,94.53,,,
+reacher_s15_t150_seed43.log,,reacher,gdm,,128,43,15,,150,300,reacher_slong.ep150.t13.json,,,96.09,,,
+reacher_s15_t150_seed44.log,,reacher,gdm,,128,44,15,,150,300,reacher_slong.ep150.t14.json,,,96.88,,,
+reacher_s15_t150_seed45.log,,reacher,gdm,,128,45,15,,150,300,reacher_slong.ep150.t15.json,,,94.53,,,
+reacher_s25_t100_seed42.log,,reacher,gdm,,128,42,25,,100,200,reacher_slong.ep150.t16.json,,,94.53,,,
+reacher_s25_t100_seed43.log,,reacher,gdm,,128,43,25,,100,200,reacher_slong.ep150.t17.json,,,91.41,,,
+reacher_s25_t100_seed44.log,,reacher,gdm,,128,44,25,,100,200,reacher_slong.ep150.t18.json,,,96.88,,,
+reacher_s25_t100_seed45.log,,reacher,gdm,,128,45,25,,100,200,reacher_slong.ep150.t19.json,,,91.41,,,
+reacher_s25_t150_seed42.log,,reacher,gdm,,128,42,25,,150,300,reacher_slong.ep150.t20.json,,,89.84,,,
+reacher_s25_t150_seed43.log,,reacher,gdm,,128,43,25,,150,300,reacher_slong.ep150.t21.json,,,95.31,,,
+reacher_s25_t150_seed44.log,,reacher,gdm,,128,44,25,,150,300,reacher_slong.ep150.t22.json,,,93.75,,,
+reacher_s25_t150_seed45.log,,reacher,gdm,,128,45,25,,150,300,reacher_slong.ep150.t23.json,,,91.41,,,
+reacher_s5_t100_seed42.log,,reacher,gdm,,128,42,5,,100,200,reacher_slong.ep150.t0.json,,,92.19,,,
+reacher_s5_t100_seed43.log,,reacher,gdm,,128,43,5,,100,200,reacher_slong.ep150.t1.json,,,88.28,,,
+reacher_s5_t100_seed44.log,,reacher,gdm,,128,44,5,,100,200,reacher_slong.ep150.t2.json,,,91.41,,,
+reacher_s5_t100_seed45.log,,reacher,gdm,,128,45,5,,100,200,reacher_slong.ep150.t3.json,,,92.97,,,
+reacher_s5_t150_seed42.log,,reacher,gdm,,128,42,5,,150,300,reacher_slong.ep150.t4.json,,,89.84,,,
+reacher_s5_t150_seed43.log,,reacher,gdm,,128,43,5,,150,300,reacher_slong.ep150.t5.json,,,96.09,,,
+reacher_s5_t150_seed44.log,,reacher,gdm,,128,44,5,,150,300,reacher_slong.ep150.t6.json,,,91.41,,,
+reacher_s5_t150_seed45.log,,reacher,gdm,,128,45,5,,150,300,reacher_slong.ep150.t7.json,,,94.53,,,
+reacher_slongjob_2271064_0.log,scale-at-horizon: S=5 RH=1 t=100 seed=42 (2t budget),reacher,gdm,,128,42,5,,100,200,reacher_slong.ep150.t0.json,,,92.19,,,
+reacher_slongjob_2271064_1.log,scale-at-horizon: S=5 RH=1 t=100 seed=43 (2t budget),reacher,gdm,,128,43,5,,100,200,reacher_slong.ep150.t1.json,,,88.28,,,
+reacher_slongjob_2271064_10.log,scale-at-horizon: S=15 RH=3 t=100 seed=44 (2t budget),reacher,gdm,,128,44,15,,100,200,reacher_slong.ep150.t10.json,,,92.97,,,
+reacher_slongjob_2271064_11.log,scale-at-horizon: S=15 RH=3 t=100 seed=45 (2t budget),reacher,gdm,,128,45,15,,100,200,reacher_slong.ep150.t11.json,,,92.97,,,
+reacher_slongjob_2271064_12.log,scale-at-horizon: S=15 RH=3 t=150 seed=42 (2t budget),reacher,gdm,,128,42,15,,150,300,reacher_slong.ep150.t12.json,,,94.53,,,
+reacher_slongjob_2271064_13.log,scale-at-horizon: S=15 RH=3 t=150 seed=43 (2t budget),reacher,gdm,,128,43,15,,150,300,reacher_slong.ep150.t13.json,,,96.09,,,
+reacher_slongjob_2271064_14.log,scale-at-horizon: S=15 RH=3 t=150 seed=44 (2t budget),reacher,gdm,,128,44,15,,150,300,reacher_slong.ep150.t14.json,,,96.88,,,
+reacher_slongjob_2271064_15.log,scale-at-horizon: S=15 RH=3 t=150 seed=45 (2t budget),reacher,gdm,,128,45,15,,150,300,reacher_slong.ep150.t15.json,,,94.53,,,
+reacher_slongjob_2271064_16.log,scale-at-horizon: S=25 RH=5 t=100 seed=42 (2t budget),reacher,gdm,,128,42,25,,100,200,reacher_slong.ep150.t16.json,,,94.53,,,
+reacher_slongjob_2271064_17.log,scale-at-horizon: S=25 RH=5 t=100 seed=43 (2t budget),reacher,gdm,,128,43,25,,100,200,reacher_slong.ep150.t17.json,,,91.41,,,
+reacher_slongjob_2271064_18.log,scale-at-horizon: S=25 RH=5 t=100 seed=44 (2t budget),reacher,gdm,,128,44,25,,100,200,reacher_slong.ep150.t18.json,,,96.88,,,
+reacher_slongjob_2271064_19.log,scale-at-horizon: S=25 RH=5 t=100 seed=45 (2t budget),reacher,gdm,,128,45,25,,100,200,reacher_slong.ep150.t19.json,,,91.41,,,
+reacher_slongjob_2271064_2.log,scale-at-horizon: S=5 RH=1 t=100 seed=44 (2t budget),reacher,gdm,,128,44,5,,100,200,reacher_slong.ep150.t2.json,,,91.41,,,
+reacher_slongjob_2271064_20.log,scale-at-horizon: S=25 RH=5 t=150 seed=42 (2t budget),reacher,gdm,,128,42,25,,150,300,reacher_slong.ep150.t20.json,,,89.84,,,
+reacher_slongjob_2271064_21.log,scale-at-horizon: S=25 RH=5 t=150 seed=43 (2t budget),reacher,gdm,,128,43,25,,150,300,reacher_slong.ep150.t21.json,,,95.31,,,
+reacher_slongjob_2271064_22.log,scale-at-horizon: S=25 RH=5 t=150 seed=44 (2t budget),reacher,gdm,,128,44,25,,150,300,reacher_slong.ep150.t22.json,,,93.75,,,
+reacher_slongjob_2271064_23.log,scale-at-horizon: S=25 RH=5 t=150 seed=45 (2t budget),reacher,gdm,,128,45,25,,150,300,reacher_slong.ep150.t23.json,,,91.41,,,
+reacher_slongjob_2271064_3.log,scale-at-horizon: S=5 RH=1 t=100 seed=45 (2t budget),reacher,gdm,,128,45,5,,100,200,reacher_slong.ep150.t3.json,,,92.97,,,
+reacher_slongjob_2271064_4.log,scale-at-horizon: S=5 RH=1 t=150 seed=42 (2t budget),reacher,gdm,,128,42,5,,150,300,reacher_slong.ep150.t4.json,,,89.84,,,
+reacher_slongjob_2271064_5.log,scale-at-horizon: S=5 RH=1 t=150 seed=43 (2t budget),reacher,gdm,,128,43,5,,150,300,reacher_slong.ep150.t5.json,,,96.09,,,
+reacher_slongjob_2271064_6.log,scale-at-horizon: S=5 RH=1 t=150 seed=44 (2t budget),reacher,gdm,,128,44,5,,150,300,reacher_slong.ep150.t6.json,,,91.41,,,
+reacher_slongjob_2271064_7.log,scale-at-horizon: S=5 RH=1 t=150 seed=45 (2t budget),reacher,gdm,,128,45,5,,150,300,reacher_slong.ep150.t7.json,,,94.53,,,
+reacher_slongjob_2271064_8.log,scale-at-horizon: S=15 RH=3 t=100 seed=42 (2t budget),reacher,gdm,,128,42,15,,100,200,reacher_slong.ep150.t8.json,,,94.53,,,
+reacher_slongjob_2271064_9.log,scale-at-horizon: S=15 RH=3 t=100 seed=43 (2t budget),reacher,gdm,,128,43,15,,100,200,reacher_slong.ep150.t9.json,,,95.31,,,
+reacher_smoke_2270234.log,[1/2] ORACLE n=32 (harness + encoder + injection sanity),reacher,oracle,,32,42,25,,25,50,,,,90.62,,,
+reacher_smoke_2270234.log,[1/2] ORACLE n=32 (harness + encoder + injection sanity),reacher,baseline,,32,42,25,,25,50,,,,93.75,,,
+reacher_speck1_t100_seed42.log,,reacher,specaccept,,128,42,10,,100,200,reacher_klow.ep100.t8.json,,,96.09,1.000,0.2,1
+reacher_speck1_t100_seed43.log,,reacher,specaccept,,128,43,10,,100,200,reacher_klow.ep100.t9.json,,,97.66,1.000,0.2,1
+reacher_speck1_t100_seed44.log,,reacher,specaccept,,128,44,10,,100,200,reacher_klow.ep100.t10.json,,,95.31,1.000,0.2,1
+reacher_speck1_t100_seed45.log,,reacher,specaccept,,128,45,10,,100,200,reacher_klow.ep100.t11.json,,,94.53,1.000,0.2,1
+reacher_speck2_t100_seed42.log,,reacher,specaccept,,128,42,10,,100,200,reacher_klow.ep100.t12.json,,,95.31,1.000,0.2,2
+reacher_speck2_t100_seed43.log,,reacher,specaccept,,128,43,10,,100,200,reacher_klow.ep100.t13.json,,,97.66,1.000,0.2,2
+reacher_speck2_t100_seed44.log,,reacher,specaccept,,128,44,10,,100,200,reacher_klow.ep100.t14.json,,,96.09,1.000,0.2,2
+reacher_speck2_t100_seed45.log,,reacher,specaccept,,128,45,10,,100,200,reacher_klow.ep100.t15.json,,,94.53,1.000,0.2,2
+reacher_strongjob_2270711_0.log,,reacher,baseline,,128,42,5,,25,50,,,,92.19,,,
+reacher_strongjob_2270711_1.log,,reacher,baseline,,128,43,5,,25,50,,,,92.19,,,
+reacher_strongjob_2270711_10.log,,reacher,baseline,,128,44,10,,150,300,reacher_strong.ep150.t10.json,,,61.72,,,
+reacher_strongjob_2270711_11.log,,reacher,baseline,,128,45,10,,150,300,reacher_strong.ep150.t11.json,,,61.72,,,
+reacher_strongjob_2270711_12.log,,reacher,specaccept,,128,44,10,,100,200,reacher_strong.ep100.t12.json,,,94.53,0.611,0.2,4
+reacher_strongjob_2270711_13.log,,reacher,specaccept,,128,45,10,,100,200,reacher_strong.ep100.t13.json,,,96.09,0.624,0.2,4
+reacher_strongjob_2270711_14.log,,reacher,specaccept,,128,44,10,,100,200,reacher_strong.ep100.t14.json,,,95.31,0.832,0.1,4
+reacher_strongjob_2270711_15.log,,reacher,specaccept,,128,45,10,,100,200,reacher_strong.ep100.t15.json,,,96.09,0.842,0.1,4
+reacher_strongjob_2270711_2.log,,reacher,baseline,,128,44,5,,25,50,,,,90.62,,,
+reacher_strongjob_2270711_3.log,,reacher,baseline,,128,45,5,,25,50,,,,91.41,,,
+reacher_strongjob_2270711_4.log,,reacher,baseline,,128,42,5,,100,200,reacher_strong.ep100.t4.json,,,50.78,,,
+reacher_strongjob_2270711_5.log,,reacher,baseline,,128,43,5,,100,200,reacher_strong.ep100.t5.json,,,51.56,,,
+reacher_strongjob_2270711_6.log,,reacher,baseline,,128,42,5,,150,300,reacher_strong.ep150.t6.json,,,44.53,,,
+reacher_strongjob_2270711_7.log,,reacher,baseline,,128,43,5,,150,300,reacher_strong.ep150.t7.json,,,47.66,,,
+reacher_strongjob_2270711_8.log,,reacher,baseline,,128,44,10,,100,200,reacher_strong.ep100.t8.json,,,65.62,,,
+reacher_strongjob_2270711_9.log,,reacher,baseline,,128,45,10,,100,200,reacher_strong.ep100.t9.json,,,65.62,,,

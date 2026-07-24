@@ -1,0 +1,45 @@
+=== streaming download+extract: https://huggingface.co/datasets/quentinll/lewm-cube/resolve/main/cube_single_expert.tar.zst -> /lustre/home/ha676/data/cube ===
+10.122.7.223@o2ib,10.122.7.227@o2ib:10.122.7.224@o2ib,10.122.7.228@o2ib:/exafs  2.9P  2.5P  452T  85% /lustre
+=== extracted tree ===
+drwxr-xr-x 2 ha676 domain_users 4.0K Jul 13 16:52 /lustre/home/ha676/data/cube
+-rw-r--r-- 1 ha676 domain_users 95G Feb 19 03:12 /lustre/home/ha676/data/cube/cube_single_expert.h5
+=== schema inspection ===
+===== /lustre/home/ha676/data/cube/cube_single_expert.h5
+  action  (2010000, 5)  float32
+  control  (2010000, 7)  float64
+  ep_idx  (2010000,)  int32
+  ep_len  (10000,)  int32
+  ep_offset  (10000,)  int64
+  id  (2010000,)  int64
+  observation  (2010000, 28)  float64
+  pixels  (2010000, 224, 224, 3)  uint8
+  prev_qpos  (2010000, 21)  float64
+  prev_qvel  (2010000, 20)  float64
+  privileged_block_0_pos  (2010000, 3)  float64
+  privileged_block_0_quat  (2010000, 4)  float64
+  privileged_block_0_yaw  (2010000, 1)  float64
+  privileged_target_block  (2010000,)  int64
+  privileged_target_block_pos  (2010000, 3)  float64
+  privileged_target_block_yaw  (2010000, 1)  float64
+  privileged_target_task  (2010000,)  object
+  proprio_effector_pos  (2010000, 3)  float64
+  proprio_effector_yaw  (2010000, 1)  float64
+  proprio_gripper_contact  (2010000, 1)  float64
+  proprio_gripper_opening  (2010000, 1)  float64
+  proprio_gripper_vel  (2010000, 1)  float64
+  proprio_joint_pos  (2010000, 6)  float64
+  proprio_joint_vel  (2010000, 6)  float64
+  qpos  (2010000, 21)  float64
+  qvel  (2010000, 20)  float64
+  render_time  (2010000,)  float64
+  reward  (2010000,)  float64
+  step_idx  (2010000,)  int64
+  success  (2010000,)  bool
+  target  (2010000, 28)  float64
+  terminated  (2010000,)  bool
+  time  (2010000, 1)  float64
+  truncated  (2010000,)  bool
+  ep_len: n=10000, total_frames=2010000
+  ep_offset: n=10000, total_frames=-
+10.122.7.223@o2ib,10.122.7.227@o2ib:10.122.7.224@o2ib,10.122.7.228@o2ib:/exafs  2.9P  2.5P  453T  85% /lustre
+=== cube staging complete ===

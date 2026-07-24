@@ -1,0 +1,29 @@
+=== gatev4c arm=flat5 t=150 seed=42 n=128 epfile=reacher_gatev4c.ep150.s999.json (budget=300) ===
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+[model] frozen LeWM (18.03M), device=cuda, training=False, subgoal=baseline
+16:51:35 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+[episodes-file] reacher_gatev4c.ep150.s999.json: 128 precomputed pairs (built for max_offset=150, seed=999, episode_min=8000) -- sampling bypassed; running at goal_offset=150
+[eval] start=random num_eval=128 goal_offset=150 budget=300 qpos_threshold=0.05 rad/joint
+[eval] episodes_idx[:5]=[8000, 8022, 8064, 8071, 8078] start_steps[:5]=[10, 20, 5, 12, 14]
+16:51:35 | INFO  | __init__.py | MUJOCO_GL=egl, attempting to import specified OpenGL backend.
+16:51:35 | INFO  | __init__.py | No OpenGL_accelerate module loaded: No module named 'OpenGL_accelerate'
+16:51:35 | INFO  | __init__.py | MuJoCo library version is: 3.10.0
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/envs/registration.py:729: UserWarning: [33mWARN: The environment is being initialised with render_mode='rgb_array' that is not in the possible render_modes ([]).[0m
+  logger.warn(
+CEM solve time: 75.5215 seconds
+CEM solve time: 57.6684 seconds
+CEM solve time: 31.7827 seconds
+CEM solve time: 22.3731 seconds
+CEM solve time: 19.4400 seconds
+CEM solve time: 18.8425 seconds
+CEM solve time: 18.2413 seconds
+CEM solve time: 17.6628 seconds
+CEM solve time: 17.6563 seconds
+CEM solve time: 17.6624 seconds
+CEM solve time: 17.6653 seconds
+CEM solve time: 17.6566 seconds
+
+==== FF-JEPA eval summary (Reacher qpos_match) ====
+subgoal=baseline num_eval=128 goal_offset=150 budget=300 seed=42 cem_seed=42 S=25
+  SR = 76.56%  (98/128)

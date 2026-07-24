@@ -1,0 +1,32 @@
+=== floor probe: reacher (/lustre/home/ha676/data/reacher/reacher.h5) ===
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/lustre/home/ha676/le-wm/specaccept/probes/probe_floor.py", line 277, in <module>
+    main()
+  File "/lustre/home/ha676/le-wm/specaccept/probes/probe_floor.py", line 207, in main
+    zb = encode_rows(model, pixels, pb, args.device, args.batch_size)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/lustre/home/ha676/le-wm/specaccept/probes/probe_floor.py", line 113, in encode_rows
+    chunks.append(encoder.encode_frames(model, pixels[srt[i:i + 512]],
+                                               ~~~~~~^^^^^^^^^^^^^^^^
+  File "h5py/_objects.pyx", line 54, in h5py._objects.with_phil.wrapper
+  File "h5py/_objects.pyx", line 55, in h5py._objects.with_phil.wrapper
+  File "/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/h5py/_hl/dataset.py", line 945, in __getitem__
+    selection = sel.select(self.shape, args, dataset=self)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/h5py/_hl/selections.py", line 85, in select
+    return selector.make_selection(args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "h5py/_objects.pyx", line 54, in h5py._objects.with_phil.wrapper
+  File "h5py/_objects.pyx", line 55, in h5py._objects.with_phil.wrapper
+  File "h5py/_selector.pyx", line 297, in h5py._selector.Selector.make_selection
+  File "h5py/_selector.pyx", line 216, in h5py._selector.Selector.apply_args
+TypeError: Indexing elements must be in increasing order
+[state] reacher: using h5['qpos'] (2010000, 2); joints = first 2 dims
+[data] /lustre/home/ha676/data/reacher/reacher.h5: 10000 episodes, 2000 eligible (episode_min=8000)
+[A] temporal floor disp(1): {'mean': 0.23905140993156238, 'std': 0.12770722201421497, 'p10': 0.07627315297722817, 'p50': 0.22270285338163376, 'p90': 0.4284350901842118, 'n': 512}
+[A] reference disp(S=10): {'mean': 0.8578234064989374, 'std': 0.3644582327588248, 'p10': 0.33510459065437315, 'p50': 0.8661545217037201, 'p90': 1.3505411982536317, 'n': 512}
+[B] criterion pairs (qpos): 502/512 anchors matched

@@ -1,0 +1,24 @@
+=== gatev4c arm=r_spec t=25 seed=45 n=1 epfile=reacher_gatev4c_route_t25_spec.json (budget=50) ===
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+[model] frozen LeWM (18.03M), device=cuda, training=False, subgoal=specaccept
+[gdm] planner from gdm_reacher_s10.pt: head=53.44M, N=3 WG=1 goal_cond=True T=1000 sampler=ddim/8-steps param=eps schedule=linear norm=standardize
+17:14:36 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+[episodes-file] reacher_gatev4c_route_t25_spec.json: 1 precomputed pairs (built for max_offset=100, seed=999, episode_min=8000) -- sampling bypassed; running at goal_offset=25
+[eval] start=random num_eval=1 goal_offset=25 budget=50 qpos_threshold=0.05 rad/joint
+[eval] episodes_idx[:5]=[9592] start_steps[:5]=[4]
+17:14:36 | INFO  | __init__.py | MUJOCO_GL=egl, attempting to import specified OpenGL backend.
+17:14:36 | INFO  | __init__.py | No OpenGL_accelerate module loaded: No module named 'OpenGL_accelerate'
+17:14:36 | INFO  | __init__.py | MuJoCo library version is: 3.10.0
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/envs/registration.py:729: UserWarning: [33mWARN: The environment is being initialised with render_mode='rgb_array' that is not in the possible render_modes ([]).[0m
+  logger.warn(
+CEM solve time: 0.2481 seconds
+CEM solve time: 0.2161 seconds
+CEM solve time: 0.2158 seconds
+CEM solve time: 0.2155 seconds
+CEM solve time: 0.2157 seconds
+[specaccept] tau=0.2 gdm_steps=8 goal_gate=False re-drafts=5 advances=0 rejects=4 gate_serves=0 call_ratio=1.000 call_ratio_all=1.000 (every-step=1.000; lower = fewer diffusion calls)
+
+==== FF-JEPA eval summary (Reacher qpos_match) ====
+subgoal=specaccept num_eval=1 goal_offset=25 budget=50 seed=45 cem_seed=45 S=10
+  SR = 0.00%  (0/1)

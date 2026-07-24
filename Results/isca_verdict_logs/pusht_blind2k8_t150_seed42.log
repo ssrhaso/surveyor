@@ -1,0 +1,95 @@
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+2026-07-13 11:47:58.077 | INFO     | stable_worldmodel.wm.utils:_resolve_hf:149 - Loading quentinll/lewm-pusht from local cache...
+2026-07-13 11:47:58.078 | INFO     | stable_worldmodel.wm.utils:_resolve_folder:137 - Loading checkpoint from folder /lustre/home/ha676/.stable_worldmodel/checkpoints/models--quentinll--lewm-pusht...
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/wm/utils.py:80: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  state_dict = torch.load(checkpoint_path, map_location='cpu')
+11:48:07 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+11:48:08 | INFO  | utils.py    | Created ViT-tiny from scratch with config: {'hidden_size': 192, 'num_hidden_layers': 12, 'num_attention_heads': 3, 'intermediate_size': 768, 'image_size': 224, 'patch_size': 14}
+[model] frozen LeWM (18.03M), device=cuda, training=False, subgoal=dspark
+[gdm] planner from gdm_stride10.pt: head=53.34M, N=3 WG=1 gamma=1.0 T=1000 sampler=ddim/8-steps param=eps schedule=linear norm=standardize
+11:48:09 | INFO  | __init__.py | Cached 'action' from '/lustre/home/ha676/data/pusht/pusht_expert_train.h5'
+11:48:09 | INFO  | __init__.py | Cached 'proprio' from '/lustre/home/ha676/data/pusht/pusht_expert_train.h5'
+11:48:09 | INFO  | __init__.py | Cached 'state' from '/lustre/home/ha676/data/pusht/pusht_expert_train.h5'
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/spaces/box.py:415: UserWarning: [33mWARN: Casting input x to numpy array.[0m
+  gym.logger.warn("Casting input x to numpy array.")
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/utils/passive_env_checker.py:157: UserWarning: [33mWARN: The obs returned by the `step()` method is not within the observation space.[0m
+  logger.warn(f"{pre} is not within the observation space.")
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/spaces/box.py:415: UserWarning: [33mWARN: Casting input x to numpy array.[0m
+  gym.logger.warn("Casting input x to numpy array.")
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/utils/passive_env_checker.py:157: UserWarning: [33mWARN: The obs returned by the `step()` method is not within the observation space.[0m
+  logger.warn(f"{pre} is not within the observation space.")
+[episodes-file] pusht.episodes150.json: 256 precomputed pairs (goal_offset=150, seed=42, eval_filter=None) -- sample_long/short bypassed
+[eval] mode=long start=final num_eval=256 goal_offset=150 budget=300 eval_filter=none
+[eval] episodes_idx[:5]=[636, 688, 700, 834, 850] start_steps[:5]=[7, 7, 7, 34, 34]
+[PIN] success = pos_diff<20 [block xy only (paper)] AND angle<20deg
+CEM solve time: 54.6620 seconds
+CEM solve time: 53.2089 seconds
+CEM solve time: 52.7899 seconds
+CEM solve time: 52.7726 seconds
+CEM solve time: 51.9449 seconds
+CEM solve time: 51.1512 seconds
+CEM solve time: 49.8148 seconds
+CEM solve time: 48.9173 seconds
+CEM solve time: 46.8266 seconds
+CEM solve time: 44.6862 seconds
+CEM solve time: 42.1251 seconds
+CEM solve time: 38.5308 seconds
+CEM solve time: 35.5697 seconds
+CEM solve time: 31.5286 seconds
+CEM solve time: 27.4444 seconds
+CEM solve time: 24.6777 seconds
+CEM solve time: 23.8433 seconds
+CEM solve time: 23.6313 seconds
+CEM solve time: 23.2175 seconds
+CEM solve time: 23.0224 seconds
+CEM solve time: 23.0216 seconds
+CEM solve time: 23.0322 seconds
+CEM solve time: 22.8158 seconds
+CEM solve time: 22.8191 seconds
+CEM solve time: 22.8148 seconds
+CEM solve time: 22.8241 seconds
+CEM solve time: 22.8147 seconds
+CEM solve time: 22.8195 seconds
+CEM solve time: 22.5939 seconds
+CEM solve time: 22.5933 seconds
+[RESULT] score=block angle=20deg  SR=58.59%  (150/256)
+[dspark] commit=fixed theta=0.5 re-drafts=2452 advances=4829 mean_commit_depth=2.00 redraft/advance=0.508 (GDM=1.000; lower=fewer diffusion calls)
+[PIN] success = pos_diff<20 [block xy only (paper)] AND angle<5deg
+CEM solve time: 54.5328 seconds
+CEM solve time: 53.6756 seconds
+CEM solve time: 53.2101 seconds
+CEM solve time: 53.1639 seconds
+CEM solve time: 53.2080 seconds
+CEM solve time: 52.9835 seconds
+CEM solve time: 52.7850 seconds
+CEM solve time: 52.7704 seconds
+CEM solve time: 51.9588 seconds
+CEM solve time: 51.1725 seconds
+CEM solve time: 49.3584 seconds
+CEM solve time: 47.6988 seconds
+CEM solve time: 45.3443 seconds
+CEM solve time: 43.0933 seconds
+CEM solve time: 39.0188 seconds
+CEM solve time: 36.7051 seconds
+CEM solve time: 34.7421 seconds
+CEM solve time: 33.4901 seconds
+CEM solve time: 32.1765 seconds
+CEM solve time: 30.6945 seconds
+CEM solve time: 30.0798 seconds
+CEM solve time: 30.0894 seconds
+CEM solve time: 30.0642 seconds
+CEM solve time: 29.4076 seconds
+CEM solve time: 29.3995 seconds
+CEM solve time: 29.1935 seconds
+CEM solve time: 28.9543 seconds
+CEM solve time: 28.7406 seconds
+CEM solve time: 28.7379 seconds
+CEM solve time: 28.5296 seconds
+[RESULT] score=block angle=5deg  SR=47.66%  (122/256)
+[dspark] commit=fixed theta=0.5 re-drafts=2881 advances=5704 mean_commit_depth=2.00 redraft/advance=0.505 (GDM=1.000; lower=fewer diffusion calls)
+
+==== FF-JEPA eval summary ====
+mode=long subgoal=dspark num_eval=256 seed=42 cem_seed=42 eval_filter=none
+  score=block   20deg :  58.59%  (150/256)
+  score=block    5deg :  47.66%  (122/256)

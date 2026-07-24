@@ -1,0 +1,39 @@
+wrote reacher_audit2.ep100.t7.json: 128 pairs (episodes >= 8000, start <= ep_len-1-100), sample [[8014, 73], [8074, 52], [8087, 58]]
+=== audit2 lerp frac=0.5 t100 seed=45 ===
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+[model] frozen LeWM (18.03M), device=cuda, training=False, subgoal=lerp
+17:54:27 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+[episodes-file] reacher_audit2.ep100.t7.json: 128 precomputed pairs (built for max_offset=100, seed=42, episode_min=8000) -- sampling bypassed; running at goal_offset=100
+[eval] start=random num_eval=128 goal_offset=100 budget=200 qpos_threshold=0.05 rad/joint
+[eval] episodes_idx[:5]=[8014, 8074, 8087, 8127, 8135] start_steps[:5]=[73, 52, 58, 58, 79]
+17:54:28 | INFO  | __init__.py | MUJOCO_GL=egl, attempting to import specified OpenGL backend.
+17:54:28 | INFO  | __init__.py | No OpenGL_accelerate module loaded: No module named 'OpenGL_accelerate'
+17:54:28 | INFO  | __init__.py | MuJoCo library version is: 3.10.0
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/envs/registration.py:729: UserWarning: [33mWARN: The environment is being initialised with render_mode='rgb_array' that is not in the possible render_modes ([]).[0m
+  logger.warn(
+[lerp] straight-line oracle, frac=0.5
+CEM solve time: 28.4386 seconds
+CEM solve time: 27.4261 seconds
+CEM solve time: 25.4560 seconds
+CEM solve time: 22.1730 seconds
+CEM solve time: 19.9687 seconds
+CEM solve time: 18.6661 seconds
+CEM solve time: 18.0106 seconds
+CEM solve time: 17.1217 seconds
+CEM solve time: 16.6792 seconds
+CEM solve time: 16.6803 seconds
+CEM solve time: 16.4574 seconds
+CEM solve time: 16.2411 seconds
+CEM solve time: 16.2459 seconds
+CEM solve time: 16.2436 seconds
+CEM solve time: 16.2414 seconds
+CEM solve time: 16.2510 seconds
+CEM solve time: 16.2572 seconds
+CEM solve time: 15.8036 seconds
+CEM solve time: 15.7991 seconds
+CEM solve time: 15.7951 seconds
+
+==== FF-JEPA eval summary (Reacher qpos_match) ====
+subgoal=lerp num_eval=128 goal_offset=100 budget=200 seed=45 cem_seed=45 S=10
+  SR = 43.75%  (56/128)

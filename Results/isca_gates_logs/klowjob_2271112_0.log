@@ -1,0 +1,38 @@
+wrote reacher_klow.ep100.t0.json: 128 pairs (episodes >= 8000, start <= ep_len-1-100), sample [[8014, 73], [8074, 52], [8087, 58]]
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+[model] frozen LeWM (18.03M), device=cuda, training=False, subgoal=gdm
+[gdm] planner from gdm_reacher_s10.pt: head=53.44M, N=3 WG=1 goal_cond=True T=1000 sampler=ddim/1-steps param=eps schedule=linear norm=standardize
+23:10:38 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+[episodes-file] reacher_klow.ep100.t0.json: 128 precomputed pairs (built for max_offset=100, seed=42, episode_min=8000) -- sampling bypassed; running at goal_offset=100
+[eval] start=random num_eval=128 goal_offset=100 budget=200 qpos_threshold=0.05 rad/joint
+[eval] episodes_idx[:5]=[8014, 8074, 8087, 8127, 8135] start_steps[:5]=[73, 52, 58, 58, 79]
+23:10:38 | INFO  | __init__.py | MUJOCO_GL=egl, attempting to import specified OpenGL backend.
+23:10:38 | INFO  | __init__.py | No OpenGL_accelerate module loaded: No module named 'OpenGL_accelerate'
+23:10:38 | INFO  | __init__.py | MuJoCo library version is: 3.10.0
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/envs/registration.py:729: UserWarning: [33mWARN: The environment is being initialised with render_mode='rgb_array' that is not in the possible render_modes ([]).[0m
+  logger.warn(
+CEM solve time: 27.9750 seconds
+CEM solve time: 26.2630 seconds
+CEM solve time: 21.9458 seconds
+CEM solve time: 17.6477 seconds
+CEM solve time: 12.4848 seconds
+CEM solve time: 8.1757 seconds
+CEM solve time: 6.2420 seconds
+CEM solve time: 4.5217 seconds
+CEM solve time: 3.8754 seconds
+CEM solve time: 3.0148 seconds
+CEM solve time: 2.8003 seconds
+CEM solve time: 2.1542 seconds
+CEM solve time: 1.7236 seconds
+CEM solve time: 1.7235 seconds
+CEM solve time: 1.7240 seconds
+CEM solve time: 1.5088 seconds
+CEM solve time: 1.2935 seconds
+CEM solve time: 1.2933 seconds
+CEM solve time: 1.2934 seconds
+CEM solve time: 1.2950 seconds
+
+==== FF-JEPA eval summary (Reacher qpos_match) ====
+subgoal=gdm num_eval=128 goal_offset=100 budget=200 seed=42 cem_seed=42 S=10
+  SR = 95.31%  (122/128)

@@ -1,0 +1,33 @@
+/lustre/home/ha676/le-wm/specaccept/probes/horizon_gate.py:86: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  d = torch.load(args.dense_pt, map_location="cpu")
+[theta] 0.8662 = disp_S10.p50 from Results/floor_reacher.json (derived from probe_floor's measurement; not fitted here)
+[pre-registered] fire-rate >= 0.7 at t=25 and <= 0.15 at t=150, else the gate is dead
+[data] subgoals_reacher_dense.pt: 10000 episodes, latents (2010000, 192) (frozen encoder, batch-independent -> identical to the pixel path)
+
+[pop max100] reacher_horizon.ep.t0.json: 128 pairs (max_offset=100, seed=42, episode_min=8000)
+[pop max100] t= 25: h p10=0.541 p50=1.254 p90=1.483 fire(h<=0.866)=0.234 n=128
+[pop max100] t= 50: h p10=0.764 p50=1.396 p90=1.481 fire(h<=0.866)=0.141 n=128
+[pop max100] t= 75: h p10=0.869 p50=1.405 p90=1.488 fire(h<=0.866)=0.102 n=128
+[pop max100] t=100: h p10=0.982 p50=1.405 p90=1.501 fire(h<=0.866)=0.078 n=128
+[pop max100] t=125: h p10=0.991 p50=1.416 p90=1.489 fire(h<=0.866)=0.087 n=103  [25 dropped: goal past episode end -- population-shifted cell]
+[pop max100] t=150: h p10=1.238 p50=1.423 p90=1.485 fire(h<=0.866)=0.041 n=73  [55 dropped: goal past episode end -- population-shifted cell]
+
+[pop max150] reacher_horizon150.ep.t0.json: 128 pairs (max_offset=150, seed=42, episode_min=8000)
+[pop max150] t= 25: h p10=0.648 p50=1.362 p90=1.495 fire(h<=0.866)=0.141 n=128
+[pop max150] t= 50: h p10=0.914 p50=1.411 p90=1.518 fire(h<=0.866)=0.078 n=128
+[pop max150] t= 75: h p10=0.903 p50=1.414 p90=1.506 fire(h<=0.866)=0.086 n=128
+[pop max150] t=100: h p10=0.962 p50=1.413 p90=1.511 fire(h<=0.866)=0.094 n=128
+[pop max150] t=125: h p10=1.081 p50=1.418 p90=1.491 fire(h<=0.866)=0.078 n=128
+[pop max150] t=150: h p10=1.149 p50=1.426 p90=1.490 fire(h<=0.866)=0.039 n=128
+
+==== verdict ====
+max100 t=25: fire=0.234 (need >= 0.7) -> FAIL
+max100 t=150: fire=0.041 but 55 episodes dropped -- population-shifted, excluded from the verdict
+max100 h p50 across t: 25:1.254 50:1.396 75:1.405 100:1.405 125:1.416 150:1.423  (monotone increasing: True)
+max150 t=25: fire=0.141 (need >= 0.7) -> FAIL
+max150 t=150: fire=0.039 (need <= 0.15) -> PASS
+max150 h p50 across t: 25:1.362 50:1.411 75:1.414 100:1.413 125:1.418 150:1.426  (monotone increasing: False)
+
+gate does NOT meet the pre-registered condition -- Phase 1 FAIL, gate is dead as specified
+(theta is derived; the condition is not re-tuned either way)
+[out] wrote Results/horizon_gate_reacher.json

@@ -1,0 +1,29 @@
+=== gatev4c arm=r_flat5 t=150 seed=44 n=35 epfile=reacher_gatev4c_route_t150_flat5.json (budget=300) ===
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+[model] frozen LeWM (18.03M), device=cuda, training=False, subgoal=baseline
+17:13:34 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+[episodes-file] reacher_gatev4c_route_t150_flat5.json: 35 precomputed pairs (built for max_offset=150, seed=999, episode_min=8000) -- sampling bypassed; running at goal_offset=150
+[eval] start=random num_eval=35 goal_offset=150 budget=300 qpos_threshold=0.05 rad/joint
+[eval] episodes_idx[:5]=[8000, 8064, 8071, 8102, 8189] start_steps[:5]=[10, 5, 12, 7, 15]
+17:13:34 | INFO  | __init__.py | MUJOCO_GL=egl, attempting to import specified OpenGL backend.
+17:13:34 | INFO  | __init__.py | No OpenGL_accelerate module loaded: No module named 'OpenGL_accelerate'
+17:13:34 | INFO  | __init__.py | MuJoCo library version is: 3.10.0
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/envs/registration.py:729: UserWarning: [33mWARN: The environment is being initialised with render_mode='rgb_array' that is not in the possible render_modes ([]).[0m
+  logger.warn(
+CEM solve time: 20.5875 seconds
+CEM solve time: 16.1720 seconds
+CEM solve time: 5.2348 seconds
+CEM solve time: 1.7354 seconds
+CEM solve time: 1.1565 seconds
+CEM solve time: 0.5788 seconds
+CEM solve time: 0.5787 seconds
+CEM solve time: 0.5790 seconds
+CEM solve time: 0.5788 seconds
+CEM solve time: 0.5788 seconds
+CEM solve time: 0.5790 seconds
+CEM solve time: 0.5789 seconds
+
+==== FF-JEPA eval summary (Reacher qpos_match) ====
+subgoal=baseline num_eval=35 goal_offset=150 budget=300 seed=44 cem_seed=44 S=25
+  SR = 97.14%  (34/35)

@@ -1,0 +1,51 @@
+=== floor probe: pusht ===
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+2026-07-13 12:12:55.504 | INFO     | stable_worldmodel.wm.utils:_resolve_hf:149 - Loading quentinll/lewm-pusht from local cache...
+2026-07-13 12:12:55.504 | INFO     | stable_worldmodel.wm.utils:_resolve_folder:137 - Loading checkpoint from folder /lustre/home/ha676/.stable_worldmodel/checkpoints/models--quentinll--lewm-pusht...
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/wm/utils.py:80: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  state_dict = torch.load(checkpoint_path, map_location='cpu')
+12:13:00 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+12:13:00 | INFO  | utils.py    | Created ViT-tiny from scratch with config: {'hidden_size': 192, 'num_hidden_layers': 12, 'num_attention_heads': 3, 'intermediate_size': 768, 'image_size': 224, 'patch_size': 14}
+[data] /lustre/home/ha676/data/pusht/pusht_expert_train.h5: 18685 episodes, 18685 eligible (episode_min=0)
+[A] temporal floor disp(1): {'mean': 0.08900800784749663, 'std': 0.05403819030421845, 'p10': 0.03166906274855137, 'p50': 0.08048468083143234, 'p90': 0.15173384547233582, 'n': 512}
+[A] reference disp(S=10): {'mean': 0.7016811385656183, 'std': 0.2786054636638661, 'p10': 0.34579263627529144, 'p50': 0.699616402387619, 'p90': 1.0854989767074585, 'n': 512}
+[B] criterion pairs (20deg): 458/512 anchors matched
+[B] criterion pairs (5deg): 436/512 anchors matched
+[B] criterion_floor_20deg: {'mean': 0.3577663780415764, 'std': 0.32289352825134066, 'p10': 0.03566625379025936, 'p50': 0.23327748477458954, 'p90': 0.8432074308395386, 'n': 458}
+[B] criterion_floor_5deg: {'mean': 0.27214625214040705, 'std': 0.26757875625041894, 'p10': 0.022964559495449066, 'p50': 0.172639861702919, 'p90': 0.7180356979370117, 'n': 436}
+[C] k=  1 dispersion: {'mean': 0.6645519216253888, 'std': 0.11709760687711106, 'p10': 0.5368062376976013, 'p50': 0.6490748226642609, 'p90': 0.8058086633682251, 'n': 1024}
+[C] k=  2 dispersion: {'mean': 0.6572331006464083, 'std': 0.11793714596798652, 'p10': 0.5278833925724029, 'p50': 0.6445245146751404, 'p90': 0.7926306068897248, 'n': 1024}
+[C] k=  3 dispersion: {'mean': 0.10457944078370929, 'std': 0.07866766316883518, 'p10': 0.04263714216649532, 'p50': 0.07953755557537079, 'p90': 0.1905600875616074, 'n': 1024}
+[C] k=  4 dispersion: {'mean': 0.11557011543300177, 'std': 0.09790552469792908, 'p10': 0.03727402128279209, 'p50': 0.0831337496638298, 'p90': 0.23640285879373552, 'n': 1024}
+[C] k=  5 dispersion: {'mean': 0.11714050576119917, 'std': 0.09795556352418144, 'p10': 0.03580703362822533, 'p50': 0.08457072824239731, 'p90': 0.23597791641950608, 'n': 1024}
+[C] k=  6 dispersion: {'mean': 0.12840968369891925, 'std': 0.10746278120994872, 'p10': 0.03687525726854801, 'p50': 0.09488199278712273, 'p90': 0.26120912432670595, 'n': 1024}
+[C] k=  8 dispersion: {'mean': 0.13140250145352184, 'std': 0.11587323011554798, 'p10': 0.03428400456905365, 'p50': 0.0945117175579071, 'p90': 0.26763402223587046, 'n': 1024}
+[C] k= 12 dispersion: {'mean': 0.13977199591317913, 'std': 0.12349492890663259, 'p10': 0.03839231505990028, 'p50': 0.098485317081213, 'p90': 0.2802185654640198, 'n': 1024}
+[C] k= 16 dispersion: {'mean': 0.14780394413719478, 'std': 0.13419218899816726, 'p10': 0.039839811995625495, 'p50': 0.10356806218624115, 'p90': 0.3276595205068589, 'n': 1024}
+[C] k= 50 dispersion: {'mean': 0.1540773479046038, 'std': 0.13935303855029968, 'p10': 0.0418510239571333, 'p50': 0.10957685858011246, 'p90': 0.3310909688472748, 'n': 1024}
+[C] bias k=1 vs k=50: p50=1.0408
+[C] bias k=2 vs k=50: p50=1.0245
+[C] bias k=3 vs k=50: p50=0.1076
+[C] bias k=4 vs k=50: p50=0.0858
+[C] bias k=5 vs k=50: p50=0.0730
+[C] bias k=6 vs k=50: p50=0.0716
+[C] bias k=8 vs k=50: p50=0.0723
+[C] bias k=12 vs k=50: p50=0.0686
+[C] bias k=16 vs k=50: p50=0.0639
+
+==== verdict ====
+criterion floor (criterion_floor_20deg): p50=0.2333 p90=0.8432
+tau*=0.20 vs floor band [0.233, 1.096]: OFF-FLOOR
+k=  1: sampler dispersion p50=0.6491 (ABOVE floor p50) -> verifier should reject noise-drafts
+k=  2: sampler dispersion p50=0.6445 (ABOVE floor p50) -> verifier should reject noise-drafts
+k=  3: sampler dispersion p50=0.0795 (below floor p50) -> drafts resolvable
+k=  4: sampler dispersion p50=0.0831 (below floor p50) -> drafts resolvable
+k=  5: sampler dispersion p50=0.0846 (below floor p50) -> drafts resolvable
+k=  6: sampler dispersion p50=0.0949 (below floor p50) -> drafts resolvable
+k=  8: sampler dispersion p50=0.0945 (below floor p50) -> drafts resolvable
+k= 12: sampler dispersion p50=0.0985 (below floor p50) -> drafts resolvable
+k= 16: sampler dispersion p50=0.1036 (below floor p50) -> drafts resolvable
+k= 50: sampler dispersion p50=0.1096 (below floor p50) -> drafts resolvable
+interpretation: floor k-independent by construction (B never touches the drafter); if dispersion crosses the floor between k=2 and k=4, the k-cliff and the call_ratio->1.00 self-test are the same phenomenon.
+[out] wrote Results/floor_pusht.json

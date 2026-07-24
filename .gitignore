@@ -32,3 +32,6 @@ paper/*.synctex.gz
 # README pin) and encoded-latent artifacts (reproducible via encode_episodes)
 vjepa2/upstream/
 vjepa2/*.npz
+
+# 175MB trace tarball; over GitHub's 100MB/file limit (see its README entry)
+Results/isca_verdict_logs/reacher_traces.tgz

@@ -1,0 +1,92 @@
+=== audit tau-selection on VAL: tau=0.15 seed=42 ===
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+2026-07-12 20:39:15.318 | INFO     | stable_worldmodel.wm.utils:_resolve_hf:149 - Loading quentinll/lewm-pusht from local cache...
+2026-07-12 20:39:15.318 | INFO     | stable_worldmodel.wm.utils:_resolve_folder:137 - Loading checkpoint from folder /lustre/home/ha676/.stable_worldmodel/checkpoints/models--quentinll--lewm-pusht...
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/wm/utils.py:80: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  state_dict = torch.load(checkpoint_path, map_location='cpu')
+20:39:20 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+20:39:20 | INFO  | utils.py    | Created ViT-tiny from scratch with config: {'hidden_size': 192, 'num_hidden_layers': 12, 'num_attention_heads': 3, 'intermediate_size': 768, 'image_size': 224, 'patch_size': 14}
+[model] frozen LeWM (18.03M), device=cuda, training=False, subgoal=specaccept
+[gdm] planner from gdm_stride10.pt: head=53.34M, N=3 WG=1 gamma=1.0 T=1000 sampler=ddim/8-steps param=eps schedule=linear norm=standardize
+20:39:21 | INFO  | __init__.py | Cached 'action' from '/lustre/home/ha676/data/pusht/pusht_expert_train.h5'
+20:39:21 | INFO  | __init__.py | Cached 'proprio' from '/lustre/home/ha676/data/pusht/pusht_expert_train.h5'
+20:39:22 | INFO  | __init__.py | Cached 'state' from '/lustre/home/ha676/data/pusht/pusht_expert_train.h5'
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/spaces/box.py:415: UserWarning: [33mWARN: Casting input x to numpy array.[0m
+  gym.logger.warn("Casting input x to numpy array.")
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/spaces/box.py:415: UserWarning: [33mWARN: Casting input x to numpy array.[0m
+  gym.logger.warn("Casting input x to numpy array.")
+[episodes-file] pusht.episodes150.val.json: 256 precomputed pairs (goal_offset=150, seed=777, eval_filter=None) -- sample_long/short bypassed
+[eval] mode=long start=final num_eval=256 goal_offset=150 budget=300 eval_filter=none
+[eval] episodes_idx[:5]=[611, 612, 622, 629, 630] start_steps[:5]=[7, 7, 7, 7, 7]
+[PIN] success = pos_diff<20 [block xy only (paper)] AND angle<20deg
+CEM solve time: 54.7954 seconds
+CEM solve time: 53.8967 seconds
+CEM solve time: 53.6407 seconds
+CEM solve time: 53.6643 seconds
+CEM solve time: 53.7136 seconds
+CEM solve time: 53.5674 seconds
+CEM solve time: 52.1403 seconds
+CEM solve time: 51.5778 seconds
+CEM solve time: 50.2930 seconds
+CEM solve time: 46.1778 seconds
+CEM solve time: 42.3556 seconds
+CEM solve time: 38.5231 seconds
+CEM solve time: 35.1021 seconds
+CEM solve time: 32.8813 seconds
+CEM solve time: 29.4646 seconds
+CEM solve time: 27.3343 seconds
+CEM solve time: 25.6422 seconds
+CEM solve time: 24.3418 seconds
+CEM solve time: 23.2842 seconds
+CEM solve time: 22.4762 seconds
+CEM solve time: 22.0439 seconds
+CEM solve time: 21.5965 seconds
+CEM solve time: 20.7781 seconds
+CEM solve time: 20.7369 seconds
+CEM solve time: 20.7454 seconds
+CEM solve time: 20.5482 seconds
+CEM solve time: 20.5263 seconds
+CEM solve time: 20.3348 seconds
+CEM solve time: 20.3319 seconds
+CEM solve time: 20.3553 seconds
+[RESULT] score=block angle=20deg  SR=63.67%  (163/256)
+[specaccept] tau=0.15 gdm_steps=8 re-drafts=2978 advances=1852 rejects=2386 call_ratio=0.617 (every-step=1.000; lower = fewer diffusion calls)
+[PIN] success = pos_diff<20 [block xy only (paper)] AND angle<5deg
+CEM solve time: 54.8364 seconds
+CEM solve time: 54.1636 seconds
+CEM solve time: 54.1557 seconds
+CEM solve time: 54.2258 seconds
+CEM solve time: 54.2584 seconds
+CEM solve time: 54.2391 seconds
+CEM solve time: 53.9868 seconds
+CEM solve time: 52.7201 seconds
+CEM solve time: 51.6153 seconds
+CEM solve time: 50.2924 seconds
+CEM solve time: 48.1027 seconds
+CEM solve time: 44.9571 seconds
+CEM solve time: 40.6844 seconds
+CEM solve time: 38.9520 seconds
+CEM solve time: 35.9544 seconds
+CEM solve time: 33.6257 seconds
+CEM solve time: 30.7900 seconds
+CEM solve time: 29.9497 seconds
+CEM solve time: 29.3620 seconds
+CEM solve time: 29.3440 seconds
+CEM solve time: 28.0611 seconds
+CEM solve time: 27.3870 seconds
+CEM solve time: 26.5459 seconds
+CEM solve time: 26.1185 seconds
+CEM solve time: 25.9044 seconds
+CEM solve time: 25.5100 seconds
+CEM solve time: 25.0786 seconds
+CEM solve time: 25.0503 seconds
+CEM solve time: 24.8385 seconds
+CEM solve time: 24.6571 seconds
+[RESULT] score=block angle=5deg  SR=55.08%  (141/256)
+[specaccept] tau=0.15 gdm_steps=8 re-drafts=3278 advances=2117 rejects=2626 call_ratio=0.608 (every-step=1.000; lower = fewer diffusion calls)
+
+==== FF-JEPA eval summary ====
+mode=long subgoal=specaccept num_eval=256 seed=42 cem_seed=42 eval_filter=none
+  score=block   20deg :  63.67%  (163/256)
+  score=block    5deg :  55.08%  (141/256)

@@ -1,0 +1,77 @@
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+[model] frozen LeWM (18.03M), device=cuda, training=False, subgoal=gdm
+[gdm] planner from gdm_reacher_s5.pt: head=53.44M, N=3 WG=1 goal_cond=True T=1000 sampler=ddim/50-steps param=eps schedule=linear norm=standardize
+18:58:50 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+[episodes-file] reacher_slong.ep150.t5.json: 128 precomputed pairs (built for max_offset=150, seed=42, episode_min=8000) -- sampling bypassed; running at goal_offset=150
+[eval] start=random num_eval=128 goal_offset=150 budget=300 qpos_threshold=0.05 rad/joint
+[eval] episodes_idx[:5]=[8014, 8074, 8087, 8127, 8135] start_steps[:5]=[36, 26, 27, 26, 37]
+18:58:51 | INFO  | __init__.py | MUJOCO_GL=egl, attempting to import specified OpenGL backend.
+18:58:51 | INFO  | __init__.py | No OpenGL_accelerate module loaded: No module named 'OpenGL_accelerate'
+18:58:51 | INFO  | __init__.py | MuJoCo library version is: 3.10.0
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/envs/registration.py:729: UserWarning: [33mWARN: The environment is being initialised with render_mode='rgb_array' that is not in the possible render_modes ([]).[0m
+  logger.warn(
+CEM solve time: 13.8394 seconds
+CEM solve time: 13.4729 seconds
+CEM solve time: 13.0429 seconds
+CEM solve time: 12.8366 seconds
+CEM solve time: 12.4130 seconds
+CEM solve time: 11.8754 seconds
+CEM solve time: 11.6611 seconds
+CEM solve time: 10.8161 seconds
+CEM solve time: 10.3807 seconds
+CEM solve time: 10.0642 seconds
+CEM solve time: 9.7366 seconds
+CEM solve time: 8.7737 seconds
+CEM solve time: 8.1345 seconds
+CEM solve time: 7.8078 seconds
+CEM solve time: 7.3837 seconds
+CEM solve time: 7.0681 seconds
+CEM solve time: 6.4219 seconds
+CEM solve time: 5.9948 seconds
+CEM solve time: 5.5615 seconds
+CEM solve time: 5.2475 seconds
+CEM solve time: 5.1384 seconds
+CEM solve time: 4.8171 seconds
+CEM solve time: 4.6023 seconds
+CEM solve time: 4.1768 seconds
+CEM solve time: 3.8576 seconds
+CEM solve time: 3.7511 seconds
+CEM solve time: 3.4279 seconds
+CEM solve time: 3.3198 seconds
+CEM solve time: 3.2147 seconds
+CEM solve time: 2.9992 seconds
+CEM solve time: 3.0003 seconds
+CEM solve time: 2.7860 seconds
+CEM solve time: 2.6786 seconds
+CEM solve time: 2.4640 seconds
+CEM solve time: 2.3579 seconds
+CEM solve time: 2.3575 seconds
+CEM solve time: 2.3584 seconds
+CEM solve time: 2.2502 seconds
+CEM solve time: 2.0364 seconds
+CEM solve time: 2.0361 seconds
+CEM solve time: 1.9291 seconds
+CEM solve time: 1.8231 seconds
+CEM solve time: 1.6073 seconds
+CEM solve time: 1.3938 seconds
+CEM solve time: 1.3931 seconds
+CEM solve time: 1.1788 seconds
+CEM solve time: 1.0722 seconds
+CEM solve time: 1.0722 seconds
+CEM solve time: 0.9644 seconds
+CEM solve time: 0.7506 seconds
+CEM solve time: 0.7505 seconds
+CEM solve time: 0.7506 seconds
+CEM solve time: 0.7502 seconds
+CEM solve time: 0.7508 seconds
+CEM solve time: 0.7506 seconds
+CEM solve time: 0.6439 seconds
+CEM solve time: 0.6439 seconds
+CEM solve time: 0.6448 seconds
+CEM solve time: 0.6444 seconds
+CEM solve time: 0.5370 seconds
+
+==== FF-JEPA eval summary (Reacher qpos_match) ====
+subgoal=gdm num_eval=128 goal_offset=150 budget=300 seed=43 cem_seed=43 S=5
+  SR = 96.09%  (123/128)

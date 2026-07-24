@@ -1,0 +1,51 @@
+/lustre/home/ha676/le-wm/specaccept/probes/horizon_gate.py:86: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  d = torch.load(args.dense_pt, map_location="cpu")
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+[tau] 0.20 = the frozen accept-test threshold recorded by Results/floor_reacher.json (closed-loop sbatches pin --accept-tau 0.20); criterion-floor-derived, second use, not swept here
+[pre-registered] fire-rate >= 0.7 at t=25 and <= 0.15 at t=150; high fire at EVERY t = model exploitation and the gate fails for that reason
+[flat-branch] RH=2 (strongest short-range flat, strongbase sweep), plan window = 10 env steps, CEM 300x30 topk=30 var=1.0 seed=42
+[data] subgoals_reacher_dense.pt: 10000 episodes, latents (2010000, 192) (frozen encoder, batch-independent -> identical to the pixel path)
+[model] frozen LeWM predictor loaded (18.03M), device=cuda
+
+[pop max100] reacher_horizon.ep.t0.json: 128 pairs (max_offset=100, seed=42, episode_min=8000)
+CEM solve time: 29.1089 seconds
+[pop max100] t= 25: c* p10=0.068 p50=0.081 p90=0.100 fire(c*<=0.20)=0.969 n=128
+CEM solve time: 16.7627 seconds
+[pop max100] t= 50: c* p10=0.071 p50=0.089 p90=1.454 fire(c*<=0.20)=0.797 n=128
+CEM solve time: 16.8068 seconds
+[pop max100] t= 75: c* p10=0.075 p50=0.090 p90=1.787 fire(c*<=0.20)=0.680 n=128
+CEM solve time: 16.8684 seconds
+[pop max100] t=100: c* p10=0.073 p50=0.098 p90=1.681 fire(c*<=0.20)=0.609 n=128
+CEM solve time: 13.6572 seconds
+[pop max100] t=125: c* p10=0.075 p50=0.100 p90=1.675 fire(c*<=0.20)=0.524 n=103  [25 dropped: goal past episode end -- population-shifted cell]
+CEM solve time: 9.6833 seconds
+[pop max100] t=150: c* p10=0.079 p50=1.338 p90=2.466 fire(c*<=0.20)=0.425 n=73  [55 dropped: goal past episode end -- population-shifted cell]
+
+[pop max150] reacher_horizon150.ep.t0.json: 128 pairs (max_offset=150, seed=42, episode_min=8000)
+CEM solve time: 16.9870 seconds
+[pop max150] t= 25: c* p10=0.069 p50=0.080 p90=0.102 fire(c*<=0.20)=0.953 n=128
+CEM solve time: 17.0125 seconds
+[pop max150] t= 50: c* p10=0.072 p50=0.086 p90=1.445 fire(c*<=0.20)=0.820 n=128
+CEM solve time: 17.0644 seconds
+[pop max150] t= 75: c* p10=0.075 p50=0.090 p90=1.626 fire(c*<=0.20)=0.703 n=128
+CEM solve time: 17.0939 seconds
+[pop max150] t=100: c* p10=0.073 p50=0.096 p90=1.981 fire(c*<=0.20)=0.625 n=128
+CEM solve time: 17.0906 seconds
+[pop max150] t=125: c* p10=0.072 p50=0.108 p90=2.791 fire(c*<=0.20)=0.531 n=128
+CEM solve time: 17.0946 seconds
+[pop max150] t=150: c* p10=0.074 p50=0.105 p90=1.670 fire(c*<=0.20)=0.531 n=128
+
+==== verdict ====
+max100 t=25: fire=0.969 (need >= 0.7) -> PASS
+max100 t=150: fire=0.425 but 55 episodes dropped -- population-shifted, excluded from the verdict
+max100 c* p50 across t: 25:0.081 50:0.089 75:0.090 100:0.098 125:0.100 150:1.338  (monotone increasing: True)
+max150 t=25: fire=0.953 (need >= 0.7) -> PASS
+max150 t=150: fire=0.531 (need <= 0.15) -> FAIL
+max150 c* p50 across t: 25:0.080 50:0.086 75:0.090 100:0.096 125:0.108 150:0.105  (monotone increasing: False)
+
+MODEL EXPLOITATION FLAG: fire-rate is high at t=150 as well as t=25 -- c* is the planner's own optimistic estimate under its learned dynamics, and a uniformly low c* means CEM believes it can reach ANY goal in one plan. That is optimism, not a horizon signal; the gate fails for this reason regardless of the t=25 check.
+
+gate does NOT meet the pre-registered condition -- Phase 1 FAIL, gate v2 is dead as specified
+(tau is the verifier's frozen threshold; not amended either way)
+[out] wrote Results/horizon_gate_cem_reacher.json

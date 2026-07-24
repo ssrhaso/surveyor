@@ -1,0 +1,381 @@
+=== unif-pusht t=100 seed=42 n=256 (unified c*-retire, budget=200) ===
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+2026-07-15 17:19:41.263 | INFO     | stable_worldmodel.wm.utils:_resolve_hf:149 - Loading quentinll/lewm-pusht from local cache...
+2026-07-15 17:19:41.264 | INFO     | stable_worldmodel.wm.utils:_resolve_folder:137 - Loading checkpoint from folder /lustre/home/ha676/.stable_worldmodel/checkpoints/models--quentinll--lewm-pusht...
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/wm/utils.py:80: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  state_dict = torch.load(checkpoint_path, map_location='cpu')
+17:19:45 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+17:19:45 | INFO  | utils.py    | Created ViT-tiny from scratch with config: {'hidden_size': 192, 'num_hidden_layers': 12, 'num_attention_heads': 3, 'intermediate_size': 768, 'image_size': 224, 'patch_size': 14}
+[model] frozen LeWM (18.03M), device=cuda, training=False, subgoal=unified
+[gdm] planner from gdm_stride10.pt: head=53.34M, N=3 WG=1 gamma=1.0 T=1000 sampler=ddim/3-steps param=eps schedule=linear norm=standardize
+17:19:46 | INFO  | __init__.py | Cached 'action' from '/lustre/home/ha676/data/pusht/pusht_expert_train.h5'
+17:19:46 | INFO  | __init__.py | Cached 'proprio' from '/lustre/home/ha676/data/pusht/pusht_expert_train.h5'
+17:19:46 | INFO  | __init__.py | Cached 'state' from '/lustre/home/ha676/data/pusht/pusht_expert_train.h5'
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/spaces/box.py:415: UserWarning: [33mWARN: Casting input x to numpy array.[0m
+  gym.logger.warn("Casting input x to numpy array.")
+[episodes-file] pusht_gatev4_route_t100_spec.json: 256 precomputed pairs (goal_offset=100, seed=42, eval_filter=None) -- sample_long/short bypassed
+[eval] mode=long start=final num_eval=256 goal_offset=100 budget=200 eval_filter=none
+[eval] episodes_idx[:5]=[618, 812, 816, 843, 863] start_steps[:5]=[57, 84, 84, 84, 84]
+[PIN] success = pos_diff<20 [block xy only (paper)] AND angle<20deg
+[unified] c*-retire spec-accept: tau=0.2, retire window=10 steps; drafting only while the goal is out of certified reach
+17:19:58 | ERROR | richuru.py  | Exception:
+Traceback (most recent call last):
+
+> File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+
+  File "/lustre/home/ha676/le-wm/specaccept/envs/pusht/eval.py", line 580, in <module>
+    main()
+    └ <function main at 0x7f06ea431260>
+
+  File "/lustre/home/ha676/le-wm/specaccept/envs/pusht/eval.py", line 476, in main
+    metrics = world.evaluate(
+              │     └ <function World.evaluate at 0x7f067ad8c2c0>
+              └ <stable_worldmodel.world.world.World object at 0x7f0656e92a90>
+
+  File "/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/world/world.py", line 244, in evaluate
+    return self._evaluate_from_dataset(
+           │    └ <function World._evaluate_from_dataset at 0x7f067ad8c680>
+           └ <stable_worldmodel.world.world.World object at 0x7f0656e92a90>
+  File "/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/world/world.py", line 550, in _evaluate_from_dataset
+    self._run(max_steps=eval_budget, mode=mode, on_step=on_step)
+    │    │              │                 │             └ <function World._evaluate_from_dataset.<locals>.on_step at 0x7f0614108e00>
+    │    │              │                 └ 'wait'
+    │    │              └ 200
+    │    └ <function World._run at 0x7f067ad8c400>
+    └ <stable_worldmodel.world.world.World object at 0x7f0656e92a90>
+  File "/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/world/world.py", line 365, in _run
+    for env_idx, ep_count in self._run_iter(
+                             │    └ <function World._run_iter at 0x7f067ad8c4a0>
+                             └ <stable_worldmodel.world.world.World object at 0x7f0656e92a90>
+  File "/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/world/world.py", line 404, in _run_iter
+    actions = self._get_actions()
+              │    └ <function World._get_actions at 0x7f067ad8c540>
+              └ <stable_worldmodel.world.world.World object at 0x7f0656e92a90>
+  File "/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/world/world.py", line 449, in _get_actions
+    return self.policy.get_action(self.infos)
+           │    │      │          │    └ {'env_name': [['PushT'], ['PushT'], ['PushT'], ['PushT'], ['PushT'], ['PushT'], ['PushT'], ['PushT'], ['PushT'], ['PushT'], [...
+           │    │      │          └ <stable_worldmodel.world.world.World object at 0x7f0656e92a90>
+           │    │      └ <function make_ffjepa_policy.<locals>._FFJEPAPolicy.get_action at 0x7f06ec1c3920>
+           │    └ <specaccept.sources.make_ffjepa_policy.<locals>._FFJEPAPolicy object at 0x7f061c8cd4d0>
+           └ <stable_worldmodel.world.world.World object at 0x7f0656e92a90>
+
+  File "/lustre/home/ha676/le-wm/specaccept/sources.py", line 850, in get_action
+    z = self.subgoal_source.current(self._sg_step, obs_latent=obs_latent,
+        │    │              │       │    │                    └ tensor([[-0.9632, -0.8714,  0.1922,  ...,  0.4655,  0.8098,  1.0060],
+        │    │              │       │    │                              [-0.0441, -0.8400, -1.3067,  ..., -1.3393,  1.3...
+        │    │              │       │    └ array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        │    │              │       │             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+        │    │              │       └ <specaccept.sources.make_ffjepa_policy.<locals>._FFJEPAPolicy object at 0x7f061c8cd4d0>
+        │    │              └ <function CstarRetireSource.current at 0x7f06ea430680>
+        │    └ <specaccept.sources.CstarRetireSource object at 0x7f061c491d50>
+        └ <specaccept.sources.make_ffjepa_policy.<locals>._FFJEPAPolicy object at 0x7f061c8cd4d0>
+
+  File "/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           │     │       └ {'obs_latent': tensor([[-0.9632, -0.8714,  0.1922,  ...,  0.4655,  0.8098,  1.0060],
+           │     │                 [-0.0441, -0.8400, -1.3067,  ......
+           │     └ (<specaccept.sources.CstarRetireSource object at 0x7f061c491d50>, array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1...
+           └ <function CstarRetireSource.current at 0x7f06ea4305e0>
+
+  File "/lustre/home/ha676/le-wm/specaccept/sources.py", line 476, in current
+    cs = cem_flat_cstar(self.lewm, self.cost_model,
+         │              │    │     │    └ SubgoalCostModel(
+         │              │    │     │        (lewm): LeWM(
+         │              │    │     │          (encoder): ViTModel(
+         │              │    │     │            (embeddings): ViTEmbeddings(
+         │              │    │     │              (patch_embeddings): ViT...
+         │              │    │     └ <specaccept.sources.CstarRetireSource object at 0x7f061c491d50>
+         │              │    └ LeWM(
+         │              │        (encoder): ViTModel(
+         │              │          (embeddings): ViTEmbeddings(
+         │              │            (patch_embeddings): ViTPatchEmbeddings(
+         │              │              (projecti...
+         │              └ <specaccept.sources.CstarRetireSource object at 0x7f061c491d50>
+         └ <function cem_flat_cstar at 0x7f06ea430400>
+
+  File "/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           │     │       └ {'adim': 2}
+           │     └ (LeWM(
+           │         (encoder): ViTModel(
+           │           (embeddings): ViTEmbeddings(
+           │             (patch_embeddings): ViTPatchEmbeddings(
+           │               (project...
+           └ <function cem_flat_cstar at 0x7f06ea3ff060>
+
+  File "/lustre/home/ha676/le-wm/specaccept/sources.py", line 403, in cem_flat_cstar
+    plan = solver.solve(info)["actions"].to(dev)       # (n, H, block*adim)
+           │      │     │                   └ device(type='cuda', index=0)
+           │      │     └ {'pixels': tensor([[[[[0.]]]],
+           │      │       
+           │      │       
+           │      │       
+           │      │               [[[[0.]]]],
+           │      │       
+           │      │       
+           │      │       
+           │      │               [[[[0.]]]],
+           │      │       
+           │      │       
+           │      │       
+           │      │               [[[[0.]]]],
+           │      │       
+           │      │       
+           │      │       
+           │      │               [[[[0.]]]],
+           │      │       
+           │      │       
+           │      │       ...
+           │      └ <function CEMSolver.solve at 0x7f06c10298a0>
+           └ <stable_worldmodel.solver.cem.CEMSolver object at 0x7f061422aa90>
+
+  File "/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+           │     │       └ {}
+           │     └ (<stable_worldmodel.solver.cem.CEMSolver object at 0x7f061422aa90>, {'pixels': tensor([[[[[0.]]]],
+           │       
+           │       
+           │       
+           │               [[[[0.]]]],
+           │       
+           │       
+           │       
+           │       ...
+           └ <function CEMSolver.solve at 0x7f06c1029800>
+  File "/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/solver/cem.py", line 210, in solve
+    costs = self.model.get_cost(expanded_infos, candidates)
+            │    │     │        │               └ tensor([[[[ 0.0000e+00,  0.0000e+00,  0.0000e+00,  ...,  0.0000e+00,
+            │    │     │        │                             0.0000e+00,  0.0000e+00],
+            │    │     │        │                           [ 0.0000...
+            │    │     │        └ {'pixels': tensor([[[[[[0.]]]],
+            │    │     │          
+            │    │     │          
+            │    │     │          
+            │    │     │                   [[[[0.]]]],
+            │    │     │          
+            │    │     │          
+            │    │     │          
+            │    │     │                   [[[[0.]]]],
+            │    │     │          
+            │    │     │          
+            │    │     │          
+            │    │     │                   ...,
+            │    │     │          
+            │    │     │          
+            │    │     │          
+            │    │     │                   [[[[0.]]]],
+            │    │     │          
+            │    │     │          
+            │    │     │          
+            │    │     │           ...
+            │    │     └ <function SubgoalCostModel.get_cost at 0x7f06ea3ff920>
+            │    └ SubgoalCostModel(
+            │        (lewm): LeWM(
+            │          (encoder): ViTModel(
+            │            (embeddings): ViTEmbeddings(
+            │              (patch_embeddings): ViT...
+            └ <stable_worldmodel.solver.cem.CEMSolver object at 0x7f061422aa90>
+
+  File "/lustre/home/ha676/le-wm/specaccept/sources.py", line 87, in get_cost
+    info_dict = self.lewm.rollout(info_dict, action_candidates)
+                │                 │          └ tensor([[[[ 0.0000e+00,  0.0000e+00,  0.0000e+00,  ...,  0.0000e+00,
+                │                 │                        0.0000e+00,  0.0000e+00],
+                │                 │                      [ 0.0000...
+                │                 └ {'pixels': tensor([[[[[[0.]]]],
+                │                   
+                │                   
+                │                   
+                │                            [[[[0.]]]],
+                │                   
+                │                   
+                │                   
+                │                            [[[[0.]]]],
+                │                   
+                │                   
+                │                   
+                │                            ...,
+                │                   
+                │                   
+                │                   
+                │                            [[[[0.]]]],
+                │                   
+                │                   
+                │                   
+                │                    ...
+                └ SubgoalCostModel(
+                    (lewm): LeWM(
+                      (encoder): ViTModel(
+                        (embeddings): ViTEmbeddings(
+                          (patch_embeddings): ViT...
+
+  File "/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/wm/lewm/lewm.py", line 100, in rollout
+    emb_list.append(self.predict(emb_trunc, act_trunc)[:, -1])
+    │        │      │    │       │          └ tensor([[[-0.4978,  0.6384, -0.9676,  ...,  0.0888,  0.6091,  0.3068]],
+    │        │      │    │       │            
+    │        │      │    │       │                    [[-1.5425,  1.7520, -0.5207,  ...,  0.5598, ...
+    │        │      │    │       └ tensor([[[-0.9632, -0.8714,  0.1922,  ...,  0.4655,  0.8098,  1.0060]],
+    │        │      │    │         
+    │        │      │    │                 [[-0.9632, -0.8714,  0.1922,  ...,  0.4655, ...
+    │        │      │    └ <function LeWM.predict at 0x7f06c0eb2c00>
+    │        │      └ LeWM(
+    │        │          (encoder): ViTModel(
+    │        │            (embeddings): ViTEmbeddings(
+    │        │              (patch_embeddings): ViTPatchEmbeddings(
+    │        │                (projecti...
+    │        └ <method 'append' of 'list' objects>
+    └ [tensor([[-0.9632, -0.8714,  0.1922,  ...,  0.4655,  0.8098,  1.0060],
+              [-0.9632, -0.8714,  0.1922,  ...,  0.4655,  0....
+  File "/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/wm/lewm/lewm.py", line 49, in predict
+    preds = self.predictor(emb, act_emb)
+            │              │    └ tensor([[[-0.4978,  0.6384, -0.9676,  ...,  0.0888,  0.6091,  0.3068]],
+            │              │      
+            │              │              [[-1.5425,  1.7520, -0.5207,  ...,  0.5598, ...
+            │              └ tensor([[[-0.9632, -0.8714,  0.1922,  ...,  0.4655,  0.8098,  1.0060]],
+            │                
+            │                        [[-0.9632, -0.8714,  0.1922,  ...,  0.4655, ...
+            └ LeWM(
+                (encoder): ViTModel(
+                  (embeddings): ViTEmbeddings(
+                    (patch_embeddings): ViTPatchEmbeddings(
+                      (projecti...
+  File "/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           │    │           │       └ {}
+           │    │           └ (tensor([[[-0.9632, -0.8714,  0.1922,  ...,  0.4655,  0.8098,  1.0060]],
+           │    │             
+           │    │                     [[-0.9632, -0.8714,  0.1922,  ...,  0.4655,...
+           │    └ <function Module._call_impl at 0x7f06ebf34220>
+           └ Predictor(
+               (dropout): Dropout(p=0.0, inplace=False)
+               (transformer): Transformer(
+                 (norm): LayerNorm((192,), eps=1e-05, ...
+  File "/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           │             │       └ {}
+           │             └ (tensor([[[-0.9632, -0.8714,  0.1922,  ...,  0.4655,  0.8098,  1.0060]],
+           │               
+           │                       [[-0.9632, -0.8714,  0.1922,  ...,  0.4655,...
+           └ <bound method Predictor.forward of Predictor(
+               (dropout): Dropout(p=0.0, inplace=False)
+               (transformer): Transformer(
+                 (n...
+  File "/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/wm/lewm/module.py", line 293, in forward
+    x = self.transformer(x, c)
+        │                │  └ tensor([[[-0.4978,  0.6384, -0.9676,  ...,  0.0888,  0.6091,  0.3068]],
+        │                │    
+        │                │            [[-1.5425,  1.7520, -0.5207,  ...,  0.5598, ...
+        │                └ tensor([[[-0.1274, -0.8076,  3.4387,  ..., -0.2682,  1.7227,  2.4970]],
+        │                  
+        │                          [[-0.1274, -0.8076,  3.4387,  ..., -0.2682, ...
+        └ Predictor(
+            (dropout): Dropout(p=0.0, inplace=False)
+            (transformer): Transformer(
+              (norm): LayerNorm((192,), eps=1e-05, ...
+  File "/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           │    │           │       └ {}
+           │    │           └ (tensor([[[-0.1274, -0.8076,  3.4387,  ..., -0.2682,  1.7227,  2.4970]],
+           │    │             
+           │    │                     [[-0.1274, -0.8076,  3.4387,  ..., -0.2682,...
+           │    └ <function Module._call_impl at 0x7f06ebf34220>
+           └ Transformer(
+               (norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+               (layers): ModuleList(
+                 (0-5): 6 x Condition...
+  File "/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           │             │       └ {}
+           │             └ (tensor([[[-0.1274, -0.8076,  3.4387,  ..., -0.2682,  1.7227,  2.4970]],
+           │               
+           │                       [[-0.1274, -0.8076,  3.4387,  ..., -0.2682,...
+           └ <bound method Transformer.forward of Transformer(
+               (norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+               (layers):...
+  File "/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/wm/lewm/module.py", line 172, in forward
+    x = block(x) if isinstance(block, Block) else block(x, c)
+        │     │                │      │           │     │  └ tensor([[[-0.4978,  0.6384, -0.9676,  ...,  0.0888,  0.6091,  0.3068]],
+        │     │                │      │           │     │    
+        │     │                │      │           │     │            [[-1.5425,  1.7520, -0.5207,  ...,  0.5598, ...
+        │     │                │      │           │     └ tensor([[[-0.1274, -0.8076,  3.4387,  ..., -0.2682,  1.7227,  2.4970]],
+        │     │                │      │           │       
+        │     │                │      │           │               [[-0.1274, -0.8076,  3.4387,  ..., -0.2682, ...
+        │     │                │      │           └ ConditionalBlock(
+        │     │                │      │               (attn): Attention(
+        │     │                │      │                 (norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+        │     │                │      │                 (attend): Softma...
+        │     │                │      └ <class 'stable_worldmodel.wm.lewm.module.Block'>
+        │     │                └ ConditionalBlock(
+        │     │                    (attn): Attention(
+        │     │                      (norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+        │     │                      (attend): Softma...
+        │     └ tensor([[[-0.1274, -0.8076,  3.4387,  ..., -0.2682,  1.7227,  2.4970]],
+        │       
+        │               [[-0.1274, -0.8076,  3.4387,  ..., -0.2682, ...
+        └ ConditionalBlock(
+            (attn): Attention(
+              (norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+              (attend): Softma...
+  File "/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           │    │           │       └ {}
+           │    │           └ (tensor([[[-0.1274, -0.8076,  3.4387,  ..., -0.2682,  1.7227,  2.4970]],
+           │    │             
+           │    │                     [[-0.1274, -0.8076,  3.4387,  ..., -0.2682,...
+           │    └ <function Module._call_impl at 0x7f06ebf34220>
+           └ ConditionalBlock(
+               (attn): Attention(
+                 (norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+                 (attend): Softma...
+  File "/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           │             │       └ {}
+           │             └ (tensor([[[-0.1274, -0.8076,  3.4387,  ..., -0.2682,  1.7227,  2.4970]],
+           │               
+           │                       [[-0.1274, -0.8076,  3.4387,  ..., -0.2682,...
+           └ <bound method ConditionalBlock.forward of ConditionalBlock(
+               (attn): Attention(
+                 (norm): LayerNorm((192,), eps=1e-05, ele...
+  File "/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/wm/lewm/module.py", line 95, in forward
+    x = x + gate_msa * self.attn(
+        │   │          └ ConditionalBlock(
+        │   │              (attn): Attention(
+        │   │                (norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+        │   │                (attend): Softma...
+        │   └ tensor([[[-0.0842, -0.0338, -0.3204,  ..., -0.0107,  0.2058, -0.0356]],
+        │     
+        │             [[-0.0544, -0.0993, -0.2127,  ..., -0.0333, ...
+        └ tensor([[[-0.1274, -0.8076,  3.4387,  ..., -0.2682,  1.7227,  2.4970]],
+          
+                  [[-0.1274, -0.8076,  3.4387,  ..., -0.2682, ...
+  File "/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           │    │           │       └ {}
+           │    │           └ (tensor([[[-0.4077, -0.5996,  1.4805,  ..., -0.1809,  0.8041,  1.5969]],
+           │    │             
+           │    │                     [[-0.1842, -0.1709,  1.2509,  ...,  0.0232,...
+           │    └ <function Module._call_impl at 0x7f06ebf34220>
+           └ Attention(
+               (norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+               (attend): Softmax(dim=-1)
+               (to_qkv): Linear(in_...
+  File "/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           │             │       └ {}
+           │             └ (tensor([[[-0.4077, -0.5996,  1.4805,  ..., -0.1809,  0.8041,  1.5969]],
+           │               
+           │                       [[-0.1842, -0.1709,  1.2509,  ...,  0.0232,...
+           └ <bound method Attention.forward of Attention(
+               (norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+               (attend): Sof...
+  File "/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/wm/lewm/module.py", line 65, in forward
+    out = F.scaled_dot_product_attention(
+          │ └ <built-in function scaled_dot_product_attention>
+          └ <module 'torch.nn.functional' from '/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/torch/nn/functional.py'>
+
+RuntimeError: CUDA error: invalid configuration argument
+CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+

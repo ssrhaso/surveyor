@@ -1,0 +1,45 @@
+=== floor probe: reacher (/lustre/home/ha676/data/reacher/reacher.h5) ===
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+[state] reacher: using h5['qpos'] (2010000, 2); joints = first 2 dims
+[data] /lustre/home/ha676/data/reacher/reacher.h5: 10000 episodes, 2000 eligible (episode_min=8000)
+[A] temporal floor disp(1): {'mean': 0.23905140993156238, 'std': 0.12770722201421497, 'p10': 0.07627315297722817, 'p50': 0.22270285338163376, 'p90': 0.4284350901842118, 'n': 512}
+[A] reference disp(S=10): {'mean': 0.8578234064989374, 'std': 0.3644582327588248, 'p10': 0.33510459065437315, 'p50': 0.8661545217037201, 'p90': 1.3505411982536317, 'n': 512}
+[B] criterion pairs (qpos): 502/512 anchors matched
+[B] criterion_floor_qpos: {'mean': 0.10243661281378176, 'std': 0.0398054326094719, 'p10': 0.04559253007173538, 'p50': 0.10589560121297836, 'p90': 0.1532112941145897, 'n': 502}
+[C] goal-conditioned drafter: goals at +100
+[C] k=  1 dispersion: {'mean': 0.4311200421943795, 'std': 0.05591584744533783, 'p10': 0.37027805745601655, 'p50': 0.4227268099784851, 'p90': 0.4991927266120911, 'n': 1024}
+[C] k=  2 dispersion: {'mean': 0.42061428414308466, 'std': 0.05532083684224447, 'p10': 0.35931818187236786, 'p50': 0.4128529578447342, 'p90': 0.4898313969373703, 'n': 1024}
+[C] k=  3 dispersion: {'mean': 0.5080245462268067, 'std': 0.21589737415776566, 'p10': 0.20864235311746598, 'p50': 0.5242349803447723, 'p90': 0.7943328142166138, 'n': 1024}
+[C] k=  4 dispersion: {'mean': 0.612267290984164, 'std': 0.2374656452775973, 'p10': 0.27366157174110417, 'p50': 0.6319880187511444, 'p90': 0.903939026594162, 'n': 1024}
+[C] k=  5 dispersion: {'mean': 0.6580415711723617, 'std': 0.2357445224507363, 'p10': 0.31776893734931944, 'p50': 0.6834301948547363, 'p90': 0.9579449355602265, 'n': 1024}
+[C] k=  6 dispersion: {'mean': 0.6818518634318025, 'std': 0.23382698008893701, 'p10': 0.3554615586996079, 'p50': 0.6935573816299438, 'p90': 0.9785960018634796, 'n': 1024}
+[C] k=  8 dispersion: {'mean': 0.6957328221978969, 'std': 0.2387005066756577, 'p10': 0.33412449657917026, 'p50': 0.7312977313995361, 'p90': 0.982440835237503, 'n': 1024}
+[C] k= 12 dispersion: {'mean': 0.7092076291228295, 'std': 0.22550706573886597, 'p10': 0.39323883950710303, 'p50': 0.7222898006439209, 'p90': 0.9935895919799805, 'n': 1024}
+[C] k= 16 dispersion: {'mean': 0.722164960054215, 'std': 0.21890138810299617, 'p10': 0.4131213665008545, 'p50': 0.7477838695049286, 'p90': 0.9899441719055176, 'n': 1024}
+[C] k= 50 dispersion: {'mean': 0.7186805421224562, 'std': 0.22561077396244467, 'p10': 0.4068038880825043, 'p50': 0.7401703894138336, 'p90': 0.9922035694122315, 'n': 1024}
+[C] bias k=1 vs k=50: p50=0.7610
+[C] bias k=2 vs k=50: p50=0.7731
+[C] bias k=3 vs k=50: p50=0.5689
+[C] bias k=4 vs k=50: p50=0.5829
+[C] bias k=5 vs k=50: p50=0.5933
+[C] bias k=6 vs k=50: p50=0.6294
+[C] bias k=8 vs k=50: p50=0.6073
+[C] bias k=12 vs k=50: p50=0.6265
+[C] bias k=16 vs k=50: p50=0.6364
+
+==== verdict ====
+criterion floor (criterion_floor_qpos): p50=0.1059 p90=0.1532
+tau*=0.20 vs floor band [0.106, 0.199]: OFF-FLOOR
+k=  1: sampler dispersion p50=0.4227 (ABOVE floor p50) -> verifier should reject noise-drafts
+k=  2: sampler dispersion p50=0.4129 (ABOVE floor p50) -> verifier should reject noise-drafts
+k=  3: sampler dispersion p50=0.5242 (ABOVE floor p50) -> verifier should reject noise-drafts
+k=  4: sampler dispersion p50=0.6320 (ABOVE floor p50) -> verifier should reject noise-drafts
+k=  5: sampler dispersion p50=0.6834 (ABOVE floor p50) -> verifier should reject noise-drafts
+k=  6: sampler dispersion p50=0.6936 (ABOVE floor p50) -> verifier should reject noise-drafts
+k=  8: sampler dispersion p50=0.7313 (ABOVE floor p50) -> verifier should reject noise-drafts
+k= 12: sampler dispersion p50=0.7223 (ABOVE floor p50) -> verifier should reject noise-drafts
+k= 16: sampler dispersion p50=0.7478 (ABOVE floor p50) -> verifier should reject noise-drafts
+k= 50: sampler dispersion p50=0.7402 (ABOVE floor p50) -> verifier should reject noise-drafts
+interpretation: floor k-independent by construction (B never touches the drafter); if dispersion crosses the floor between k=2 and k=4, the k-cliff and the call_ratio->1.00 self-test are the same phenomenon.
+[out] wrote Results/floor_reacher.json

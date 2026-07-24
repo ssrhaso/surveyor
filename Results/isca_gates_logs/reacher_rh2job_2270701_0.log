@@ -1,0 +1,22 @@
+=== baseline RH=2 t25 native seed=42 ===
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+[model] frozen LeWM (18.03M), device=cuda, training=False, subgoal=baseline
+11:18:58 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+[holdout] eval restricted to episodes [8000, 10000) (2000/10000 eligible)
+[eval] start=random num_eval=128 goal_offset=25 budget=50 qpos_threshold=0.05 rad/joint
+[eval] episodes_idx[:5]=[8014, 8074, 8087, 8127, 8135] start_steps[:5]=[127, 91, 103, 105, 142]
+11:18:58 | INFO  | __init__.py | MUJOCO_GL=egl, attempting to import specified OpenGL backend.
+11:18:58 | INFO  | __init__.py | No OpenGL_accelerate module loaded: No module named 'OpenGL_accelerate'
+11:18:58 | INFO  | __init__.py | MuJoCo library version is: 3.10.0
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/envs/registration.py:729: UserWarning: [33mWARN: The environment is being initialised with render_mode='rgb_array' that is not in the possible render_modes ([]).[0m
+  logger.warn(
+CEM solve time: 28.8691 seconds
+CEM solve time: 18.8850 seconds
+CEM solve time: 7.3314 seconds
+CEM solve time: 2.6650 seconds
+CEM solve time: 1.7778 seconds
+
+==== FF-JEPA eval summary (Reacher qpos_match) ====
+subgoal=baseline num_eval=128 goal_offset=25 budget=50 seed=42 cem_seed=42 S=10
+  SR = 94.53%  (121/128)

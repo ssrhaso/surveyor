@@ -1,0 +1,94 @@
+=== audit every-step k=8 (t150 test pop) seed=43 ===
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+2026-07-12 20:32:22.797 | INFO     | stable_worldmodel.wm.utils:_resolve_hf:149 - Loading quentinll/lewm-pusht from local cache...
+2026-07-12 20:32:22.797 | INFO     | stable_worldmodel.wm.utils:_resolve_folder:137 - Loading checkpoint from folder /lustre/home/ha676/.stable_worldmodel/checkpoints/models--quentinll--lewm-pusht...
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/wm/utils.py:80: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  state_dict = torch.load(checkpoint_path, map_location='cpu')
+20:32:29 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+20:32:29 | INFO  | utils.py    | Created ViT-tiny from scratch with config: {'hidden_size': 192, 'num_hidden_layers': 12, 'num_attention_heads': 3, 'intermediate_size': 768, 'image_size': 224, 'patch_size': 14}
+[model] frozen LeWM (18.03M), device=cuda, training=False, subgoal=gdm
+[gdm] planner from gdm_stride10.pt: head=53.34M, N=3 WG=1 gamma=1.0 T=1000 sampler=ddim/8-steps param=eps schedule=linear norm=standardize
+20:32:32 | INFO  | __init__.py | Cached 'action' from '/lustre/home/ha676/data/pusht/pusht_expert_train.h5'
+20:32:34 | INFO  | __init__.py | Cached 'proprio' from '/lustre/home/ha676/data/pusht/pusht_expert_train.h5'
+20:32:36 | INFO  | __init__.py | Cached 'state' from '/lustre/home/ha676/data/pusht/pusht_expert_train.h5'
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/spaces/box.py:415: UserWarning: [33mWARN: Casting input x to numpy array.[0m
+  gym.logger.warn("Casting input x to numpy array.")
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/utils/passive_env_checker.py:157: UserWarning: [33mWARN: The obs returned by the `step()` method is not within the observation space.[0m
+  logger.warn(f"{pre} is not within the observation space.")
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/spaces/box.py:415: UserWarning: [33mWARN: Casting input x to numpy array.[0m
+  gym.logger.warn("Casting input x to numpy array.")
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/utils/passive_env_checker.py:157: UserWarning: [33mWARN: The obs returned by the `step()` method is not within the observation space.[0m
+  logger.warn(f"{pre} is not within the observation space.")
+[episodes-file] pusht.episodes150.json: 256 precomputed pairs (goal_offset=150, seed=42, eval_filter=None) -- sample_long/short bypassed
+[eval] mode=long start=final num_eval=256 goal_offset=150 budget=300 eval_filter=none
+[eval] episodes_idx[:5]=[636, 688, 700, 834, 850] start_steps[:5]=[7, 7, 7, 34, 34]
+[PIN] success = pos_diff<20 [block xy only (paper)] AND angle<20deg
+CEM solve time: 55.0356 seconds
+CEM solve time: 53.6563 seconds
+CEM solve time: 53.4922 seconds
+CEM solve time: 53.2955 seconds
+CEM solve time: 52.6332 seconds
+CEM solve time: 51.7320 seconds
+CEM solve time: 50.4220 seconds
+CEM solve time: 49.9462 seconds
+CEM solve time: 49.1207 seconds
+CEM solve time: 47.8235 seconds
+CEM solve time: 44.1481 seconds
+CEM solve time: 41.6174 seconds
+CEM solve time: 37.9219 seconds
+CEM solve time: 34.7425 seconds
+CEM solve time: 32.5835 seconds
+CEM solve time: 29.9953 seconds
+CEM solve time: 28.0435 seconds
+CEM solve time: 26.7912 seconds
+CEM solve time: 25.7183 seconds
+CEM solve time: 24.6389 seconds
+CEM solve time: 24.4143 seconds
+CEM solve time: 24.2185 seconds
+CEM solve time: 23.9930 seconds
+CEM solve time: 23.9946 seconds
+CEM solve time: 23.7895 seconds
+CEM solve time: 23.5861 seconds
+CEM solve time: 23.3604 seconds
+CEM solve time: 23.3692 seconds
+CEM solve time: 23.1531 seconds
+CEM solve time: 23.1582 seconds
+[RESULT] score=block angle=20deg  SR=58.59%  (150/256)
+[PIN] success = pos_diff<20 [block xy only (paper)] AND angle<5deg
+CEM solve time: 54.9014 seconds
+CEM solve time: 54.0665 seconds
+CEM solve time: 53.8256 seconds
+CEM solve time: 53.6241 seconds
+CEM solve time: 53.1880 seconds
+CEM solve time: 53.1828 seconds
+CEM solve time: 53.0226 seconds
+CEM solve time: 52.5882 seconds
+CEM solve time: 51.7513 seconds
+CEM solve time: 50.4061 seconds
+CEM solve time: 48.8885 seconds
+CEM solve time: 46.3197 seconds
+CEM solve time: 43.5511 seconds
+CEM solve time: 39.9445 seconds
+CEM solve time: 36.0631 seconds
+CEM solve time: 35.3931 seconds
+CEM solve time: 34.3434 seconds
+CEM solve time: 33.9063 seconds
+CEM solve time: 32.8125 seconds
+CEM solve time: 31.9618 seconds
+CEM solve time: 31.3354 seconds
+CEM solve time: 30.6832 seconds
+CEM solve time: 29.8023 seconds
+CEM solve time: 28.9288 seconds
+CEM solve time: 28.9346 seconds
+CEM solve time: 28.7179 seconds
+CEM solve time: 28.4932 seconds
+CEM solve time: 28.5029 seconds
+CEM solve time: 28.4984 seconds
+CEM solve time: 28.5043 seconds
+[RESULT] score=block angle=5deg  SR=48.05%  (123/256)
+
+==== FF-JEPA eval summary ====
+mode=long subgoal=gdm num_eval=256 seed=43 cem_seed=43 eval_filter=none
+  score=block   20deg :  58.59%  (150/256)
+  score=block    5deg :  48.05%  (123/256)

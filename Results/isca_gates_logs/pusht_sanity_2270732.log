@@ -1,0 +1,22 @@
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+2026-07-12 12:13:16.321 | INFO     | stable_worldmodel.wm.utils:_resolve_hf:152 - Downloading quentinll/lewm-pusht from HuggingFace...
+2026-07-12 12:13:16.322 | INFO     | stable_worldmodel.wm.utils:_resolve_hf:157 - Fetching https://huggingface.co/quentinll/lewm-pusht/resolve/main/config.json
+=== [1/3] pretrained encoder (swm hub auto-download) ===
+config.json:   0%|          | 0.00/1.31k [00:00<?, ?B/s]config.json: 100%|██████████| 1.31k/1.31k [00:00<00:00, 893kB/s]
+2026-07-12 12:13:16.570 | INFO     | stable_worldmodel.wm.utils:_resolve_hf:157 - Fetching https://huggingface.co/quentinll/lewm-pusht/resolve/main/weights.pt
+weights.pt:   0%|          | 0.00/72.3M [00:00<?, ?B/s]weights.pt:   0%|          | 8.19k/72.3M [00:00<32:53, 36.6kB/s]weights.pt:   2%|▏         | 1.24M/72.3M [00:00<00:14, 4.81MB/s]weights.pt:   7%|▋         | 4.87M/72.3M [00:00<00:07, 8.91MB/s]weights.pt:  10%|▉         | 6.87M/72.3M [00:00<00:05, 11.3MB/s]weights.pt:  25%|██▌       | 18.2M/72.3M [00:00<00:01, 35.5MB/s]weights.pt:  38%|███▊      | 27.3M/72.3M [00:01<00:01, 37.6MB/s]weights.pt:  44%|████▍     | 31.9M/72.3M [00:01<00:01, 23.0MB/s]weights.pt:  49%|████▉     | 35.3M/72.3M [00:02<00:02, 14.2MB/s]weights.pt:  61%|██████    | 44.2M/72.3M [00:02<00:01, 22.4MB/s]weights.pt:  76%|███████▌  | 54.6M/72.3M [00:02<00:00, 33.5MB/s]weights.pt:  91%|█████████ | 65.6M/72.3M [00:02<00:00, 46.0MB/s]weights.pt: 100%|██████████| 72.3M/72.3M [00:02<00:00, 29.3MB/s]
+2026-07-12 12:13:19.635 | INFO     | stable_worldmodel.wm.utils:_resolve_folder:137 - Loading checkpoint from folder /lustre/home/ha676/.stable_worldmodel/checkpoints/models--quentinll--lewm-pusht...
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/wm/utils.py:80: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  state_dict = torch.load(checkpoint_path, map_location='cpu')
+12:13:28 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+12:13:28 | INFO  | utils.py    | Created ViT-tiny from scratch with config: {'hidden_size': 192, 'num_hidden_layers': 12, 'num_attention_heads': 3, 'intermediate_size': 768, 'image_size': 224, 'patch_size': 14}
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/spaces/box.py:415: UserWarning: [33mWARN: Casting input x to numpy array.[0m
+  gym.logger.warn("Casting input x to numpy array.")
+encoder OK: 18.034478 M params, cuda: True
+=== [2/3] PushT env (box2d) ===
+env OK, render: (224, 224, 3)
+=== [3/3] h5 schema ===
+keys: ['action', 'ep_len', 'ep_offset', 'episode_idx', 'pixels', 'proprio', 'state', 'step_idx']
+frames: (2336736, 2)
+PUSHT-SANITY-OK
