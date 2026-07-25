@@ -18,6 +18,7 @@ interval as the overfit check.
 from __future__ import annotations
 
 import argparse
+import collections
 import glob
 
 import numpy as np
@@ -34,21 +35,60 @@ def _load_tokens(f: str):
     return np.load(f)["tokens"]
 
 
+def _fd_budget():
+    """Per-process open-memmap budget: raise the soft fd limit to the hard
+    limit, keep 512 fds of headroom for torch/cuda/sockets. Holding every
+    episode's memmap open died on EMFILE at 2k files (job 2292554)."""
+    try:
+        import resource
+        soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+        if soft != resource.RLIM_INFINITY and (hard == resource.RLIM_INFINITY
+                                               or hard > soft):
+            try:
+                resource.setrlimit(resource.RLIMIT_NOFILE, (hard, hard))
+                soft = hard
+            except (ValueError, OSError):
+                pass
+        if soft == resource.RLIM_INFINITY:
+            return 65536
+        return max(64, soft - 512)
+    except ImportError:          # windows smoke runs
+        return 512
+
+
 class PairDataset(torch.utils.data.Dataset):
-    """Lazy (cond, block, goal) pairs over per-episode token arrays."""
+    """Lazy (cond, block, goal) pairs over per-episode token arrays.
+    Memmaps open on demand through an LRU capped at the fd budget."""
+
+    MAX_OPEN = _fd_budget()
 
     def __init__(self, files: list[str], stride: int, n_future: int):
         self.stride, self.N = int(stride), int(n_future)
-        self.toks = [_load_tokens(f) for f in files]
-        self.index = [(i, m) for i, t in enumerate(self.toks)
-                      for m in range(0, t.shape[0] - self.N * self.stride)]
+        self.files = list(files)
+        self._open = collections.OrderedDict()
+        self.index = []
+        for i, f in enumerate(self.files):
+            t = _load_tokens(f)
+            self.index += [(i, m)
+                           for m in range(0, t.shape[0] - self.N * self.stride)]
+            del t
+
+    def tokens(self, i):
+        t = self._open.get(i)
+        if t is None:
+            while len(self._open) >= self.MAX_OPEN:
+                self._open.popitem(last=False)
+            t = self._open[i] = _load_tokens(self.files[i])
+        else:
+            self._open.move_to_end(i)
+        return t
 
     def __len__(self):
         return len(self.index)
 
     def __getitem__(self, j):
         i, m = self.index[j]
-        t = self.toks[i]
+        t = self.tokens(i)
         cond = torch.from_numpy(np.asarray(t[m], dtype=np.float32))
         block = torch.from_numpy(np.stack(
             [np.asarray(t[m + (k + 1) * self.stride], dtype=np.float32)
@@ -113,7 +153,7 @@ def main():
 
     tr = PairDataset(tr_files, args.stride, args.n_future)
     va = PairDataset(va_files, args.stride, args.n_future)
-    T_tok, D = tr.toks[0].shape[-2:]
+    T_tok, D = tr.tokens(0).shape[-2:]
     print(f"[pairs] train {len(tr)} / val {len(va)} from {len(files)} files "
           f"(N={args.n_future}, T_tok={T_tok}, D={D}, S={args.stride})")
 

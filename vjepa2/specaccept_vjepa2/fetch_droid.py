@@ -74,7 +74,11 @@ def mirror_droid(dataset: str, mirror_root: Path, max_shards: int | None = None)
         print(f"[mirror] {rel} ({int(it['size']) / 1e6:.1f} MB)")
     vdirs = [p.parent for p in (mirror_root / dataset).rglob("dataset_info.json")]
     assert vdirs, f"no dataset_info.json under {mirror_root / dataset}"
-    return sorted(vdirs)[-1]
+    # full droid ships metadata for several versions (1.0.0, 1.0.1, ...) but a
+    # partial mirror only has shards for one; prefer a version dir that
+    # actually contains tfrecords
+    with_shards = [v for v in vdirs if any(v.glob("*.tfrecord*"))]
+    return sorted(with_shards or vdirs)[-1]
 
 
 def main():

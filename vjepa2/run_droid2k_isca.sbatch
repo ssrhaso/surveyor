@@ -23,7 +23,10 @@ set -euo pipefail
 export TORCH_HOME=/lustre/home/ha676/torch_cache
 export PYTHONUNBUFFERED=1
 # Mirror runs on the LOGIN node (mirror_only.py under nohup; compute nodes
-# reach GCS at ~170KB/s vs ~7MB/s from login). Gate on its marker:
+# reach GCS at ~170KB/s vs ~7MB/s from login). Gate on its marker, but only
+# when the fetch still has to run: the chain deletes the mirror after a
+# successful fetch, so on resubmits the manifest supersedes the marker.
+test -f /lustre/home/ha676/data/droid2k_eps/manifest.json || \
 test -f /lustre/home/ha676/data/droid_mirror/MIRROR_DONE || {
   echo "mirror not done; submit after mirror_only.py finishes"; exit 1; }
 TFVENV=/lustre/home/ha676/vj2tf
