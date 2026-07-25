@@ -238,7 +238,14 @@ class SpecAcceptSubgoalSource:
     needs_obs = True
 
     def __init__(self, planner, n_envs, device="cpu", n_steps=50, seed=42,
-                 tau=0.2, record=False, goal_gate=False):
+                 tau=0.2, record=False, goal_gate=False,
+                 readout=None, readout_tau=None):
+        # readout: optional gap-maximizing verification lens (learn_readout.py).
+        # Verification-side ONLY: drafting, cost, and planner stay in native
+        # space; when set, accept iff ||r(z_now) - r(tgt)|| <= readout_tau
+        # (unit-norm readout distance, tau derived from the reopened gap).
+        self.readout = readout
+        self.readout_tau = None if readout_tau is None else float(readout_tau)
         self.planner = planner
         self.goal_gate = bool(goal_gate)
         self.needs_goal = getattr(planner, "goal_cond", False) or self.goal_gate
@@ -299,9 +306,13 @@ class SpecAcceptSubgoalSource:
 
                 accept = False
                 if q is not None and tgt is not None:
-                    rel = float((z_now[r] - tgt).norm()
-                                / z_now[r].norm().clamp_min(1e-8))
-                    verified = rel <= self.tau
+                    if self.readout is not None:
+                        d = float((self.readout(z_now[r]) - self.readout(tgt)).norm())
+                        verified = d <= self.readout_tau
+                    else:
+                        rel = float((z_now[r] - tgt).norm()
+                                    / z_now[r].norm().clamp_min(1e-8))
+                        verified = rel <= self.tau
                     if not verified:
                         self.n_reject += 1
                     accept = verified and self._ptr[i] < self.N

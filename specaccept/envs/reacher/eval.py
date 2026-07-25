@@ -42,6 +42,12 @@ def parse_args():
                    default="oracle")
     p.add_argument("--gdm-ckpt", default=None, help="trained (goal-cond) planner checkpoint")
     p.add_argument("--gdm-steps", type=int, default=50, help="DDIM sampling steps for GDM")
+    p.add_argument("--verify-readout", default=None,
+                   help="learn_readout.py checkpoint: verify drafts in the "
+                        "gap-maximized lens space instead of native rel-L2 "
+                        "(verification-side only; drafting/cost stay native)")
+    p.add_argument("--readout-tau", type=float, default=None,
+                   help="override the lens's derived tau (default: ckpt value)")
     p.add_argument("--accept-tau", type=float, default=0.2,
                    help="specaccept: relative-L2 tolerance for the reality verifier")
     p.add_argument("--goal-gate", action="store_true",
@@ -250,11 +256,26 @@ def main():
                                       device=args.device, n_steps=args.gdm_steps,
                                       seed=cem_seed, record=bool(args.dump_traces))
         elif args.subgoal == "specaccept":
+            readout, rtau = None, None
+            if args.verify_readout:
+                from specaccept.probes.learn_readout import Readout
+                ck = torch.load(args.verify_readout, map_location="cpu",
+                                weights_only=False)
+                readout = Readout(ck["dim"], ck["out_dim"],
+                                  attentive=ck["attentive"])
+                readout.load_state_dict(ck["state"])
+                readout.to(args.device).eval()
+                rtau = (args.readout_tau if args.readout_tau is not None
+                        else ck["tau_derived"])
+                print(f"[readout-verify] lens={args.verify_readout} "
+                      f"({ck['dim']}->{ck['out_dim']}), tau={rtau:.3f} "
+                      f"(gap after: {ck['gap_after']})")
             source = SpecAcceptSubgoalSource(gdm_planner, n_envs=args.num_eval,
                                              device=args.device,
                                              n_steps=args.gdm_steps, seed=cem_seed,
                                              tau=args.accept_tau,
                                              goal_gate=args.goal_gate,
+                                             readout=readout, readout_tau=rtau,
                                              record=bool(args.dump_traces))
         elif args.subgoal == "horizon_gated":
             source = HorizonGatedSource(gdm_planner, model, n_envs=args.num_eval,
