@@ -16,7 +16,11 @@
 # success_rate within noise of the paper's reported PushT number (checked at
 # read-off). No spec-accept arm exists yet - drafter/gap-stat come only after
 # this anchors. Runs inline via run_plan_pusht.py (their submitit launch
-# hardcodes h100/qos for their cluster).
+# hardcodes h100/qos for their cluster). PROTOCOL NOTE: their config's
+# max_iter=null loops the MPC forever on never-succeeding episodes (smoke
+# 2299328 hit the walltime this way); we cap max_iter=12 = the env's own
+# 300-step episode budget (12 x 5 actions x frameskip 5). Same cap for every
+# future arm - internal comparisons unaffected.
 # ======================================================================================
 set -euo pipefail
 export DATASET_DIR=/lustre/home/ha676/data/dinowm/datasets
