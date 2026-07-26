@@ -1,0 +1,29 @@
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+[model] frozen LeWM (18.03M), device=cuda, training=False, subgoal=specaccept
+[gdm] planner from gdm_reacher_s10.pt: head=53.44M, N=3 WG=1 goal_cond=True T=1000 sampler=ddim/8-steps param=eps schedule=linear norm=standardize
+12:41:35 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+[episodes-file] reacher_gatev4c.ep100.s999.json: 128 precomputed pairs (built for max_offset=100, seed=999, episode_min=8000); sampling bypassed, running at goal_offset=50
+[eval] start=random num_eval=128 goal_offset=50 budget=100 qpos_threshold=0.05 rad/joint
+[eval] episodes_idx[:5]=[8000, 8022, 8064, 8071, 8078] start_steps[:5]=[19, 40, 11, 27, 32]
+12:41:38 | INFO  | __init__.py | MUJOCO_GL=egl, attempting to import specified OpenGL backend.
+12:41:38 | INFO  | __init__.py | No OpenGL_accelerate module loaded: No module named 'OpenGL_accelerate'
+12:41:44 | INFO  | __init__.py | MuJoCo library version is: 3.10.0
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/envs/registration.py:729: UserWarning: [33mWARN: The environment is being initialised with render_mode='rgb_array' that is not in the possible render_modes ([]).[0m
+  logger.warn(
+[readout-verify] lens=readout_reacher.pt (192->64), tau=0.309 (gap after: [0.29330897331237793, 0.3242935836315155])
+CEM solve time: 29.7682 seconds
+CEM solve time: 26.5420 seconds
+CEM solve time: 22.2768 seconds
+CEM solve time: 20.3521 seconds
+CEM solve time: 16.9292 seconds
+CEM solve time: 14.1410 seconds
+CEM solve time: 11.7852 seconds
+CEM solve time: 10.0677 seconds
+CEM solve time: 9.2137 seconds
+CEM solve time: 7.4978 seconds
+[specaccept] tau=0.2 gdm_steps=8 goal_gate=False re-drafts=419 advances=357 rejects=202 gate_serves=0 call_ratio=0.540 call_ratio_all=0.540 (every-step=1.000; lower = fewer diffusion calls)
+
+==== FF-JEPA eval summary (Reacher qpos_match) ====
+subgoal=specaccept num_eval=128 goal_offset=50 budget=100 seed=45 cem_seed=45 S=10
+  SR = 78.12%  (100/128)

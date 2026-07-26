@@ -1,0 +1,49 @@
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401
+[model] frozen LeWM (18.03M), device=cuda, training=False, subgoal=specaccept
+[gdm] planner from gdm_reacher_s10.pt: head=53.44M, N=3 WG=1 goal_cond=True T=1000 sampler=ddim/8-steps param=eps schedule=linear norm=standardize
+12:47:09 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+[episodes-file] reacher_gatev4c.ep150.s999.json: 128 precomputed pairs (built for max_offset=150, seed=999, episode_min=8000); sampling bypassed, running at goal_offset=150
+[eval] start=random num_eval=128 goal_offset=150 budget=300 qpos_threshold=0.05 rad/joint
+[eval] episodes_idx[:5]=[8000, 8022, 8064, 8071, 8078] start_steps[:5]=[10, 20, 5, 12, 14]
+12:47:09 | INFO  | __init__.py | MUJOCO_GL=egl, attempting to import specified OpenGL backend.
+12:47:09 | INFO  | __init__.py | No OpenGL_accelerate module loaded: No module named 'OpenGL_accelerate'
+12:47:09 | INFO  | __init__.py | MuJoCo library version is: 3.10.0
+/lustre/home/ha676/le-wm/.venv/lib/python3.11/site-packages/gymnasium/envs/registration.py:729: UserWarning: [33mWARN: The environment is being initialised with render_mode='rgb_array' that is not in the possible render_modes ([]).[0m
+  logger.warn(
+[readout-verify] lens=readout_reacher.pt (192->64), tau=0.309 (gap after: [0.29330897331237793, 0.3242935836315155])
+CEM solve time: 27.8084 seconds
+CEM solve time: 27.2062 seconds
+CEM solve time: 25.9096 seconds
+CEM solve time: 24.4075 seconds
+CEM solve time: 23.1321 seconds
+CEM solve time: 20.9862 seconds
+CEM solve time: 19.7130 seconds
+CEM solve time: 16.7083 seconds
+CEM solve time: 15.6418 seconds
+CEM solve time: 13.9256 seconds
+CEM solve time: 12.8521 seconds
+CEM solve time: 11.5674 seconds
+CEM solve time: 9.2146 seconds
+CEM solve time: 8.3577 seconds
+CEM solve time: 7.2882 seconds
+CEM solve time: 6.4325 seconds
+CEM solve time: 5.3600 seconds
+CEM solve time: 4.7120 seconds
+CEM solve time: 4.7124 seconds
+CEM solve time: 4.4983 seconds
+CEM solve time: 3.8556 seconds
+CEM solve time: 3.6480 seconds
+CEM solve time: 3.6368 seconds
+CEM solve time: 3.6381 seconds
+CEM solve time: 3.6391 seconds
+CEM solve time: 3.2106 seconds
+CEM solve time: 3.2114 seconds
+CEM solve time: 2.9967 seconds
+CEM solve time: 2.7811 seconds
+CEM solve time: 2.7815 seconds
+[specaccept] tau=0.2 gdm_steps=8 goal_gate=False re-drafts=795 advances=715 rejects=474 gate_serves=0 call_ratio=0.526 call_ratio_all=0.526 (every-step=1.000; lower = fewer diffusion calls)
+
+==== FF-JEPA eval summary (Reacher qpos_match) ====
+subgoal=specaccept num_eval=128 goal_offset=150 budget=300 seed=45 cem_seed=45 S=10
+  SR = 89.84%  (115/128)

@@ -1,0 +1,10 @@
+[data] 110 train / 19 val episodes, dim=192, attentive=False
+[before] val equiv p90=1.392 hop p10=1.006 gap=closed (-0.386)
+step     0 loss 6.3275  val gap [1.378, 1.000] width -0.378
+step   400 loss 1.9428  val gap [0.512, 0.503] width -0.009
+step   800 loss 1.5959  val gap [0.465, 0.470] width +0.005
+step  1200 loss 1.5753  val gap [0.464, 0.439] width -0.025
+step  1600 loss 1.7088  val gap [0.443, 0.454] width +0.012
+step  1999 loss 1.5623  val gap [0.443, 0.445] width +0.002
+[after] val gap [0.443, 0.445] width +0.002 (was -0.386); derived tau = 0.444
+[saved] readout_tworoom.pt
