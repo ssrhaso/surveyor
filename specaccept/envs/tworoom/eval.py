@@ -33,7 +33,7 @@ def parse_args():
     p.add_argument("--device", default="cuda")
     # what to evaluate
     p.add_argument("--subgoal", choices=["oracle", "voracle", "gdm", "baseline",
-                                         "specaccept", "unified", "lerp"],
+                                         "specaccept", "specpaired", "unified", "lerp"],
                    default="oracle")
     p.add_argument("--lerp-frac", type=float, default=0.5,
                    help="lerp diagnostic source: fraction along current->goal "
@@ -42,6 +42,12 @@ def parse_args():
     p.add_argument("--gdm-steps", type=int, default=50, help="DDIM sampling steps for GDM")
     p.add_argument("--accept-tau", type=float, default=0.2,
                    help="specaccept: relative-L2 tolerance for the reality verifier")
+    p.add_argument("--readout-ckpt", default=None,
+                   help="specpaired: time-contrastive lens (learn_readout.py) applied "
+                        "to the DINOv2 verification half. The instrument prescribes "
+                        "this when the raw gap is closed with separated bulks.")
+    p.add_argument("--readout-tau", type=float, default=None,
+                   help="override the lens checkpoint's derived tau")
     p.add_argument("--mode", choices=["short", "long"], default="short")
     p.add_argument("--goal-offset", type=int, default=None,
                    help="override the mode-derived goal_offset (25 short / 75 long)")
@@ -150,7 +156,7 @@ def cross_room_mask(h5, wall_center=112.0):
 
 def main():
     args = parse_args()
-    if args.subgoal in ("gdm", "specaccept", "unified") and not args.gdm_ckpt:
+    if args.subgoal in ("gdm", "specaccept", "specpaired", "unified") and not args.gdm_ckpt:
         raise ValueError(f"--subgoal {args.subgoal} requires --gdm-ckpt <trained planner checkpoint>")
 
     encoder._ensure_swm_importable(args.swm_src)
@@ -169,7 +175,7 @@ def main():
           f"device={args.device}, training={model.training}, subgoal={args.subgoal}")
 
     gdm_planner = None
-    if args.subgoal in ("gdm", "specaccept", "unified"):
+    if args.subgoal in ("gdm", "specaccept", "specpaired", "unified"):
         from specaccept.drafter import load_gdm_planner, count_params
         gdm_planner = load_gdm_planner(args.gdm_ckpt, device=args.device)
         d = gdm_planner.diffusion
@@ -261,6 +267,39 @@ def main():
                                              n_steps=args.gdm_steps, seed=cem_seed,
                                              tau=args.accept_tau,
                                              record=bool(args.dump_traces))
+        elif args.subgoal == "specpaired":
+            # plan in LeWM space, CERTIFY in frozen-DINOv2 space. LeWM's TwoRoom
+            # latents are metrically degenerate (equiv p90 1.393 > hop p10 1.018),
+            # so no tau certifies there; the drafted waypoint carries its own
+            # DINOv2 half and the accept test runs on that. tau MUST come from
+            # probe_dino_gap.py, which measures in this exact space.
+            from specaccept.paired import PairedEncoder, SpecAcceptPairedSource, load_dinov2
+            penc = PairedEncoder(model, load_dinov2(device=args.device),
+                                 device=args.device)
+            ro, ro_tau = None, None
+            if args.readout_ckpt:
+                from specaccept.probes.learn_readout import Readout
+                ck = torch.load(args.readout_ckpt, map_location="cpu", weights_only=False)
+                ro = Readout(ck["dim"], ck["out_dim"], attentive=ck["attentive"]).to(args.device)
+                ro.load_state_dict(ck["state"])
+                ro.eval()
+                if args.readout_tau is None and ck.get("tau_derived") is None:
+                    raise ValueError(
+                        f"{args.readout_ckpt} has tau_derived=None (its gap never "
+                        "opened), so --readout-tau must be given explicitly. Derive "
+                        "it with specaccept.envs.tworoom.probe_lens_floor; do not "
+                        "pick it from a closed-loop number.")
+                ro_tau = float(args.readout_tau if args.readout_tau is not None
+                               else ck["tau_derived"])
+                print(f"[specpaired] lens={args.readout_ckpt} lens_tau={ro_tau:.4f}")
+            source = SpecAcceptPairedSource(gdm_planner, penc, n_envs=args.num_eval,
+                                            device=args.device, n_steps=args.gdm_steps,
+                                            seed=cem_seed, tau=args.accept_tau,
+                                            record=bool(args.dump_traces),
+                                            readout=ro, readout_tau=ro_tau)
+            print(f"[specpaired] verify-space=dino384{'-lens' if ro else ''} "
+                  f"tau={ro_tau if ro else args.accept_tau} "
+                  f"N={source.N} (planner still consumes the LeWM half)")
         elif args.subgoal == "lerp":
             source = LerpSubgoalSource(n_envs=args.num_eval, device=args.device,
                                        frac=args.lerp_frac)
@@ -303,6 +342,8 @@ def main():
               f"rejects={source.n_reject} "
               f"call_ratio={source.n_redraft / max(total, 1):.3f} "
               f"(every-step=1.000; lower = fewer diffusion calls)")
+    if args.subgoal == "specpaired":
+        print(source.stats())
     if args.subgoal == "voracle":
         pt = source._ptr
         print(f"[voracle] tau={source.tau} advances={source.n_advance} holds={source.n_hold} "

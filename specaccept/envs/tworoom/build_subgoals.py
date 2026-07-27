@@ -17,6 +17,10 @@ from pathlib import Path
 
 import numpy as np
 import torch
+try:  # tworoom.h5 pixels are blosc-compressed; this registers the filter
+    import hdf5plugin  # noqa: F401
+except ImportError:
+    pass
 import h5py
 
 from specaccept import encoder
@@ -47,6 +51,14 @@ def parse_args():
                         "not the intended door-crossing one")
     p.add_argument("--no-require-cross-room", dest="require_cross_room", action="store_false")
     p.add_argument("--wall-center", type=float, default=112.0)
+    p.add_argument("--dino-pair", action="store_true",
+                   help="also encode every subgoal frame with frozen DINOv2 and "
+                        "store the concatenation [lewm(192) | dino(384)]. The "
+                        "drafter then emits both halves of each waypoint from one "
+                        "sample, so the half served to the planner and the half "
+                        "the verifier certifies describe the SAME imagined future "
+                        "(specaccept.paired). Needed because LeWM's TwoRoom latent "
+                        "space cannot support verification at any threshold.")
     return p.parse_args()
 
 
@@ -79,6 +91,13 @@ def main():
     nparams = sum(p.numel() for p in model.parameters())
     print(f"[model] frozen LeWM loaded: {nparams/1e6:.2f}M params, device={args.device}, "
           f"training={model.training}")
+
+    dino = None
+    if args.dino_pair:
+        from specaccept import paired
+        dino = paired.load_dinov2(device=args.device)
+        print(f"[model] frozen DINOv2 loaded for the verifier half "
+              f"({sum(p.numel() for p in dino.parameters())/1e6:.2f}M params)")
 
     lat_chunks = []
     lengths_all, kept_ids_all, kept_len_all, source_file_all = [], [], [], []
@@ -140,6 +159,11 @@ def main():
                 span = pixels[lo:hi]
                 sel = span[rows - lo]
                 z = encoder.encode_frames(model, sel, device=args.device, batch_size=args.batch_size)
+                if dino is not None:
+                    from specaccept import paired
+                    zd = paired.encode_frames_dino(dino, sel, device=args.device,
+                                                   batch_size=args.batch_size)
+                    z = torch.cat([z, zd], dim=-1)     # [lewm(192) | dino(384)]
                 lat_chunks.append(z)
                 lengths_all.append(len(rows))
                 done += len(rows)
@@ -177,7 +201,10 @@ def main():
         "in_5deg": torch.ones(n_kept_total, dtype=torch.bool),     # no stricter tier for TwoRoom;
                                                                     # kept for train_gdm.py --mask compat
         "stride": args.stride,
-        "latent_dim": 192,
+        "latent_dim": int(latents.shape[1]),
+        "paired": ({"lewm_dim": 192, "dino_dim": 384, "verify_space": "dino_pooled",
+                    "encode_fn": "specaccept.paired.encode_frames_dino"}
+                   if args.dino_pair else None),
         "criterion": {
             "pos_thresh": args.pos_thresh,
             "mode": "tworoom_native_dist_to_target",
