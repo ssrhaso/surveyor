@@ -793,6 +793,14 @@ def make_ffjepa_policy(base_cls):
             if self._sg_step is not None:
                 self._sg_step[:] = 0
 
+        def _frame_kwargs(self, frames, gframes):
+            """Raw replan frames for sources that certify OUTSIDE the LeWM
+            latent space (specaccept.paired). Opt-in via `wants_frames`, so
+            every other source's call signature is unchanged."""
+            if not getattr(self.subgoal_source, "wants_frames", False):
+                return {}
+            return {"frames": frames, "goal_frames": gframes}
+
         def get_action(self, info_dict, **kwargs):
             assert hasattr(self, "env"), "Environment not set for the policy"
             n = self.env.num_envs
@@ -828,6 +836,7 @@ def make_ffjepa_policy(base_cls):
             if not self.time_instrument:
                 obs_latent = None
                 goal_latent = None
+                frames = gframes = None
                 if getattr(self.subgoal_source, "needs_obs", False) and replan:
                     frames = np.asarray(info_dict["pixels"])[replan]  # (R,[T,]H,W,3) uint8
                     if frames.ndim == 5:                              # history dim -> take latest
@@ -843,7 +852,8 @@ def make_ffjepa_policy(base_cls):
                             self.cost_model.lewm, gframes, device=self.cost_model.device)
 
                 z = self.subgoal_source.current(self._sg_step, obs_latent=obs_latent,
-                                                replan_idx=replan, goal_latent=goal_latent)  # (n,192)
+                                                replan_idx=replan, goal_latent=goal_latent,
+                                                **self._frame_kwargs(frames, gframes))  # (n,192)
                 info_dict = {**info_dict, SubgoalCostModel.SUBGOAL_KEY: z}
                 return super().get_action(info_dict, **kwargs)
 
@@ -855,6 +865,7 @@ def make_ffjepa_policy(base_cls):
 
             obs_latent = None
             goal_latent = None
+            frames = gframes = None
             if getattr(self.subgoal_source, "needs_obs", False) and replan:
                 frames = np.asarray(info_dict["pixels"])[replan]
                 if frames.ndim == 5:
@@ -869,7 +880,8 @@ def make_ffjepa_policy(base_cls):
                         self.cost_model.lewm, gframes, device=self.cost_model.device)
 
             z = self.subgoal_source.current(self._sg_step, obs_latent=obs_latent,
-                                            replan_idx=replan, goal_latent=goal_latent)
+                                            replan_idx=replan, goal_latent=goal_latent,
+                                            **self._frame_kwargs(frames, gframes))
             info_dict = {**info_dict, SubgoalCostModel.SUBGOAL_KEY: z}
 
             if torch.cuda.is_available():
