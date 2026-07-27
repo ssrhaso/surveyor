@@ -20,10 +20,13 @@ export PYTHONUNBUFFERED=1
 cd /lustre/home/ha676/le-wm/vjepa2
 source ../.venv/bin/activate
 GRIDS=/lustre/home/ha676/data/dinowm/pusht_lat/grids
+# 18,685 train eps -> ~1.6M pairs: 2 epochs = ~100k steps, already 2-3x the
+# optimizer budget of every prior drafter (v1 33k, v3 48k); 12 would blow the
+# walltime with no checkpoint saved.
 python -m specaccept_vjepa2.train_drafter \
   --data "$GRIDS/grid_pusht_train_*.npy" \
   --out gdm_dinowm_pusht_s25.pt \
-  --stride 25 --n-future 3 --epochs 12 --batch 32 --val-files 60 \
+  --stride 25 --n-future 3 --epochs 2 --batch 32 --val-files 60 \
   --device cuda 2>&1 | tee ../logs/dwm_drafter_train.log
 
 echo "=== drafter quality probe (held-out valid eps) ==="
