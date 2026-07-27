@@ -1,0 +1,60 @@
+# Deployed as dino_wm/conf/plan_tworoom.yaml.
+# TwoRoom closed-loop protocol, mirroring their plan_wall.yaml verbatim except
+# for the goal horizon. goal_source=random_state draws an init/goal agent pair
+# in OPPOSITE rooms (see env/tworoom/tworoom_env_wrapper.py); obs_g is the scene
+# rendered with the agent AT the goal, which is what makes the destination
+# observable on this substrate. Success = final agent within 16 px of the goal
+# (TwoRoomEnv's own `terminated` criterion). MPC-CEM budget identical to every
+# other DINO-WM env here (300 samples x 10 opt steps), max_iter capped by the
+# runner (their null = infinite loop).
+defaults:
+  - _self_
+  - override hydra/launcher: submitit_slurm
+
+hydra:
+  run:
+    dir: plan_outputs/${now:%Y%m%d%H%M%S}_${replace_slash:${model_name}}_gH${goal_H}
+  sweep:
+    dir: plan_outputs/${now:%Y%m%d%H%M%S}_${replace_slash:${model_name}}_gH${goal_H}
+    subdir: ${hydra.job.num}
+  launcher:
+    submitit_folder: ${hydra.sweep.dir}/.submitit/%j
+    nodes: 1
+    tasks_per_node: 1
+    cpus_per_task: 16
+    mem_gb: 256
+    gres: "gpu:1"
+    qos: "explore"
+    timeout_min: 720
+
+ckpt_base_path: ./checkpoints
+model_name: null
+model_epoch: latest
+
+seed: 99
+n_evals: 50
+goal_source: 'random_state'
+goal_H: 5
+n_plot_samples: 10
+
+debug_dset_init: False
+
+objective:
+  _target_: planning.objectives.create_objective_fn
+  alpha: 1
+  base: 2
+  mode: last
+
+planner:
+  _target_: planning.mpc.MPCPlanner
+  max_iter: null
+  n_taken_actions: 5
+  sub_planner:
+    target: planning.cem.CEMPlanner
+    horizon: 5
+    topk: 30
+    num_samples: 300
+    var_scale: 1
+    opt_steps: 10
+    eval_every: 1
+  name: mpc_cem
