@@ -170,6 +170,53 @@ Written now so no result can be re-framed after the fact.
 - **T2 fails** (LeWM-space verifier is NOT degenerate) -> the diagnosis above
   is wrong and the whole framing needs revisiting before any claim is made.
 
+## AMENDMENT: stride saturation, and a second frozen prediction (2026-07-27)
+
+Measured after the first battery, before the repaired-drafter rerun.
+
+The first battery collapsed because both TwoRoom drafters emitted latents about
+100x too large (undertrained: 940 gradient steps). That is now fixed (400
+epochs, norm ratio 0.934). But repairing it exposed a deeper fault that no
+drafter can fix.
+
+`specaccept/probes/probe_stride_saturation.py` measures, per stride S, how far
+a frame S ahead sits relative to two UNRELATED frames. The planner scores CEM
+candidates by terminal L2 to the served subgoal, so once that ratio approaches
+1.0 the subgoal is indistinguishable from noise and drafting cannot help at any
+drafter quality. This is a different question from the verification gap, which
+asks whether ARRIVAL is detectable.
+
+| substrate | tuned S | saturation at tuned S | largest S with sat <= 0.80 |
+|---|---|---|---|
+| PushT (method wins) | 10 | 0.526 | 15 |
+| Reacher (method wins) | 10 | 0.639 | 15 |
+| Cube (method wins) | 15 | 0.624 | **15, an exact hit** |
+| **TwoRoom on LeWM** | 10 | **0.988** | **2** |
+
+Every substrate where the method works serves its subgoal at 0.46 to 0.64
+saturation. TwoRoom on LeWM at S=10 sits at 0.988: the drafted waypoint is
+98.8 percent of the way to being a random latent as far as the planner's cost
+function is concerned. Its encoder is already at 0.626 for CONSECUTIVE frames,
+so there is no stride that is both informative and far enough ahead to
+decompose anything. S=2 is inside the range but spans about 10 px of motion
+against a task needing roughly 190 px.
+
+This also supplies a mechanism for a finding the paper currently reports as
+purely empirical, the interior optimum in S: the upper arm of that curve is
+subgoal saturation. PushT S=25 is at 0.904, Reacher S=25 at 0.909, Cube S=25 at
+0.803, and all three were measured worse than their tuned S.
+
+**FROZEN PREDICTION (S1), before the repaired-drafter rerun:** with the norm
+fault fixed, TwoRoom on LeWM at S=10 STILL fails to beat flat at either
+horizon, because the subgoal is saturated in the planner's space. Passing this
+makes the negative mechanistic rather than asserted; failing it refutes the
+saturation reading and is the more interesting outcome.
+
+Caveat to state whenever this is used: the 0.80 cutoff is a chosen threshold,
+not a derived one. The defensible claim is the ordering and the separation
+(three working substrates at 0.46 to 0.64, one failing substrate at 0.99), not
+a precise boundary.
+
 ## Log
 
 - 2026-07-27: diagnosis re-confirmed from raw logs and gap JSONs; paired
