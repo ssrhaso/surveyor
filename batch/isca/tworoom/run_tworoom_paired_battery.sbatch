@@ -28,6 +28,18 @@
 # The gap statistic predicts the fixed-tau arms UNDERPERFORM; the criterion-floor
 # rule says tau=0.20 is usable. This battery adjudicates between our own rules.
 #
+# STRIDE SATURATION (measured after the first battery, frozen before this run).
+# The planner scores CEM candidates by terminal L2 to the served subgoal, so a
+# subgoal that sits at the distance of an unrelated frame carries no signal.
+# hop(S) p50 / cross p50 at the served stride:
+#   PushT S=10 0.526 | Reacher S=10 0.639 | Cube S=15 0.624   (method wins)
+#   TwoRoom on LeWM S=10 0.988                                (method fails)
+# TwoRoom's encoder is at 0.626 for CONSECUTIVE frames, so no stride is both
+# informative and far enough ahead to decompose the task.
+# FROZEN PREDICTION S1: with the norm fault fixed, TwoRoom on LeWM at S=10
+# STILL fails to beat flat at either horizon. Confirming it makes the negative
+# mechanistic; refuting it overturns the saturation reading.
+#
 # SIX ARMS x t in {25,75} x seeds {42,43}.
 # ================================================================================
 set -euo pipefail
@@ -37,8 +49,23 @@ cd /lustre/home/ha676/le-wm
 source .venv/bin/activate
 H5=$(find /lustre/home/ha676/data/tworoom \( -name '*.h5' -o -name '*.hdf5' \) | head -1)
 
-GDM192=gdm_tworoom_s10_gc.pt
-GDM576=gdm_tworoom_s10_gc_paired.pt
+# REPAIRED drafters only. The originals emitted latents ~100x too large
+# (undertrained at 940 gradient steps) and every arm built on them is void.
+# Offline fidelity gate, job 2300079, drafted/true norm ratio:
+#   gdm_tworoom_s10_gc.pt              109.74            FAIL (July, 20 epochs)
+#   gdm_tworoom_s10_gc_e400.pt           0.978           pass
+#   gdm_tworoom_s10_gc_e400v.pt          0.989           pass  <- used
+#   gdm_tworoom_s10_gc_paired.pt       132.03 / 21.88    FAIL
+#   gdm_tworoom_s10_gc_paired_e400.pt   69.09 /  6.59    FAIL (epochs alone
+#                                                        do not fix the paired
+#                                                        target; the recipe does)
+#   gdm_tworoom_s10_gc_paired_e400v.pt   1.014 / 1.001   pass  <- used
+#   PushT control, same code path        0.988
+# Both selected drafters use the same recipe (v-parameterisation, cosine
+# schedule, min-SNR 5), so the ONLY difference between the LeWM-space and
+# paired arms is the verification space, which is what the control tests.
+GDM192=gdm_tworoom_s10_gc_e400v.pt
+GDM576=gdm_tworoom_s10_gc_paired_e400v.pt
 LENS=readout_tworoom_paired_h10.pt
 test -f "$GDM576" || { echo "FAILED: paired drafter missing (run the prep job)"; exit 1; }
 test -f "$LENS"   || { echo "FAILED: lens missing (run the lens job)"; exit 1; }
