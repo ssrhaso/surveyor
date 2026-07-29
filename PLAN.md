@@ -8,6 +8,252 @@ Method = spec-accept; "DSpark" = the ported negative-result baseline only.
 ---
 
 ## ================================================================
+## STATUS 2026-07-29 (READ THIS FIRST — supersedes everything below)
+## TwoRoom re-opened, three retractions, one live positive.
+## ================================================================
+##
+## THE BLOCKING FACT IS RESOLVED (2304691, read 2026-07-29 midday).
+## LeWM's paper (arXiv 2603.19312, Fig. 6) reports **87 on Two-Room**; our
+## flat read 64-66. The anchor ablation peeled our protocol differences off
+## cumulatively, three seeds each:
+##   V0 ours-as-run 65.10 | V1 -cross-room 65.10 (vacuous: success is a
+##   subset of cross-room in this dataset) | V2 -success-filter 79.69 |
+##   V3 -holdout 80.21 | V4 start-random 82.29 | V5 +goal_proprio,n=50
+##   **85.33** (seeds 86/82/88; bar was >=82: PASSED, their 87 inside our
+##   seed range).
+## The 21pp gap is PROTOCOL, not the checkpoint: success filter ~14.6pp
+## (it selects a strictly HARDER population, opposite of its intent),
+## start source ~2.1pp, goal source + n ~3.0pp, cross-room 0, holdout
+## ~0.5pp. Every TwoRoom margin we measured was under a uniformly harder
+## protocol, now attributed pp-by-pp. Also noted: with goal_state on
+## unfiltered episodes the goal IMAGE (agent at demo end) mismatches the
+## scored target; LeWM's goal_proprio is the coherent goal source on the
+## unfiltered population, not just their convention.
+##
+## IN FLIGHT (submitted 2026-07-29 midday, docs/tworoom_paired_prereg.md
+## 07-29 amendment frozen FIRST — anchored protocol, Stage A/B bars, gate):
+##  * 2304722 Stage A: flat RH {1,2,5} x 6 seeds + oracle s25 RH=1 x 6
+##    seeds at the ANCHORED long protocol (t=75, eval-filter none,
+##    episode-min 4000, goal_proprio, n=64). Sets the Stage B bar.
+##    Stage B gate: oracle >= best flat + 3pp, else no-headroom scope row.
+##  * 2304723 best-of-k offline probe (probe_bok.py; k* = 80% of k=16
+##    gain; kill if no gain or LeWM-half fidelity degrades). Mechanism
+##    implemented in paired.py (--best-of-k, --bok-score goal|feas).
+##  * 2304733 item-3 chain: unfiltered pair pool (--no-success-filter in
+##    build_subgoals.py, ~2x pairs, matches anchored serving population)
+##    -> 576-d gc drafter, proven recipe -> offline norm gate + bok probe.
+##    NOT closed-loop until gated + pre-registered.
+##
+## CONTEXT FROM THE PAPER (newly read, changes the framing):
+##  * LeWM is the WEAKEST method on Two-Room: 87 vs DINO-WM 100, PLDM 97,
+##    GCBC/GCIVL/GCIQL 100. It is the only env where LeWM loses.
+##  * Their stated reason: SIGReg in a low-intrinsic-dimensionality env
+##    gives "a less structured latent representation".
+##  * We measured exactly that independently: TwoRoom equiv p50 0.876 vs
+##    cross 1.456, by far the worst of the four envs (PushT 0.085,
+##    Cube 0.091, Reacher 0.230).
+##  => The valuable claim is NOT "4th env win". It is: LeWM's TwoRoom
+##     deficit is representational, we can measure it, and certifying
+##     subgoals in an external structured space recovers part of it
+##     WITHOUT retraining the world model.
+##  * Other LeWM numbers (we reproduce these): Reacher 86, PushT 96,
+##    Cube 74.
+##
+## THREE RETRACTIONS (all mine, all caught by discipline or by the user):
+##  1. "+18.8pp drafting margin at t=75" -> flat had never been swept over
+##     replan rate. RH=1 lifts flat from 27.34 to 44.53. Real margin +1.6pp.
+##  2. "+10.9pp at t=25" -> two seeds. At six seeds flat rose 60.94 -> 66.41
+##     and the margin became -2.1pp.
+##  3. Stride-saturation as a scope rule -> REFUTED by its own frozen
+##     prediction. Distance saturation does not imply the planner has no
+##     signal. The "explains the interior optimum in S" claim goes with it.
+##
+## THE BUG THAT INVALIDATED JULY. Both TwoRoom drafters emitted latents
+## ~100x too large (109.7 and 132.0 drafted/true norm) against a PushT
+## control at 0.988 through the identical code path. Cause: 11,807 training
+## pairs x 20 epochs = 940 gradient steps for a 53M DiT. Fixed by
+## v-parameterisation + cosine + min-SNR 5 at 400 epochs (ratio 1.014/1.001).
+## => The July "TwoRoom parked FINAL / intervention failed" conclusion rests
+## on a broken drafter and MUST be retracted. Its replacement is not a win,
+## it is a properly measured null-to-small-positive.
+## An audit confirmed every paper drafter is clean (pusht 0.991/0.992,
+## reacher 1.001, cube 0.987), so the 11-cell grid is unaffected.
+##
+## THE ONE LIVE POSITIVE (t=75, RH=2, 12 seeds, filtered protocol):
+##   flat 43.36 | pair no-verify 49.22 | pair+verify tau=.098 48.83 (cr .962)
+##   => +5.47pp, t ~ 2.0, p ~ 0.06. Survived doubling the seeds, which the
+##      two retracted margins did not. Against strongest flat anywhere at
+##      t=75 (RH=1, 44.01) it is +4.8pp.
+##   CEILING: oracle 52.60 at t=75 RH=1 vs flat 44.01 (+8.6) => headroom is
+##      real at range. At t=25 oracle is 46.61 vs flat 64.84 (-18.2) =>
+##      decomposition CANNOT win at short horizon, so TwoRoom must be a
+##      horizon-extension result, as PushT and Reacher already are.
+##   voracle 15.62 / 1.56 is not a ceiling: verification in LeWM space never
+##      fires so it sticks on waypoint 1. Consistent with the dead verifier.
+##
+## WHAT WORKS AND WHAT DOES NOT, on TwoRoom:
+##  WORKS   certify in frozen DINOv2 instead of LeWM space: +5.2pp at t=25
+##          over the same drafter unverified (specaccept/paired.py)
+##  WORKS   jointly-trained 576-d drafter: +3.1pp over the 192-d one
+##  DEAD    verification in LeWM's own latent space: call_ratio 0.998-1.000,
+##          numerically identical to no verification in every cell
+##  NULL    retrieval snapping to real training frames
+##  NULL    progress-constrained snapping
+##  NULL    arrival gate (also null on DINO-WM: gated and ungated traces
+##          byte-identical, so that frozen prediction is refuted too)
+##
+## OTHER LEGS:
+##  * WALL P3 PASSED: flat 1.00, spec tau=0.20 0.685. The instrument
+##    predicted a fixed tau underperforms on a never-seen task; it does, by
+##    31pp. Cleanest prospective hit we have. P4 unavailable (its lens never
+##    opened at the serving hop, so no derived tau; reported as such).
+##  * DINO-WM pusht P1/P2 FAILED: flat 0.82-0.88, spec 0.00-0.06. Drafter is
+##    weak but NOT norm-broken (1.08-1.29x no-op, loses to lerp twice). The
+##    arrival gate did not fix it. Unresolved; do not write up as a clean
+##    negative until the serving path is understood.
+##  * pusht H15 (2299902) running. TwoRoom DINO-WM WM training continues.
+##
+## EVENING UPDATE (2026-07-29): STAGE A+B BOTH LANDED SAME DAY. ALL
+## PRE-REGISTERED BARS READ. TwoRoom = a WIN at the anchored protocol.
+##  * Stage A (2304722): flat RH1/2/5 = 41.67/42.71/38.54, oracle 57.81.
+##    Gate PASSED (+15.1). P-A1 refuted+recorded (anchored flat t=75 is NOT
+##    higher than filtered; the success-filter cost is horizon-dependent).
+##  * bok probe (2304723): k*=8 both rules; 'goal' primary ('feas' =
+##    stay-put risk, recorded in advance).
+##  * nofilt drafter (2304733): 39,637 pairs (3.36x), norm gate 1.003/1.002.
+##  * Stage B (2306077), six-seed means vs bars (prereg has full table):
+##      pair+verify t098 55.47 vs bar 46.71  -> B1 PASSED (+12.8 over flat,
+##        wins ALL SIX seeds, paired t~5.9; > 2x the filtered margin)
+##      + bok8-goal 58.33 vs bar 57.47       -> B2 PASSED (>= pair every
+##        seed; sits AT the oracle ceiling 57.81)
+##      no-verify 56.25, verify -0.78 at cr .94-.97 -> B3 PASSED
+##      nofilt drafter 53.65                 -> B4 FAILED (null, recorded:
+##        3.4x matched data does not beat the filtered pool)
+##      bok8-feas 32.29                      -> stay-put pathology CONFIRMED
+##        (-23pp; offline fidelity misleads again, predicted in advance)
+##      tau=0.20 52.08                       -> robustness row, derived tau
+##        better but not fragile
+##  * 12-seed extension 2306141 IN FLIGHT (flat RH2 + pair t098, seeds
+##    48-53, fired unconditionally BEFORE Stage B was read; pooled bar =
+##    margin >= +3pp AND t >= 2).
+##  * Poster strips: DONE + rendered (pusht spec/flat t150, tworoom spec
+##    t75; strips/*.npz + render script specaccept/render_strips.py).
+##  * Paper: July TwoRoom conclusion retracted, anchor + representational
+##    story in, \inflight marker awaiting the 12-seed pool. Compiles, 22pp.
+##
+## NEXT, IN ORDER:
+##  1. Read 2306141 -> pool 12 seeds -> if margin >= +3pp and t >= 2, the
+##     headline sentence is earned; swap the paper's \inflight for measured
+##     text (ONE paper update, per the rule).
+##  2. Remaining poster work: assemble frames into the poster layout
+##     (render PNGs exist; also cube/reacher strips if wanted - drivers
+##     need the same --dump-strip plumbing as pusht/tworoom).
+##  3. B2 (bok) extension seeds 48-53 if we want 12-seed backing for the
+##     bok sentence too (optional; B2 is a 6-seed bar and passed).
+## ================================================================
+
+---
+
+## ================================================================
+## STATUS 2026-07-27 (superseded by the block above)
+## New-agent handoff: the full picture in one block.
+## ================================================================
+##
+## WHAT THIS PROJECT IS. Method = CERTIFIED SPEC-ACCEPT: draft a block of
+## N subgoal latents, serve them to the stack's own frozen planner, and at
+## every replan boundary VERIFY the achieved latent against the waypoint
+## pursued (rel L2 <= tau -> advance at zero drafter cost; else re-draft
+## from reality). Constants derived, not tuned (tau = criterion floor /
+## gap; k = sampler convergence). Companion instrument = the VERIFICATION
+## GAP [equiv p90, hop p10] computed from cached latents in minutes:
+## predicts applicability, tau, and which auxiliary mechanism (none /
+## arrival gate / c* router / lens) BEFORE any closed-loop run.
+##
+## PROVEN & FROZEN (never re-run):
+##  * LeWM grid: certified spec >= strongest flat in ALL 11 pre-registered
+##    env x horizon cells (PushT 5/5, Reacher 4/4, Cube +14.0 vs +5 bar);
+##    fairness/timing/tau-robustness closed. paper tab:grand.
+##  * Gap instrument: explains every closed-loop outcome on 9 substrates;
+##    3/3 prospective predictions confirmed (droid lens 8x, v3 drafter
+##    fidelity + planning value at 20x). Cube tau-midpoint PRESCRIPTION
+##    failed its bar -> claim is applicability/tau-existence only.
+##  * TwoRoom-on-LeWM: provably out of scope (gap inverted, encoder
+##    saturated ~sqrt2); ENCODER SWAP to frozen DINOv2 CURES the metric
+##    (equiv 0.876 -> 0.081) = scope condition is an encoder property.
+##  * V-JEPA 2 (1B): mechanism + tau transfer; certificate dead (3x);
+##    15x compute claim RETIRED (failed powered pre-reg replication; no
+##    offline instrument can referee planning there). Honest scale bound.
+##
+## IN FLIGHT ON ISCA (bars frozen in docs/dinowm_prereg.md BEFORE runs):
+##  * pusht-DINO battery 2299661 (P1 spec@tau=0.121 >= flat-2pp; P2
+##    tau=0.20 degenerate-accept). Flat anchor banked: 86% (paper 90%).
+##  * wall anchor 2299790 + prep 2299789 -> battery 2299791 (P3 fixed-tau
+##    underperforms; P4 lens-verified recovers). Lens taus derived.
+##  * pusht goal_H=15 battery 2299902 (P5: margin improves at range).
+##  * TwoRoom recovery: WM training 2299632 + drafter prep 2299811; the
+##    LAST unbuilt piece = tworoom eval wrapper for dino_wm (vendor
+##    stable_worldmodel/envs/two_room/env.py, 710 lines, pymunk; then
+##    pre-register bars incl. long-horizon cells where LeWM flat
+##    collapsed 68->31; lens verifier tau=0.540 designated).
+##  * point_maze = prediction-only row FOREVER (env needs mujoco-py+d4rl).
+##
+## INFRA MAP (ISCA, ssh isca, user ha676; PowerShell ssh only, Git Bash
+## cannot auth; beware PowerShell quoting — use script files):
+##  * le-wm stack: /lustre/home/ha676/le-wm (.venv py3.11 torch2.5).
+##  * dino_wm: /lustre/home/ha676/dino_wm (.venv py3.9 torch2.3); compat
+##    patches REQUIRED and already applied in-place: cem.py latent-goal
+##    branch, evaluator decode gate (DWM_DECODE opt-in), train.py
+##    save_ckpt guard, env/__init__ mujoco guard, dinov2 hub py3.9 patch
+##    (rerun patch_dinov2_py39.py if TORCH_HOME cache purged), max_iter=12
+##    cap in runners (their null = infinite loop). Copies of all patches +
+##    runners live in batch/isca/dinowm/ (committed).
+##  * Serving stack: batch/isca/dinowm/specaccept_dinowm.py (SpecMPCPlanner;
+##    verify on POOLED VISUAL tokens only = the gap space; spec serves
+##    drafted VISUAL target + goal's own proprio — drafted proprio token is
+##    untrained, serving it flies away). Runner env vars: ARM/TAU/PLAN_CFG/
+##    MODEL_NAME/GOAL_H/READOUT_CKPT/MAX_ITER.
+##  * Data: /lustre/home/ha676/data/dinowm/* (pusht grids = (T,197,384)
+##    fp16, 196 visual + 1 proprio token); QUOTA IS NEARLY FULL — check
+##    lfs quota before big encodes.
+##  * Drafter training reused verbatim: vjepa2/specaccept_vjepa2/
+##    train_drafter.py on grid npy files (dims inferred from data).
+##
+## DISCIPLINE (non-negotiable, the paper's credibility rests on it):
+##  * Anchor flat FIRST on any new substrate (cube lesson).
+##  * Gap probe + freeze predictions in docs/dinowm_prereg.md BEFORE any
+##    closed-loop spec run. Never change arms mid-battery.
+##  * Claims are internal to a stack (spec vs THAT stack's flat); never
+##    compare absolute numbers across stacks or papers (SAGE's protocol
+##    differs wildly from ours).
+##  * Commit only when the user asks; no co-author lines; no em dashes in
+##    paper prose or commit messages; user prefers concise headline-first.
+##
+## PAPER STATE: main_v2.tex compiles clean (21pp; shim
+## iclr2026_conference.sty is a PLACEHOLDER — swap official kit before
+## submission; bst = plainnat copy). New: fig:method + fig:gap (TikZ),
+## sections/instrument_generality.tex with \inflight markers awaiting
+## battery verdicts. Abstract/contributions/conclusion tightened, em
+## dashes purged (table cell placeholders remain). Supervisor brief:
+## claude.ai artifact dde8b3df (concise, same URL on republish).
+##
+## RELATED WORK (positioning, memory: related-work-sage-trm): SAGE
+## (2607.17973) = CONCURRENT subgoal drafting on LeWM, NO verification /
+## instrument / generality -> cite as premise validation, differentiate
+## on certification. TRM (2605.22164) = metric-repair, lens-adjacent.
+## PLDM port rejected (optional cheap gap-probe only).
+##
+## NEXT, IN ORDER: (1) read off pusht/wall/H15 battery verdicts, swap
+## \inflight boxes for measured sentences; (2) build tworoom eval wrapper
+## -> pre-register -> final battery; (3) deep verbosity pass on main_v2
+## body + cube spine panel plot; (4) related-work re-sweep + real
+## SAGE/TRM author names in references.bib; (5) official ICLR style kit.
+## Kill-switch: anything DINO-WM-side unfinished by 2026-08-01 is cut and
+## reported as frozen predictions.
+## ================================================================
+
+---
+
+## ================================================================
 ## STATUS 2026-07-15 (READ THIS FIRST — supersedes cube/EXP-3 blocks)
 ## ================================================================
 ## The paper's method is now UNIFIED SPEC-ACCEPT (spec-accept v2): draft

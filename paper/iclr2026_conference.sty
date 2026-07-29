@@ -1,0 +1,74 @@
+% ============================================================
+% PLACEHOLDER SHIM for iclr2026_conference.sty
+% The official ICLR kit was not present in this repo and the ICLR media
+% server does not serve it publicly. This shim reproduces the template's
+% geometry, header, title block, and natbib setup closely enough to
+% compile and review drafts. REPLACE with the official style file from
+% the ICLR author kit before submission (drop-in; delete this file).
+% ============================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{iclr2026_conference}[2026/07/27 placeholder shim]
+
+\RequirePackage{natbib}
+\RequirePackage{fancyhdr}
+
+% ---- page geometry (ICLR letterpaper defaults, approximated) ----
+\setlength{\paperwidth}{8.5in}
+\setlength{\paperheight}{11in}
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+\setlength{\textwidth}{6.5in}
+\setlength{\topmargin}{-0.25in}
+\setlength{\headheight}{14pt}
+\setlength{\headsep}{0.25in}
+\setlength{\textheight}{8.75in}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt plus 1pt minus 1pt}
+
+% ---- running header ----
+\newif\ificlrfinal
+\iclrfinalfalse
+\newcommand{\iclrfinalcopy}{\iclrfinaltrue}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{\small Under review as a conference paper at ICLR 2026}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancypagestyle{plain}{%
+  \fancyhf{}%
+  \fancyhead[C]{\small Under review as a conference paper at ICLR 2026}%
+  \fancyfoot[C]{\small\thepage}%
+  \renewcommand{\headrulewidth}{0.4pt}}
+
+% ---- title block ----
+\renewcommand{\maketitle}{%
+  \par\begingroup
+  \newpage\global\@topnum\z@
+  \begin{center}%
+    {\Large\bfseries \@title \par}%
+    \vskip 1.2em%
+    {\normalsize \@author \par}%
+  \end{center}%
+  \vskip 1em
+  \endgroup
+  \thispagestyle{plain}}
+
+% ---- abstract ----
+\renewenvironment{abstract}{%
+  \vskip 0.5em
+  \begin{center}{\bfseries\scshape Abstract}\end{center}
+  \vskip 0.2em
+  \begin{quote}\small}{\end{quote}\vskip 1em}
+
+% ---- section styling (ICLR small-caps flavor, approximated) ----
+\renewcommand{\section}{\@startsection{section}{1}{\z@}%
+  {-2.0ex plus -0.5ex minus -0.2ex}{1.2ex plus 0.3ex}%
+  {\large\bfseries\scshape\raggedright}}
+\renewcommand{\subsection}{\@startsection{subsection}{2}{\z@}%
+  {-1.8ex plus -0.5ex minus -0.2ex}{0.8ex plus 0.2ex}%
+  {\normalsize\bfseries\raggedright}}
+\renewcommand{\subsubsection}{\@startsection{subsubsection}{3}{\z@}%
+  {-1.5ex plus -0.5ex minus -0.2ex}{0.5ex plus 0.2ex}%
+  {\normalsize\bfseries\raggedright}}
+
+\endinput

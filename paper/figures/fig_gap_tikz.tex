@@ -1,0 +1,70 @@
+% Figure: the verification-gap instrument across nine substrates (pgfplots).
+% Input via \input{figures/fig_gap_tikz}. Requires pgfplots (compat>=1.16) and
+% \definecolor{gapopen}{HTML}{2A78D6} \definecolor{gapmech}{HTML}{EB6834}
+% \definecolor{gapdead}{HTML}{E34948} in the preamble.
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=\linewidth, height=7.4cm,
+  xmode=log, xmin=0.04, xmax=1.7,
+  xtick={0.05,0.1,0.2,0.4,0.8,1.414},
+  xticklabels={0.05,0.1,0.2,0.4,0.8,$\sqrt{2}$},
+  xlabel={relative latent distance (log)},
+  ymin=0.4, ymax=9.6,
+  ytick={9,8,7,6,5,4,3,2,1},
+  yticklabels={PushT\,·\,LeWM, Cube\,·\,LeWM, Reacher\,·\,LeWM,
+               TwoRoom\,·\,LeWM, DROID\,·\,V-JEPA\,2, PushT\,·\,DINO-WM,
+               Maze\,·\,DINO-WM, Wall\,·\,DINO-WM, TwoRoom\,·\,DINO-WM},
+  y tick label style={font=\scriptsize},
+  x tick label style={font=\scriptsize},
+  xlabel style={font=\scriptsize},
+  axis line style={black!40},
+  ymajorgrids, grid style={black!12},
+  legend style={font=\scriptsize, at={(0.5,-0.18)}, anchor=north,
+                draw=black!25, /tikz/every even column/.append style={column sep=12pt}},
+  legend columns=2,
+  legend cell align=left,
+]
+% legend proxies
+\addlegendimage{gapopen, line width=4pt}
+\addlegendentry{gap open, spec certifies}
+\addlegendimage{gapmech, line width=4pt}
+\addlegendentry{tails overlap, auxiliary mechanism}
+\addlegendimage{gapdead, line width=4pt, densely dashed}
+\addlegendentry{inverted, verification impossible}
+\addlegendimage{only marks, mark=diamond*, mark size=2.6pt, black}
+\addlegendentry{operating $\tau$}
+
+% open gaps [equiv p90 -> hop p10]
+\addplot[gapopen, line width=4.5pt, opacity=0.95] coordinates {(0.171,9) (0.406,9)};
+\addplot[gapopen, line width=4.5pt, opacity=0.95] coordinates {(0.219,8) (0.353,8)};
+\addplot[gapopen, line width=4.5pt, opacity=0.95] coordinates {(0.108,4) (0.135,4)};
+% tail overlap (drawn hop p10 -> equiv p90)
+\addplot[gapmech, line width=3pt, opacity=0.8] coordinates {(0.379,7) (0.410,7)};
+\addplot[gapmech, line width=3pt, opacity=0.8] coordinates {(0.112,5) (0.121,5)};
+\addplot[gapmech, line width=3pt, opacity=0.8] coordinates {(0.056,3) (0.061,3)};
+\addplot[gapmech, line width=3pt, opacity=0.8] coordinates {(0.052,2) (0.078,2)};
+\addplot[gapmech, line width=3pt, opacity=0.8] coordinates {(0.099,1) (0.159,1)};
+% inverted (dashed)
+\addplot[gapdead, line width=3pt, densely dashed] coordinates {(1.018,6) (1.393,6)};
+% taus
+\addplot[only marks, mark=diamond*, mark size=2.6pt, black]
+  coordinates {(0.20,9) (0.20,8) (0.20,7) (0.121,4) (0.540,1)};
+\end{axis}
+\end{tikzpicture}
+\caption{\textbf{The verification gap across nine substrates.} The verifier must
+separate \emph{arrived} (adjacent-frame noise, equiv p90, the criterion floor of
+\Cref{sec:calib-tau}) from \emph{did not move} (one subgoal hop, hop p10); the
+interval between them is where $\tau$ can operate, computed from cached latents in
+minutes. Every closed-loop outcome in this paper matches its row: PushT's in-gap
+$\tau$ needed no auxiliary mechanism; Cube's below-gap $\tau$ required the arrival
+gate; Reacher's tail overlap required the $c^{*}$ router; TwoRoom-on-LeWM is
+inverted at every stride (verification provably cannot operate, even ground-truth
+demo waypoints verify $14/113$); DROID's pooled space is degenerate at any $\tau$.
+On DINO-WM the instrument ran \emph{before} any closed-loop cell: PushT's gap is
+open but the transfer $\tau{=}0.20$ lies above it, so $\tau{=}0.121$ was derived and
+frozen; the bottom row shows TwoRoom \emph{cured} of inversion by swapping the
+encoder (frozen DINOv2, same pixels), with the learned-lens $\tau$ marked.}
+\label{fig:gap}
+\end{figure}

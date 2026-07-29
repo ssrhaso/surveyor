@@ -217,6 +217,94 @@ not a derived one. The defensible claim is the ordering and the separation
 (three working substrates at 0.46 to 0.64, one failing substrate at 0.99), not
 a precise boundary.
 
+## AMENDMENT: anchor CLOSED; anchored-protocol re-run + best-of-k (2026-07-29)
+
+### Anchor ablation 2304691, MEASURED (t=25, three seeds per variant)
+
+| variant | difference peeled | seeds 42/43/44 | mean |
+|---|---|---|---|
+| V0 | ours as run | 65.62 / 62.50 / 67.19 | 65.10 |
+| V1 | drop cross-room filter | identical to V0 | 65.10 |
+| V2 | also drop success filter | 89.06 / 75.00 / 75.00 | 79.69 |
+| V3 | also drop holdout | 89.06 / 73.44 / 78.12 | 80.21 |
+| V4 | also start random | 82.81 / 75.00 / 89.06 | 82.29 |
+| V5 | also goal_proprio, n=50 | 86.00 / 82.00 / 88.00 | **85.33** |
+
+**Bar was V5 >= 82: PASSED.** LeWM's published 87 sits inside our V5 seed
+range (82-88). The 21pp reproduction gap is protocol, not the checkpoint:
+success filter ~14.6pp, start source ~2.1pp, goal source + n ~3.0pp,
+cross-room 0pp (vacuous: the filter removed no episode already passing the
+success filter -- success is a subset of cross-room in this dataset), holdout
+~0.5pp. Two honest notes recorded with it: (1) the success filter was meant
+as hygiene and instead selects a strictly HARDER population; (2) with
+`goal_state` on unfiltered episodes the goal IMAGE (agent at demo end)
+mismatches the scored target, so LeWM's `goal_proprio` is not just their
+protocol, it is the coherent one on the unfiltered population.
+
+### The ANCHORED protocol (long horizon), fixed before any cell runs
+
+`--mode long --goal-offset 75 --eval-budget 150 --eval-filter none
+--episode-min 4000 --goal-from-proprio --num-eval 64`, CEM seed = eval seed.
+Holdout is kept (drafters train on episodes < 4000; measured cost ~0.5pp).
+Mode long forces start=final. No cross-room filter. Everything else as the
+2026-07-27 protocol.
+
+### Stage A (fired first, no bars -- it SETS the bar): flat RH in {1,2,5}
+x seeds 42-47, plus oracle stride-25 RH=1 x seeds 42-47 (the ceiling row).
+
+Predictions recorded before it runs:
+- P-A1: anchored flat t=75 reads HIGHER than the filtered-protocol 43-44
+  (the unfiltered population was easier at t=25 by ~15pp).
+- P-A2 (risk, stated plainly): under goal_proprio the t=75 goal is "where a
+  mostly-failed demo wandered to 75 steps later", which may be close to the
+  start; decomposition headroom at t=75 may therefore SHRINK relative to the
+  filtered protocol. The oracle row adjudicates this before Stage B is read.
+
+**Stage B gate:** Stage B margins are only meaningful if oracle >= strongest
+flat + 3pp at six seeds. If the gate fails, the anchored t=75 population has
+no decomposition headroom, the outcome is declared a bounded scope row
+(the +5.47pp result stands but stays internal to the filtered protocol,
+reported next to the anchor attribution table), and no Stage B margin may be
+quoted as a win.
+
+### Best-of-k drafting, registered before any run
+
+Mechanism (`--best-of-k`, `specaccept/paired.py`): sample k candidate blocks
+per re-draft, serve the one scoring best in the DINOv2 half. Same principle
+as the two mechanisms that measured positive (decisions in the structured
+space, execution in the planner's space). Two zero-constant scoring rules:
+`goal` (final waypoint nearest goal) and `feas` (first waypoint nearest
+current state). k* derived OFFLINE by `probe_bok.py`: smallest k in
+{2,4,8,16} capturing >= 80% of the k=16 median-score gain over k=1.
+Offline kill criteria (either kills it before any closed loop): no k=16 gain
+to select on; or selection degrades the LeWM half's fidelity to the true
+future (the planner would be served worse waypoints).
+
+### Stage B arms (six seeds each, fired only after Stage A + probe land)
+
+flat(best RH from Stage A) | pair no-verify | pair+verify tau=0.098 |
+pair+verify+bok(k*, best offline rule) | pair+verify tau=0.20 (3 seeds,
+robustness row, unbarred).
+
+### FROZEN BARS (Stage B)
+
+- **B1 (headline).** pair+verify tau=0.098 >= strongest flat + 4pp at six
+  seeds. Extension rule: if it passes, run seeds 48-53 for both arms; the
+  headline requires pooled 12-seed margin >= +3pp AND t >= 2.
+- **B2 (best-of-k adds value).** pair+verify+bok >= pair+verify + 2pp at six
+  seeds; otherwise best-of-k is recorded refuted and does not recur.
+- **B3 (verification is cheap).** pair+verify >= pair no-verify - 2pp with
+  call_ratio < 1.0; verification must retain SR while cutting drafter calls.
+
+Declared readings: B1 pass -> TwoRoom joins PushT/Reacher as a
+horizon-extension win, now at a protocol anchored to LeWM's published number,
+with the representational story quotable. B1 fail with pair no-verify beating
+flat -> verification discards good waypoints on this population; mechanism
+miss, reported with call_ratio and rel-L2 distributions. Both fail (or Stage B
+gate fails) -> TwoRoom is a scope row; the honest deliverable is the anchor
+attribution table + the measured representational deficit + the filtered-
+protocol +5.47pp as an internal result.
+
 ## Log
 
 - 2026-07-27: diagnosis re-confirmed from raw logs and gap JSONs; paired
@@ -232,3 +320,90 @@ a precise boundary.
   other source). Battery **2300025** submitted: 24 cells, six arms. An earlier
   submission (2300017) was cancelled two cells in -- before any lens cell ran --
   solely to fold in the explicit lens tau; no number from it is used.
+- 2026-07-29: anchor ablation 2304691 read (table above); amendment frozen
+  BEFORE any anchored-protocol long-horizon cell or best-of-k sample existed.
+
+## STAGE A MEASURED + STAGE B FINALIZED (2026-07-29 afternoon, before any
+## Stage B cell ran)
+
+Stage A (2304722, anchored t=75, six seeds/arm): flat RH1 41.67, RH2 **42.71**
+(strongest), RH5 38.54; oracle s25 RH1 **57.81**.
+- **Stage B gate PASSED**: oracle - best flat = +15.1pp >= +3pp. Headroom at
+  the anchored protocol is LARGER than at the filtered one (+8.6).
+- **P-A1 REFUTED, recorded**: anchored flat t=75 (42.71) is NOT above the
+  filtered-protocol 43.4-44.0; the population effect that lifted t=25 by
+  ~15pp does nothing at t=75. The success-filter cost is horizon-dependent.
+- P-A2 did not materialize (the gate passing is its direct test).
+
+Best-of-k probe (2304723, filtered drafter): both rules derive **k* = 8**
+(sel-score p50 0.22 -> 0.13, >= 80% of the k=16 gain); no kill criterion
+trips (selection does not move the LeWM half beyond noise). Probe on the
+nofilt drafter (2304733): same reading, k* = 8.
+**Rule choice, recorded with reason BEFORE closed loop:** primary bok arm =
+`goal`. The `feas` rule (argmin first-hop distance) selects
+smallest-first-hop blocks, the stay-put pathology that regressed the V-JEPA 2
+v2 residual drafter; its better offline m+1 fidelity (0.137 vs 0.184) does
+not outweigh that documented failure mode. `feas` runs as a 3-seed
+exploratory row, unbarred.
+
+Nofilt drafter chain (2304733): 39,637 pairs (3.36x), 400 epochs, loss
+0.0346, **norm gate PASSED (1.003 lewm / 1.002 dino)**. Enters Stage B as
+its own arm (same tau=0.098: the derivation is an encoder/criterion
+property, drafter-independent).
+
+### Stage B arms as fired (amendment BEFORE submission; bars concrete now
+### that the flat bar exists)
+
+| arm | seeds | bar |
+|---|---|---|
+| pair no-verify (filtered, tau=0) | 6 | B3 reference |
+| pair+verify tau=0.098 (filtered) | 6 | **B1: >= 46.71 (flat 42.71 + 4)** |
+| pair+verify + bok k=8 goal (filtered) | 6 | **B2: >= B1 arm + 2pp** |
+| pair+verify tau=0.20 (filtered) | 3 | robustness, unbarred |
+| pair+verify tau=0.098 (NOFILT drafter) | 6 | **B4: >= B1 arm + 2pp, else null** |
+| pair+verify + bok k=8 feas (filtered) | 3 | exploratory, unbarred |
+
+B1 extension rule unchanged (pass -> seeds 48-53 both arms, pooled 12-seed
+margin >= +3pp and t >= 2). B3 unchanged (verify within 2pp of no-verify at
+call_ratio < 1).
+
+Amendment, logged before any Stage B cell was read: the extension seeds
+48-53 (flat RH2 + pair tau=0.098) are fired UNCONDITIONALLY alongside Stage
+B rather than after its 6-seed read. This only adds data and removes a
+conditional branch; the pooled 12-seed bar applies exactly as written, and
+the 6-seed B1 verdict is still read first and reported.
+
+## STAGE B VERDICT (2306077, read 2026-07-29 evening; all six-seed means,
+## anchored protocol t=75 RH=2, seeds 42-47 unless noted)
+
+| arm | mean | bar | verdict |
+|---|---|---|---|
+| flat RH2 (Stage A) | 42.71 | - | reference |
+| oracle s25 RH1 (Stage A) | 57.81 | - | ceiling |
+| pair no-verify | 56.25 | B3 ref | - |
+| pair+verify tau=0.098 | **55.47** | >= 46.71 | **B1 PASSED** |
+| pair+verify + bok k=8 goal | **58.33** | >= 57.47 | **B2 PASSED** |
+| pair+verify tau=0.20 (3 seeds) | 52.08 | unbarred | robust, below t098 |
+| pair+verify NOFILT drafter | 53.65 | >= 57.47 | **B4 FAILED - null** |
+| pair+verify + bok k=8 feas (3 seeds) | 32.29 | unbarred | **catastrophic** |
+
+- **B1: +12.8pp over flat, wins on ALL SIX seeds** (per-seed paired diffs
+  +20.3/+12.5/+15.6/+14.1/+6.3/+7.8; paired t ~ 5.9). More than double the
+  filtered-protocol margin (+5.47). 12-seed extension 2306141 in flight.
+- **B2: bok(goal) >= pair on every seed** (+3.1/+3.1/+3.1/0.0/+4.7/+3.1;
+  paired t ~ 4.5) and its mean sits AT the oracle ceiling (58.33 vs 57.81;
+  oracle is RH1 + static-table staleness, so a soft ceiling).
+- **B3 PASSED**: verify within 2pp of no-verify (-0.78) at call_ratio
+  0.939-0.968 (advances 22-47 per ~700 replans; verification distance p50
+  ~0.21 vs tau 0.098, rejects dominate as expected on this substrate).
+- **B4 null, recorded**: 3.36x distribution-matched data does NOT beat the
+  success-filtered pool (-1.8pp vs the same arm on the filtered drafter).
+  The success filter helps as a TRAINING curator even though it distorts
+  EVAL populations.
+- **feas rule: the pre-recorded stay-put pathology is confirmed, -23pp vs
+  the goal rule** despite BETTER offline m+1 fidelity (0.137 vs 0.184).
+  Third demonstration in this program that offline fidelity does not track
+  closed-loop value, and the first one predicted in advance from a named
+  failure mode.
+- tau=0.20 robustness: -3.4pp vs the derived tau=0.098 but still +9.4 over
+  flat; the derived-tau prescription holds on this substrate.
