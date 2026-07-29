@@ -142,6 +142,14 @@ def parse_args():
                         "source, every replan's (z_cond, drafted subgoal) pair; the "
                         "raw material for failure anatomy (unreachable-subgoal vs "
                         "drift vs budget) without re-running the eval")
+    p.add_argument("--dump-strip", type=int, default=0,
+                   help="capture the raw frame at EVERY replan boundary for the "
+                        "first N envs (the achieved state the verifier sees), "
+                        "plus per-replan advance/redraft/gate events for sources "
+                        "that log them; saved as npz for filmstrip rendering "
+                        "(render_strips.py). Poster/paper qualitative figures.")
+    p.add_argument("--dump-strip-out", default="strips",
+                   help="output directory for --dump-strip npz files")
     return p.parse_args()
 
 
@@ -454,7 +462,8 @@ def main():
                     source = OracleSubgoalSource(table, device=args.device)
                 policy = PolicyCls(cost_model=cost_model, subgoal_source=source,
                                    time_instrument=args.time_instrument,
-                                   dump_frames=bool(args.dump_frames_dir),
+                                   dump_frames=bool(args.dump_frames_dir) or args.dump_strip > 0,
+                                   dump_strip=args.dump_strip,
                                    solver=solver, config=config, process=process, transform=transform)
             world.set_policy(policy)
             if args.mode == "random_init":
@@ -509,6 +518,43 @@ def main():
                     json.dump(manifest, f, indent=2)
                 print(f"[frames] saved {sum(m['success'] for m in manifest)}/{len(manifest)} "
                       f"episode frame-sets (start/goal/last PNG) to {outdir}")
+            if args.dump_strip and not is_baseline and getattr(policy, "_strip", None):
+                import json as _json
+                from pathlib import Path
+                outdir = Path(args.dump_strip_out)
+                outdir.mkdir(parents=True, exist_ok=True)
+                fn = outdir / (f"strip_pusht_{args.subgoal}_{score_mode}_{angle:g}"
+                               f"_t{goal_offset}_seed{args.seed}.npz")
+                # dataset eval assigns one episode per env slot; episode_successes
+                # follows the episodes_idx slot order (same convention as the
+                # cross-room split diagnostic in the tworoom driver)
+                succ = np.asarray(metrics["episode_successes"]).astype(bool)
+                payload = {"success": succ,
+                           "meta": np.array(_json.dumps({
+                               "env": "pusht", "subgoal": args.subgoal,
+                               "score": score_mode, "angle": float(angle),
+                               "goal_offset": int(goal_offset), "seed": int(args.seed),
+                               "tau": float(getattr(args, "accept_tau", float("nan"))),
+                               "sr": float(sr)}))}
+                for i, fr_list in enumerate(policy._strip):
+                    if not fr_list:
+                        continue
+                    payload[f"ep{i}_tags"] = np.array([t for t, _ in fr_list], np.int64)
+                    payload[f"ep{i}_frames"] = np.stack(
+                        [f for _, f in fr_list]).astype(np.uint8)
+                    for tag, fr in (("start", policy._frame_start[i]),
+                                    ("goal", policy._frame_goal[i]),
+                                    ("last", policy._frame_last[i])):
+                        if fr is not None:
+                            payload[f"ep{i}_{tag}"] = np.asarray(fr).astype(np.uint8)
+                ev = getattr(source, "events", None)
+                if ev:
+                    payload["ev_env"] = np.array([e for e, _, _ in ev], np.int64)
+                    payload["ev_kind"] = np.array([k for _, k, _ in ev])
+                    payload["ev_rel"] = np.array([r for _, _, r in ev], np.float32)
+                np.savez_compressed(fn, **payload)
+                print(f"[strip] saved {sum(1 for s in policy._strip if s)} episode "
+                      f"strips -> {fn}")
             if args.dump_traces:
                 rec = {"score": score_mode, "angle": float(angle), "sr": float(sr),
                        "successes": np.asarray(metrics["episode_successes"]).astype(bool).tolist()}

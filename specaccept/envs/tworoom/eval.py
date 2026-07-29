@@ -42,12 +42,41 @@ def parse_args():
     p.add_argument("--gdm-steps", type=int, default=50, help="DDIM sampling steps for GDM")
     p.add_argument("--accept-tau", type=float, default=0.2,
                    help="specaccept: relative-L2 tolerance for the reality verifier")
+    p.add_argument("--snap-bank", default=None,
+                   help="specpaired: paired subgoals .pt whose latents form a bank of "
+                        "REAL encoded frames. Every drafted waypoint is replaced by its "
+                        "nearest bank entry, matched on the DINOv2 half, so waypoints "
+                        "are reachable states by construction rather than free points "
+                        "in a latent space where consecutive frames already sit at rel "
+                        "L2 0.876. Flat is unaffected by that degeneracy because its "
+                        "target is a real frame; this gives drafting the same footing.")
+    p.add_argument("--snap-progress", action="store_true",
+                   help="restrict snap candidates to bank frames strictly closer to "
+                        "the goal than the agent already is. A waypoint that does not "
+                        "reduce distance to the goal is not a subgoal.")
+    p.add_argument("--goal-gate", action="store_true",
+                   help="arrival gate: once the achieved state verifies against the "
+                        "FINAL goal, serve the goal for the rest of the episode at "
+                        "zero drafter cost. Reuses the accept test, so it adds no "
+                        "threshold of its own. This is the mechanism that turned "
+                        "Cube from a loss into a win and it has never been "
+                        "available on TwoRoom, whose budget is twice what the goal "
+                        "needs and therefore leaves room to overshoot after arrival.")
     p.add_argument("--readout-ckpt", default=None,
                    help="specpaired: time-contrastive lens (learn_readout.py) applied "
                         "to the DINOv2 verification half. The instrument prescribes "
                         "this when the raw gap is closed with separated bulks.")
     p.add_argument("--readout-tau", type=float, default=None,
                    help="override the lens checkpoint's derived tau")
+    p.add_argument("--best-of-k", type=int, default=1,
+                   help="specpaired: sample k candidate blocks per re-draft and "
+                        "serve the one scoring best in the DINOv2 half. k is "
+                        "derived offline by probe_bok.py, never closed-loop.")
+    p.add_argument("--bok-score", choices=["goal", "feas"], default="goal",
+                   help="best-of-k rule: goal = final waypoint nearest the goal "
+                        "(progress); feas = first waypoint nearest the current "
+                        "state (achievability). Both reuse the verifier metric "
+                        "with no constant of their own.")
     p.add_argument("--mode", choices=["short", "long"], default="short")
     p.add_argument("--goal-offset", type=int, default=None,
                    help="override the mode-derived goal_offset (25 short / 75 long)")
@@ -59,6 +88,10 @@ def parse_args():
                         "within --pos-thresh of their OWN target (TwoRoom's own "
                         "success rule); the TwoRoom analog of PushT's success20/5.")
     p.add_argument("--pos-thresh", type=float, default=encoder.TWOROOM_POS_THRESH)
+    p.add_argument("--goal-from-proprio", action="store_true",
+                   help="set the goal from goal_proprio (the agent's position at the "
+                        "goal frame), as LeWM's own config/eval/tworoom.yaml does, "
+                        "rather than goal_state (the episode's fixed target).")
     p.add_argument("--require-cross-room", action="store_true",
                    help="restrict eval episodes to ones whose agent and target START in "
                         "different rooms (the intended door-crossing task; ~48%% of "
@@ -72,6 +105,12 @@ def parse_args():
                    help="restrict eval to episode indices < this (exclusive)")
     p.add_argument("--dump-traces", default=None,
                    help="path (.pt): per-episode success flags + per-replan latents")
+    p.add_argument("--dump-strip", type=int, default=0,
+                   help="capture the raw frame at EVERY replan boundary for the "
+                        "first N envs, plus per-replan advance/redraft/gate events; "
+                        "npz for filmstrip rendering (render_strips.py)")
+    p.add_argument("--dump-strip-out", default="strips",
+                   help="output directory for --dump-strip npz files")
     p.add_argument("--num-eval", type=int, default=32)
     p.add_argument("--eval-budget", type=int, default=None, help="override mode default")
     p.add_argument("--seed", type=int, default=42)
@@ -239,10 +278,19 @@ def main():
 
     config = swm.PlanConfig(horizon=args.horizon, receding_horizon=args.receding_horizon,
                             action_block=args.action_block)
+    # LeWM's own config (config/eval/tworoom.yaml) sets the goal from
+    # `goal_proprio`, the agent's proprio at the goal frame, whereas we have
+    # always used `goal_state`, the episode's fixed target. Those are different
+    # tasks: theirs is "reach where the demo was goal_offset steps later", ours
+    # is "reach the episode target". They coincide only when the goal frame is
+    # the episode's last frame. This is one of three protocol differences
+    # between our number and their reported 87 on Two-Room.
+    goal_key = "goal_proprio" if args.goal_from_proprio else "goal_state"
     callables = [
         {"method": "_set_state", "args": {"state": {"value": "state", "in_dataset": True}}},
-        {"method": "_set_goal_state", "args": {"goal_state": {"value": "goal_state", "in_dataset": True}}},
+        {"method": "_set_goal_state", "args": {"goal_state": {"value": goal_key, "in_dataset": True}}},
     ]
+    print(f"[protocol] goal callable value = {goal_key}")
 
     PolicyCls = make_ffjepa_policy(swm.policy.WorldModelPolicy)
 
@@ -266,7 +314,8 @@ def main():
                                              device=args.device,
                                              n_steps=args.gdm_steps, seed=cem_seed,
                                              tau=args.accept_tau,
-                                             record=bool(args.dump_traces))
+                                             record=bool(args.dump_traces),
+                                             goal_gate=args.goal_gate)
         elif args.subgoal == "specpaired":
             # plan in LeWM space, CERTIFY in frozen-DINOv2 space. LeWM's TwoRoom
             # latents are metrically degenerate (equiv p90 1.393 > hop p10 1.018),
@@ -292,14 +341,29 @@ def main():
                 ro_tau = float(args.readout_tau if args.readout_tau is not None
                                else ck["tau_derived"])
                 print(f"[specpaired] lens={args.readout_ckpt} lens_tau={ro_tau:.4f}")
+            bank = None
+            if args.snap_bank:
+                _b = torch.load(args.snap_bank, map_location="cpu", weights_only=False)
+                bank = _b["latents"].float()
+                assert bank.shape[1] == 576, (
+                    f"snap bank must be paired 576-d, got {bank.shape[1]}; "
+                    "rebuild subgoals with --dino-pair")
+                print(f"[specpaired] snap bank {args.snap_bank}: "
+                      f"{bank.shape[0]} real frames")
             source = SpecAcceptPairedSource(gdm_planner, penc, n_envs=args.num_eval,
                                             device=args.device, n_steps=args.gdm_steps,
                                             seed=cem_seed, tau=args.accept_tau,
                                             record=bool(args.dump_traces),
-                                            readout=ro, readout_tau=ro_tau)
+                                            readout=ro, readout_tau=ro_tau,
+                                            goal_gate=args.goal_gate, snap_bank=bank,
+                                            snap_progress=args.snap_progress,
+                                            best_of_k=args.best_of_k,
+                                            bok_score=args.bok_score)
             print(f"[specpaired] verify-space=dino384{'-lens' if ro else ''} "
                   f"tau={ro_tau if ro else args.accept_tau} "
-                  f"N={source.N} (planner still consumes the LeWM half)")
+                  f"N={source.N} (planner still consumes the LeWM half)"
+                  + (f" best_of_k={args.best_of_k} score={args.bok_score}"
+                     if args.best_of_k > 1 else ""))
         elif args.subgoal == "lerp":
             source = LerpSubgoalSource(n_envs=args.num_eval, device=args.device,
                                        frac=args.lerp_frac)
@@ -325,6 +389,7 @@ def main():
         else:
             source = OracleSubgoalSource(table, device=args.device)
         policy = PolicyCls(cost_model=cost_model, subgoal_source=source,
+                           dump_frames=args.dump_strip > 0, dump_strip=args.dump_strip,
                            solver=solver, config=config, process=process, transform=transform)
     world.set_policy(policy)
     metrics = world.evaluate(
@@ -334,6 +399,35 @@ def main():
     sr = metrics["success_rate"]
     n_succ = int(metrics["episode_successes"].sum())
     world.close()
+
+    # ---- where does the headroom actually live? -------------------------
+    # TwoRoom's only structural obstacle is the wall, so split the result by
+    # whether the episode's start and goal sit in different rooms. If a method
+    # solves same-room and fails cross-room, the door route is the entire
+    # remaining headroom and that is what a subgoal has to supply. Printed for
+    # every arm so flat and spec are directly comparable on the same split.
+    try:
+        succ = np.asarray(metrics["episode_successes"], dtype=bool)
+        import h5py as _h5
+        with _h5.File(args.h5, "r") as _f:
+            _off = _f["ep_offset"][:]
+            _len = _f["ep_len"][:]
+            _st = _f["state"][:]
+        cross = []
+        for _e, _s in zip(episodes_idx, start_steps):
+            _b, _L = int(_off[_e]), int(_len[_e])
+            _i0 = _b + int(_s)
+            _ig = _b + min(int(_s) + goal_offset, _L - 1)
+            cross.append((_st[_i0][0] < args.wall_center)
+                         != (_st[_ig][0] < args.wall_center))
+        cross = np.asarray(cross, dtype=bool)
+        for tag, m in (("cross-room (door required)", cross),
+                       ("same-room  (straight shot)", ~cross)):
+            if m.sum():
+                print(f"[split] {tag}: {100 * succ[m].mean():5.1f}%  "
+                      f"({int(succ[m].sum())}/{int(m.sum())})")
+    except Exception as _e:      # diagnostic only, never fail an eval over it
+        print(f"[split] unavailable: {_e}")
 
     if args.subgoal == "specaccept":
         total = source.n_redraft + source.n_advance
@@ -367,6 +461,37 @@ def main():
               f"spec: re-drafts={sp.n_redraft} advances={sp.n_advance} "
               f"rejects={sp.n_reject} "
               f"call_ratio={sp.n_redraft / max(sp_total, 1):.3f}")
+
+    if args.dump_strip and not is_baseline and getattr(policy, "_strip", None):
+        import json as _json
+        from pathlib import Path
+        outdir = Path(args.dump_strip_out)
+        outdir.mkdir(parents=True, exist_ok=True)
+        fn = outdir / (f"strip_tworoom_{args.subgoal}_t{goal_offset}"
+                       f"_seed{args.seed}.npz")
+        succ = np.asarray(metrics["episode_successes"]).astype(bool)
+        payload = {"success": succ,
+                   "meta": np.array(_json.dumps({
+                       "env": "tworoom", "subgoal": args.subgoal,
+                       "goal_offset": int(goal_offset), "seed": int(args.seed),
+                       "tau": float(args.accept_tau), "sr": float(sr)}))}
+        for i, fr_list in enumerate(policy._strip):
+            if not fr_list:
+                continue
+            payload[f"ep{i}_tags"] = np.array([t for t, _ in fr_list], np.int64)
+            payload[f"ep{i}_frames"] = np.stack([f for _, f in fr_list]).astype(np.uint8)
+            for tag, fr in (("start", policy._frame_start[i]),
+                            ("goal", policy._frame_goal[i]),
+                            ("last", policy._frame_last[i])):
+                if fr is not None:
+                    payload[f"ep{i}_{tag}"] = np.asarray(fr).astype(np.uint8)
+        ev = getattr(source, "events", None)
+        if ev:
+            payload["ev_env"] = np.array([e for e, _, _ in ev], np.int64)
+            payload["ev_kind"] = np.array([k for _, k, _ in ev])
+            payload["ev_rel"] = np.array([r for _, _, r in ev], np.float32)
+        np.savez_compressed(fn, **payload)
+        print(f"[strip] saved {sum(1 for s in policy._strip if s)} episode strips -> {fn}")
 
     if args.dump_traces:
         from pathlib import Path

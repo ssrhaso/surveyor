@@ -268,6 +268,10 @@ class SpecAcceptSubgoalSource:
         self.n_advance = 0   # positions served from the queue (calls skipped)
         self.n_reject = 0    # verification failures (subset of redrafts)
         self.n_gate = 0      # goal-progress failures: replans served with the raw goal
+        # per-replan event log for filmstrips: exactly ONE (env, kind, rel)
+        # appended per env per current() call, aligning the k-th event of env i
+        # with the k-th strip frame the policy captured for env i.
+        self.events = []
 
     @torch.no_grad()
     def current(self, sg_steps, obs_latent=None, replan_idx=None, goal_latent=None) -> torch.Tensor:
@@ -296,19 +300,24 @@ class SpecAcceptSubgoalSource:
                             self._target[i] = cand
                             self._cache[i] = cand
                             self.n_advance += 1
+                            self.events.append((int(i), "advance", float("nan")))
                         else:
                             self._cache[i] = z_goal_rows[r]
                             self.n_gate += 1
+                            self.events.append((int(i), "gate", float("nan")))
                         continue
                     need_rows.append(r)   # block exhausted -> fresh draft
                     need_envs.append(i)
+                    self.events.append((int(i), "redraft", float("nan")))
                     continue
 
                 accept = False
+                rel = float("nan")
                 if q is not None and tgt is not None:
                     if self.readout is not None:
                         d = float((self.readout(z_now[r]) - self.readout(tgt)).norm())
                         verified = d <= self.readout_tau
+                        rel = d
                     else:
                         rel = float((z_now[r] - tgt).norm()
                                     / z_now[r].norm().clamp_min(1e-8))
@@ -324,13 +333,16 @@ class SpecAcceptSubgoalSource:
                         self._target[i] = None
                         self._cache[i] = z_goal_rows[r]
                         self.n_gate += 1
+                        self.events.append((int(i), "gate", float(rel)))
                     else:
                         self._target[i] = nxt
                         self._cache[i] = nxt
                         self.n_advance += 1
+                        self.events.append((int(i), "advance", float(rel)))
                 else:
                     need_rows.append(r)
                     need_envs.append(i)
+                    self.events.append((int(i), "redraft", float(rel)))
             if need_rows:
                 z_cond = z_now[need_rows].to(self.planner.device)
                 z_goal = (goal_latent[need_rows].to(self.planner.device)
@@ -751,7 +763,7 @@ def make_ffjepa_policy(base_cls):
 
     class _FFJEPAPolicy(base_cls):
         def __init__(self, *, cost_model, subgoal_source, time_instrument=False,
-                    dump_frames=False, **wmp_kwargs):
+                    dump_frames=False, dump_strip=0, **wmp_kwargs):
             # base WorldModelPolicy.__init__(solver, config, process, transform, ...)
             super().__init__(**wmp_kwargs)
             self.type = "ffjepa"
@@ -778,6 +790,15 @@ def make_ffjepa_policy(base_cls):
             self._frame_goal = None
             self._frame_last = None
             self._captured_start = None
+            # per-replan frame capture for qualitative filmstrips (poster/paper).
+            # dump_strip = M > 0 captures, for envs 0..M-1, the raw frame at
+            # EVERY replan boundary (the achieved state the verifier sees),
+            # tagged with the replan ordinal. Additive: a few numpy copies per
+            # replan for M envs, nothing when 0. Alignment guarantee: the k-th
+            # strip frame of env i corresponds to the k-th current() event of
+            # env i, because both are appended exactly once per replan of i.
+            self.dump_strip = int(dump_strip)
+            self._strip = None
 
         def set_env(self, env):
             super().set_env(env)
@@ -788,6 +809,8 @@ def make_ffjepa_policy(base_cls):
                 self._frame_goal = [None] * n
                 self._frame_last = [None] * n
                 self._captured_start = np.zeros(n, dtype=bool)
+            if self.dump_strip:
+                self._strip = [[] for _ in range(min(self.dump_strip, n))]
 
         def reset_subgoals(self):
             if self._sg_step is not None:
@@ -829,6 +852,16 @@ def make_ffjepa_policy(base_cls):
                                 g = g[-1]
                             self._frame_goal[i] = np.array(g, copy=True)
                         self._captured_start[i] = True
+
+            if self._strip is not None and replan:
+                pixels_all = np.asarray(info_dict["pixels"])
+                for i in replan:
+                    if i < len(self._strip):
+                        fr = pixels_all[i]
+                        if fr.ndim == 4:      # history dim -> take latest
+                            fr = fr[-1]
+                        self._strip[i].append(
+                            (int(self._sg_step[i]), np.array(fr, copy=True)))
 
             # closed-loop sources (GDM) need the CURRENT achieved frame latent at
             # replan: encode the raw env frame with the frozen E (== goal-encode
