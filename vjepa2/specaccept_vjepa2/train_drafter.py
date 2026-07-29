@@ -157,9 +157,12 @@ def main():
     print(f"[pairs] train {len(tr)} / val {len(va)} from {len(files)} files "
           f"(N={args.n_future}, T_tok={T_tok}, D={D}, S={args.stride})")
 
-    frame_a, frame_b = stats_from(tr_files)
+    # stats over a file subsample: loading frame slices from every file OOMs
+    # at ~18k-episode scale (~6MB/file accumulates); ~2000 files is plenty
+    stat_files = tr_files[::max(1, len(tr_files) // 2000)]
+    frame_a, frame_b = stats_from(stat_files)
     if args.residual:
-        stat_a, stat_b = residual_stats_from(tr_files, args.stride, args.n_future)
+        stat_a, stat_b = residual_stats_from(stat_files, args.stride, args.n_future)
         print(f"[stats] residual std p50 {float(stat_b.median()):.4f} "
               f"(frame std p50 {float(frame_b.median()):.4f})")
     else:
