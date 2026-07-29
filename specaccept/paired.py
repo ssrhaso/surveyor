@@ -105,7 +105,24 @@ class SpecAcceptPairedSource:
     wants_frames = True
 
     def __init__(self, planner, paired_encoder, n_envs, device="cpu", n_steps=50,
-                 seed=42, tau=0.2, record=False, readout=None, readout_tau=None):
+                 seed=42, tau=0.2, record=False, readout=None, readout_tau=None,
+                 goal_gate=False, snap_bank=None, snap_progress=False,
+                 best_of_k=1, bok_score="goal"):
+        # Best-of-k drafting. Sample k candidate blocks per re-draft and serve
+        # the one that scores best IN THE DINOv2 HALF -- the same principle as
+        # the two mechanisms that measured positive on TwoRoom (verify in
+        # DINOv2, jointly-trained halves): use the structured space for
+        # DECISIONS, the planner's space for execution. Scoring rules, both
+        # zero-constant reuses of the verifier's own metric:
+        #   goal  rel L2 of the block's FINAL waypoint to the goal (progress);
+        #   feas  rel L2 of the block's FIRST waypoint to the current state
+        #         (achievability -- the quantity verification will test).
+        # k is derived OFFLINE by probe_bok.py (saturation of the selected
+        # score), never against a closed-loop number.
+        self.best_of_k = int(best_of_k)
+        self.bok_score = str(bok_score)
+        assert self.bok_score in ("goal", "feas")
+        self.bok_margins = []   # median-candidate minus selected score, per pick
         # readout: optional time-contrastive lens over the DINOv2 half. The
         # TwoRoom gap in raw pooled DINOv2 is CLOSED at every hop (equiv p90
         # 0.210 vs hop10 p10 0.074) with bulks separated ~1.7x -- the reacher
@@ -113,6 +130,37 @@ class SpecAcceptPairedSource:
         # threshold. When set, accept iff ||r(d_now) - r(d_tgt)|| <= readout_tau.
         self.readout = readout
         self.readout_tau = None if readout_tau is None else float(readout_tau)
+        # Arrival gate. Once the achieved state verifies against the FINAL GOAL
+        # the env retires, one way, and the goal is served for the rest of the
+        # episode at zero drafter cost. This is the mechanism that turned Cube
+        # from a loss into a win (+32pp of the total margin there came from the
+        # overshoot tax alone). It reuses the accept test, so it adds no tuned
+        # constant. TwoRoom gives twice the budget the goal needs, so there is
+        # ample room to arrive and then be walked back off the target.
+        self.goal_gate = bool(goal_gate)
+        self.retired = np.zeros(n_envs, dtype=bool)
+        self.n_gate = 0
+        # Retrieval snapping. LeWM's TwoRoom encoder puts consecutive frames at
+        # rel L2 0.876 against a random-pair baseline of 1.456, so a GENERATED
+        # latent in that space need not correspond to any reachable state, and
+        # the closed loop confirms it: achieved-vs-waypoint distance sits at
+        # 0.211 against a cross-pair baseline of 0.226. Flat is unharmed because
+        # its target is a real encoded frame. So snap every drafted waypoint to
+        # its nearest REAL frame from the training bank, making waypoints
+        # reachable by construction. The nearest-neighbour search runs in the
+        # DINOv2 half, which is well structured (equiv 0.098 vs cross 0.226),
+        # and the retrieved frame's LeWM half is what the planner is served, so
+        # both halves come from one real frame and cannot disagree.
+        self.snap = None
+        if snap_bank is not None:
+            bank = snap_bank.to(device).float()
+            self.snap = bank
+            self.snap_d = split_paired(bank)[1].contiguous()
+            self.snap_dn = self.snap_d / self.snap_d.norm(dim=-1, keepdim=True).clamp_min(1e-8)
+        self.snap_progress = bool(snap_progress)
+        self.n_snap = 0
+        self.n_prog_empty = 0
+        self.snap_moves = []
         self.planner = planner
         self.penc = paired_encoder
         self.needs_goal = bool(getattr(planner, "goal_cond", False))
@@ -137,6 +185,64 @@ class SpecAcceptPairedSource:
         self.n_advance = 0
         self.n_reject = 0
         self.rels = []       # every verification distance, for the mechanics report
+        # per-replan event log for filmstrips: exactly ONE (env, kind, rel)
+        # appended per env per current() call, so the k-th event of env i
+        # aligns with the k-th strip frame the policy captured for env i.
+        # kind: 'advance' (verified, waypoint served from queue), 'redraft'
+        # (rejected or no queue), 'gate' (retired, goal served).
+        self.events = []
+
+    @torch.no_grad()
+    def _snap_block(self, block, d_now=None, d_goal=None):
+        """(R, N, 576) drafted -> (R, N, 576) with each waypoint replaced by a
+        REAL training frame, matched on the DINOv2 half by cosine.
+
+        With snap_progress and the current/goal latents supplied, candidates are
+        first restricted to bank frames strictly CLOSER to the goal than the
+        agent already is. A waypoint that does not reduce distance to the goal
+        is not a subgoal, and unconstrained nearest-neighbour will happily
+        return one, since the drafted point it is matching may itself point
+        nowhere useful. Rows with no qualifying candidate fall back to the
+        unconstrained match rather than being dropped."""
+        if self.snap is None:
+            return block
+        R, N, _ = block.shape
+        q = split_paired(block.reshape(R * N, -1))[1]
+        qn = q / q.norm(dim=-1, keepdim=True).clamp_min(1e-8)
+        sim = qn @ self.snap_dn.T                           # (R*N, B)
+
+        if self.snap_progress and d_now is not None and d_goal is not None:
+            gn = d_goal.norm(dim=-1, keepdim=True).clamp_min(1e-8)
+            d_bank_goal = torch.cdist(d_goal, self.snap_d) / gn      # (R, B)
+            d_now_goal = ((d_now - d_goal).norm(dim=-1, keepdim=True) / gn)  # (R, 1)
+            ok = d_bank_goal < d_now_goal                            # (R, B)
+            self.n_prog_empty += int((~ok.any(dim=-1)).sum())
+            ok = ok.repeat_interleave(N, dim=0)                      # (R*N, B)
+            keep = ok.any(dim=-1, keepdim=True)
+            sim = torch.where(ok | ~keep, sim, torch.full_like(sim, -2.0))
+
+        idx = sim.argmax(dim=-1)                            # (R*N,)
+        snapped = self.snap[idx]
+        # how far each draft had to move, in the verification metric: near zero
+        # means the drafter was already on-manifold and snapping is a no-op
+        moved = ((q - split_paired(snapped)[1]).norm(dim=-1)
+                 / split_paired(snapped)[1].norm(dim=-1).clamp_min(1e-8))
+        self.snap_moves.extend(moved.tolist())
+        self.n_snap += R * N
+        return snapped.reshape(R, N, -1)
+
+    @torch.no_grad()
+    def _accepts(self, d_a, d_b, want_dist=False):
+        """Is d_a at d_b, in the verification space? One test, used for both
+        waypoint acceptance and the arrival gate, so the gate stays free of
+        any threshold of its own."""
+        if self.readout is not None:
+            dist = float((self.readout(d_a) - self.readout(d_b)).norm())
+            ok = dist <= self.readout_tau
+        else:
+            dist = float((d_a - d_b).norm() / d_b.norm().clamp_min(1e-8))
+            ok = dist <= self.tau
+        return (ok, dist) if want_dist else ok
 
     @torch.no_grad()
     def _pair(self, frames, lewm_latent=None):
@@ -163,17 +269,27 @@ class SpecAcceptPairedSource:
         if self.needs_goal and goal_frames is not None:
             z_goal_paired = self._pair(goal_frames, goal_latent)
 
+        # arrival gate: retire envs that have verifiably reached the final goal
+        if self.goal_gate and z_goal_paired is not None:
+            _, d_goal = split_paired(z_goal_paired)
+            for r, i in enumerate(replan_idx):
+                if self.retired[i]:
+                    continue
+                if self._accepts(d_now[r], d_goal[r]):
+                    self.retired[i] = True
+
         need_rows, need_envs = [], []
         for r, i in enumerate(replan_idx):
+            if self.retired[i]:                      # hold the goal, no drafting
+                self._cache[i] = split_paired(z_goal_paired[r])[0]
+                self.n_gate += 1
+                self.events.append((int(i), "gate", float("nan")))
+                continue
             q, tgt = self._queue[i], self._target[i]
             accept = False
+            rel = float("nan")
             if q is not None and tgt is not None:
-                if self.readout is not None:
-                    rel = float((self.readout(d_now[r]) - self.readout(tgt)).norm())
-                    verified = rel <= self.readout_tau
-                else:
-                    rel = float((d_now[r] - tgt).norm() / tgt.norm().clamp_min(1e-8))
-                    verified = rel <= self.tau
+                verified, rel = self._accepts(d_now[r], tgt, want_dist=True)
                 self.rels.append(rel)
                 if not verified:
                     self.n_reject += 1
@@ -184,18 +300,50 @@ class SpecAcceptPairedSource:
                 self._target[i] = split_paired(nxt)[1]
                 self._cache[i] = split_paired(nxt)[0]
                 self.n_advance += 1
+                self.events.append((int(i), "advance", float(rel)))
             else:
                 need_rows.append(r)
                 need_envs.append(i)
+                self.events.append((int(i), "redraft", float(rel)))
 
         if need_rows:
             z_cond = z_now[need_rows].to(self.planner.device)
             z_goal = (z_goal_paired[need_rows].to(self.planner.device)
                       if z_goal_paired is not None else None)
-            blocks = self.planner.sample_sequence(z_cond, n_steps=self.n_steps,
-                                                  generator=self._gen,
-                                                  z_goal_native=z_goal)   # (R', N, 576)
-            blocks = blocks.to(self.device)
+            K = self.best_of_k
+            if K > 1:
+                if self.bok_score == "goal" and z_goal is None:
+                    raise ValueError("--bok-score goal needs a goal-conditioned "
+                                     "stack (no goal frames reached the source)")
+                Rn = z_cond.shape[0]
+                blocks = self.planner.sample_sequence(
+                    z_cond.repeat_interleave(K, dim=0), n_steps=self.n_steps,
+                    generator=self._gen,
+                    z_goal_native=(z_goal.repeat_interleave(K, dim=0)
+                                   if z_goal is not None else None))
+                blocks = blocks.reshape(Rn, K, self.N, -1)     # (R', K, N, 576)
+                d_cand = split_paired(blocks)[1]               # (R', K, N, 384)
+                if self.bok_score == "goal":
+                    ref = split_paired(z_goal)[1]              # (R', 384)
+                    pt = d_cand[:, :, -1]                      # final waypoint
+                else:
+                    ref = d_now[need_rows].to(blocks.device)   # (R', 384)
+                    pt = d_cand[:, :, 0]                       # first waypoint
+                s = ((pt - ref[:, None]).norm(dim=-1)
+                     / ref.norm(dim=-1, keepdim=True).clamp_min(1e-8))  # (R', K)
+                pick = s.argmin(dim=1)
+                self.bok_margins.extend(
+                    (s.median(dim=1).values - s.gather(1, pick[:, None])[:, 0])
+                    .tolist())
+                blocks = blocks[torch.arange(Rn, device=blocks.device), pick]
+            else:
+                blocks = self.planner.sample_sequence(z_cond, n_steps=self.n_steps,
+                                                      generator=self._gen,
+                                                      z_goal_native=z_goal)   # (R', N, 576)
+            g_rows = (split_paired(z_goal_paired[need_rows])[1]
+                      if z_goal_paired is not None else None)
+            blocks = self._snap_block(blocks.to(self.device),
+                                      d_now=d_now[need_rows], d_goal=g_rows)
             if self.record:
                 self.trace.append({"replan_idx": np.asarray(need_envs),
                                    "z_cond": z_cond.detach().float().cpu(),
@@ -213,7 +361,20 @@ class SpecAcceptPairedSource:
         rels = np.asarray(self.rels) if self.rels else np.array([0.0])
         space = "dino384-lens" if self.readout is not None else "dino384"
         tau_used = self.readout_tau if self.readout is not None else self.tau
-        return (f"[specpaired] tau={tau_used} verify-space={space} "
+        gate = (f" gated_serves={self.n_gate} retired={int(self.retired.sum())}/"
+                f"{self.n_envs}" if self.goal_gate else "")
+        if self.snap is not None and self.snap_moves:
+            mv = np.asarray(self.snap_moves)
+            gate += (f" snapped={self.n_snap} bank={self.snap.shape[0]} "
+                     f"move_p50={np.percentile(mv, 50):.3f}")
+            if self.snap_progress:
+                gate += f" prog_empty={self.n_prog_empty}"
+        if self.best_of_k > 1 and self.bok_margins:
+            bm = np.asarray(self.bok_margins)
+            gate += (f" bok={self.best_of_k}({self.bok_score}) "
+                     f"sel_margin p50={np.percentile(bm, 50):.3f} "
+                     f"p90={np.percentile(bm, 90):.3f}")
+        return (f"[specpaired]{gate} tau={tau_used} verify-space={space} "
                 f"re-drafts={self.n_redraft} advances={self.n_advance} "
                 f"rejects={self.n_reject} "
                 f"call_ratio={self.n_redraft / max(total, 1):.3f} "
