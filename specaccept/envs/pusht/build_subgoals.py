@@ -40,6 +40,12 @@ def parse_args():
     p.add_argument("--max-episodes", type=int, default=None, help="limit #episodes considered")
     p.add_argument("--sample-mode", choices=["head", "spread", "random"], default="head")
     p.add_argument("--sample-seed", type=int, default=0)
+    p.add_argument("--dino-pair", action="store_true",
+                   help="also encode every subgoal frame with frozen DINOv2 and "
+                        "store the concatenation [lewm(192) | dino(384)], as the "
+                        "TwoRoom builder does (specaccept.paired). Control leg: "
+                        "does DINOv2-space verification also work on an env whose "
+                        "OWN space passes the gap probe?")
     return p.parse_args()
 
 
@@ -68,6 +74,13 @@ def main():
     nparams = sum(p.numel() for p in model.parameters())
     print(f"[model] frozen LeWM loaded: {nparams/1e6:.2f}M params, device={args.device}, "
           f"training={model.training}")
+
+    dino = None
+    if args.dino_pair:
+        from specaccept import paired
+        dino = paired.load_dinov2(device=args.device)
+        print(f"[model] frozen DINOv2 loaded for the verifier half "
+              f"({sum(p.numel() for p in dino.parameters())/1e6:.2f}M params)")
 
     with h5py.File(args.h5, "r") as f:
         ep_off = f["ep_offset"][:]
@@ -126,6 +139,11 @@ def main():
             span = pixels[lo:hi]                       # one contiguous read (fast)
             sel = span[rows - lo]                      # stride-H subsample in RAM
             z = encoder.encode_frames(model, sel, device=args.device, batch_size=bs)
+            if dino is not None:
+                from specaccept import paired
+                zd = paired.encode_frames_dino(dino, sel, device=args.device,
+                                               batch_size=bs)
+                z = torch.cat([z, zd], dim=-1)     # [lewm(192) | dino(384)]
             lat_chunks.append(z)
             done += len(rows)
             if ep_i % 200 == 0:
@@ -149,7 +167,10 @@ def main():
         "ep_len": torch.tensor(kept_len, dtype=torch.long),
         "in_5deg": torch.tensor(in_5deg, dtype=torch.bool),   # subset flag (subset of kept)
         "stride": args.stride,
-        "latent_dim": 192,
+        "latent_dim": int(latents.shape[1]),
+        "paired": ({"lewm_dim": 192, "dino_dim": 384, "verify_space": "dino_pooled",
+                    "encode_fn": "specaccept.paired.encode_frames_dino"}
+                   if args.dino_pair else None),
         "criterion": {
             "pos_thresh": args.pos_thresh,
             "angle_deg_headline": args.angle_headline,
