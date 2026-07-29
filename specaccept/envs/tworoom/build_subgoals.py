@@ -50,6 +50,15 @@ def parse_args():
                         "~48%% of collected episodes are a trivial same-room task, "
                         "not the intended door-crossing one")
     p.add_argument("--no-require-cross-room", dest="require_cross_room", action="store_false")
+    p.add_argument("--no-success-filter", dest="success_filter", action="store_false",
+                   default=True,
+                   help="keep episodes whose demo never reached its target. The "
+                        "anchor ablation (2304691) measured the success filter as "
+                        "selecting a strictly harder EVAL population, and the "
+                        "anchored protocol (goal_proprio = reach where the demo "
+                        "ended) makes failed demos a well-posed training signal: "
+                        "conditioned on the demo's end frame, predict the states "
+                        "along the way. Roughly doubles the pair pool.")
     p.add_argument("--wall-center", type=float, default=112.0)
     p.add_argument("--dino-pair", action="store_true",
                    help="also encode every subgoal frame with frozen DINOv2 and "
@@ -130,10 +139,11 @@ def main():
                         state[off], goal_state[off], args.wall_center):
                     n_drop_same_room += 1
                     continue
-                final_dist = float(dist_to_target[off + L - 1])
-                if not encoder.tworoom_success(final_dist, args.pos_thresh):
-                    n_drop += 1
-                    continue
+                if args.success_filter:
+                    final_dist = float(dist_to_target[off + L - 1])
+                    if not encoder.tworoom_success(final_dist, args.pos_thresh):
+                        n_drop += 1
+                        continue
                 rows = np.arange(off, off + L, args.stride)
                 kept_ids_all.append(int(e))
                 kept_len_all.append(L)
@@ -209,6 +219,7 @@ def main():
             "pos_thresh": args.pos_thresh,
             "mode": "tworoom_native_dist_to_target",
             "require_cross_room": args.require_cross_room,
+            "success_filter": args.success_filter,
             "wall_center": args.wall_center,
         },
         "encoder": {"source": args.source, "encoder_id": args.encoder_id,
