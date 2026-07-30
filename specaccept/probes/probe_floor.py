@@ -14,6 +14,10 @@ from __future__ import annotations
 import argparse
 import json
 
+try:  # some h5 pixel stores are blosc-compressed; this registers the filter
+    import hdf5plugin  # noqa: F401
+except ImportError:
+    pass
 import h5py
 import numpy as np
 import torch
@@ -47,6 +51,13 @@ def parse_args():
     p.add_argument("--cube-tol", type=float, default=0.04,
                    help="cube success threshold (m); the benchmark's own criterion")
     p.add_argument("--tau", type=float, default=0.20, help="the frozen threshold to test against")
+    p.add_argument("--verify-space", choices=["lewm", "dino"], default="lewm",
+                   help="which encoder the floors are measured through. 'dino' = "
+                        "pooled frozen DINOv2 (specaccept.paired.encode_frames_dino), "
+                        "the paired verifier's serving space; tau for a paired arm "
+                        "MUST come from a floor measured here, never transferred "
+                        "from another space. Part C (sampler dispersion) stays "
+                        "planner-native and is skipped unless --gdm-ckpt is given.")
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--json-out", default=None)
     return p.parse_args()
@@ -64,17 +75,21 @@ def dist_stats(x: np.ndarray) -> dict:
             "p90": float(np.percentile(x, 90)), "n": int(len(x))}
 
 
-def encode_rows(model, pixels, rows, device, batch_size):
+def encode_rows(model, pixels, rows, device, batch_size, encode_fn=None):
     """Encode h5 pixel rows (any order, duplicates ok); returns (len(rows), D).
 
     h5py fancy indexing requires STRICTLY increasing indices: unique-ify,
-    encode each row once, scatter back through the inverse map."""
+    encode each row once, scatter back through the inverse map.
+    encode_fn defaults to the LeWM path; --verify-space dino passes
+    paired.encode_frames_dino so floors are measured in the paired
+    verifier's exact serving space."""
+    fn = encode_fn or encoder.encode_frames
     rows = np.asarray(rows)
     uniq, inv = np.unique(rows, return_inverse=True)
     chunks = []
     for i in range(0, len(uniq), 512):
-        chunks.append(encoder.encode_frames(model, pixels[uniq[i:i + 512]],
-                                            device=device, batch_size=batch_size))
+        chunks.append(fn(model, pixels[uniq[i:i + 512]],
+                         device=device, batch_size=batch_size))
     return torch.cat(chunks, dim=0)[inv]
 
 
@@ -125,11 +140,19 @@ def load_states(f, env):
 def main():
     args = parse_args()
     rng = np.random.default_rng(args.seed)
-    model = encoder.load_lewm(source=args.source, encoder_id=args.encoder_id,
-                              local_dir=args.local_dir, swm_src=args.swm_src,
-                              device=args.device)
+    if args.verify_space == "dino":
+        from specaccept import paired
+        model = paired.load_dinov2(device=args.device)
+        EF = paired.encode_frames_dino
+        print("[space] floors measured in pooled frozen DINOv2 "
+              "(the paired verifier's serving space)")
+    else:
+        model = encoder.load_lewm(source=args.source, encoder_id=args.encoder_id,
+                                  local_dir=args.local_dir, swm_src=args.swm_src,
+                                  device=args.device)
+        EF = None
 
-    out = {"args": vars(args), "env": args.env}
+    out = {"args": vars(args), "env": args.env, "verify_space": args.verify_space}
     with h5py.File(args.h5, "r") as f:
         ep_off = f["ep_off" if "ep_off" in f else "ep_offset"][:]
         ep_len = f["ep_len"][:]
@@ -147,11 +170,11 @@ def main():
         base = ep_off[eps].astype(np.int64) + ts
 
         # ---- A. temporal floor ----
-        z0 = encode_rows(model, pixels, base, args.device, args.batch_size)
-        z1 = encode_rows(model, pixels, base + 1, args.device, args.batch_size)
+        z0 = encode_rows(model, pixels, base, args.device, args.batch_size, EF)
+        z1 = encode_rows(model, pixels, base + 1, args.device, args.batch_size, EF)
         zS = encode_rows(model, pixels, np.minimum(base + args.stride,
                          (ep_off[eps] + ep_len[eps] - 1).astype(np.int64)),
-                         args.device, args.batch_size)
+                         args.device, args.batch_size, EF)
         out["temporal_floor_disp1"] = dist_stats(rel(z1, z0))
         out[f"disp_S{args.stride}"] = dist_stats(rel(zS, z0))
         print(f"[A] temporal floor disp(1): {out['temporal_floor_disp1']}")
@@ -185,13 +208,17 @@ def main():
         for ang, (pa, pb) in pair_sets.items():
             if len(pa) == 0:
                 continue
-            za = encode_rows(model, pixels, pa, args.device, args.batch_size)
-            zb = encode_rows(model, pixels, pb, args.device, args.batch_size)
+            za = encode_rows(model, pixels, pa, args.device, args.batch_size, EF)
+            zb = encode_rows(model, pixels, pb, args.device, args.batch_size, EF)
             key = ("criterion_floor_%gdeg" % ang) if ang else f"criterion_floor_{args.env}"
             out[key] = dist_stats(rel(za, zb))
             print(f"[B] {key}: {out[key]}")
 
         # ---- C. sampler dispersion per k ----
+        if args.gdm_ckpt and args.verify_space == "dino":
+            raise ValueError("part C conditions the drafter on the LeWM encode; "
+                             "run it with --verify-space lewm (or use the env's "
+                             "probe_k for a paired drafter)")
         if args.gdm_ckpt:
             planner = load_gdm_planner(args.gdm_ckpt, device=args.device)
             cond_rows = base[:args.n_cond]
