@@ -94,6 +94,12 @@ def parse_args():
                    help="path (.pt): per-episode success flags + per-replan latents")
     p.add_argument("--time-instrument", action="store_true",
                    help="CUDA-synced drafter/CEM wall-clock per episode (timing figure)")
+    p.add_argument("--dump-strip", type=int, default=0,
+                   help="capture the raw frame at EVERY replan boundary for the "
+                        "first N envs, plus per-replan advance/redraft/gate events; "
+                        "npz for filmstrip rendering (render_strips.py)")
+    p.add_argument("--dump-strip-out", default="strips",
+                   help="output directory for --dump-strip npz files")
     return p.parse_args()
 
 
@@ -311,6 +317,7 @@ def main():
             source = OracleSubgoalSource(table, device=args.device)
         policy = PolicyCls(cost_model=cost_model, subgoal_source=source,
                            time_instrument=args.time_instrument,
+                           dump_frames=args.dump_strip > 0, dump_strip=args.dump_strip,
                            solver=solver, config=config, process=process, transform=transform)
     world.set_policy(policy)
     metrics = world.evaluate(
@@ -373,6 +380,37 @@ def main():
               f"spec: re-drafts={sp.n_redraft} advances={sp.n_advance} "
               f"rejects={sp.n_reject} "
               f"call_ratio={sp.n_redraft / max(sp_total, 1):.3f}")
+
+    if args.dump_strip and not is_baseline and getattr(policy, "_strip", None):
+        import json as _json
+        from pathlib import Path
+        outdir = Path(args.dump_strip_out)
+        outdir.mkdir(parents=True, exist_ok=True)
+        fn = outdir / (f"strip_reacher_{args.subgoal}_t{goal_offset}"
+                       f"_seed{args.seed}.npz")
+        succ = np.asarray(metrics["episode_successes"]).astype(bool)
+        payload = {"success": succ,
+                   "meta": np.array(_json.dumps({
+                       "env": "reacher", "subgoal": args.subgoal,
+                       "goal_offset": int(goal_offset), "seed": int(args.seed),
+                       "tau": float(args.accept_tau), "sr": float(sr)}))}
+        for i, fr_list in enumerate(policy._strip):
+            if not fr_list:
+                continue
+            payload[f"ep{i}_tags"] = np.array([t for t, _ in fr_list], np.int64)
+            payload[f"ep{i}_frames"] = np.stack([f for _, f in fr_list]).astype(np.uint8)
+            for tag, fr in (("start", policy._frame_start[i]),
+                            ("goal", policy._frame_goal[i]),
+                            ("last", policy._frame_last[i])):
+                if fr is not None:
+                    payload[f"ep{i}_{tag}"] = np.asarray(fr).astype(np.uint8)
+        ev = getattr(source, "events", None)
+        if ev:
+            payload["ev_env"] = np.array([e for e, _, _ in ev], np.int64)
+            payload["ev_kind"] = np.array([k for _, k, _ in ev])
+            payload["ev_rel"] = np.array([r for _, _, r in ev], np.float32)
+        np.savez_compressed(fn, **payload)
+        print(f"[strip] saved {sum(1 for s in policy._strip if s)} episode strips -> {fn}")
 
     if args.dump_traces:
         from pathlib import Path
