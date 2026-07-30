@@ -26,8 +26,9 @@ from pathlib import Path
 import numpy as np
 
 COLORS = {"advance": "#0ca30c", "redraft": "#d03b3b", "gate": "#fab219",
-          "none": "#8a8a8a", "meta": "#555555", "goal": "#333333"}
-SHORT = {"advance": "acc", "redraft": "re", "gate": "goal"}
+          "route": "#3b6bd0", "none": "#8a8a8a", "meta": "#555555",
+          "goal": "#333333"}
+SHORT = {"advance": "acc", "redraft": "re", "gate": "goal", "route": "rt"}
 
 
 def parse_args():
