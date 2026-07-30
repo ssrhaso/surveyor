@@ -84,6 +84,21 @@ def parse_args():
                         "an intermediate waypoint cannot help inside one serving "
                         "stride). Re-evaluated every replan; short-horizon "
                         "protection for LeWM's own t=25 protocol.")
+    p.add_argument("--composite-crossover", type=float, default=None,
+                   help="window-rule composite policy: the DRIVER routes this run "
+                        "to the flat branch when goal_offset <= this value (the "
+                        "measured crossover constant; 45 = midpoint of the "
+                        "confirmed [40,50] band), else to the certified spec "
+                        "branch (specpaired + verify at --accept-tau). One "
+                        "invocation, one policy; the branch is a function of the "
+                        "task's known goal distance only, never picked per cell.")
+    p.add_argument("--composite-flat-rh", type=int, default=2,
+                   help="composite flat-branch receding horizon (frozen per "
+                        "protocol convention: 5 at LeWM's own t=25 protocol, "
+                        "2 at the anchored protocol = Stage A's strongest flat)")
+    p.add_argument("--composite-spec-rh", type=int, default=2,
+                   help="composite spec-branch receding horizon (the headline "
+                        "arm's RH)")
     p.add_argument("--mode", choices=["short", "long"], default="short")
     p.add_argument("--goal-offset", type=int, default=None,
                    help="override the mode-derived goal_offset (25 short / 75 long)")
@@ -216,6 +231,22 @@ def main():
     goal_offset = args.goal_offset if args.goal_offset is not None else (25 if args.mode == "short" else 75)
     eval_budget = args.eval_budget or (50 if args.mode == "short" else 150)
     cem_seed = args.cem_seed if args.cem_seed is not None else args.seed
+
+    # Window-rule composite: dispatch BEFORE any model/source construction so
+    # each branch is bit-identical to the corresponding fixed arm's code path.
+    if args.composite_crossover is not None:
+        if goal_offset <= args.composite_crossover:
+            args.subgoal = "baseline"
+            args.receding_horizon = args.composite_flat_rh
+            branch = "flat"
+        else:
+            args.subgoal = "specpaired"
+            args.receding_horizon = args.composite_spec_rh
+            branch = "spec"
+        print(f"[composite] window rule: goal_offset={goal_offset} "
+              f"{'<=' if branch == 'flat' else '>'} "
+              f"crossover={args.composite_crossover:g} -> {branch} branch "
+              f"(subgoal={args.subgoal}, RH={args.receding_horizon})")
 
     model = encoder.load_lewm(source=args.source, encoder_id=args.encoder_id,
                               local_dir=args.local_dir, swm_src=args.swm_src,
