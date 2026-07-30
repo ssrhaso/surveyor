@@ -8,6 +8,88 @@ Method = spec-accept; "DSpark" = the ported negative-result baseline only.
 ---
 
 ## ================================================================
+## STATUS 2026-07-31 (READ THIS FIRST — supersedes everything below)
+## THE ENTIRE EXPERIMENTAL PROGRAM IS CLOSED. Writing/poster only.
+## ================================================================
+##
+## WHAT EXISTS (each claim pre-registered; verdict tables live in
+## docs/tworoom_paired_prereg.md and docs/dinowm_prereg.md; grid claims in
+## paper tab:grand; NEVER re-run any of this):
+##  * Core: certified spec-accept >= strongest flat in all 11 pre-reg
+##    env x horizon cells (PushT 5/5, Reacher 4/4, Cube +14.0). Constants
+##    derived (tau = criterion floor, k = sampler convergence), fairness
+##    (2x-CEM flat) + timing + tau-robustness closed on all envs.
+##  * TWOROOM (the 4th env, closed 07-29..31 in three days): LeWM's own
+##    weakest benchmark (their 87 vs 97-100 for baselines; they blame the
+##    representation). Arc: 21pp "reproduction gap" = PROTOCOL (V5
+##    verbatim replication 85.33; success filter ~14.6pp selects a harder
+##    population). Their-protocol t=25: flat 83.72 (12 seeds, ties 87),
+##    oracle -21pp (goal inside one planning window -> decomposition
+##    structurally counterproductive), spec 77.08 = honest B25-1 miss.
+##    ANCHORED t=75: spec (verify in frozen DINOv2, tau=0.098 derived)
+##    57.03 vs flat 41.67 = +15.4pp, ALL 12 seeds, paired t~11, AT the
+##    oracle ceiling (57.81). Crossover MAPPED t in [40,50], frozen
+##    prediction confirmed. DEPLOYED CLAIM = composite: flat up to the
+##    measured crossover (ONE measured constant), certified spec beyond;
+##    never loses to flat. Controls: fairness flat+2xCEM 48.44 (real +6.8
+##    rescue, reported; spec +8.6 above it, margin NOT compute-driven);
+##    timing +2% wall-clock (140ms on 6.9s eps; CEM 94%); C1/C2 on pusht:
+##    verify-space SR-indifferent where own gap open BUT external space =
+##    degenerate-reject (cr 1.00 vs 0.66) -> rule "own space when gap
+##    open, transplant when not" stands with a measured reason.
+##  * REFUTATIONS ON RECORD (the discipline is a paper feature): k-from-
+##    bias k*=2 refuted closed-loop (31.25; sampler diversity collapse,
+##    invisible to bias-of-means — spec serving NEEDS diversity); bok-feas
+##    -23pp (stay-put pathology, predicted in advance); nofilt 3.4x-data
+##    drafter null; bok-goal passed 6-seed bar (+2.9) but +1.8/t~1.1 at 12
+##    seeds -> optional add-on, out of headline; B25-1 non-inferiority
+##    miss at t=25 (oracle explains).
+##  * DINO-WM leg KILLED per the pre-declared Aug-1 switch: P3 = confirmed
+##    prospective hit (31pp, called in advance); P4 unavailable; P1/P2/P5
+##    confounded by an UNRESOLVED serving fault (flat healthy, spec ~0,
+##    3 batteries, same signature; drafter passes offline gates) — claimed
+##    in NEITHER direction; tworoom-dinowm WM training cancelled, offline
+##    encoder-swap cure (0.876 -> 0.081) stands as the measured claim.
+##  * V-JEPA 2: mechanism + tau transfer positive; certificate dead (3x);
+##    15x compute claim retired. Chapter dropped by supervisor agreement.
+##  * Assets: filmstrip pipeline (--dump-strip + specaccept/render_strips
+##    .py; pusht + tworoom rendered), crossover figure
+##    (paper/figures/fig_tworoom_crossover.png), proximity router
+##    (--route-goal-hop), verify-half switch, timing in tworoom driver.
+##
+## PAPER STATE: main_v2.tex compiles (22pp). TwoRoom is in abstract /
+## contributions (verifier-modularity bullet) / grid paragraph /
+## held-out section (full arc + controls) / conclusion; both
+## instrument_generality \inflights resolved with measured verdicts;
+## composite switch stated as ONE MEASURED CONSTANT. Style shim is still
+## the PLACEHOLDER ICLR kit — swap before submission.
+##
+## OUTSTANDING (no GPUs involved):
+##  1. COMMITS: done 07-30 evening (7 commits, FEAT:/CHORE:, no
+##     co-author; user pushes). Rule stands: commit ONLY when asked.
+##  2. POSTER (hard deadline Aug 11, supervisor promise): awaiting the
+##     user's format/template decision; filmstrip panels now exist for
+##     ALL FOUR envs (strips/, spec-vs-flat pairs).
+##  3. Paper polish: full-PDF read-through, remaining [CHECK authors]
+##     bib entries (6), official ICLR kit swap (kits committed as zips),
+##     reproducibility statement + refuted-ledger appendix;
+##     Results/RESULTS.md is STALE (7/3) — do not trust it, prereg docs
+##     + logs are the truth.
+##  4. Extension candidates: see docs/next_agent_audit_prompt.md +
+##     docs/audit_map.md. NOTE 07-30 post-audit batteries CLOSED the top
+##     run candidates (all prereg-frozen first, verdicts same-day):
+##     composite window-rule run END-TO-END as one arm (--composite-
+##     crossover 45, reproduces its branch cells exactly, all 5 t);
+##     crossover band 12-seed both edges (t40 flat +3.5 / t50 spec +3.4,
+##     band [40,50] unchanged); fairness control 12-seed (pooled 47.00,
+##     spec +10.0pp, paired t~4.9); oracle ceiling 12-seed (56.90, spec
+##     statistically AT it); statistical-conventions disclosure para in
+##     sec:setup. Experimental ledger at optimum — writing/poster only.
+## ================================================================
+
+---
+
+## ================================================================
 ## STATUS 2026-07-29 (READ THIS FIRST — supersedes everything below)
 ## TwoRoom re-opened, three retractions, one live positive.
 ## ================================================================
@@ -141,15 +223,85 @@ Method = spec-accept; "DSpark" = the ported negative-result baseline only.
 ##  * Paper: July TwoRoom conclusion retracted, anchor + representational
 ##    story in, \inflight marker awaiting the 12-seed pool. Compiles, 22pp.
 ##
+## MORNING 2026-07-30: HEADLINE BANKED + FAITHFULNESS PROGRAM RUNNING.
+##  * 12-seed pool (2306141): flat 41.67 vs pair+verify 57.03 =
+##    **+15.4pp, positive on ALL 12 seeds, paired t~10.9** vs bar
+##    (>=+3pp, t>=2) -> PASSED. Ext seeds STRONGER for spec (58.6): no
+##    regression-to-mean. 57.03 = statistically AT oracle (57.81).
+##    Paper \inflight swapped for measured text; compiles, 22pp.
+##  * k derivation: k* = 2 (bias below floor at every k; sampler converges
+##    immediately in the verification space). Confirm 2306515 in flight,
+##    bar: within 3pp of 57.03 at 6 seeds -> pass = 25x fewer diffusion
+##    steps per draft in the faithful row.
+##  * PushT paired drafter: norm gate PASSED (1.001/1.002), beats no-op in
+##    BOTH halves (LeWM half faithful on pusht, 0.12-0.17, vs chance ~1.37
+##    on tworoom = the encoder story from the drafter's side).
+##  * PushT verify-space CONTROL pre-registered (prereg doc): C1 verify
+##    LeWM-half tau=0.20 vs C2 verify DINO-half tau=derived, SAME drafter,
+##    t=150, 6 seeds; tau from probe_floor --verify-space dino (2306521,
+##    in flight). Answers "why not DINOv2 everywhere" with a measurement.
+##
+## NIGHT 2026-07-30 (user asleep; all read + fired same night):
+##  * k=2 confirm REFUTED (31.25 vs 57.03): k-from-bias rule dead closed-
+##    loop; cause visible offline = diversity collapse at low steps
+##    (disp 0.049 vs 0.127); k stays 50. Second prescriptive-rule failure.
+##  * THEIR-PROTOCOL battery (2306523, LeWM Fig.6 setup verbatim + n=64
+##    x6 seeds): flat RH5 84.89 (their 87 in noise) | oracle-s10 63.54
+##    (-21pp: goal sits INSIDE one planning window; decomposition
+##    structurally counterproductive) | best spec arm (bok+proximity-router
+##    RH5) 77.08 -> B25-1 non-inferiority FAILED (-7.8pp), P25-1 confirmed.
+##    NEW router mechanism built (--route-goal-hop 0.163, derived).
+##  * => FINAL TWOROOM CLAIM = WINDOW-RULE COMPOSITE (zero new constants,
+##    goal_offset is a known task parameter): within one window -> flat
+##    (84.9 = ties LeWM's own game); beyond -> certified spec (57.0 vs
+##    41.7, +15.4pp). Both sides measured at THEIR-anchored protocols.
+##    Reacher shape; never loses to flat. Prereg has the full table.
+##  * PushT C1/C2 verify-space control chained + queued (floor probe
+##    2306565 -> battery 2306566, tau_dino read from JSON at runtime;
+##    specpaired arm + --verify-half ported to the pusht driver).
+##
+## MORNING 2026-07-31 (all overnight batteries read + banked; prereg has
+## the full verdict tables):
+##  * CROSSOVER PREDICTION CONFIRMED: flat +4.9 at t=40, spec +3.4 at
+##    t=50, tie t=60 (noise), spec +15.4 at t=75 -> crossover in [40,50],
+##    where the goal exits the ~25-step window + one stride. The window
+##    rule is now a measured curve (spine panel material).
+##  * bok 12-seed pool 58.85 vs 57.03 = +1.8 (t~1.1): 6-seed bar passed
+##    but margin within noise at 12 -> bok stays optional, OUT of headline.
+##  * their-protocol flat 12-seed: 83.72 (composite table symmetric).
+##  * C1/C2: SR indifferent (63.54 vs 62.24) BUT C2's derived-tau DINO
+##    verifier is degenerate-reject (cr 1.00, 0 advances) vs C1 cr 0.66:
+##    external space loses ALL call-savings where the own gap is open ->
+##    the verify-space rule stands WITH a measured reason.
+##  * Paper updated (their-protocol + composite + crossover + k=2/bok
+##    honesty in one block); compiles 22pp. TWOROOM IS EXPERIMENTALLY
+##    CLOSED end-to-end; zero TwoRoom compute outstanding.
+##
+## 2026-07-31 LATER: PROGRAM FULLY CLOSED. DINO-WM leg killed per the
+## Aug-1 switch (2299983 cancelled; P3 = confirmed prospective hit, P4
+## unavailable, P1/P2/P5 = confounded serving fault, claimed in neither
+## direction; tworoom closed-loop cut, offline cure stands). TwoRoom
+## fairness control (2306686): flat+2xCEM = 48.44 -- rescues +6.8 over
+## flat (prediction too strong, reported as-is) but spec stays +8.6pp
+## above the control (paired t~2.5) with less compute -> margin NOT
+## compute-driven; last control in the program. Paper solidity pass DONE:
+## TwoRoom in abstract/contributions (verifier-modularity bullet)/grid
+## para/conclusion; both instrument_generality \inflights resolved with
+## measured verdicts; composite switch re-stated as ONE MEASURED CONSTANT
+## (crossover), fixing the zero-constants overclaim. Crossover figure
+## rendered (paper/figures/fig_tworoom_crossover.png). Compiles, 22pp.
+## ZERO experiments outstanding anywhere in the program.
+##
+## TIMING BANKED (2306731): tworoom overhead = ~140ms on ~6.9s episodes
+## (+2%; CEM 94% of wall-clock; lerp tautology reproduced flat 42.7 =
+## instrumentation validated). fig:cost column complete for all 4 envs.
+## Paper sentence added; compiles 22pp. TRULY ZERO experiments left.
+##
 ## NEXT, IN ORDER:
-##  1. Read 2306141 -> pool 12 seeds -> if margin >= +3pp and t >= 2, the
-##     headline sentence is earned; swap the paper's \inflight for measured
-##     text (ONE paper update, per the rule).
-##  2. Remaining poster work: assemble frames into the poster layout
-##     (render PNGs exist; also cube/reacher strips if wanted - drivers
-##     need the same --dump-strip plumbing as pusht/tworoom).
-##  3. B2 (bok) extension seeds 48-53 if we want 12-seed backing for the
-##     bok sentence too (optional; B2 is a 6-seed bar and passed).
+##  1. Poster assembly (Aug 11; awaiting format/template decision;
+##     filmstrips + crossover figure ready as panels).
+##  2. Commit the 07-30/31 work when asked.
+##  3. Post-poster: cube best-of-k battery (pre-register >= +2pp bar).
 ## ================================================================
 
 ---
