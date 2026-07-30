@@ -107,7 +107,8 @@ class SpecAcceptPairedSource:
     def __init__(self, planner, paired_encoder, n_envs, device="cpu", n_steps=50,
                  seed=42, tau=0.2, record=False, readout=None, readout_tau=None,
                  goal_gate=False, snap_bank=None, snap_progress=False,
-                 best_of_k=1, bok_score="goal"):
+                 best_of_k=1, bok_score="goal", route_goal_hop=None,
+                 verify_half="dino"):
         # Best-of-k drafting. Sample k candidate blocks per re-draft and serve
         # the one that scores best IN THE DINOv2 HALF -- the same principle as
         # the two mechanisms that measured positive on TwoRoom (verify in
@@ -123,6 +124,25 @@ class SpecAcceptPairedSource:
         self.bok_score = str(bok_score)
         assert self.bok_score in ("goal", "feas")
         self.bok_margins = []   # median-candidate minus selected score, per pick
+        # Proximity router (short-horizon protection). At each replan, if the
+        # GOAL itself is within one certified hop in the verification space
+        # (rel L2 <= route_goal_hop, the measured hop-S10 scale from the gap
+        # probe -- a derived constant, not tuned), serve the goal directly and
+        # draft nothing: an intermediate waypoint cannot help inside one
+        # serving stride, and the oracle measured decomposition NEGATIVE at
+        # short horizon. This is the c*-retire idea transplanted to the
+        # verification space; unlike the (null) arrival gate it is re-evaluated
+        # EVERY replan, not a one-way retirement.
+        self.route_goal_hop = None if route_goal_hop is None else float(route_goal_hop)
+        self.n_route = 0
+        # Which half the ACCEPT TEST reads. 'dino' is the method (certify in
+        # the external structured space); 'lewm' is the control arm for the
+        # verify-space question on substrates whose own gap is open (pusht
+        # C1/C2): same drafter, same serving, only the verifier's ruler
+        # changes. Router/bok/snap stay in the DINOv2 half regardless (their
+        # constants were derived there).
+        self.verify_half = str(verify_half)
+        assert self.verify_half in ("dino", "lewm")
         # readout: optional time-contrastive lens over the DINOv2 half. The
         # TwoRoom gap in raw pooled DINOv2 is CLOSED at every hop (equiv p90
         # 0.210 vs hop10 p10 0.074) with bulks separated ~1.7x -- the reacher
@@ -265,17 +285,20 @@ class SpecAcceptPairedSource:
         # computed here; both halves come from the SAME frames either way.
         z_now = self._pair(frames, obs_latent)                        # (R, 576)
         _, d_now = split_paired(z_now)
+        # the half the ACCEPT TEST reads (router/bok/snap stay on d_now/dino)
+        v_now = d_now if self.verify_half == "dino" else split_paired(z_now)[0]
         z_goal_paired = None
         if self.needs_goal and goal_frames is not None:
             z_goal_paired = self._pair(goal_frames, goal_latent)
 
         # arrival gate: retire envs that have verifiably reached the final goal
         if self.goal_gate and z_goal_paired is not None:
-            _, d_goal = split_paired(z_goal_paired)
+            v_goal = (split_paired(z_goal_paired)[1] if self.verify_half == "dino"
+                      else split_paired(z_goal_paired)[0])
             for r, i in enumerate(replan_idx):
                 if self.retired[i]:
                     continue
-                if self._accepts(d_now[r], d_goal[r]):
+                if self._accepts(v_now[r], v_goal[r]):
                     self.retired[i] = True
 
         need_rows, need_envs = [], []
@@ -285,11 +308,20 @@ class SpecAcceptPairedSource:
                 self.n_gate += 1
                 self.events.append((int(i), "gate", float("nan")))
                 continue
+            if self.route_goal_hop is not None and z_goal_paired is not None:
+                d_goal_r = split_paired(z_goal_paired[r])[1]
+                rel_g = float((d_now[r] - d_goal_r).norm()
+                              / d_goal_r.norm().clamp_min(1e-8))
+                if rel_g <= self.route_goal_hop:     # goal within one hop: no
+                    self._cache[i] = split_paired(z_goal_paired[r])[0]  # drafting
+                    self.n_route += 1
+                    self.events.append((int(i), "route", rel_g))
+                    continue
             q, tgt = self._queue[i], self._target[i]
             accept = False
             rel = float("nan")
             if q is not None and tgt is not None:
-                verified, rel = self._accepts(d_now[r], tgt, want_dist=True)
+                verified, rel = self._accepts(v_now[r], tgt, want_dist=True)
                 self.rels.append(rel)
                 if not verified:
                     self.n_reject += 1
@@ -297,7 +329,8 @@ class SpecAcceptPairedSource:
             if accept:
                 nxt = q[self._ptr[i]]
                 self._ptr[i] += 1
-                self._target[i] = split_paired(nxt)[1]
+                self._target[i] = (split_paired(nxt)[1] if self.verify_half == "dino"
+                                   else split_paired(nxt)[0])
                 self._cache[i] = split_paired(nxt)[0]
                 self.n_advance += 1
                 self.events.append((int(i), "advance", float(rel)))
@@ -352,14 +385,17 @@ class SpecAcceptPairedSource:
                 self._queue[i] = blocks[j]
                 self._ptr[i] = 1
                 self.n_redraft += 1
-                self._target[i] = split_paired(blocks[j][0])[1]
+                self._target[i] = (split_paired(blocks[j][0])[1]
+                                   if self.verify_half == "dino"
+                                   else split_paired(blocks[j][0])[0])
                 self._cache[i] = split_paired(blocks[j][0])[0]
         return self._cache.clone()
 
     def stats(self, tau=None):
         total = self.n_redraft + self.n_advance
         rels = np.asarray(self.rels) if self.rels else np.array([0.0])
-        space = "dino384-lens" if self.readout is not None else "dino384"
+        space = ("dino384-lens" if self.readout is not None
+                 else "dino384" if self.verify_half == "dino" else "lewm192")
         tau_used = self.readout_tau if self.readout is not None else self.tau
         gate = (f" gated_serves={self.n_gate} retired={int(self.retired.sum())}/"
                 f"{self.n_envs}" if self.goal_gate else "")
@@ -374,6 +410,9 @@ class SpecAcceptPairedSource:
             gate += (f" bok={self.best_of_k}({self.bok_score}) "
                      f"sel_margin p50={np.percentile(bm, 50):.3f} "
                      f"p90={np.percentile(bm, 90):.3f}")
+        if self.route_goal_hop is not None:
+            gate += (f" router_hop={self.route_goal_hop} "
+                     f"routed={self.n_route}")
         return (f"[specpaired]{gate} tau={tau_used} verify-space={space} "
                 f"re-drafts={self.n_redraft} advances={self.n_advance} "
                 f"rejects={self.n_reject} "
