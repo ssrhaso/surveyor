@@ -77,6 +77,13 @@ def parse_args():
                         "(progress); feas = first waypoint nearest the current "
                         "state (achievability). Both reuse the verifier metric "
                         "with no constant of their own.")
+    p.add_argument("--route-goal-hop", type=float, default=None,
+                   help="specpaired proximity router: serve the GOAL directly at "
+                        "any replan where it verifies within this rel-L2 in the "
+                        "DINOv2 half (derive from the gap probe's hop-S10 scale; "
+                        "an intermediate waypoint cannot help inside one serving "
+                        "stride). Re-evaluated every replan; short-horizon "
+                        "protection for LeWM's own t=25 protocol.")
     p.add_argument("--mode", choices=["short", "long"], default="short")
     p.add_argument("--goal-offset", type=int, default=None,
                    help="override the mode-derived goal_offset (25 short / 75 long)")
@@ -105,6 +112,11 @@ def parse_args():
                    help="restrict eval to episode indices < this (exclusive)")
     p.add_argument("--dump-traces", default=None,
                    help="path (.pt): per-episode success flags + per-replan latents")
+    p.add_argument("--time-instrument", action="store_true",
+                   help="wall-clock CEM-vs-drafter split (additive; zero overhead "
+                        "when unset). Prints a [timing] line. Non-baseline sources "
+                        "only; measure flat via --subgoal lerp --lerp-frac 1.0, "
+                        "the instrumented-flat tautology, as fig:cost does.")
     p.add_argument("--dump-strip", type=int, default=0,
                    help="capture the raw frame at EVERY replan boundary for the "
                         "first N envs, plus per-replan advance/redraft/gate events; "
@@ -358,7 +370,8 @@ def main():
                                             goal_gate=args.goal_gate, snap_bank=bank,
                                             snap_progress=args.snap_progress,
                                             best_of_k=args.best_of_k,
-                                            bok_score=args.bok_score)
+                                            bok_score=args.bok_score,
+                                            route_goal_hop=args.route_goal_hop)
             print(f"[specpaired] verify-space=dino384{'-lens' if ro else ''} "
                   f"tau={ro_tau if ro else args.accept_tau} "
                   f"N={source.N} (planner still consumes the LeWM half)"
@@ -389,6 +402,7 @@ def main():
         else:
             source = OracleSubgoalSource(table, device=args.device)
         policy = PolicyCls(cost_model=cost_model, subgoal_source=source,
+                           time_instrument=args.time_instrument,
                            dump_frames=args.dump_strip > 0, dump_strip=args.dump_strip,
                            solver=solver, config=config, process=process, transform=transform)
     world.set_policy(policy)
@@ -503,6 +517,19 @@ def main():
         Path(args.dump_traces).parent.mkdir(parents=True, exist_ok=True)
         torch.save(rec, args.dump_traces)
         print(f"[traces] saved {args.dump_traces}")
+
+    if args.time_instrument and not is_baseline:
+        t_d, t_c = policy.t_drafter, policy.t_cem
+        t_tot = t_d + t_c
+        frac = 100.0 * t_d / t_tot if t_tot > 0 else 0.0
+        per_ep = {
+            "drafter_ms": 1000.0 * t_d / max(args.num_eval, 1),
+            "cem_ms": 1000.0 * t_c / max(args.num_eval, 1),
+            "total_ms": 1000.0 * t_tot / max(args.num_eval, 1),
+        }
+        print(f"[timing] drafter={t_d:.3f}s cem={t_c:.3f}s total={t_tot:.3f}s "
+              f"drafter_frac={frac:.2f}% per_episode_ms={per_ep} "
+              f"timed_steps={policy._timed_steps}")
 
     print("\n==== FF-JEPA eval summary (TwoRoom) ====")
     print(f"mode={args.mode} subgoal={args.subgoal} num_eval={args.num_eval} "
