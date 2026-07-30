@@ -407,3 +407,345 @@ the 6-seed B1 verdict is still read first and reported.
   failure mode.
 - tau=0.20 robustness: -3.4pp vs the derived tau=0.098 but still +9.4 over
   flat; the derived-tau prescription holds on this substrate.
+
+## 12-SEED POOL (extension 2306141, read 2026-07-30 morning): HEADLINE BANKED
+
+flat RH2 (seeds 42-53): 41.67. pair+verify tau=0.098 (seeds 42-53): **57.03**.
+**Margin +15.4pp, positive on ALL TWELVE seeds** (paired t ~ 10.9, unpaired
+t ~ 6.2) vs the frozen bar (>= +3pp, t >= 2): **PASSED**. The extension
+seeds were STRONGER for spec (58.6) and slightly weaker for flat (40.6), so
+no regression-to-mean shrinkage (the failure mode of both retracted July
+margins). 57.03 is statistically AT the oracle ceiling (57.81, RH1 static
+table). TwoRoom is the third horizon-extension win, at the anchored
+protocol.
+
+## THEIR-PROTOCOL BATTERY (registered 2026-07-30 night, BEFORE any cell ran):
+## spec-accept AT LeWM's OWN published TwoRoom setup
+
+Mission (user): replicate LeWM's Fig. 6 TwoRoom number (DONE: V5 = 85.33,
+their 87 in seed range) and now field the best certified spec-accept AT
+THAT PROTOCOL. Protocol (paper App. F.1/D, config verbatim): start sampled
+randomly from a dataset trajectory, goal = the state 25 steps later in the
+SAME trajectory (goal_proprio), budget 50, CEM 300/30/30 var 1.0, horizon 5
+blocks, RH = full 5-block execution; our additions: eval-filter none,
+episode-min 4000 (holdout hygiene, ~0.5pp), n=64, seeds 42-47.
+
+Paper fact folded in (Tab. 3): agent position is PERFECTLY probeable from
+LeWM's TwoRoom latent (MLP MSE 0.000, r 1.000) -- the information is
+present, the METRIC is what our gap probe shows broken. Their own probing
+table is evidence for our mechanism split (information vs metric).
+
+NEW MECHANISM, registered before running: the PROXIMITY ROUTER
+(--route-goal-hop, paired.py). At each replan, if the goal itself verifies
+within one hop in the DINOv2 half (rel L2 <= hop-S10 p50 = 0.163, the gap
+probe's measured hop scale -- derived, not tuned), serve the goal directly;
+an intermediate waypoint cannot help inside one serving stride, and the
+oracle measured decomposition NEGATIVE at short horizon. c*-retire
+transplanted to the verification space; unlike the null arrival gate it is
+re-evaluated every replan (routing, not retirement).
+
+Arms (t=25, six seeds each): flat RH5 (their config) | flat RH2 (sweep) |
+oracle s10 RH5 (short-horizon decomposition ceiling) | pair+verify t098 RH2
+(no router: the honest exposure of the oracle logic) | +bok8-goal RH2 |
++bok8+router RH2 | +bok8+router RH5 (their exact serving config).
+
+FROZEN BARS AND PREDICTIONS:
+- **P25-1 (prediction, recorded): router-OFF spec arms LOSE to flat at
+  t=25** (the oracle logic; if oracle-s10 itself reads below flat, pure
+  decomposition cannot win here and the router is the only path).
+- **B25-1 (primary, non-inferiority): best router arm >= best flat - 2pp.**
+- **B25-2 (aspirational): best router arm > best flat** (any positive
+  margin; powered follow-up before quoting if it lands within noise).
+- Reading either way: combined with the banked +15.4pp at t=75, the paper
+  claim becomes "ties LeWM's own short-horizon protocol, beats it decisively
+  at range" -- the Reacher shape, at a protocol anchored to their Fig. 6.
+
+### VERDICT (2306523, all 42 cells COMPLETED same night, read 2026-07-30)
+
+flat RH5 (their config) **84.89** | flat RH2 80.99 | oracle-s10 **63.54** |
+pair RH2 70.31 | +bok 72.40 | +bok+router RH2 69.27 | +bok+router RH5 77.08.
+
+- **P25-1 CONFIRMED** (router-off spec loses by 12-15pp).
+- **Oracle -21pp vs flat**: at their protocol the goal sits INSIDE one
+  planning window (25 steps = their horizon exactly); even ground-truth
+  waypoints are counterproductive there. No drafter can fix this; it is the
+  regime law's window leg, measured at the anchored protocol.
+- **B25-1 FAILED** (77.08 vs bar 82.89; the router recovered 70->77 but not
+  parity). B25-2 failed. Recorded as-is. Mechanism notes: RH5 >> RH2 for
+  every arm at t=25 (replanning itself taxes the short game); router helped
+  at RH5, slightly hurt at RH2.
+- **RESULTING CLAIM (no further compute): the WINDOW RULE composite.**
+  goal_offset is a known task parameter in this protocol, so the regime
+  law's first leg applies with zero constants: goal within one planning
+  window -> plan flat (84.9, ties their published 87 within noise); beyond
+  -> certified spec-accept (57.0 vs flat 41.7 at t=75, +15.4pp, 12 seeds).
+  TwoRoom is now measured on BOTH sides of the crossover at protocols
+  anchored to LeWM's Fig. 6; the deployed policy never loses to flat.
+
+## CROSSOVER SWEEP (registered 2026-07-30 night, before running; DESCRIPTIVE,
+## no bars -- it maps the composite's switch point)
+
+t in {40, 50, 60} at the anchored long protocol (eval-filter none,
+episode-min 4000, goal_proprio, budget 2t, n=64, seeds 42-47); arms = flat
+RH2, flat RH5, spec(pair+verify t098) RH2, spec RH5. Endpoints already
+banked: t=25 flat 84.9 vs spec 77.1; t=75 flat 41.7 vs spec 57.0.
+**Frozen prediction (falsifiable, from the window rule): flat still ahead
+at t=40; spec ahead by t in [50, 60]; crossover where the goal exits the
+~25-step planning window plus one serving stride.** Also fired: bok-arm
+extension seeds 48-53 at t=75 (12-seed backing for the B2 sentence) and
+their-protocol flat RH5 seeds 48-53 (12-seed symmetry for the composite
+table).
+
+### CROSSOVER + EXTENSIONS VERDICT (2306577, read 2026-07-31 morning)
+
+Best-arm means (6 seeds): t=40 flat 65.36 vs spec 60.42 (flat +4.9); t=50
+flat 61.20 vs spec 64.59 (spec +3.4); t=60 flat 55.47 vs spec 55.73 (tie,
+inside noise); endpoints banked t=25 -7.8 / t=75 +15.4.
+**FROZEN PREDICTION CONFIRMED: flat ahead at t=40, spec ahead at t=50; the
+crossover sits in [40, 50], where the goal exits the ~25-step planning
+window plus one serving stride.** t=60's tie is a wobble within seed noise
+on a monotone-trend curve; reported as measured. (Protocol note: the t=25
+point is the their-protocol start-random battery; t>=40 are mode-long
+start-final; both unfiltered + goal_proprio.)
+
+- **bok 12-seed pool: 58.85 vs pair 57.03 = +1.8pp, paired t ~ 1.1.** The
+  pre-registered 6-seed B2 bar passed (+2.86 >= +2), but the extension
+  weakens the margin to within noise. HONEST STATUS: best-of-k stays an
+  optional add-on with a passed bar and a non-significant 12-seed margin;
+  it does NOT enter the headline sentence.
+- their-protocol flat RH5 12-seed: **83.72** (composite table symmetric).
+- COMPOSITE REFINEMENT (correcting the "zero constants" phrasing above): the
+  switch is placed at the MEASURED crossover, one measured constant with the
+  same epistemic status as tau and S -- placing it at the window edge would
+  route t=40 to spec and lose 4.9pp. Paper text updated to match.
+
+## COMPUTE-MATCHED FLAT CONTROL (registered 2026-07-31 before running):
+## the fairness control every other headline env has, applied to TwoRoom
+
+flat RH2 at the anchored t=75 protocol with DOUBLED CEM samples (300 -> 600,
+the paper's convention: a strict upper bound on the drafter's overhead), six
+seeds 42-47. **Frozen prediction: no material rescue -- flat+2xCEM stays
+well below certified spec's 57.03; the t=75 collapse is a lookahead limit,
+not an optimization limit** (same call as PushT/Reacher, which held 3/4).
+If flat+2x reaches within 3pp of 57.03 the headline must be re-framed as
+partially compute-driven and the margin re-stated against this control.
+
+### VERDICT (2306686, read 2026-07-31): flat+2xCEM = 48.44
+(40.62/43.75/56.25/45.31/57.81/46.88). The doubled budget DOES rescue
++6.8pp over plain flat (41.67) -- the "no material rescue" prediction was
+too strong, as it was for Reacher RH2, and is reported as-is. But certified
+spec stays **+8.6pp above the control** (57.03 vs 48.44; per-seed paired
+t ~ 2.5, 5/6 seeds positive) while using LESS planning compute than the 2x
+upper bound. The re-frame trigger (within 3pp) does NOT trip. Reading: the
+t=75 collapse is partly optimization, mostly lookahead; the headline margin
+is not compute-driven. THIS CLOSES THE LAST CONTROL IN THE PROGRAM.
+
+## TIMING ACCOUNTING (2306731, read 2026-07-31): overhead ~2% of wall-clock
+
+Instrumented policy (lerp-1.0 tautology for flat, the fig:cost convention),
+t=75 anchored, 3 seeds each, n=64, 150 timed replans per run:
+  flat-instr: drafter 19.7-19.9s, cem 400-437s (drafter_frac 4.3-4.7%),
+              total 420-457s; SR 40.6/40.6/46.9 (tautology reproduces flat
+              RH2's 42.71 -- instrumentation validated again)
+  spec:       drafter 28.5-28.8s, cem 399-436s (drafter_frac 6.2-6.7%),
+              total 428-465s; SR 57.8/54.7/65.6 (consistent with 57.03)
+Per-episode: ~6.9s both arms; the drafter + DINOv2 verifier add ~140ms
+(+2%). CEM is ~94% of wall-clock on this stack, so the near-every-step
+call_ratio (0.95) is cheap in seconds: **the +15.4pp costs ~2% wall-clock.**
+Completes the fourth env's fig:cost column.
+
+## PUSHT C1/C2 VERIFY-SPACE CONTROL: VERDICT (2306565 -> 2306566, read
+## 2026-07-31 morning)
+
+tau_dino derived at runtime: criterion floor p50 = 0.1182 (tau*=0.20 is
+floor-consistent in DINO space too, band [0.118, 0.276]). Six seeds each,
+one shared paired drafter, t=150:
+  C1 (verify LeWM half, tau=0.20):  **63.54**, call_ratio 0.660,
+      advances 450 (the verifier genuinely fires both ways)
+  C2 (verify DINO half, tau=0.1182): **62.24**, call_ratio 1.000,
+      advances 0 (degenerate-reject: closed-loop distances p50 0.184 sit
+      above the offline floor)
+**Declared reading |C1-C2| <= 3pp holds: SR is space-indifferent where the
+own gap is open. But the mechanics add the real answer to "why not DINOv2
+everywhere": the external space loses the ENTIRE call-savings benefit on
+this substrate (cr 1.00 vs 0.66) at equal SR. The rule stands with a
+measured reason: verify in the stack's own space when its gap is open (no
+extra model, real efficiency); transplant only when it is not.**
+
+## k*=2 CONFIRM: REFUTED (2306515, read 2026-07-30 night)
+
+k=2 arm at the anchored t=75 protocol: 34.4/21.9/37.5/21.9/32.8/39.1 =
+**31.25** vs bar "within 3pp of 57.03" -> the k-from-bias derivation rule is
+**refuted closed-loop**, k stays 50. Mechanism visible in the probe's own
+numbers: dispersion at k=2 is 0.049 vs 0.127 at k=50 -- the sampler
+COLLAPSES TO ITS MEAN at low step counts (mode-averaging, the DROID-lerp
+poison), which a bias-of-means statistic structurally cannot detect. Second
+prescriptive-rule failure (after cube tau-midpoint); consistent with the
+instrument's amended scope: applicability and tau-existence, not
+prescriptions. Also implies spec serving BENEFITS from sampler diversity,
+consistent with best-of-k's positive effect at k(steps)=50.
+
+## FAITHFULNESS PROGRAM (2026-07-30, prep 2306153 read; closed loops
+## pre-registered here BEFORE running)
+
+- **k derivation (probe_k, faith-prep task 0): k* = 2.** Bias-to-k50 p50 is
+  below the criterion floor (0.098) at EVERY k (0.056 at k=2); dispersion
+  grows with k. The sampler converges immediately in the verification
+  space. **Confirm run 2306515 fired, bar frozen in its header: k=2 arm
+  within 3pp of the k=50 12-seed mean (57.03) at six seeds.** Pass = the
+  row runs at 25x fewer diffusion steps per draft; fail = the k rule is
+  refuted on this substrate and the row keeps k=50.
+- **PushT paired drafter (faith-prep task 1): norm gate PASSED**
+  (1.001 lewm / 1.002 dino); beats no-op in BOTH halves at every position
+  (m+1 dino 0.099 vs 0.150; m+2 lewm 0.125 vs 1.136). Note the contrast
+  with TwoRoom, where the LeWM half sits at chance (~1.37): the drafter is
+  faithful wherever the encoder is, measured cross-substrate.
+- **PushT DINOv2-verify CONTROL, registered now.** Question: does external-
+  space verification also work where the stack's OWN space passes the gap
+  probe (answering "why not DINOv2 everywhere" with a measurement)? Arms,
+  t=150 protocol (mode long, budget 300, score block, angle 20, H2/RH2,
+  n=64, seeds 42-47), BOTH sharing gdm_pusht_s10_paired_e400v.pt so only
+  the verifier's half differs:
+    C1 paired drafter, verify in the LeWM half, tau=0.20 (the env's
+       derived tau);
+    C2 paired drafter, verify in the DINO half, tau = criterion floor p50
+       from probe_floor --verify-space dino (job 2306521; filled in before
+       the battery is submitted, bar does not depend on its value).
+  Declared readings: |C1 - C2| <= 3pp -> verification-space choice is free
+  when the gap is open; the rule "own space when open (no extra model),
+  transplant when not" stands. C2 > C1 + 3pp -> DINOv2 is simply the
+  better verifier and the story simplifies. C2 < C1 - 3pp -> transplanting
+  costs SR where the native space works; the transplant is a repair, not
+  an upgrade. All three outcomes reportable.
+
+## COMPOSITE END-TO-END BATTERY + CROSSOVER SEED SYMMETRY (registered
+## 2026-07-30, frozen BEFORE submission; GPUs idle, post-audit)
+
+Motivation (program audit, 2026-07-30): the deployed composite claim
+currently CITES its two constituent cells; a reviewer's likeliest
+objection is "was the window-rule policy ever RUN as one arm?" This
+battery runs it end-to-end. Second, the crossover band's arms are 6-seed
+while the composite table's flat comparators are 12-seed; precision-only
+extensions close the asymmetry.
+
+COMPOSITE ARM (one policy, driver-internal dispatch: --composite-crossover
+45 in specaccept/envs/tworoom/eval.py). At each t the driver routes on the
+task's KNOWN goal distance: goal_offset <= 45 (the measured crossover,
+midpoint of the confirmed [40,50] band -- the ONE constant) -> flat
+branch; else -> certified spec branch (specpaired, tau=0.098 derived,
+verify in frozen DINOv2, k(steps)=50). Branch RH frozen by PRIOR-prereg
+convention, not tuned here: their-protocol flat = RH5 (LeWM's own serving
+config), anchored flat = RH2 (Stage A's strongest flat), spec = RH2 (the
+headline arm) everywhere. Protocols = the banked ones verbatim: t=25
+their-protocol (mode short, start random, budget 50); t in {40,50,60,75}
+anchored (mode long, budget 2t, eval-filter none, episode-min 4000,
+goal_proprio). n=64, seeds 42-47 (same seeds as the banked cells, so the
+comparison is paired and reads as an integration test).
+
+FROZEN BARS AND PREDICTION:
+- **B-COMP-1 (primary, per t): composite mean >= banked mean of its own
+  selected branch arm at that t, minus 1pp.** Banked branch references:
+  t=25 flat_rh5 84.89 | t=40 flat_rh2 65.36 | t=50 spec_rh2 64.59 |
+  t=60 spec_rh2 55.73 | t=75 spec_rh2 (seeds 42-47) 55.47.
+- **B-COMP-2 (the paper-facing reading): composite >= max(best flat, best
+  spec) - 1pp at every t.** Identical references except t=60, where the
+  branch (spec 55.73) and best flat (55.47) are a recorded tie.
+- Prediction (falsifiable): the composite reproduces its branch arm
+  per-seed up to CEM nondeterminism; a mean deviation beyond 1pp is an
+  INTEGRATION FAULT and is reported as such, never adjusted away.
+- No banked number changes under any outcome; the composite gets its own
+  row. A miss is reported as-is.
+
+SEED-SYMMETRY EXTENSIONS (precision-only; NO registered verdict may
+change under any pooled outcome):
+- their-protocol pair_bok_rt_rh5 (77.08 at 6 seeds), seeds 48-53 -> 12.
+  B25-1 remains FAILED regardless of the pooled mean.
+- crossover t=40 and t=50, flat_rh2 + spec_rh2, seeds 48-53 -> 12 each.
+  The 6-seed crossover verdicts stand as registered at their own n. The
+  12-seed pooled means are reported alongside; if pooling moves a point
+  across the tie line the crossover band is RE-STATED as measured
+  (widening the reported band is a permitted outcome; tightening the
+  claim post hoc is not). t=60 stays 6-seed (declared tie, descriptive).
+
+FILMSTRIPS (cube + reacher, qualitative-only, same convention as
+run_poster_strips.sbatch): n=8 single-seed captures at the paper cells;
+no number from these runs may be quoted anywhere.
+
+### VERDICTS (2306763/2306764/2306765, all 65 tasks COMPLETED, read
+### 2026-07-30 afternoon -- same day as registration)
+
+**COMPOSITE: B-COMP-1 AND B-COMP-2 PASSED AT EVERY t, zero deviation.**
+Means (seeds 42-47): t=25 **84.89** | t=40 **65.36** | t=50 **64.59** |
+t=60 **55.73** | t=75 **55.47** -- each cell reproduces its banked branch
+arm EXACTLY, per-seed (the dispatch is bit-identical to the fixed arm's
+code path and the serving stack is deterministic under matched
+seed/cem-seed). The [composite] routing line fired correctly in all 30
+logs (flat RH5 at t=25, flat RH2 at t=40, spec RH2 at t=50/60/75). The
+prediction held in its strongest form: no integration fault, and the
+window-rule policy has now been RUN END-TO-END AS ONE ARM at all five
+goal distances. The paper may state: one invocation, one constant (the
+measured crossover), never loses to the best fixed arm at any t.
+
+**SEED-SYMMETRY EXTENSIONS: verdicts unchanged, band CONFIRMED at 12
+seeds.** Pooled 12-seed means (42-53):
+- t=40: flat_rh2 **65.10** vs spec_rh2 **61.59** -> flat +3.5 (6-seed
+  read was +4.9; same sign, flat still ahead -> lower edge holds).
+- t=50: spec_rh2 **63.28** vs flat_rh2 **59.90** -> spec +3.4 (identical
+  margin to the 6-seed read -> upper edge holds).
+- The crossover stays in [40, 50] at doubled seed count; no re-statement
+  of the band is required.
+- their-protocol pair_bok_rt_rh5: ext seeds 76.82, pooled 12-seed
+  **76.95** (vs 77.08 at 6 seeds). B25-1 remains FAILED as registered;
+  the composite table is now 12-seed on BOTH sides at t=25.
+
+**FILMSTRIPS: all 5 captured** (cube spec champion + cube flat-lerp,
+reacher spec t=150 + reacher flat-lerp, tworoom flat-lerp t=75); with the
+existing pusht pair and tworoom spec strip, all four environments now
+have spec-vs-flat side-by-side panels. Qualitative only; no numbers
+quotable from the n=8 runs. All 8 npz pulled to the local repo
+(strips/).
+
+## PRECISION EXTENSIONS II: FAIRNESS CONTROL + ORACLE CEILING TO 12 SEEDS
+## (registered 2026-07-30 evening, frozen BEFORE submission)
+
+Motivation: after the composite/ext12 pass, the two softest inferential
+statistics left in the arc are both t=75 anchored controls at 6 seeds --
+the compute-matched flat margin (spec +8.6 over 48.44, paired t ~ 2.5,
+the weakest test statistic the paper quotes) and the oracle ceiling
+(57.81, 6 seeds, against which the 12-seed spec 57.03 is described as
+"statistically at the ceiling"). Both extend seeds 48-53 -> 12; log
+names pool with the originals (2room_fair2x_flat_seed*.log,
+2room_anchA_oracle_rh1_seed*.log).
+
+FROZEN RULES:
+- Precision-only intent, but with the honest exposure stated up front:
+  * FAIRNESS: the original re-frame trigger (control within 3pp of
+    57.03) was adjudicated at its registered n=6 and did not trip. If
+    the POOLED 12-seed control comes within 3pp of 57.03, the re-frame
+    clause RE-OPENS and is applied (headline re-stated as partially
+    compute-driven). We do not get to extend seeds and ignore a tripped
+    trigger.
+  * ORACLE: the ceiling is re-stated at the pooled value. The "spec
+    statistically at the oracle ceiling" sentence is re-checked against
+    the pooled oracle (unpaired t, spec 12-seed pool vs oracle 12-seed
+    pool); if spec falls statistically below, the sentence downgrades
+    to "near the ceiling". Config unchanged from Stage A (oracle s25
+    RH1; static-table staleness caveat rides along as always noted).
+- No other verdict may change; +15.4pp headline and all banked cells
+  untouched under every outcome.
+
+### VERDICT (2306870, all 12 tasks COMPLETED, read 2026-07-30 evening —
+### both extensions STRENGTHEN)
+
+- **FAIRNESS: pooled 12-seed control = 47.00** (ext seeds 42.19/45.31/
+  45.31/50.00/39.06/51.56 = 45.57; original 48.44 regressed down).
+  Margin vs spec 57.03 = **+10.0pp, paired t ~ 4.9, 11/12 seeds
+  positive** (only seed 45 negative). The re-frame trigger (within 3pp)
+  stays untripped by a wide margin. Rescue over plain flat re-states as
+  41.67 -> 47.00 (+5.3pp, still real, still reported). The arc's
+  weakest statistic (t~2.5 at 6 seeds) is now t~4.9 at 12.
+- **ORACLE CEILING: pooled 12-seed = 56.90** (seeds 42-47 reproduce
+  57.81 exactly; ext 59.38/60.94/51.56/60.94/46.88/56.25 = 55.99).
+  Spec 57.03 vs pooled ceiling: diff +0.13pp, t ~ 0.06 — statistically
+  indistinguishable; **"at the oracle ceiling" STANDS**, now 12-seed on
+  both sides. Ceiling re-stated as 56.9 wherever quoted.

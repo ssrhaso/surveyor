@@ -201,3 +201,19 @@ n_evals=50, seeds 99-102, success = final agent within 16 px of the goal
   above before any TwoRoom closed-loop cell existed. Wall lens amendment:
   the h10 lens retrained at the wall SERVING hop did NOT open (width -0.131),
   so P4-wall has no derived tau at the serving hop; see the wall note.
+
+## VERDICTS (appended 2026-07-31; the leg was closed at the pre-declared
+## Aug-1 kill-switch. Recorded here so this doc carries its own outcomes,
+## per the program trust-order convention.)
+
+| prediction | verdict |
+|---|---|
+| P1 (pusht spec@tau=0.121 >= flat-2pp) | CONFOUNDED, claimed in neither direction: flat healthy 0.82-0.88, spec ~0 across three batteries with one signature (drafter passes offline gates + beats no-op; served waypoints produce no progress) = unresolved serving-integration fault |
+| P2 (tau=0.20 degenerate-accept) | CONFOUNDED, same fault |
+| P3 (wall: fixed tau underperforms) | CONFIRMED, cleanest prospective hit: spec 0.685 vs flat 1.00 (-31pp), called before the run |
+| P4 (wall recovers under lens) | UNAVAILABLE: lens never opened a gap at the serving hop, no tau derivable; arm not run, reported rather than improvised |
+| P5 (goal_H=15 margin improves) | CONFOUNDED, same serving fault (spec 0.0 all seeds, job dwm_bat15) |
+| tworoom closed-loop completion | CUT at the kill-switch (WM training cancelled epoch ~32; eval wrapper never built). The OFFLINE encoder-swap cure stands as measured: equiv 0.876 -> 0.081 under DINOv2 on identical frames |
+
+Autopsy of the serving fault is post-poster work only, time-boxed, with a
+re-kill switch (see PLAN.md).
