@@ -53,7 +53,8 @@ $8\times$ data (still closed, width $-0.107$); (ii) $20\times$ data does not rep
 the DROID drafter's latent fidelity (no-op ratio $0.39$--$0.48\times$, vs.\ v1's
 $0.53$--$0.63\times$); (iii) nor its planning value (paired against v1 across three
 budgets: $+0.015/-0.053/+0.074$, all CIs straddling zero). Six further predictions
-are frozen and running (\Cref{sec:generality-dinowm}).
+were frozen before their tests on DINO-WM; their verdicts, including the ones the
+serving fault left unresolvable, are reported in \Cref{sec:generality-dinowm}.
 
 \paragraph{When the gap is closed but recoverable: the lens.} Where bulks separate
 but tails overlap, a small time-contrastive readout (verifier-side only; world model
@@ -96,10 +97,19 @@ spec-vs-flat margin improves on its short-horizon value. The transplanted drafte
 the first in this program to beat the no-op reference on a video-feature substrate
 (no-op ratio $1.11/1.22/1.31\times$ at block positions $1/2/3$).
 
-\inflight{P1--P5 batteries running at submission-draft time (12 + 12 + 8 arms,
-seeds 99--102, $n{=}50$/cell); this paragraph reports frozen predictions, and the
-camera-ready inserts verdicts as measured. Point-maze remains prediction-only (its
-environment requires mujoco-py + d4rl).}
+Verdicts, reported exactly as they fell. \textbf{P3 confirmed}, the cleanest
+prospective hit in the program: Wall at the fixed transfer $\tau$ scores $0.685$
+against flat's $1.00$, a $31$pp underperformance the instrument called before the
+run. \textbf{P4 unavailable}: the Wall lens never opened a gap at the serving hop,
+so no $\tau$ could be derived and the arm was not run, reported rather than
+improvised. \textbf{P1, P2, and P5 are confounded and remain open}: across three
+independent batteries the flat arms are healthy ($0.82$--$0.88$) while every
+spec-accept arm scores near zero with one signature (the drafter passes its offline
+gates and beats the no-op reference, yet served waypoints produce no progress),
+which indicates an unresolved fault in our DINO-WM serving integration rather than
+a verdict on the predictions; we decline to claim them in either direction, and the
+predictions stay frozen. Point-maze remains prediction-only (its environment
+requires mujoco-py + d4rl).
 
 \subsection{TwoRoom: the scope condition is an encoder property, and repairable}
 \label{sec:generality-tworoom}
@@ -116,8 +126,14 @@ $\tau{=}0.540$). The scope condition is not ``TwoRoom is hard'': it is a measura
 property of the encoder's metric, diagnosed in advance, and repaired by a component
 swap the instrument itself prescribed.
 
-\inflight{The closed-loop completion, a DINO-WM world model trained on TwoRoom
-(running), a drafted arm under the lens verifier, bars frozen on model completion, lands after the draft freeze and is reported as measured.}
+The closed-loop completion on this substrate (a DINO-WM world model trained on
+TwoRoom, drafted arm under the lens verifier) was cut at the program's
+pre-declared deadline before its evaluation harness was complete; the encoder-swap
+cure above is the measured claim, and the closed-loop arm remains a frozen
+prediction. The LeWM-side closed loop, however, did complete
+(\Cref{sec:results-heldout}): certifying TwoRoom in frozen DINOv2 while the
+planner consumes LeWM latents recovers $+15.4$pp at range, the same
+component-swap prescription executed on the verifier alone.
 
 \subsection{V-JEPA 2: what transfers at $55\times$ scale, and what cannot be known offline}
 \label{sec:generality-scale}

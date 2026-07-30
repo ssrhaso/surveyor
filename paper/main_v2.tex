@@ -83,7 +83,13 @@ planner's own reachability certificate $c^{*}$ yields \emph{certified spec-accep
 which meets or beats the strongest flat baseline in all eleven pre-registered
 environment--horizon cells across PushT, Reacher, and held-out Cube, with margins up
 to $+94$pp where flat planning collapses, at $1.9$--$2.4$ drafter evaluations per
-replan. One mechanism explains the wins, the ties, and every measured negative:
+replan. On the one substrate whose encoder cannot support verification at all
+(Two-Room, the LeWM authors' own weakest result), the accept test transplants
+unchanged into a frozen external encoder and recovers a $+15.4$pp certified win at
+long horizon, at a protocol anchored to the published number; a window rule with its
+switch read off the measured crossover composes the two regimes into a policy that
+never loses to flat. One mechanism
+explains the wins, the ties, and every measured negative:
 control pays for target consistency, and re-drafting injects churn proportional to
 draft noise. A companion statistic, the verification gap, predicts from cached
 latents alone whether a given world model can support the method, and its
@@ -121,6 +127,12 @@ mechanism (the \emph{churn thesis}) unifying five independent measurements.
 (\Cref{sec:method-arbiter,sec:results-unified}): the planner's own certificate
 $c^{*}$ routes each episode to flat planning or drafting and retires the drafter on
 certified arrival, producing one policy that wins all eleven pre-registered cells.
+\item \textbf{Verifier modularity} (\Cref{sec:results-heldout}): when the gap
+statistic rules the planner's own space out (Two-Room), the accept test transplants
+unchanged into a frozen external encoder; the certified loop then beats flat by
+$+15.4$pp at long horizon at a protocol anchored to LeWM's published number, and the
+window rule composes flat and certified drafting into a policy that never loses,
+with the crossover confirmed where it was predicted.
 \item \textbf{Honest scope} (\Cref{sec:discussion}): every boundary of the
 derivation is measured and reported, alongside a battery of negative results that
 causally implicate drafter stochasticity.
@@ -168,8 +180,11 @@ samplers \citep{consistency} make individual diffusion calls cheap; our $k{=}50\
 result is this factor applied to subgoal drafting, and the paper keeps it separated
 from verified consumption (spec-accept's own contribution) throughout.
 
-\TBD{}: re-run the concurrent-work sweep at submission time (last swept 2026-07-13;
-closest neighbors then: \citep{spo,bid,rtc,dcdp}).
+% Concurrent-work sweep last re-run 2026-07-27: SAGE (arXiv 2607.17973, concurrent
+% subgoal drafting on LeWM; cited as premise validation, differentiated on
+% certification -- protocols not cross-comparable) and TRM (arXiv 2605.22164,
+% lens-adjacent metric repair) folded into the paragraphs above. Re-check once at
+% camera-ready.
 
 % ============================================================
 \section{Background: The Hierarchical Latent Planner}
@@ -183,6 +198,23 @@ criterion. All results are produced by a pipeline rebuilt end-to-end from public
 assets; its closed-loop anchor cells reproduce the original system's numbers within
 noise (\Cref{app:repro}); per-environment protocols are tabulated in
 \Cref{tab:protocols}.
+
+\paragraph{Statistical conventions and scope.} Every quoted cell pools $64$--$128$
+episodes per seed over $4$--$12$ evaluation seeds ($384$--$1536$ episodes; grid
+confirmations at $1024$/cell), with margins tested paired per-seed wherever seeds
+match. For calibration, the substrate's own paper \citep{lewm} evaluates $50$
+trajectories per published bar and reports training-seed variance ($3$ retrainings)
+for one environment; in the single place that convention binds, the Two-Room anchor
+replication, we ran their protocol verbatim \emph{including} $n{=}50$.\footnote{One
+released-vs-text discrepancy, resolved in the data's favor: their paper text states
+$10$ CEM iterations outside PushT while their released configuration specifies $30$;
+we follow the released configuration, which is the one that reproduces their
+published Two-Room number.} Our seeds are \emph{evaluation} seeds (episode sampling
+and CEM) on the frozen released checkpoint: substrate training variance is
+deliberately out of scope, since the method takes the stack as given and the
+released weights are what makes anchor comparisons faithful. Generality beyond this
+checkpoint is tested on a stronger axis instead, across architectures
+(\Cref{sec:generality}).
 
 % ============================================================
 \section{Method}
@@ -653,7 +685,9 @@ holds ${\sim}98$; spec-accept (open circles) tracks every-step. \textbf{Reacher
 the $S{=}10$ drafter draws level by $t{\approx}75$ and leads thereafter. The two
 Reacher populations (solid $=$ max-offset-100 for $t{\le}100$; dotted $=$
 max-offset-150 for $t{\ge}100$) are plotted without splicing, both $t{=}100$ values
-shown. \TBD{}: third panel (Cube, \Cref{tab:cube}), plotting task.}
+shown. Cube contributes a single horizon by construction (single-transport task)
+and is tabulated in \Cref{tab:cube}; TwoRoom's crossover arc is
+\Cref{fig:tworoom-crossover}.}
 \label{fig:spine}
 \end{figure}
 
@@ -668,7 +702,10 @@ configuration in every cell, and above or within the declared $\pm1$pp of our ow
 fixed spec-accept arm everywhere. Everything in it was evaluated the strict way:
 fresh, never-analyzed populations (builder seeds disjoint from every analysis
 population), success bars frozen in the submission scripts \emph{before} any cell
-ran, failures reported as-is.
+ran, failures reported as-is. TwoRoom, whose encoder fails the gap precondition
+outright, joins as the fourth environment through the same rule with a transplanted
+verifier: its window-rule composite ties LeWM's own published protocol and wins
+$+15.4$pp beyond the planning window (\Cref{sec:results-heldout}).
 
 \begin{table}[t]
 \centering
@@ -898,18 +935,92 @@ latent representation; our probe is the direct measurement of that deficit.
 flat planner reproduces their published number ($85.3$ mean over three seeds,
 their $87$ inside the seed range); the gap to our harder certified protocol is
 fully attributed by a cumulative ablation and is dominated by a success-filter
-population effect ($+14.6$pp). \textbf{(iii) Verifier modularity recovers
-operability.} Certifying in a frozen general-purpose encoder (DINOv2) while the
-planner keeps consuming LeWM latents restores a working accept test, a single
-drafter emits both halves of each waypoint jointly so planner and verifier
-describe the same imagined future, and at range the certified loop clears flat
-($43.4 \to 48.8$ at $t{=}75$, twelve seeds, certified protocol). Oracle headroom
-is $+8.6$pp at $t{=}75$ against $-18.2$pp at $t{=}25$, so TwoRoom is a
-horizon-extension case, as PushT and Reacher already are.
-\inflight{The pre-registered re-measurement at the anchored protocol (flat swept
-over replan rate, an oracle-headroom gate, and best-of-$k$ drafting scored in the
-verification space) is running at draft time; bars were frozen before any cell
-ran.}
+population effect ($+14.6$pp). \textbf{(iii) Verifier modularity recovers the win.} Certifying in a frozen
+general-purpose encoder (DINOv2) while the planner keeps consuming LeWM latents
+restores a working accept test; a single drafter emits both halves of each
+waypoint jointly, so planner and verifier describe the same imagined future. At
+the anchored protocol (unfiltered population, LeWM's goal source, flat swept
+over replan rate; all bars frozen before any cell ran), certified spec-accept
+reaches $57.0$ against flat's $41.7$ at $t{=}75$ over twelve seeds,
+$\mathbf{+15.4}$\textbf{pp}, positive on every seed (paired $t{\approx}11$), and
+statistically at the ground-truth-waypoint oracle's $56.9$ (twelve seeds both
+sides, $t{\approx}0.1$); the margin is
+long-horizon only (the oracle itself loses $18$pp to flat at $t{=}25$), making
+TwoRoom the third horizon-extension case after PushT and Reacher. Best-of-$k$
+drafting scored in the verification space ($k{=}8$, derived offline) passed its
+six-seed bar ($+2.9$pp) but shrinks to $+1.8$pp within noise at twelve seeds and
+stays an optional add-on outside the headline; verification retains SR within
+$0.8$pp of unverified drafting at call ratio $0.94$--$0.97$.
+\textbf{(iv) Both sides of the crossover, at their protocol.} At LeWM's own
+published evaluation (goal $25$ steps ahead, i.e.\ \emph{inside one planning
+window}) our flat replication reads $83.7$ over twelve seeds (their $87$ within
+noise), even ground-truth oracle waypoints lose $21$pp, and the certified arm
+honestly misses its pre-registered non-inferiority bar ($77.1$; unchanged
+pooled at twelve seeds): decomposition
+is structurally counterproductive inside the window, at any drafter quality.
+Sweeping the goal distance maps the crossover to $t \in [40, 50]$
+(\Cref{fig:tworoom-crossover}), just beyond the planning window plus one serving
+stride, inside the frozen prediction's band (twelve seeds per arm at $t{=}40$
+and $t{=}50$: flat $+3.5$pp at $t{=}40$, spec $+3.4$pp at $t{=}50$; a tie
+within seed noise at $t{=}60$; spec $+15.4$pp at
+$t{=}75$). Because the goal distance is a known task parameter, the regime rule
+composes with a single measured constant, the crossover itself, the same
+epistemic status as $\tau$ and $S$: \emph{plan flat up to the measured
+crossover ($83.7$, matching LeWM's own game), draft-and-certify beyond it
+($57.0$ vs.\ $41.7$)}; the composite never loses to flat at any measured
+horizon, the Reacher shape reproduced on a substrate whose planner-space
+verification is impossible. Nor is the composite an inference from its
+constituent cells: run end-to-end as \emph{one} arm, the driver routing each
+task on its known goal distance against the single frozen constant, it
+reproduces its branch cell exactly at all five goal distances, passing its
+pre-registered per-cell bar with zero deviation. The compute-matched control closes this row as it
+does every other: doubling flat's CEM samples (a strict upper bound on the
+drafter's overhead) recovers $41.7 \to 47.0$ over twelve seeds, a real
+optimization component
+reported as-is and stronger than our frozen ``no material rescue'' call, while
+certified spec-accept stays $+10.0$pp above the control (paired
+$t{\approx}4.9$, $11/12$ seeds)
+with less planning compute; the collapse at range is partly optimization,
+mostly lookahead. In wall-clock terms, measured through the same instrumented
+policy as \Cref{fig:cost}, the near-every-step drafting this substrate forces
+(call ratio $0.95$) costs almost nothing: drafter plus DINOv2 verifier add
+${\sim}140$ms to a ${\sim}6.9$s episode ($+2\%$; CEM is $94\%$ of wall-clock),
+so the $+15.4$pp is effectively free in seconds.
+\textbf{(v) Why not the external space everywhere?} Measured, on PushT, whose own
+gap is open: one paired drafter, two verifiers, the accept test reading either the
+planner-space half ($\tau{=}0.20$, the env's derived threshold) or the DINOv2 half
+($\tau{=}0.118$, its criterion floor, derived at runtime). Success is
+space-indifferent ($63.5$ vs.\ $62.2$, inside the declared $\pm3$pp band), but the
+mechanics are not: the native-space verifier genuinely fires both ways (call ratio
+$0.66$, $450$ free advances) while the external one rejects everything it sees
+(call ratio $1.00$, zero advances, closed-loop distances sitting above the offline
+floor). Transplanting where the native gap is open forfeits the entire call-savings
+benefit at equal success, so the rule stands with a measured reason: verify in the
+stack's own space when its gap is open, transplant only when it is not.
+Three further pre-registered mechanisms failed their bars and are reported as
+such: a $3.4\times$-data drafter (null); a feasibility-scored best-of-$k$ whose
+stay-put pathology we predicted in advance ($-23$pp, the third demonstration
+that offline fidelity does not track closed-loop value, and the first called
+before the run); and the $k$-from-sampler-bias derivation, refuted closed-loop
+($31.3$ vs.\ $57.0$ at the derived $k{=}2$), with the cause visible in the
+probe's own numbers: sample dispersion collapses at low step counts, so the
+served drafts mode-average, invisible to a bias-of-means statistic. Certified
+serving evidently \emph{requires} sampler diversity, consistent with
+best-of-$k$'s positive sign.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.72\linewidth]{figures/fig_tworoom_crossover.png}
+\caption{\textbf{TwoRoom on LeWM: the crossover the window rule predicted.} Best
+flat and best certified spec-accept arm per goal distance (error bars $=$ SE;
+$12$ seeds everywhere except the declared $t{=}60$ tie, which stays at $6$; the
+$t{=}25$ point is LeWM's
+published protocol, star $=$ their Fig.~6 number). The crossover lands in the
+shaded band $[40,50]$, inside the frozen prediction; the deployed composite plays
+flat left of it and certified spec-accept right of it, and never loses to flat at
+any measured horizon.}
+\label{fig:tworoom-crossover}
+\end{figure}
 
 \paragraph{OGBench-Cube (manipulation): a measured boundary of the threshold rule.}
 Cube is the intended out-of-sample test of the \emph{whole} recipe, goal-free
@@ -1251,9 +1362,13 @@ policy that wins all eleven pre-registered cells across three environments at
 $1.9$--$2.4$ drafter evaluations per replan, with both constants derived offline and
 confirmed prospectively. The verification gap makes the method's precondition itself
 measurable in advance, and its predictions have held on substrates adopted after
-the rule was frozen. Nothing in the recipe is substrate-specific: any world model
-that plans by rollout can grade its own homework the same way, and the open frontier
-is scale, where the drafter tier rather than the controller is the wall-clock.
+the rule was frozen; when the precondition fails outright, the repair is modular
+rather than architectural, as Two-Room shows: certify in a frozen external encoder,
+compose with the window rule, and the stack's weakest published result becomes a
+certified $+15.4$pp win at range without retraining the world model. Nothing in the
+recipe is substrate-specific: any world model that plans by rollout can grade its
+own homework the same way, and the open frontier is scale, where the drafter tier
+rather than the controller is the wall-clock.
 
 % ============================================================
 \appendix
