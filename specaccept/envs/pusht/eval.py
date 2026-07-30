@@ -53,8 +53,14 @@ def parse_args():
                    help="swm dataset name (box: resolved under STABLEWM_HOME); --h5 used for oracle/state")
     # what to evaluate
     p.add_argument("--subgoal", choices=["oracle", "gdm", "baseline", "dspark", "specaccept",
-                                         "regressor", "unified", "lerp"],
+                                         "regressor", "unified", "lerp", "specpaired"],
                    default="oracle")
+    p.add_argument("--verify-half", choices=["dino", "lewm"], default="dino",
+                   help="specpaired: which half of the paired draft the accept "
+                        "test reads. The C1/C2 verify-space control runs BOTH "
+                        "on one drafter; tau must be derived in the chosen "
+                        "space (lewm: the env's criterion floor; dino: "
+                        "probe_floor --verify-space dino).")
     p.add_argument("--lerp-frac", type=float, default=0.5,
                    help="lerp source: waypoint at this fraction along the latent segment "
                         "from the CURRENT latent to the goal (re-anchored each replan); "
@@ -271,7 +277,7 @@ def sample_random_init_goals(h5, num_eval, seed, angle_deg=20.0):
 
 def main():
     args = parse_args()
-    if args.subgoal in ("gdm", "specaccept", "unified") and not args.gdm_ckpt:
+    if args.subgoal in ("gdm", "specaccept", "unified", "specpaired") and not args.gdm_ckpt:
         raise ValueError(f"--subgoal {args.subgoal} requires --gdm-ckpt <trained planner checkpoint>")
     if args.subgoal == "regressor" and not args.regressor_ckpt:
         raise ValueError("--subgoal regressor requires --regressor-ckpt (train_regressor.py)")
@@ -306,7 +312,7 @@ def main():
 
     # GDM planner (goal-free) loaded once; the per-env source is rebuilt per run
     gdm_planner = None
-    if args.subgoal in ("gdm", "dspark", "specaccept", "unified"):
+    if args.subgoal in ("gdm", "dspark", "specaccept", "unified", "specpaired"):
         from specaccept.drafter import load_gdm_planner, count_params
         gdm_planner = load_gdm_planner(args.gdm_ckpt, device=args.device)
         gdm_planner.noise_scale = args.gdm_noise_scale
@@ -435,6 +441,22 @@ def main():
                                                      n_steps=args.gdm_steps, seed=cem_seed,
                                                      tau=args.accept_tau,
                                                      record=bool(args.dump_traces))
+                elif args.subgoal == "specpaired":
+                    # verify-space control (C1/C2): one paired drafter, the
+                    # accept test reads --verify-half; everything else fixed.
+                    from specaccept.paired import (PairedEncoder,
+                                                   SpecAcceptPairedSource,
+                                                   load_dinov2)
+                    penc = PairedEncoder(model, load_dinov2(device=args.device),
+                                         device=args.device)
+                    source = SpecAcceptPairedSource(
+                        gdm_planner, penc, n_envs=args.num_eval,
+                        device=args.device, n_steps=args.gdm_steps,
+                        seed=cem_seed, tau=args.accept_tau,
+                        record=bool(args.dump_traces),
+                        verify_half=args.verify_half)
+                    print(f"[specpaired] verify-half={args.verify_half} "
+                          f"tau={args.accept_tau} N={source.N}")
                 elif args.subgoal == "lerp":
                     source = LerpSubgoalSource(n_envs=args.num_eval, device=args.device,
                                                frac=args.lerp_frac)
@@ -571,6 +593,8 @@ def main():
                       f"rejects={source.n_reject} "
                       f"call_ratio={source.n_redraft / max(total, 1):.3f} "
                       f"(every-step=1.000; lower = fewer diffusion calls)")
+            if args.subgoal == "specpaired":
+                print(source.stats())
             if args.subgoal == "unified":
                 seen = source._seen
                 retired = int(source._retired.sum())
