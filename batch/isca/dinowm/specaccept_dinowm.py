@@ -66,7 +66,7 @@ class SpecAcceptGridSource:
 
     def __init__(self, planner, n_envs, tau, k, device, seed=0,
                  readout=None, readout_tau=None, goal_gate=False,
-                 arrive_tau=None):
+                 arrive_tau=None, snap_fn=None):
         self.planner = planner
         self.n = n_envs
         self.tau = float(tau)
@@ -80,6 +80,9 @@ class SpecAcceptGridSource:
         # arrival is judged by the SAME test as waypoint arrival unless told
         # otherwise, so the gate introduces no new tuned constant
         self.arrive_tau = float(arrive_tau) if arrive_tau is not None else None
+        # optional draft-and-snap (autopsy D2): replace every drafted grid
+        # with its nearest REAL cached grid before serving/verifying
+        self.snap_fn = snap_fn
         self.gen = torch.Generator(device=str(device)).manual_seed(seed)
         self.blocks = [None] * n_envs      # (N, P+1, D) each
         self.ptr = [0] * n_envs
@@ -114,6 +117,8 @@ class SpecAcceptGridSource:
         goal = pooled_all(z_goal[idxs])
         blocks = self.planner.sample_sequence(
             cond, n_steps=self.k, generator=self.gen, z_goal_pooled=goal)
+        if self.snap_fn is not None:
+            blocks = self.snap_fn(blocks)
         for j, i in enumerate(idxs):
             self.blocks[i] = blocks[j]
             self.ptr[i] = 0
@@ -175,7 +180,8 @@ class SpecMPCPlanner(MPCPlanner):
 
     def __init__(self, *args, gdm_ckpt=None, accept_tau=0.121, gdm_steps=8,
                  spec_seed=0, readout_ckpt=None, readout_tau=None,
-                 goal_gate=False, arrive_tau=None, **kwargs):
+                 goal_gate=False, arrive_tau=None, spec_serve="draft",
+                 snap_dir=None, snap_max=6000, **kwargs):
         super().__init__(*args, **kwargs)
         assert gdm_ckpt, "SpecMPCPlanner needs gdm_ckpt"
         self.gdm = load_token_gdm(gdm_ckpt, device=str(self.device))
@@ -200,8 +206,74 @@ class SpecMPCPlanner(MPCPlanner):
             self.readout_tau = float(readout_tau if readout_tau is not None
                                      else ck["tau_derived"])
             print(f"[spec] lens={readout_ckpt} lens_tau={self.readout_tau:.3f}")
+        # ---- autopsy serve modes (docs/dinowm_prereg.md AUTOPSY REGISTRATION):
+        # draft = production path | goal = D1 tautology (serve the goal grid
+        # through the same latent-goal branch) | snap = D2 draft-and-snap
+        # (every drafted grid replaced by its nearest REAL cached train grid,
+        # matched in pooled-visual rel L2 -- the TwoRoom snap-bank mechanism,
+        # no new constant)
+        self.spec_serve = str(spec_serve)
+        assert self.spec_serve in ("draft", "goal", "snap"), self.spec_serve
+        self.bank_grids = None
+        self.bank_pooled = None
+        self.bank_norms = None
+        if self.spec_serve == "snap" or snap_dir:
+            assert snap_dir, "spec_serve=snap needs snap_dir"
+            self._load_snap_bank(snap_dir, int(snap_max))
         print(f"[spec] drafter={gdm_ckpt} tau={self.accept_tau} k={self.gdm_steps} "
-              f"goal_gate={self.goal_gate}")
+              f"goal_gate={self.goal_gate} serve_mode={self.spec_serve}")
+
+    def _load_snap_bank(self, snap_dir, snap_max):
+        import glob
+        files = sorted(glob.glob(os.path.join(snap_dir, "grid_pusht_train_*.npy")))
+        assert files, f"no train grids under {snap_dir}"
+        grids = []
+        for f in files:
+            a = np.load(f)                                # (T, P+1, D) fp16
+            grids.append(torch.from_numpy(a[::2].copy())) # stride-2 subsample
+        bank = torch.cat(grids)
+        if bank.shape[0] > snap_max:
+            sel = torch.linspace(0, bank.shape[0] - 1, snap_max).long()
+            bank = bank[sel]
+        self.bank_grids = bank.half().to(self.device)     # (K, P+1, D)
+        pv = self.bank_grids[:, :-1].float().mean(dim=1)  # (K, D)
+        self.bank_pooled = pv
+        self.bank_norms = pv.norm(dim=-1).clamp_min(1e-8)
+        print(f"[snap] bank {bank.shape[0]} real grids from "
+              f"{len(files)} train episodes ({snap_dir})", flush=True)
+
+    def _snap_grids(self, grids):
+        """(..., P+1, D) drafted -> nearest REAL bank grid, matched in
+        pooled-visual rel L2 (distance normalized by the bank grid's norm)."""
+        shape = grids.shape
+        flat = grids.reshape(-1, shape[-2], shape[-1])
+        pv = flat[:, :-1].float().mean(dim=1)             # (M, D)
+        d = torch.cdist(pv, self.bank_pooled) / self.bank_norms.unsqueeze(0)
+        idx = d.argmin(dim=1)
+        return self.bank_grids[idx].to(grids.dtype).reshape(shape)
+
+    def _diag(self, tag, tgt, z_now, z_goal):
+        """Per-iteration serving diagnostics: where does the served target sit
+        (pooled space), and how far off the real-grid manifold is it (token
+        space)? Print-only; no effect on planning."""
+        with torch.no_grad():
+            pt, pn, pg = pooled_visual(tgt), pooled_visual(z_now), pooled_visual(z_goal)
+            rel_now = ((pt - pn).norm(dim=-1)
+                       / pn.norm(dim=-1).clamp_min(1e-8)).mean()
+            rel_goal = ((pt - pg).norm(dim=-1)
+                        / pg.norm(dim=-1).clamp_min(1e-8)).mean()
+            line = (f"[diag] serve={tag} rel_to_now={float(rel_now):.3f} "
+                    f"rel_to_goal={float(rel_goal):.3f}")
+            if self.bank_pooled is not None:
+                pv = tgt[:, :-1].float().mean(dim=1)
+                d = (torch.cdist(pv, self.bank_pooled)
+                     / self.bank_norms.unsqueeze(0))
+                idx = d.argmin(dim=1)
+                near = self.bank_grids[idx].float()
+                tok_mse = ((tgt[:, :-1].float() - near[:, :-1]) ** 2).mean()
+                line += (f" tok_mse_nearest={float(tok_mse):.5f} "
+                         f"pooled_rel_nearest={float(d.min(dim=1).values.mean()):.3f}")
+        print(line, flush=True)
 
     def _grid(self, obs):
         """obs dict (B, 1, ...) numpy/tensor -> (B, P+1, D) native latents via
@@ -240,7 +312,10 @@ class SpecMPCPlanner(MPCPlanner):
                                       seed=self.spec_seed, readout=self.readout,
                                       readout_tau=self.readout_tau,
                                       goal_gate=self.goal_gate,
-                                      arrive_tau=self.arrive_tau)
+                                      arrive_tau=self.arrive_tau,
+                                      snap_fn=(self._snap_grids
+                                               if self.spec_serve == "snap"
+                                               else None))
         z_goal = self._grid(obs_g)
         trans_g = move_to_device(self.preprocessor.transform_obs(obs_g), self.device)
         with torch.no_grad():
@@ -250,7 +325,14 @@ class SpecMPCPlanner(MPCPlanner):
         memo_actions = None
         while not np.all(self.is_success) and self.iter < self.max_iter:
             z_now = self._grid(cur_obs_0)
-            tgt = source.step(z_now, z_goal)
+            if self.spec_serve == "goal":
+                # D1 tautology: the goal grid (real encoded tokens) through
+                # the SAME latent-goal branch; must reproduce flat if the
+                # hand-off is sound
+                tgt = z_goal
+            else:
+                tgt = source.step(z_now, z_goal)
+            self._diag(self.spec_serve, tgt, z_now, z_goal)
             goal_latent = self._latent_goal(tgt, z_goal_pro)
 
             self.sub_planner.logging_prefix = f"plan_{self.iter}"
@@ -272,7 +354,8 @@ class SpecMPCPlanner(MPCPlanner):
             self.action_len[new_successes] = (self.iter + 1) * self.n_taken_actions
 
             print("self.is_success: ", self.is_success)
-            print(source.stats(), flush=True)
+            if self.spec_serve != "goal":
+                print(source.stats(), flush=True)
             logs = {f"{self.logging_prefix}/{k}": v for k, v in logs.items()}
             logs.update({"step": self.iter + 1})
             self.wandb_run.log(logs)
@@ -285,7 +368,8 @@ class SpecMPCPlanner(MPCPlanner):
             self.iter += 1
             self.sub_planner.logging_prefix = f"plan_{self.iter}"
 
-        print(source.stats())
+        if self.spec_serve != "goal":
+            print(source.stats())
         planned_actions = torch.cat(self.planned_actions, dim=1)
         self.evaluator.assign_init_cond(obs_0=init_obs_0, state_0=init_state_0)
         return planned_actions, self.action_len

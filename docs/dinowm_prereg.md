@@ -217,3 +217,66 @@ n_evals=50, seeds 99-102, success = final agent within 16 px of the goal
 
 Autopsy of the serving fault is post-poster work only, time-boxed, with a
 re-kill switch (see PLAN.md).
+
+## AUTOPSY REGISTRATION (2026-07-31, frozen BEFORE any diagnostic GPU run;
+## user authorized pulling it forward from post-poster — GPUs idle, poster
+## blocked on a template decision)
+
+TIME-BOX: three days, ends 2026-08-02 EOD. If the fault is not localized to
+a code-level or representational cause by then, the leg stays dead, the
+neither-direction verdicts above stand verbatim, and no further DINO-WM GPU
+is spent. Diagnostic runs adjudicate NOTHING about P1/P2/P5 (n=20, 2 seeds);
+they only localize. The original P1/P2 predictions stand UNCHANGED and may
+only be adjudicated by fresh full batteries registered after a fix.
+
+LOG-AUDIT FINDINGS (read 2026-07-31 morning, BEFORE new runs; these CORRECT
+the provenance of the verdict table above, not its conclusions):
+1. Batteries 2299661 (12 tasks) and 2299902 (8 tasks) = 100% TIMEOUT at
+   walltime. Every number previously cited from them was a MID-RUN
+   truncation (~7 of 12 MPC iters). "Three batteries, one signature" was
+   really: one completed small battery + two walltime-killed ones.
+2. The gate-test battery 2301459 (6 tasks, n=20, seeds 99/100) COMPLETED
+   2026-07-29 and carries the decisive mechanics, read now:
+     flat 0.90/0.90 | spec nogate 0.20/0.05 | spec gate 0.20/0.10
+     verifier stats: advances 1-8 vs rejects ~230 per run, call_ratio
+     ~1.0, gate retired only 1-2/20 envs.
+   => The verifier essentially NEVER accepts: drafted waypoints are never
+   verifiably reached, and pursuing them actively hurts vs flat. The
+   overshoot/arrival-gate hypothesis is REFUTED as the primary cause.
+3. The cem.py latent-goal branch is shape-clean by inspection; the spec
+   planner instantiates and serves (constructor + stats lines present).
+
+FROZEN DIAGNOSIS HYPOTHESIS: drafted token grids are OFF-MANIFOLD for the
+token-level CEM cost while pooled-space conditioning and verification
+cannot see it (the DROID compression lesson, drafter-side). Predicted
+signature match: CEM chases a token target no real state resembles ->
+progress ~0; pooled offline gates pass; verifier never accepts because no
+achieved state approaches the drafted grid.
+
+DIAGNOSTIC ARMS (all: n_evals=20, goal_H=5, max_iter=12, tau=0.121, k=8,
+seeds 99/100 unless noted; serving protocol identical to 2301459):
+- D1 GOAL-SERVE TAUTOLOGY (spec code path, target := the goal grid at every
+  iteration — real encoded tokens through the same _latent_goal branch).
+  Frozen prediction: ~= flat (0.85-0.90). If instead it collapses, the
+  latent-goal hand-off itself is broken -> bounded code-fix hunt.
+- D2 DRAFT-AND-SNAP (each drafted grid replaced by its nearest REAL grid
+  from the train-split episode cache /lustre/home/ha676/data/dinowm/
+  pusht_lat/grids/, matched in pooled-visual rel L2 — the TwoRoom snap-bank
+  mechanism, no new constant). Frozen prediction: advances >> 8 and SR
+  materially above the 0.05-0.20 nogate band. If D1 healthy AND D2 lifts ->
+  off-manifold diagnosis CONFIRMED and the fix is identified. If D1 healthy
+  but D2 ~= nogate -> drafted content itself does not advance toward the
+  goal (deeper than manifold) -> expect re-kill at the box.
+- D3 SPEC AS-IS (seed 99 only): fault reproduction under the current code
+  state, control for any drift since 2301459.
+Instrumentation added for all spec-path arms: per-iteration mean pooled rel
+L2 of served target vs current and vs goal, plus mean token-space MSE of
+the served target to its nearest bank grid (the off-manifold score).
+
+PROMOTION RULE (frozen): only if D1 ~= flat and D2 confirms does a snap
+arm get promoted to a FRESH pre-registered P1 battery at the ORIGINAL bar
+(spec@tau=0.121 >= flat - 2pp, their protocol, n_evals=50, seeds 99-102),
+with walltime sized from the measured 7.6h/run so no battery can time out
+again. Bank convention declared now: snap bank = train-split grids only
+(the drafter's own training population; the eval episodes are dset-drawn
+and disjoint).
