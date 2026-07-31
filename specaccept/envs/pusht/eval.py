@@ -71,6 +71,11 @@ def parse_args():
                    help="specaccept: relative-L2 tolerance for the reality verifier "
                         "(accept the next drafted position iff the achieved latent is "
                         "within tau of the subgoal just driven toward)")
+    p.add_argument("--draft-noise", type=float, default=0.0,
+                   help="corruption sweep (certification prereg): displace every "
+                        "drafted waypoint by this relative-norm sigma along a "
+                        "random unit direction, every draft incl. re-drafts. "
+                        "Blind consumption = --accept-tau 999 (accepts all).")
     p.add_argument("--gdm-ckpt", default=None, help="(Task C) trained planner checkpoint")
     p.add_argument("--gdm-steps", type=int, default=50, help="DDIM sampling steps for GDM")
     p.add_argument("--gdm-noise-scale", type=float, default=1.0,
@@ -440,6 +445,7 @@ def main():
                                                      device=args.device,
                                                      n_steps=args.gdm_steps, seed=cem_seed,
                                                      tau=args.accept_tau,
+                                                     draft_noise=args.draft_noise,
                                                      record=bool(args.dump_traces))
                 elif args.subgoal == "specpaired":
                     # verify-space control (C1/C2): one paired drafter, the
@@ -585,6 +591,7 @@ def main():
                     rec["start_steps"] = list(start_steps)
                 if not is_baseline and getattr(source, "record", False):
                     rec["trace"] = source.trace  # list of {replan_idx, z_cond, z_next}
+                    rec["cal"] = getattr(source, "cal", [])
                 trace_dump[f"{score_mode}_{angle:g}"] = rec
             if args.subgoal == "specaccept":
                 total = source.n_redraft + source.n_advance

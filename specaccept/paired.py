@@ -201,6 +201,7 @@ class SpecAcceptPairedSource:
         self._gen.manual_seed(int(seed))
         self.record = record
         self.trace = []
+        self.cal = []   # per-verification (env, rel, accepted, z_now, tgt), record-gated
         self.n_redraft = 0
         self.n_advance = 0
         self.n_reject = 0
@@ -323,6 +324,13 @@ class SpecAcceptPairedSource:
             if q is not None and tgt is not None:
                 verified, rel = self._accepts(v_now[r], tgt, want_dist=True)
                 self.rels.append(rel)
+                if self.record:
+                    # calibration event log (certification prereg M1): the
+                    # verify-half latents, so tworoom's row calibrates in the
+                    # DINOv2 space the accept test actually reads
+                    self.cal.append((int(i), float(rel), bool(verified),
+                                     v_now[r].detach().float().cpu(),
+                                     tgt.detach().float().cpu()))
                 if not verified:
                     self.n_reject += 1
                 accept = verified and self._ptr[i] < self.N

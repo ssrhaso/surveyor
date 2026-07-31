@@ -362,6 +362,7 @@ def main():
                "episodes_idx": list(episodes_idx), "start_steps": list(start_steps)}
         if not is_baseline and getattr(source, "record", False):
             rec["trace"] = source.trace
+            rec["cal"] = getattr(source, "cal", [])
         Path(args.dump_traces).parent.mkdir(parents=True, exist_ok=True)
         torch.save(rec, args.dump_traces)
         print(f"[traces] saved {args.dump_traces}")

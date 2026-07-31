@@ -239,7 +239,7 @@ class SpecAcceptSubgoalSource:
 
     def __init__(self, planner, n_envs, device="cpu", n_steps=50, seed=42,
                  tau=0.2, record=False, goal_gate=False,
-                 readout=None, readout_tau=None):
+                 readout=None, readout_tau=None, draft_noise=0.0):
         # readout: optional gap-maximizing verification lens (learn_readout.py).
         # Verification-side ONLY: drafting, cost, and planner stay in native
         # space; when set, accept iff ||r(z_now) - r(tgt)|| <= readout_tau
@@ -263,6 +263,16 @@ class SpecAcceptSubgoalSource:
         self._gen.manual_seed(int(seed))
         self.record = record
         self.trace = []
+        # calibration event log (docs/certification_prereg.md M1): one entry
+        # per VERIFICATION event -- (env, rel, accepted, z_achieved, target)
+        # -- so accepts and rejects are both recorded (the draft-only trace
+        # cannot reconstruct accepted replans' achieved latents). record-gated.
+        self.cal = []
+        # corruption sweep (docs/certification_prereg.md): every drafted
+        # waypoint w is displaced by draft_noise * ||w|| along a random unit
+        # direction, at EVERY draft including re-drafts (deployed semantics).
+        # 0.0 = off. Verification and traces see the corrupted (served) block.
+        self.draft_noise = float(draft_noise)
         self._gated = np.zeros(n_envs, dtype=bool)  # env is serving the goal, not a waypoint
         self.n_redraft = 0   # diffusion calls
         self.n_advance = 0   # positions served from the queue (calls skipped)
@@ -322,6 +332,10 @@ class SpecAcceptSubgoalSource:
                         rel = float((z_now[r] - tgt).norm()
                                     / z_now[r].norm().clamp_min(1e-8))
                         verified = rel <= self.tau
+                    if self.record:
+                        self.cal.append((int(i), float(rel), bool(verified),
+                                         z_now[r].detach().float().cpu(),
+                                         tgt.detach().float().cpu()))
                     if not verified:
                         self.n_reject += 1
                     accept = verified and self._ptr[i] < self.N
@@ -351,6 +365,12 @@ class SpecAcceptSubgoalSource:
                 blocks = self.planner.sample_sequence(z_cond, n_steps=self.n_steps,
                                                       generator=self._gen,
                                                       z_goal_native=z_goal)  # (R', N, dim)
+                if self.draft_noise > 0:
+                    u = torch.randn(blocks.shape, generator=self._gen,
+                                    device=blocks.device, dtype=blocks.dtype)
+                    u = u / u.norm(dim=-1, keepdim=True).clamp_min(1e-8)
+                    blocks = blocks + (self.draft_noise
+                                       * blocks.norm(dim=-1, keepdim=True) * u)
                 blocks = blocks.to(self.device)
                 if self.record:
                     self.trace.append({"replan_idx": np.asarray(need_envs),
