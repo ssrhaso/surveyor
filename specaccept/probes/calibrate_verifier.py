@@ -73,6 +73,11 @@ def parse_args():
                         "computing; see certification prereg)")
     p.add_argument("--r2-gate", type=float, default=0.90,
                    help="frozen probe-quality gate on criterion dims")
+    p.add_argument("--dump-events", default=None,
+                   help="08-01 extraction addendum: write per-event "
+                        "(rel, accepted, state_dist) CSV for the radius-"
+                        "sensitivity and operating-curve readouts "
+                        "(descriptive; tau and all decisions unchanged)")
     p.add_argument("--seed", type=int, default=0)
     return p.parse_args()
 
@@ -209,6 +214,13 @@ def main():
     span = np.maximum(hi - lo, 1e-9)
     frac_oob = float(((St < lo - 0.1 * span) | (St > hi + 0.1 * span)).any(axis=1).mean())
     d = crit_dist(Sn, St, cfg["dims"], cfg["metric"], circular=args.circular)
+
+    if args.dump_events:
+        with open(args.dump_events, "w") as fo:
+            fo.write("rel,accepted,state_dist\n")
+            for rel_i, acc_i, d_i in zip(rels, accs, d):
+                fo.write(f"{rel_i:.6f},{int(acc_i)},{d_i:.6f}\n")
+        print(f"[cal] dumped {len(rels)} events -> {args.dump_events}", flush=True)
 
     # replay check: recorded decisions must equal rel <= tau
     mism = int((accs != (rels <= args.tau)).sum())
