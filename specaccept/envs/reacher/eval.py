@@ -50,6 +50,11 @@ def parse_args():
                    help="override the lens's derived tau (default: ckpt value)")
     p.add_argument("--accept-tau", type=float, default=0.2,
                    help="specaccept: relative-L2 tolerance for the reality verifier")
+    p.add_argument("--random-reject", type=float, default=None,
+                   help="decision-content control (docs/randreject_prereg.md): "
+                        "replace the accept test with an i.i.d. coin rejecting "
+                        "at this matched probability; all other mechanics "
+                        "identical to the banked spec arm")
     p.add_argument("--goal-gate", action="store_true",
                    help="specaccept: serve a drafted waypoint only if it reduces "
                         "latent distance to the goal; otherwise serve the goal "
@@ -282,7 +287,11 @@ def main():
                                              tau=args.accept_tau,
                                              goal_gate=args.goal_gate,
                                              readout=readout, readout_tau=rtau,
+                                             random_reject=args.random_reject,
                                              record=bool(args.dump_traces))
+            if args.random_reject is not None:
+                print(f"[randreject] coin control p={args.random_reject} "
+                      f"(matched-rate; latent test overridden)")
         elif args.subgoal == "horizon_gated":
             source = HorizonGatedSource(gdm_planner, model, n_envs=args.num_eval,
                                         device=args.device, n_steps=args.gdm_steps,

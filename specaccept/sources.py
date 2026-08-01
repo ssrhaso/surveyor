@@ -239,7 +239,8 @@ class SpecAcceptSubgoalSource:
 
     def __init__(self, planner, n_envs, device="cpu", n_steps=50, seed=42,
                  tau=0.2, record=False, goal_gate=False,
-                 readout=None, readout_tau=None, draft_noise=0.0):
+                 readout=None, readout_tau=None, draft_noise=0.0,
+                 random_reject=None):
         # readout: optional gap-maximizing verification lens (learn_readout.py).
         # Verification-side ONLY: drafting, cost, and planner stay in native
         # space; when set, accept iff ||r(z_now) - r(tgt)|| <= readout_tau
@@ -273,6 +274,13 @@ class SpecAcceptSubgoalSource:
         # direction, at EVERY draft including re-drafts (deployed semantics).
         # 0.0 = off. Verification and traces see the corrupted (served) block.
         self.draft_noise = float(draft_noise)
+        # matched-rate random-rejection control (docs/randreject_prereg.md):
+        # when set, every verification event rejects with this probability via
+        # a DEDICATED coin generator, so the draft-sampling stream is untouched
+        # relative to a normal spec run at the same seed.
+        self.random_reject = None if random_reject is None else float(random_reject)
+        self._coin_gen = torch.Generator()
+        self._coin_gen.manual_seed(int(seed) + 777001)
         self._gated = np.zeros(n_envs, dtype=bool)  # env is serving the goal, not a waypoint
         self.n_redraft = 0   # diffusion calls
         self.n_advance = 0   # positions served from the queue (calls skipped)
@@ -332,6 +340,11 @@ class SpecAcceptSubgoalSource:
                         rel = float((z_now[r] - tgt).norm()
                                     / z_now[r].norm().clamp_min(1e-8))
                         verified = rel <= self.tau
+                    if self.random_reject is not None:
+                        # coin control: the coin, not the latent test, decides;
+                        # rel is still computed so telemetry stays comparable
+                        verified = bool(float(torch.rand(
+                            (), generator=self._coin_gen)) >= self.random_reject)
                     if self.record:
                         self.cal.append((int(i), float(rel), bool(verified),
                                          z_now[r].detach().float().cpu(),

@@ -76,6 +76,11 @@ def parse_args():
                         "drafted waypoint by this relative-norm sigma along a "
                         "random unit direction, every draft incl. re-drafts. "
                         "Blind consumption = --accept-tau 999 (accepts all).")
+    p.add_argument("--random-reject", type=float, default=None,
+                   help="decision-content control (docs/randreject_prereg.md): "
+                        "replace the accept test with an i.i.d. coin rejecting "
+                        "at this matched probability; all other mechanics "
+                        "identical to the banked spec arm")
     p.add_argument("--gdm-ckpt", default=None, help="(Task C) trained planner checkpoint")
     p.add_argument("--gdm-steps", type=int, default=50, help="DDIM sampling steps for GDM")
     p.add_argument("--gdm-noise-scale", type=float, default=1.0,
@@ -446,7 +451,11 @@ def main():
                                                      n_steps=args.gdm_steps, seed=cem_seed,
                                                      tau=args.accept_tau,
                                                      draft_noise=args.draft_noise,
+                                                     random_reject=args.random_reject,
                                                      record=bool(args.dump_traces))
+                    if args.random_reject is not None:
+                        print(f"[randreject] coin control p={args.random_reject} "
+                              f"(matched-rate; latent test overridden)")
                 elif args.subgoal == "specpaired":
                     # verify-space control (C1/C2): one paired drafter, the
                     # accept test reads --verify-half; everything else fixed.
