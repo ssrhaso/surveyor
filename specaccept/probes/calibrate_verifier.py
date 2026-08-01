@@ -36,7 +36,7 @@ from specaccept import encoder
 ENV = {
     "pusht": dict(state_col="state", dims=(2, 3), radius=20.0, metric="l2",
                   space="native", encoder_id="quentinll/lewm-pusht"),
-    "reacher": dict(state_col="state", dims=(0, 1), radius=0.05, metric="maxabs",
+    "reacher": dict(state_col="qpos", dims=None, radius=0.05, metric="maxabs",
                     space="native", encoder_id="quentinll/lewm-reacher"),
     "cube": dict(state_col="privileged_block_0_pos", dims=None, radius=0.04,
                  metric="l2", space="native", encoder_id="quentinll/lewm-cube"),
@@ -61,17 +61,29 @@ def parse_args():
     p.add_argument("--device", default="cuda")
     p.add_argument("--n-probe", type=int, default=4000,
                    help="dataset frames sampled for probe training")
+    p.add_argument("--probe", choices=["ridge", "mlp"], default="ridge",
+                   help="probe class; mlp = sensitivity row (certification "
+                        "prereg M1 amendment): same frozen definitions, "
+                        "reported alongside the ridge row")
     p.add_argument("--ridge", type=float, default=1.0)
+    p.add_argument("--circular", action="store_true",
+                   help="M1 reacher amendment: probe targets [sin,cos] per "
+                        "angle dim, decode via atan2, criterion distance = "
+                        "wrapped angular difference (registered before "
+                        "computing; see certification prereg)")
     p.add_argument("--r2-gate", type=float, default=0.90,
                    help="frozen probe-quality gate on criterion dims")
     p.add_argument("--seed", type=int, default=0)
     return p.parse_args()
 
 
-def crit_dist(sa, sb, dims, metric):
+def crit_dist(sa, sb, dims, metric, circular=False):
     a = sa if dims is None else sa[..., list(dims)]
     b = sb if dims is None else sb[..., list(dims)]
-    d = np.abs(a - b)
+    if circular:
+        d = np.abs(np.arctan2(np.sin(a - b), np.cos(a - b)))   # wrapped diff
+    else:
+        d = np.abs(a - b)
     return d.max(axis=-1) if metric == "maxabs" else np.linalg.norm(a - b, axis=-1)
 
 
@@ -90,6 +102,10 @@ def main():
     rng = np.random.default_rng(args.seed)
 
     # ---- 1. probe food: sampled dataset frames + ground-truth state --------
+    try:
+        import hdf5plugin  # noqa: F401  (registers blosc/zstd filters for pixels)
+    except ImportError:
+        pass
     import h5py
     with h5py.File(args.h5, "r") as f:
         if cfg["state_col"] not in f:
@@ -124,15 +140,40 @@ def main():
     X = lat.numpy().astype(np.float64)
 
     # ---- 3. ridge probe + frozen quality gate ------------------------------
+    # circular amendment: regress [sin, cos] per angle dim; decode via atan2
+    d_state = state.shape[1]
+    if args.circular:
+        target = np.concatenate([np.sin(state), np.cos(state)], axis=1)
+    else:
+        target = state
+
     n = X.shape[0]
     idx = rng.permutation(n)
     cut = int(0.8 * n)
     tr, te = idx[:cut], idx[cut:]
-    predict = fit_ridge(X[tr], state[tr], args.ridge)
-    pred_te = predict(X[te])
-    dims = cfg["dims"] if cfg["dims"] is not None else tuple(range(state.shape[1]))
-    ss_res = ((state[te][:, dims] - pred_te[:, dims]) ** 2).sum(axis=0)
-    ss_tot = ((state[te][:, dims] - state[te][:, dims].mean(axis=0)) ** 2).sum(axis=0)
+    if args.probe == "mlp":
+        from sklearn.neural_network import MLPRegressor
+        mlp = MLPRegressor(hidden_layer_sizes=(256,), max_iter=500,
+                           random_state=args.seed)
+        mlp.fit(X[tr], target[tr])
+        predict_t = mlp.predict
+    else:
+        predict_t = fit_ridge(X[tr], target[tr], args.ridge)
+
+    def predict(Z):
+        p = predict_t(Z)
+        if args.circular:
+            return np.arctan2(p[:, :d_state], p[:, d_state:])
+        return p
+
+    pred_te = predict_t(X[te])
+    if args.circular:
+        # gate applies to the transformed targets, all dims (prereg amendment)
+        dims_r2 = tuple(range(target.shape[1]))
+    else:
+        dims_r2 = cfg["dims"] if cfg["dims"] is not None else tuple(range(state.shape[1]))
+    ss_res = ((target[te][:, dims_r2] - pred_te[:, dims_r2]) ** 2).sum(axis=0)
+    ss_tot = ((target[te][:, dims_r2] - target[te][:, dims_r2].mean(axis=0)) ** 2).sum(axis=0)
     r2 = float(1.0 - (ss_res.sum() / max(ss_tot.sum(), 1e-12)))
     print(f"[cal] probe R^2 (criterion dims) = {r2:.4f} (gate {args.r2_gate})",
           flush=True)
@@ -167,7 +208,7 @@ def main():
     lo, hi = state.min(axis=0), state.max(axis=0)
     span = np.maximum(hi - lo, 1e-9)
     frac_oob = float(((St < lo - 0.1 * span) | (St > hi + 0.1 * span)).any(axis=1).mean())
-    d = crit_dist(Sn, St, cfg["dims"], cfg["metric"])
+    d = crit_dist(Sn, St, cfg["dims"], cfg["metric"], circular=args.circular)
 
     # replay check: recorded decisions must equal rel <= tau
     mism = int((accs != (rels <= args.tau)).sum())
@@ -185,7 +226,9 @@ def main():
             "p90": float(np.percentile(x, 90))}
 
     out = {
-        "env": args.env, "tau": args.tau, "n_events": int(len(events)),
+        "env": args.env, "tau": args.tau, "probe": args.probe,
+        "circular": bool(args.circular),
+        "n_events": int(len(events)),
         "n_accept": int(accs.sum()), "n_reject": int((~accs).sum()),
         "probe_r2_criterion_dims": r2, "probe_gate": args.r2_gate,
         "row_unavailable_probe_below_gate": bool(gated_out),
