@@ -1,166 +1,96 @@
 % ============================================================
-% NEW SECTIONS (post-freeze program, 2026-07-22 -- 07-27).
-% Input from main_v2 just before "Negative Results".
-% Every closed number here is from an archived pre-registered run;
-% \inflight marks batteries whose bars are frozen and running.
+% Instrument + generality (compressed 2026-08-02 for the 9-page limit).
+% Full transplant narratives moved to app:generality in main_iclr2027.tex;
+% every load-bearing claim, verdict, and honest miss is retained here.
 % ============================================================
 
 \section{The Verification Gap: Applicability, Measured in Advance}
 \label{sec:instrument}
 
-The criterion floor of \Cref{sec:calib-tau} is half of a more general object. The
-accept test must separate two distributions computable from cached latents alone:
-\emph{equivalence} distances (states one frame apart, arrived, up to task
-tolerance) and \emph{hop} distances (states one subgoal interval apart, did not
-move). A workable threshold exists iff the interval
-\[
-\mathcal{G} \;=\; \bigl[\, \mathrm{equiv}\ p_{90},\;\; \mathrm{hop}\ p_{10} \,\bigr]
-\]
-is non-empty, and $\tau$ must lie inside it. We call $\mathcal{G}$ the
-\textbf{verification gap} and compute it for every substrate this paper touches
-(\Cref{fig:gap}), one GPU-pass over cached latents, minutes per environment, no
-closed-loop rollouts.
+The criterion floor of \Cref{sec:calib-tau} is half of a more general object:
+the accept test must separate \emph{equivalence} distances (arrived, up to
+task tolerance) from \emph{hop} distances (one subgoal interval apart, did not
+move), both computable from cached latents alone. A workable threshold exists
+iff $\mathcal{G} = [\,\mathrm{equiv}\ p_{90},\ \mathrm{hop}\ p_{10}\,]$ is
+non-empty, and $\tau$ must lie inside it. We call $\mathcal{G}$ the
+\textbf{verification gap} and compute it for every substrate this paper
+touches (\Cref{fig:gap}, \Cref{app:generality}), one GPU-pass over cached
+latents, minutes per environment.
 
-\input{figures/fig_gap_tikz}
+\paragraph{One statistic explains every outcome.} PushT's $\tau{=}0.20$ sits
+inside its gap $[0.171, 0.406]$: pure spec-accept wins with no auxiliary
+mechanism. Cube's gap $[0.219, 0.353]$ sits just \emph{above} the transfer
+$\tau$: slight over-rejection, and indeed Cube required the arrival gate.
+Reacher's bulks separate $4\times$ but the tails overlap ($0.410$ vs.\
+$0.379$): a noisy verifier, and indeed Reacher required the $c^{*}$ router.
+TwoRoom-on-LeWM is \emph{inverted at every stride}: adjacent frames read
+$0.88$ median while unrelated episodes read ${\approx}\sqrt{2}$; no threshold
+exists (even ground-truth demo waypoints verify $14/113$). DROID's pooled space opens no gap at any stride, and the
+ground-truth calibration row at that scale measures exactly what remains: a
+statistic that rank-tracks and separates scenes while running metrically loose
+at the transfer $\tau$ (\Cref{sec:results-cert}, \Cref{sec:generality-scale}).
 
-\paragraph{One statistic explains every outcome.} PushT's $\tau{=}0.20$ sits inside
-its gap $[0.171, 0.406]$: pure spec-accept wins with no auxiliary mechanism
-(\Cref{tab:grand}). Cube's gap $[0.219, 0.353]$ sits just \emph{above} the transfer
-$\tau$: slight over-rejection, and indeed Cube required the arrival gate. Reacher's
-bulks separate $4\times$ but the tails overlap (equiv $p_{90}$ $0.410$ vs.\ hop
-$p_{10}$ $0.379$): a noisy verifier, and indeed Reacher required the per-episode
-$c^{*}$ router. TwoRoom-on-LeWM is \emph{inverted at every stride}: adjacent
-frames read $0.88$ median while unrelated episodes read ${\approx}\sqrt{2}$, the
-encoder assigning near-orthogonal codes to distinct positions. No threshold
-exists, and the behavioral evidence agrees: a verified oracle serving waypoints the
-demonstrator \emph{physically visited} accepted $14/113$ of them. DROID's pooled
-space opens no gap at any stride: verification runs degenerate-accept, which is the
-honest scope of the scale transplant (\Cref{sec:generality-scale}).
-
-\paragraph{Prescription has a measured boundary.} The instrument's applicability
-claim (gap exists $\Rightarrow$ a $\tau$ exists; inverted $\Rightarrow$ verification
-cannot operate) is distinct from a stronger prescription we tested and reject: that
-the gap \emph{midpoint} is the right $\tau$ and can replace an auxiliary mechanism.
-Pre-registered on Cube (8 seeds, gate off, $\tau{=}0.286$ at the midpoint): mechanics
-moved as predicted (acceptances ${\sim}3\times$) but SR \emph{fell} to $74.6$ against
-a $\ge 78.0$ bar with seed variance tripled: the gate's margin is arrival
-protection, not threshold mis-calibration. We therefore claim applicability and
-$\tau$-existence, not $\tau$-optimality.
-
-\paragraph{Prospective record.} Three predictions were frozen before their tests and
-confirmed: (i) a learned attentive readout cannot open DROID's pooled gap with
-$8\times$ data (still closed, width $-0.107$); (ii) $20\times$ data does not repair
-the DROID drafter's latent fidelity (no-op ratio $0.39$--$0.48\times$, vs.\ v1's
-$0.53$--$0.63\times$); (iii) nor its planning value (paired against v1 across three
-budgets: $+0.015/-0.053/+0.074$, all CIs straddling zero). Six further predictions
-were frozen before their tests on DINO-WM; their verdicts, including the ones the
-serving fault left unresolvable, are reported in \Cref{sec:generality-dinowm}.
-
-\paragraph{When the gap is closed but recoverable: the lens.} Where bulks separate
-but tails overlap, a small time-contrastive readout (verifier-side only; world model
-and planner untouched) can reopen the interval on held-out episodes: Reacher
-$-0.039 \to +0.031$ (derived $\tau{=}0.309$), and on the DINO-WM substrates below,
-Maze $-0.006 \to +0.167$, Wall $-0.012 \to +0.146$, TwoRoom-on-DINOv2
-$-0.055 \to +0.229$. Two honest boundaries: DROID's pooled space resists the lens at
-any tested data scale (information absent from the readout, not mis-read), and an
-open lens gap is an \emph{offline} statement: closed-loop, the Reacher lens
-traded short-horizon SR ($-4.5$/$-2.5$pp at $t{=}25/50$) for verification
-efficiency (call ratio $0.63 \to 0.55$); its closed-loop value is tested
-pre-registered on Wall below.
+\paragraph{Boundaries, tested against ourselves.} The applicability claim
+(gap exists $\Rightarrow$ a $\tau$ exists; inverted $\Rightarrow$ verification
+cannot operate) is distinct from a stronger midpoint-prescription we tested
+and reject: pre-registered on Cube ($\tau{=}0.286$ at the midpoint, gate off),
+SR \emph{fell} to $74.6$ against a $\ge78.0$ bar, so we claim applicability
+and $\tau$-existence, not $\tau$-optimality. Where bulks separate but tails
+overlap, a small time-contrastive \emph{lens} (verifier-side only) can reopen
+the interval on held-out episodes (Reacher $-0.039 \to +0.031$; Maze
+$+0.167$; Wall $+0.146$; TwoRoom-on-DINOv2 $+0.229$), with two honest
+boundaries: DROID's pooled space resists the lens at any tested data scale
+($8\times$ data, width $-0.107$; $20\times$ repairs neither drafter fidelity
+nor planning value, both frozen predictions confirmed), and an open lens gap
+is an \emph{offline} statement, the Reacher lens traded short-horizon SR for
+verification efficiency and the pre-registered Wall closed-loop test could
+not run (\Cref{sec:generality-dinowm}).
 
 % ============================================================
 \section{Generality: A Second Architecture and a Scale Transplant}
 \label{sec:generality}
 
-The results of \Cref{sec:results} live on one stack. This section transplants the
-method twice, to a second full planning architecture where closed-loop success is
-measurable, and to a $55\times$ larger world model where it is not, and lets the
-instrument of \Cref{sec:instrument} make its predictions \emph{first}.
+The method transplants twice, the instrument predicting \emph{first} (full
+narratives in \Cref{app:generality}).
 
-\subsection{DINO-WM: derive-first on an architecture adopted mid-project}
-\label{sec:generality-dinowm}
+\paragraph{DINO-WM (a second architecture).}\label{sec:generality-dinowm}
+The instrument ran before any spec-accept cell on DINO-WM \citep{dinowm}:
+PushT's gap is open but the transfer $\tau{=}0.20$ sits \emph{above} it, so
+$\tau{=}0.121$ was derived and five predictions frozen before execution.
+\textbf{P3 confirmed}, the cleanest prospective hit in the program: Wall at
+the fixed transfer $\tau$ scores $0.685$ against flat's $1.00$, a $31$pp
+underperformance called before the run. \textbf{P4 unavailable}: no lens gap
+ever opened at Wall's serving hop, so the arm was not run. On PushT a
+component-isolation autopsy exonerated the serving path and convicted the
+transplanted \emph{drafter's content} at full data scale; the verifier's
+${\sim}97\%$ rejection rate was the \emph{correct} reading of a bad drafter.
+\textbf{P1, P2, and P5 are therefore unadjudicated-for-method}. Verifier,
+derived $\tau$, and serving machinery transfer; generative drafting on frozen
+video features has not, at any data scale we could buy.
 
-DINO-WM \citep{dinowm} plans with MPC-CEM over frozen DINOv2 patch features, a
-task-agnostic encoder, unlike LeWM's task-trained one, and therefore the harder
-test of the gap's portability. We reproduce its released PushT protocol as the
-anchor (flat success $86\%$ at $n{=}50$, seed $99$, vs.\ the paper's $90\%$; our run
-caps MPC at the environment's 300-step episode budget), then run the instrument
-before any spec-accept cell: PushT's gap is \emph{open} at the natural hop but the
-LeWM-transfer $\tau{=}0.20$ sits \emph{above} it, the instrument's first
-$\tau$-mis-calibration call; so $\tau{=}0.121$ is derived and the following are
-frozen (\texttt{docs/dinowm\_prereg.md}) before execution: \textbf{P1} certified
-spec-accept at $\tau{=}0.121$ within $2$pp of flat; \textbf{P2} $\tau{=}0.20$ runs
-degenerate-accept; \textbf{P3} Maze/Wall (tail-overlap rows) underperform at any
-fixed $\tau$; \textbf{P4} Wall recovers under the lens verifier; \textbf{P5} at
-$\mathrm{goal}_H{=}15$, where the drafted block spans the goal distance exactly, the
-spec-vs-flat margin improves on its short-horizon value. The transplanted drafter is
-the first in this program to beat the no-op reference on a video-feature substrate
-(no-op ratio $1.11/1.22/1.31\times$ at block positions $1/2/3$).
+\paragraph{TwoRoom (an encoder property, repairable).}\label{sec:generality-tworoom}
+The instrument localizes TwoRoom's impossibility to the encoder, and the causal
+test confirms: the \emph{same pixels} through frozen DINOv2 cure the saturation
+($0.876 \to 0.081$; lens gap $+0.229$, derived $\tau{=}0.540$). Diagnosed in
+advance and repaired: the LeWM-side closed loop recovers $+15.4$pp at range
+(\Cref{sec:results-heldout}); the DINO-WM-side loop was cut at the
+pre-declared deadline and remains a frozen prediction.
 
-Verdicts, reported exactly as they fell. \textbf{P3 confirmed}, the cleanest
-prospective hit in the program: Wall at the fixed transfer $\tau$ scores $0.685$
-against flat's $1.00$, a $31$pp underperformance the instrument called before the
-run. \textbf{P4 unavailable}: the Wall lens never opened a gap at the serving hop,
-so no $\tau$ could be derived and the arm was not run, reported rather than
-improvised. \textbf{P1, P2, and P5 are confounded and remain open}: across three
-independent batteries the flat arms are healthy ($0.82$--$0.88$) while every
-spec-accept arm scores near zero with one signature (the drafter passes its offline
-gates and beats the no-op reference, yet served waypoints produce no progress),
-which indicates an unresolved fault in our DINO-WM serving integration rather than
-a verdict on the predictions; we decline to claim them in either direction, and the
-predictions stay frozen. Point-maze remains prediction-only (its environment
-requires mujoco-py + d4rl).
+\paragraph{V-JEPA 2 ($55\times$ scale).}\label{sec:generality-scale}
+The \emph{mechanism} carries: the certified source runs end-to-end, the
+verifier constant transfers ($\tau{=}0.20$ against measured single-replan
+floors of $0.06$--$0.10$), and the calibration audit runs unchanged at scale
+($\rho=0.53$, cross-scene rejection $99.9\%$, dataset-pair label;
+\Cref{sec:results-cert}). The scale boundary: $c^{*}$ carries no
+discriminative signal (routes $0/36$ anchors to flat); the drafter is not
+rescued by $20\times$ data; planning \emph{quality} cannot be honestly
+adjudicated offline at all (\Cref{app:generality}). An exploratory
+$15\times$-compute result did not survive the powered pre-registered
+replication and is retired; closed-loop evaluation at scale is future
+work.
 
-\subsection{TwoRoom: the scope condition is an encoder property, and repairable}
-\label{sec:generality-tworoom}
-
-TwoRoom-on-LeWM is this paper's cleanest impossibility (\Cref{sec:instrument}):
-inverted gap, verifier rejecting reality itself, ground-truth waypoints
-\emph{halving} flat's success because planning optimizes the same broken metric. The
-instrument localizes the failure to the encoder, which makes a causal test
-available: push the \emph{same pixels} through frozen DINOv2. The saturation cures:
-adjacent-frame distance drops $0.876 \to 0.081$, hops and cross-episode
-distances scale properly again, and the substrate lands in the recoverable
-tail-overlap class, where the lens opens a usable gap ($+0.229$, derived
-$\tau{=}0.540$). The scope condition is not ``TwoRoom is hard'': it is a measurable
-property of the encoder's metric, diagnosed in advance, and repaired by a component
-swap the instrument itself prescribed.
-
-The closed-loop completion on this substrate (a DINO-WM world model trained on
-TwoRoom, drafted arm under the lens verifier) was cut at the program's
-pre-declared deadline before its evaluation harness was complete; the encoder-swap
-cure above is the measured claim, and the closed-loop arm remains a frozen
-prediction. The LeWM-side closed loop, however, did complete
-(\Cref{sec:results-heldout}): certifying TwoRoom in frozen DINOv2 while the
-planner consumes LeWM latents recovers $+15.4$pp at range, the same
-component-swap prescription executed on the verifier alone.
-
-\subsection{V-JEPA 2: what transfers at $55\times$ scale, and what cannot be known offline}
-\label{sec:generality-scale}
-
-Transplanted to V-JEPA~2's 1B action-conditioned model (token-grid targets served to
-the upstream CEM unmodified), the \emph{mechanism} carries: the certified source runs
-end-to-end, and the verifier constant transfers ($\tau{=}0.20$ against measured
-single-replan floors of $0.06$--$0.10$). Three things do not, and we report them as
-the scale boundary. The planner certificate $c^{*}$ carries no discriminative signal
-on this substrate (three independent measurements; a router built on it routes
-$0/36$ anchors to flat). The drafter is not rescued by data ($20\times$: predictions
-(ii)--(iii) above). And planning \emph{quality} cannot be honestly adjudicated
-offline at all: there is no simulator for a real-robot DROID model, in-model scoring
-is circular (the model grades plans that may exploit its own errors), and the
-demonstration-agreement instrument fails its own sanity checks at $n{=}36$ paired
-anchors (flat's agreement ${\approx}0$ and not improving with $16\times$ budget; a
-straight-line interpolation outscoring both planners). An exploratory
-$15\times$-compute result did not survive this powered pre-registered replication
-and is retired accordingly; closed-loop evaluation at scale is future work requiring
-hardware, not more offline instruments.
-
-\paragraph{Concurrent work.} SAGE \citep{sage} (July 2026) independently reports that
-drafted subgoal latents repair long-horizon myopia on LeWM, converging evidence
-for the premise, but consumes its drafts open-loop: no reality-verification, no
-applicability instrument, one architecture. TRM \citep{trm} repairs latent-metric
-failures with reachability-based metrics, the training-time complement to our
-verifier-side lens; its LeWM-vs-PLDM TwoRoom comparison independently supports the
-encoder-property reading of \Cref{sec:generality-tworoom}. Our contribution remains
-the certificate and the instrument: \emph{when} a drafted plan can be trusted, and
-\emph{whether} a given stack can support the trust test at all.
+\paragraph{Concurrent work.} SAGE \citep{sage} independently reports drafted
+subgoal latents repairing long-horizon myopia on LeWM, converging evidence
+for the premise, but consumes drafts open-loop; TRM \citep{trm} repairs
+latent metrics at training time, the complement to our verifier-side lens.
+Ours remains the certificate and the instrument.

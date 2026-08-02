@@ -1,17 +1,15 @@
-% references.bib -- verified entries only (arXiv IDs checked against live pages
-% or primary-source PDFs on the date noted). Entries marked CHECK need a final
-% metadata pass (authors/venue) before submission; the IDs themselves are firm.
+% references.bib -- all entries verified against live arXiv pages 2026-08-02.
 
 % ---- substrate ----
 @article{lewm,
-  title   = {LeWM: Learning World Models with a Frozen JEPA Encoder},
-  author  = {{[CHECK authors -- primary-source PDF on file]}},
+  title   = {LeWorldModel: Stable End-to-End Joint-Embedding Predictive Architecture from Pixels},
+  author  = {Maes, Lucas and Le Lidec, Quentin and Scieur, Damien and LeCun, Yann and Balestriero, Randall},
   journal = {arXiv preprint arXiv:2603.19312},
   year    = {2026},
 }
 @article{ffjepa,
-  title   = {FF-JEPA: Hierarchical Latent Planning with Diffusion Subgoal Models},
-  author  = {{[CHECK authors -- primary-source PDF on file]}},
+  title   = {FF-JEPA: Long-Horizon Planning in World Models with Latent Planners},
+  author  = {Masip, Sergi and Swinnen, Jonathan and Hu, Yutong and Detry, Renaud and Tuytelaars, Tinne},
   journal = {arXiv preprint arXiv:2606.09311},
   year    = {2026},
 }
@@ -25,10 +23,9 @@
 }
 @article{pldm,
   title   = {Learning from Reward-Free Offline Data: A Case for Planning with Latent Dynamics Models},
-  author  = {Sobal, Vlad and others},
-  journal = {arXiv preprint arXiv:2502.14855},
+  author  = {Sobal, Vlad and Zhang, Wancong and Cho, Kyunghyun and Balestriero, Randall and Rudner, Tim G. J. and LeCun, Yann},
+  journal = {arXiv preprint arXiv:2502.14819},
   year    = {2025},
-  note    = {CHECK: confirm ID/author list},
 }
 
 % ---- planning / control ----
@@ -68,7 +65,7 @@
 }
 @article{dspark,
   title   = {DSpark: Confidence-Scheduled Speculative Decoding with Semi-Autoregressive Generation},
-  author  = {{[CHECK authors]}},
+  author  = {Cheng, Xin and Yu, Xingkai and Shao, Chenze and Li, Jiashi and Xiong, Yunfan and Qian, Yi and Zhu, Jiaqi and Ma, Shirong and Zhang, Xiaokang and Ye, Jiasheng and Chen, Qinyu and Deng, Chengqi and Yu, Jiping and Dai, Damai and Zhang, Zhengyan and Wei, Yixuan and Tan, Yixuan and Yang, Wenkai and Xu, Runxin and Wu, Yu and Xu, Zhean and Wang, Xuanyu and Chen, Muyang and Tian, Rui and Bi, Xiao and Hao, Zhewen and Chen, Shaoyuan and Cao, Huanqi and Zhang, Wentao and Xu, Anyi and Zhang, Huishuai and Zhao, Dongyan and Liang, Wenfeng},
   journal = {arXiv preprint arXiv:2607.05147},
   year    = {2026},
 }
@@ -76,29 +73,27 @@
 % ---- commitment / chunking in control ----
 @article{bid,
   title   = {Bidirectional Decoding: Improving Action Chunking via Guided Test-Time Sampling},
-  author  = {Liu, Yuejiang and Hamid, Jubayer Ibn and Xie, Annie and Du, Yoonho and Finn, Chelsea},
+  author  = {Liu, Yuejiang and Hamid, Jubayer Ibn and Xie, Annie and Lee, Yoonho and Du, Maximilian and Finn, Chelsea},
   journal = {arXiv preprint arXiv:2408.17355},
   year    = {2024},
-  note    = {CHECK: author list against the v2 title change},
 }
 @article{rtc,
   title   = {Real-Time Execution of Action Chunking Flow Policies},
-  author  = {{[CHECK authors]}},
+  author  = {Black, Kevin and Galliker, Manuel Y. and Levine, Sergey},
   journal = {arXiv preprint arXiv:2506.07339},
   year    = {2025},
 }
 @article{dcdp,
   title   = {Closed-Loop Action Chunks with Dynamic Corrections for Training-Free Diffusion Policy},
-  author  = {{[CHECK authors]}},
+  author  = {Wu, Pengyuan and Zhang, Pingrui and Wang, Zhigang and Wang, Dong and Zhao, Bin and Li, Xuelong},
   journal = {arXiv preprint arXiv:2603.01953},
   year    = {2026},
 }
 @article{spo,
   title   = {Speculative Policy Orchestration: A Latency-Resilient Framework for Cloud-Robotic Manipulation},
-  author  = {{[CHECK authors]}},
+  author  = {Nguyen, Chanh and Jin, Shutong and Pokorny, Florian T. and Elmroth, Erik},
   journal = {arXiv preprint arXiv:2603.19418},
   year    = {2026},
-  note    = {concurrent work; speculation over network transport, not drafter compute},
 }
 
 % ---- few-step diffusion ----
@@ -122,10 +117,11 @@
   journal = {arXiv preprint arXiv:2410.20092},
   year    = {2024},
 }
-@misc{vlwm,
-  title  = {VLWM [TBD: resolve the exact citation -- the fixed-budget-50 PushT
-            baseline quoted in the cross-paper cell; ID not yet pinned]},
-  year   = {2026},
+@article{vlwm,
+  title   = {Beyond the Next Step: Variable-Length Latent World Models for Long-Horizon Planning},
+  author  = {Du, Tianqi and Zhang, Qi and Wang, Yifei and Wang, Yisen},
+  journal = {arXiv preprint arXiv:2606.21775},
+  year    = {2026},
 }
 
 @article{sage,
