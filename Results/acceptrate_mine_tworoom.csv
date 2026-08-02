@@ -1,0 +1,13 @@
+file,tau,redrafts,advances,rejects,call_ratio
+2room_anchB_pair_t098_seed42.log,0.098,657,34,591,0.951
+2room_anchB_pair_t098_seed43.log,0.098,714,28,650,0.962
+2room_anchB_pair_t098_seed44.log,0.098,655,27,590,0.960
+2room_anchB_pair_t098_seed45.log,0.098,728,47,664,0.939
+2room_anchB_pair_t098_seed46.log,0.098,669,22,605,0.968
+2room_anchB_pair_t098_seed47.log,0.098,701,46,637,0.938
+2room_anchExt_pair_t098_seed48.log,0.098,668,24,603,0.965
+2room_anchExt_pair_t098_seed49.log,0.098,697,25,632,0.965
+2room_anchExt_pair_t098_seed50.log,0.098,676,37,612,0.948
+2room_anchExt_pair_t098_seed51.log,0.098,675,28,610,0.960
+2room_anchExt_pair_t098_seed52.log,0.098,711,21,647,0.971
+2room_anchExt_pair_t098_seed53.log,0.098,692,26,628,0.964

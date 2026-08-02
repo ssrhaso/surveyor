@@ -1,0 +1,34 @@
+{
+  "env": "pusht",
+  "tau": 0.2,
+  "probe": "mlp",
+  "circular": false,
+  "n_events": 3552,
+  "n_accept": 1880,
+  "n_reject": 1672,
+  "probe_r2_criterion_dims": 0.9829985498717382,
+  "probe_gate": 0.9,
+  "row_unavailable_probe_below_gate": false,
+  "replay_mismatches": 0,
+  "drafted_target_frac_out_of_bounds": 0.015484234234234234,
+  "criterion_radius": 20.0,
+  "metric": "l2",
+  "state_dist_accept": {
+    "p10": 2.79233716419633,
+    "p50": 8.675278048429195,
+    "p90": 20.03637834672694
+  },
+  "state_dist_reject": {
+    "p10": 5.709301720619793,
+    "p50": 17.041402008076204,
+    "p90": 48.38989666288109
+  },
+  "spearman_rel_vs_state_dist": 0.4923090569228271,
+  "false_accept_rate": 0.10159574468085106,
+  "false_reject_rate": 0.5771531100478469,
+  "traces": [
+    "runs/pusht/traces_cal_spec_t150_seed42.pt",
+    "runs/pusht/traces_cal_spec_t150_seed43.pt",
+    "runs/pusht/traces_cal_spec_t150_seed44.pt"
+  ]
+}

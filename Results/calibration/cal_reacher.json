@@ -1,0 +1,33 @@
+{
+  "env": "reacher",
+  "tau": 0.2,
+  "probe": "ridge",
+  "n_events": 2012,
+  "n_accept": 958,
+  "n_reject": 1054,
+  "probe_r2_criterion_dims": 0.4117752538580337,
+  "probe_gate": 0.9,
+  "row_unavailable_probe_below_gate": true,
+  "replay_mismatches": 0,
+  "drafted_target_frac_out_of_bounds": 0.0,
+  "criterion_radius": 0.05,
+  "metric": "maxabs",
+  "state_dist_accept": {
+    "p10": 0.025059126494345253,
+    "p50": 0.07217635058252347,
+    "p90": 0.18036534958879857
+  },
+  "state_dist_reject": {
+    "p10": 0.06669632398233515,
+    "p50": 0.1963696544752196,
+    "p90": 0.8801180580540481
+  },
+  "spearman_rel_vs_state_dist": 0.6608009368419006,
+  "false_accept_rate": 0.6878914405010439,
+  "false_reject_rate": 0.056925996204933584,
+  "traces": [
+    "runs/reacher/traces_cal_spec_t150_seed42.pt",
+    "runs/reacher/traces_cal_spec_t150_seed43.pt",
+    "runs/reacher/traces_cal_spec_t150_seed44.pt"
+  ]
+}

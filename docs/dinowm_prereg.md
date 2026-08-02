@@ -280,3 +280,40 @@ with walltime sized from the measured 7.6h/run so no battery can time out
 again. Bank convention declared now: snap bank = train-split grids only
 (the drafter's own training population; the eval episodes are dset-drawn
 and disjoint).
+
+## AUTOPSY VERDICT (2308656, 5/5 COMPLETED, read 2026-07-31 evening —
+## the decision tree resolves to the honest-negative branch)
+
+- **D1 GOAL-SERVE TAUTOLOGY: CONFIRMED HEALTHY.** 0.90 / 0.80 vs flat's
+  0.90 / 0.90 (gate-test), rel_to_goal = 0.000, achieved state converges
+  to rel_to_now ~ 0.12 ~ tau. **The latent-goal hand-off, cem branch,
+  grid encoding, and the whole serving integration are exonerated** —
+  and D1 doubles as a validation of the serving stack + derived tau on
+  the second architecture.
+- **D2 DRAFT-AND-SNAP: REFUTED.** 0.05 / 0.10 (the nogate band);
+  advances 11 / 7 of ~250 (prediction was >> 8). Real-manifold targets
+  do not restore acceptance or SR. The diag localizes why: snapped
+  targets sit rel_to_now ~ 0.17 AND rel_to_goal ~ 0.20 — the drafter's
+  proposals are neither near reality nor nearer the goal.
+- **D3 AS-IS CONTROL:** fault reproduced (0.20); drafted grids' token
+  MSE to the nearest real grid 0.47 vs the 0.28-0.32 real-frame bank
+  floor — the off-manifold excess is real but NOT the primary cause
+  (per D2).
+
+**DIAGNOSIS (replaces "unresolved serving-integration fault"):** the
+transplanted drafter's CONTENT fails on frozen DINOv2 features — its
+waypoints do not advance toward the goal. The verifier's ~97% rejection
+rate across every battery was CORRECT detection of a bad drafter:
+certification behaving exactly as designed. Per the frozen tree
+(D1 healthy + D2 no-lift): **no promotion battery; the leg re-kills at
+the box.** P1/P2 remain unadjudicated for the method served by a
+competent drafter; the verdict table above is glossed accordingly.
+
+**DATA-SCALE FOLLOW-UP (2026-08-01, checked against records before any
+run):** the "data-starved drafter" hypothesis is REFUTED by the training
+log itself — the drafter trained on ALL 18,685 train episodes (~1.6M
+pairs, ~100k optimizer steps = 2-3x the budget of every working LeWM
+drafter; the grid encode loop is uncapped). The content failure stands
+AT FULL DATA SCALE, consistent with the V-JEPA 2 20x-data null:
+two foundation-feature stacks, the same drafter-side lesson. This is
+the sentence the paper's cross-architecture section now carries.
