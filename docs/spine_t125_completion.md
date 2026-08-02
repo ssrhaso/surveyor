@@ -1,0 +1,36 @@
+# Spine t=125 table-completion cells (registered 2026-08-02, BEFORE submission)
+
+Purpose: tab:spine(c) currently evaluates the interior offset t=125 only for the
+S=10 arms and flat (footnote h). The three remaining every-step arms are filled
+in for table completeness. User-authorized (GPU idle); these are NEW cells, not
+re-runs — no banked cell is touched, no graveyard rule applies.
+
+Category: DESCRIPTIVE, NO BAR. No paper claim depends on these cells; every
+banked verdict is unchanged under any outcome.
+
+Cells (12 jobs): {S=5 RH=1, S=15 RH=3, S=25 RH=5} every-step (subgoal gdm,
+k=50, tau flag inert) x t=125 x seeds 42-45, on the EXACT spine(c) fixed
+population: max-offset-150, episode-min 8000, builder seed 42, n=128, budget
+2t=250 — identical to batch/isca/run_reacher_horizon150.sbatch except the arm
+list. Batch: batch/isca/run_spine_t125_completion.sbatch.
+
+Declared expectation (descriptive, falsifiable): each arm lands between its own
+banked t=100 and t=150 values within seed noise (S=5: [91.2, 93.0]; S=15:
+[93.9, 95.5]; S=25: [92.6, 93.6]), the monotone-interior reading the footnote
+asserts. A cell outside its bracket beyond noise is reported as-is and the
+"interior point of a monotone trend" sentence is corrected.
+
+## READOUT (2026-08-02, job 2308957, 12/12 COMPLETED same hour)
+
+| arm | seeds 42/43/44/45 | pooled (512 eps) | declared bracket | verdict |
+|---|---|---|---|---|
+| S=5 RH=1 | 94.53 / 92.97 / 92.19 / 92.19 | **92.97** | [91.2, 93.0] | INSIDE |
+| S=15 RH=3 | 91.41 / 95.31 / 95.31 / 92.97 | **93.75** | [93.9, 95.5] | 0.15pp below the lower edge, SE ~0.97 -> within seed noise |
+| S=25 RH=5 | 91.41 / 92.19 / 93.75 / 89.84 | **91.80** | [92.6, 93.6] | 0.8pp below the lower edge, SE ~0.81 -> within 1 SE; note this arm's t100->t150 trend was already non-monotone (93.6 -> 92.6), so "interior" was never well-defined for it |
+
+Reading (descriptive, as registered): S=5 confirms the interior reading
+exactly; S=15 and S=25 land marginally below their brackets, both within one
+seed-noise SE — no monotone-interior violation beyond noise, reported as-is.
+tab:spine(c) is now complete at all three offsets for every arm; the ---^h
+footnote is retired. No banked verdict or margin changes (spec 95.5 remains
+the best t=125 cell; gap row unchanged at +14.1).
