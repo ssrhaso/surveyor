@@ -1,7 +1,7 @@
 # PLAN (tick sheet)
 
-Paper: `paper/main_v2.tex` (ACTIVE — method-paper restructure, 2026-07-13;
-`paper (1).tex` = v1 forensic archive feeding the appendices; writeup/main.tex = older interim doc).
+Paper: `paper/main_iclr2027.tex` (ACTIVE — ICLR2027 build, 9pp main text, 2026-08-02;
+`main_v2.tex` = frozen 07-31 archive; `paper (1).tex` = v1 forensic archive; writeup/main.tex = older interim doc).
 Rule: update the paper ONCE per completed block, not per job.
 Method = spec-accept; "DSpark" = the ported negative-result baseline only.
 
@@ -167,6 +167,36 @@ Method = spec-accept; "DSpark" = the ported negative-result baseline only.
 ##    calibrated ADAPTIVE rate controller. Paper drops: per-event
 ##    selectivity drives SR at nominal. ISCA queue EMPTY; all GPU work
 ##    from the meat-audit arc is COMPLETE.
+##
+##  08-02 ADDENDUM — SUBMISSION MECHANICS (no new claims):
+##  * Live build = paper/main_iclr2027.tex: 9pp main (conclusion ends p9),
+##    refs p10+, appendices A-I to p24; one main-text figure (fig:cost) +
+##    one table (tab:grand); bib verified vs live arXiv. main_v2.tex FROZEN.
+##  * tab:taugrid completion battery ISCA 2309056: 18/18 COMPLETED and
+##    FULLY HARVESTED 08-02 evening (prereg docs/taugrid_completion.md
+##    READOUT appended; tab:taugrid COMPLETE, zero dashes; recompiled;
+##    both zips refreshed). Verdicts: 6/7 cells on their declared
+##    expectations. A pusht t100: tau.15 64.3/.69, tau.25 64.1/.51,
+##    tau.40 65.8/.42 — BAND-EDGE PROBE: pusht tau.40 does NOT drop
+##    (vs reacher's -5.3pp), sec 5.1 floor-ordering sentence STANDS.
+##    B pusht val t150: tau.10 64.3/.81, tau.40 64.3/.39 — row flat
+##    end to end, calls monotone. C reacher: tau.15 95.9/.70 in bracket;
+##    tau.25 93.6/.56 = THE ONE EXCURSION, 0.55pp below its declared
+##    bracket [94.1,95.5] (~0.5 SE), recorded as-is, changes no paper
+##    sentence. ISCA QUEUE NOW EMPTY — ZERO experiments outstanding
+##    anywhere; the program is fully closed including table completion.
+##  * STATEMENTS ADDED after conclusion (render p10, outside the 9pp
+##    count): Reproducibility (honest clean-room sentence per
+##    repro_smoke_prereg.md; seed-60 SRs NOT quoted), LLM-usage (plain
+##    disclosure). Ethics statement — DECISION: OMIT, per the frozen
+##    submission plan (docs/iclr2027_submission_plan.md sec 1: optional;
+##    sim-only benchmarks, no human subjects, no sensitive data); recorded
+##    here per the decide-either-way rule.
+##  * dinowm_prereg.md blank anchor field FILLED from the 2299529 log:
+##    flat 0.86 (final SR, n=50 seed 99; post-eval video-decode OOM is
+##    after scoring) vs DINO-WM paper's 0.90 — matches the tex quote.
+##  * Supplementary bundle: assembling (code + ANONYMIZED prereg docs +
+##    figure scripts; grep ha676|isca|isambard|lustre|hasaa before ship).
 ## ================================================================
 
 ---
