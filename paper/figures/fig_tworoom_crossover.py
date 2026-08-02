@@ -82,6 +82,7 @@ ax.tick_params(colors=INK, labelsize=9)
 ax.grid(axis="y", color="#ececec", lw=0.7, zorder=0)
 
 fig.tight_layout()
-out = r"C:\Users\hasaa\Desktop\LEWM\le-wm\paper\figures\fig_tworoom_crossover.png"
+from pathlib import Path
+out = str(Path(__file__).resolve().parent / "fig_tworoom_crossover.png")
 fig.savefig(out, dpi=220)
 print("saved", out)

@@ -3,6 +3,7 @@
 % \usetikzlibrary{arrows.meta,positioning,shapes.geometric,calc}
 \begin{figure}[t]
 \centering
+\resizebox{0.86\linewidth}{!}{%
 \begin{tikzpicture}[
   font=\small,
   node distance=6mm and 9mm,
@@ -42,7 +43,8 @@
   {certificate $c^{*}\!\le\tau$ (one flat CEM probe):\\
    route episode to flat / retire drafter on\\certified arrival};
 \draw[arr, densely dashed, black!55] (cstar.south east) ++(-4mm,0) -- ++(0,-4mm);
-\end{tikzpicture}
+\end{tikzpicture}%
+}
 \caption{\textbf{Certified spec-accept.} A drafted $N$-block is consumed waypoint by
 waypoint; at every replan boundary the \emph{achieved} latent is verified against
 the waypoint just pursued. Within $\tau$, the next pre-drafted waypoint is served

@@ -1,0 +1,72 @@
+% TwoRoom crossover, TikZ-native (replaces the rasterized matplotlib PNG).
+% Data = banked per-seed cells (docs/tworoom_paired_prereg.md verdicts); means/SE
+% recomputed from the per-seed lists in figures/fig_tworoom_crossover.py.
+% Colors reuse the preamble's gapopen (flat / planner space) and gapmech
+% (certified spec-accept / mechanism), matching fig:gap.
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.8\linewidth, height=6.6cm,
+  xmin=21, xmax=85.5, ymin=25, ymax=95,
+  xtick={25,40,50,60,75},
+  xlabel={goal distance $t$ (env steps)},
+  ylabel={success rate (\%)},
+  tick label style={font=\scriptsize},
+  label style={font=\footnotesize},
+  axis line style={black!40},
+  ymajorgrids, grid style={black!10},
+  clip=false,
+]
+% measured crossover band [40,50]
+\fill[black!8] (axis cs:40,25) rectangle (axis cs:50,95);
+\node[font=\scriptsize, color=black!55] at (axis cs:45,92.0)
+  {measured crossover};
+% one planning window (their protocol) marker
+\draw[black!45, densely dotted] (axis cs:25,25) -- (axis cs:25,95);
+\node[font=\scriptsize, color=black!55, align=left, anchor=south west]
+  at (axis cs:25.8,26.3) {one planning window\\(LeWM's own protocol)};
+% LeWM's published Fig. 6 number
+\addplot[only marks, mark=star, mark size=3.2pt, black!55]
+  coordinates {(25,87)};
+\node[font=\scriptsize, color=black!55, anchor=west] at (axis cs:26.6,87.6)
+  {LeWM's published 87};
+% flat planning (12 seeds; 6 at t=60)
+\addplot[gapopen, thick, mark=*, mark size=1.7pt,
+         error bars/.cd, y dir=both, y explicit]
+  coordinates {
+    (25,83.72) +- (0,1.67)
+    (40,65.10) +- (0,1.36)
+    (50,59.90) +- (0,1.44)
+    (60,55.47) +- (0,2.87)
+    (75,41.67) +- (0,1.83)};
+% certified spec-accept (12 seeds; 6 at t=25 and t=60)
+\addplot[gapmech, thick, mark=*, mark size=1.7pt,
+         error bars/.cd, y dir=both, y explicit]
+  coordinates {
+    (25,77.08) +- (0,1.38)
+    (40,61.59) +- (0,1.93)
+    (50,63.28) +- (0,1.99)
+    (60,55.73) +- (0,2.63)
+    (75,57.03) +- (0,1.65)};
+% direct series labels
+\node[gapopen, font=\footnotesize\bfseries, anchor=west]
+  at (axis cs:76.3,40.6) {flat planning};
+\node[gapmech, font=\footnotesize\bfseries, align=left, anchor=west]
+  at (axis cs:76.3,57.5) {certified\\spec-accept};
+% headline margin annotation
+\node[font=\scriptsize, color=black!65, align=left, anchor=west]
+  at (axis cs:61.5,38.0) {$+15.4$pp (12 seeds, every seed)};
+\end{axis}
+\end{tikzpicture}
+\caption{\textbf{TwoRoom on LeWM: the crossover the window rule predicted.} Best
+flat and best certified spec-accept arm per goal distance (error bars $=$ SE;
+$12$ seeds per point except the declared six-seed cells: both arms at $t{=}60$
+and the certified arm at $t{=}25$, whose pooled twelve-seed value, $76.95$,
+agrees within $0.2$pp). The $t{=}25$ point is LeWM's published protocol,
+star $=$ their Fig.~6 number. The crossover lands in the shaded band $[40,50]$,
+inside the frozen prediction; the deployed composite plays flat left of it and
+certified spec-accept right of it, and never loses to flat at any measured
+horizon.}
+\label{fig:tworoom-crossover}
+\end{figure}

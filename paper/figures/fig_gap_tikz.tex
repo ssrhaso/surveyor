@@ -6,7 +6,7 @@
 \centering
 \begin{tikzpicture}
 \begin{axis}[
-  width=\linewidth, height=7.4cm,
+  width=0.9\linewidth, height=6.0cm,
   xmode=log, xmin=0.04, xmax=1.7,
   xtick={0.05,0.1,0.2,0.4,0.8,1.414},
   xticklabels={0.05,0.1,0.2,0.4,0.8,$\sqrt{2}$},
@@ -32,7 +32,7 @@
 \addlegendimage{gapmech, line width=4pt}
 \addlegendentry{tails overlap, auxiliary mechanism}
 \addlegendimage{gapdead, line width=4pt, densely dashed}
-\addlegendentry{inverted, verification impossible}
+\addlegendentry{inverted, no operating $\tau$}
 \addlegendimage{only marks, mark=diamond*, mark size=2.6pt, black}
 \addlegendentry{operating $\tau$}
 
@@ -42,12 +42,12 @@
 \addplot[gapopen, line width=4.5pt, opacity=0.95] coordinates {(0.108,4) (0.135,4)};
 % tail overlap (drawn hop p10 -> equiv p90)
 \addplot[gapmech, line width=3pt, opacity=0.8] coordinates {(0.379,7) (0.410,7)};
-\addplot[gapmech, line width=3pt, opacity=0.8] coordinates {(0.112,5) (0.121,5)};
 \addplot[gapmech, line width=3pt, opacity=0.8] coordinates {(0.056,3) (0.061,3)};
 \addplot[gapmech, line width=3pt, opacity=0.8] coordinates {(0.052,2) (0.078,2)};
 \addplot[gapmech, line width=3pt, opacity=0.8] coordinates {(0.099,1) (0.159,1)};
-% inverted (dashed)
+% inverted (dashed; drawn hop p10 -> equiv p90)
 \addplot[gapdead, line width=3pt, densely dashed] coordinates {(1.018,6) (1.393,6)};
+\addplot[gapdead, line width=3pt, densely dashed] coordinates {(0.076,5) (0.112,5)};
 % taus
 \addplot[only marks, mark=diamond*, mark size=2.6pt, black]
   coordinates {(0.20,9) (0.20,8) (0.20,7) (0.121,4) (0.540,1)};
@@ -60,8 +60,9 @@ interval between them is where $\tau$ can operate, computed from cached latents 
 minutes. Every closed-loop outcome in this paper matches its row: PushT's in-gap
 $\tau$ needed no auxiliary mechanism; Cube's below-gap $\tau$ required the arrival
 gate; Reacher's tail overlap required the $c^{*}$ router; TwoRoom-on-LeWM is
-inverted at every stride (verification provably cannot operate, even ground-truth
-demo waypoints verify $14/113$); DROID's pooled space is degenerate at any $\tau$.
+inverted at every stride (verification measurably cannot operate: even ground-truth
+demo waypoints verify $14/113$); DROID's pooled space opens no gap at any stride,
+and both prescribed repairs measured null there (\Cref{sec:generality-scale}).
 On DINO-WM the instrument ran \emph{before} any closed-loop cell: PushT's gap is
 open but the transfer $\tau{=}0.20$ lies above it, so $\tau{=}0.121$ was derived and
 frozen; the bottom row shows TwoRoom \emph{cured} of inversion by swapping the
