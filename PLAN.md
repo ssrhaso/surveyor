@@ -85,6 +85,88 @@ Method = spec-accept; "DSpark" = the ported negative-result baseline only.
 ##     spec +10.0pp, paired t~4.9); oracle ceiling 12-seed (56.90, spec
 ##     statistically AT it); statistical-conventions disclosure para in
 ##     sec:setup. Experimental ledger at optimum — writing/poster only.
+##
+## 08-01 ADDENDUM — CERTIFICATION DAY CLOSED; GPU WORK COMPLETE.
+##  All in docs/certification_prereg.md + dinowm_prereg.md VERDICTS:
+##  * CALIBRATION (M1): quotable FA = .000 cube / .102 pusht / .400
+##    reacher (registered circ amendment; frozen-probe row recorded
+##    unavailable; rho=0.978) / .522 tworoom. Conservative-row rule +
+##    R2>=0.90 gates applied; replay exact everywhere.
+##  * CORRUPTION (R1): P-CERT-1 CONFIRMED — derived tau=0.20 localizes
+##    closed-loop rejection ignition exactly (cr .59->1.00 at sigma
+##    crossing tau). P-CERT-2 refuted (white jitter averages out both
+##    modes; verification's SR value is vs autocorrelated error, banked).
+##  * M2: call_ratio falls with horizon (pusht .88->.57, reacher
+##    .75->.58) — the serving loop measures the window rule.
+##  * DINOWM AUTOPSY: hand-off exonerated (goal-serve = flat), snap
+##    refuted, fault = DRAFTER CONTENT at FULL data scale (18,685 eps,
+##    2-3x optimizer budget; data-starvation hypothesis refuted by the
+##    training log). Verifier's rejections were CORRECT. Leg re-killed
+##    at the box; P1/P2 unadjudicated-for-method.
+##  NEXT: paper surgery (certification subsection + tab:calibration +
+##  tau-ignition + DINO-WM rewrite + formal certified-definition para),
+##  then the writing bundle; strips round-3 (8 npz) + calibration JSONs
+##  not yet pulled local. POSTER Aug 11 awaits user template decision.
+##
+##  08-01 EVENING — MEAT-AUDIT FOLLOW-UP, USER-APPROVED, IN FLIGHT:
+##  * B1 DECISION-CONTENT CONTROL (matched-rate random rejection): the one
+##    experiment the hostile-AC audit found missing (our own P-CERT-2 hands
+##    reviewers the "is it just re-anchor scheduling?" question). Prereg
+##    frozen FIRST in docs/randreject_prereg.md: coin rejects i.i.d. at the
+##    banked cells' own per-event rejection probability, derived exactly
+##    from printed log counters (pusht .4937, reacher .4902); banked
+##    per-seed comparison columns recorded (pusht 98.14 pooled, reacher
+##    91.11); bar = banked spec >= coin + 3pp AND paired t >= 2 per env;
+##    call_ratio validity gate +/-0.05; single shot, all outcomes
+##    reportable. ISCA 2308863 (12 jobs: pusht t150 seeds 42-45 n=256,
+##    reacher t150 seeds 42-49 n=128), submitted after freeze; coin
+##    engagement confirmed in the live logs. --random-reject plumbed in
+##    sources.py + pusht/reacher drivers (dedicated coin RNG; draft stream
+##    untouched).
+##  * EXTRACTION ADDENDUM (registered in certification_prereg.md before
+##    computing): per-event (rel, accepted, state_dist) CSV dump from the
+##    frozen calibration pipeline (--dump-events) for the descriptive
+##    FA(r)/FR(r) radius-sensitivity curves + rel-vs-state operating curve
+##    with derived tau marked (defuses reacher .400 / tworoom .522 before
+##    review); ISCA 2308864 (4 jobs, quotable probe classes). M2 TWOROOM
+##    ROWS COMPLETED same day: 12 banked t=75 cells mined, pooled
+##    call_ratio 0.958 (Results/acceptrate_mine_tworoom.csv) — M2 table
+##    now covers all four envs.
+##
+##  08-01 LATE — BOTH BATTERIES READ; VERDICTS BANKED; SWEEP IN FLIGHT:
+##  * B1 VERDICT (randreject_prereg.md): validity gates PASSED; **coin
+##    TIES certified spec on both t150 cells** (pusht 98.05 vs 98.14,
+##    +0.10pp t=0.16; reacher 90.33 vs 91.11, +0.78pp t=2.65 — below the
+##    3pp bar). B-COIN-1 FAILS -> declared middle reading: per-event
+##    SELECTIVITY is not load-bearing at nominal; verification's value =
+##    setting the re-anchor RATE (coin's p was parasitic on the verifier)
+##    + ignition under divergence (R1) + calibration (M1). Consistent
+##    with paper's own "idle where drafts track reality" + banked blind
+##    losses; paper must state the refined decomposition.
+##  * FA(r) READOUT (certification_prereg.md): false accepts are
+##    near-boundary — reacher .400 -> .064 at 2x radius (.003 at 3x);
+##    tworoom .522 -> .130 at 2x; pusht .102 -> .020 at 1.5x; cube .000
+##    at criterion (.194 at HALF radius = sharp at scale). Rerun
+##    reproduces every banked FA exactly. events_{env}.csv pulled local.
+##  * RATE-SWEEP (registered post-B1 pre-run, in randreject_prereg.md):
+##    SR(p) dose-response below the matched rate — reacher p{0,.125,.25}
+##    (p=0 never banked on s999 pop) + pusht p{.125,.25} (p=0 = banked
+##    Isambard -18pp commit-3, cited not re-run). P-RATE-1/2/3 frozen.
+##    ISCA 2308892 (20 jobs). Readout pending.
+##  * RATE-SWEEP VERDICT (20/20, battery closed): REACHER P-RATE-1
+##    CONFIRMED (blind 84.57 -> 85.74 -> 90.43 monotone, knee ~p=.25,
+##    call_ratio floor .357 as predicted); PUSHT P-RATE-2 primary FAILED,
+##    declared alternative applies (96.97/96.39 at p=.125/.25 = flat from
+##    p=.125 up; the -18pp blind loss is confined to strict p=0).
+##    Decomposition final: rate load-bearing (graded on reacher, step on
+##    pusht), selectivity +0.1-0.8pp, verifier sits ON the SR plateau.
+##    HONEST NUANCE banked in the verdict: verifier rate .59-.61 is above
+##    the SR-knee (~.25) — a coin at .25 matches SR cheaper, BUT its p is
+##    only knowable from the verifier's telemetry, cannot ignite under
+##    corruption (R1), and carries no per-episode diagnostic. Paper keeps:
+##    calibrated ADAPTIVE rate controller. Paper drops: per-event
+##    selectivity drives SR at nominal. ISCA queue EMPTY; all GPU work
+##    from the meat-audit arc is COMPLETE.
 ## ================================================================
 
 ---

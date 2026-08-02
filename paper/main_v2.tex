@@ -70,30 +70,35 @@ for Hierarchical Latent World-Model Planning}
 \maketitle
 
 \begin{abstract}
-When can a drafted subgoal plan be trusted, and for how long? We introduce
-\emph{spec-accept}, a training-free consumption rule for hierarchical latent
-world-model planners: draft a block of $N$ subgoal latents once, then verify the
-achieved latent against the waypoint just pursued at every replan boundary. Within a
-relative distance $\tau$, the next pre-drafted waypoint is served at zero drafter
-cost; otherwise the block is re-drafted from reality. The verifier is the
-environment itself, with no learned components, and both constants are measured
-rather than tuned: $\tau$ is the encoder's criterion floor and the step budget $k$
-is the sampler's convergence point, each computed offline in minutes. Adding the
-planner's own reachability certificate $c^{*}$ yields \emph{certified spec-accept},
-which meets or beats the strongest flat baseline in all eleven pre-registered
-environment--horizon cells across PushT, Reacher, and held-out Cube, with margins up
-to $+94$pp where flat planning collapses, at $1.9$--$2.4$ drafter evaluations per
-replan. On the one substrate whose encoder cannot support verification at all
-(Two-Room, the LeWM authors' own weakest result), the accept test transplants
-unchanged into a frozen external encoder and recovers a $+15.4$pp certified win at
-long horizon, at a protocol anchored to the published number; a window rule with its
-switch read off the measured crossover composes the two regimes into a policy that
-never loses to flat. One mechanism
-explains the wins, the ties, and every measured negative:
-control pays for target consistency, and re-drafting injects churn proportional to
-draft noise. A companion statistic, the verification gap, predicts from cached
-latents alone whether a given world model can support the method, and its
-predictions have held prospectively on substrates adopted after the rule was frozen.
+When can a drafted subgoal plan be trusted, and for how long? We answer with a
+\emph{certification layer} for frozen hierarchical latent world-model planners,
+built from one training-free rule and a set of measured guarantees about that rule.
+The rule is \emph{spec-accept}: draft a block of $N$ subgoal latents once, then at
+every replan boundary verify the \emph{achieved} latent against the waypoint just
+pursued; within a relative distance $\tau$ the next pre-drafted waypoint is served
+at zero drafter cost, otherwise the block is re-drafted from reality. Every
+constant is derived offline rather than tuned: $\tau$ is the encoder's own
+criterion floor, the step budget $k$ is the sampler's convergence point. The
+guarantees are then earned the hard way. Calibrated against ground-truth state,
+the accept test tracks physical truth (Spearman up to $0.98$; false-accepts
+quantified per environment and shown to be near-boundary). Under injected drafter
+corruption, its closed-loop rejection ignites exactly where the offline-derived
+$\tau$ predicts. And a pre-registered random-rejection control we ran against
+ourselves shows the test's per-event selectivity is \emph{not} what carries
+success at nominal operation: the verifier's closed-loop value is discovering,
+adapting, and certifying the re-anchoring \emph{rate}. A companion statistic, the
+verification gap, predicts from cached latents alone whether a substrate can
+support the method at all; its verdicts have held prospectively on every
+substrate adopted after the rule was frozen, including a $31$pp cross-architecture
+failure called in advance. Validated on its substrate's entire published suite,
+certified spec-accept meets or beats the strongest flat baseline in all eleven
+pre-registered environment--horizon cells (margins up to $+94$pp where flat
+planning collapses) at $1.9$--$2.4$ drafter evaluations per replan; on the one
+environment whose encoder fails the gap precondition (Two-Room, the substrate
+authors' own weakest result) the accept test transplants unchanged into a frozen
+external encoder and recovers a $+15.4$pp certified win at long horizon, with a
+window rule whose switch is read off the measured crossover composing the two
+regimes into a policy that never loses to flat.
 \end{abstract}
 
 % ============================================================
@@ -120,22 +125,34 @@ rule with one threshold and no learned components; it composes with any drafter.
 \item \textbf{Calibration by measurement} (\Cref{sec:calib}): $\tau$ and $k$ are
 read off two offline measurements in minutes, not swept. The derived PushT $k{=}3$
 was a configuration no sweep had run; it was predicted, then confirmed.
-\item \textbf{Evaluation and mechanism} (\Cref{sec:results,sec:why}): one frozen
-recipe, every comparison anchored to the strongest flat baseline per cell, and one
-mechanism (the \emph{churn thesis}) unifying five independent measurements.
+\item \textbf{The verifier held to account} (\Cref{sec:results-cert}): a
+ground-truth calibration table (false-accept and false-reject rates at each
+environment's own success radius, with the residual errors shown near-boundary), a
+corruption sweep in which closed-loop rejection ignites exactly at the
+offline-derived $\tau$, and a pre-registered matched-rate random-rejection control
+that \emph{refutes} the strongest reading of our own mechanism: per-event
+selectivity is not load-bearing at nominal operation. What survives, with
+dose-response evidence, is sharper: verification is a calibrated, adaptive
+controller of the re-anchoring rate, whose fixed-rate shadow is knowable only in
+hindsight and cannot ignite under divergence.
 \item \textbf{Certified drafting scope}
 (\Cref{sec:method-arbiter,sec:results-unified}): the planner's own certificate
 $c^{*}$ routes each episode to flat planning or drafting and retires the drafter on
-certified arrival, producing one policy that wins all eleven pre-registered cells.
+certified arrival; the resulting single policy wins all eleven pre-registered
+environment--horizon cells of the substrate's published suite, our primary
+validation of the layer as a whole.
 \item \textbf{Verifier modularity} (\Cref{sec:results-heldout}): when the gap
 statistic rules the planner's own space out (Two-Room), the accept test transplants
 unchanged into a frozen external encoder; the certified loop then beats flat by
 $+15.4$pp at long horizon at a protocol anchored to LeWM's published number, and the
 window rule composes flat and certified drafting into a policy that never loses,
 with the crossover confirmed where it was predicted.
-\item \textbf{Honest scope} (\Cref{sec:discussion}): every boundary of the
-derivation is measured and reported, alongside a battery of negative results that
-causally implicate drafter stochasticity.
+\item \textbf{A pre-flight applicability instrument and honest scope}
+(\Cref{sec:why-regime,sec:discussion}): the verification gap predicts from cached
+latents whether a substrate supports the method; its verdicts held prospectively on
+every substrate adopted after the rule was frozen (including a $31$pp
+cross-architecture failure called before the run), and every boundary of the
+derivation is measured and reported alongside the retained negative results.
 \end{enumerate}
 
 % ============================================================
@@ -907,6 +924,140 @@ Reacher. \textbf{Middle:} what it buys. \textbf{Right:} time per completed task,
 \label{fig:cost}
 \end{figure}
 
+\subsection{Certification: the verifier held to account}
+\label{sec:results-cert}
+The word \emph{certified} is cheap unless the certificate itself is audited. This
+subsection does that, pre-registered end to end: what the accept test's decisions
+mean physically (calibration), whether the derived $\tau$ has closed-loop content
+(corruption), and which part of the decision actually carries success (a control we
+ran against our own mechanism).
+
+\textbf{Calibration against ground truth.} For every headline serving arm we
+replayed each verification event offline (replay mismatches: zero everywhere) and
+decoded both the achieved latent and the pursued waypoint to ground-truth state
+through a probe trained on dataset frames, gated at held-out $R^{2}\geq0.90$ on the
+criterion dimensions with a pre-frozen conservative-row rule when probe classes
+disagree. \Cref{tab:calibration} gives the operating characteristic at the derived
+$\tau$, against each environment's \emph{own success radius}. Accepted waypoints are
+physically within the task's success radius $100\%$/$90\%$ of the time on
+Cube/PushT; on the two tightest criteria (Reacher $0.05$\,rad, Two-Room $16$\,px)
+accepts sit at $80$--$107\%$ of the radius with $2.5$--$3\times$ separation from
+rejects, and Reacher's verifier ranks true angular distance at $\rho=0.978$, a
+near-perfect ordinal sensor. The residual false-accepts are near-boundary, not
+gross: sweeping the readout radius (decisions and $\tau$ fixed), Reacher's
+false-accept rate falls $0.400\to0.064$ at twice the criterion radius and $0.003$
+at three times; Two-Room's falls $0.522\to0.130$ at twice. Errors elsewhere are
+conservative (high false-reject, low false-accept): the verifier errs by paying an
+unnecessary re-draft, not by serving a bad waypoint.
+
+\begin{table}[h]
+\centering
+\small
+\caption{The verifier's operating characteristic at the derived $\tau$, per
+environment, from replayed serving decisions ($991$--$3{,}552$ events/env) decoded
+to ground-truth state. FA/FR $=$ false-accept/false-reject rates at the
+environment's own success-criterion radius; acc p50 $=$ median physical distance of
+accepted waypoints vs.\ that radius. Conservative probe row quoted where classes
+disagree (pre-frozen rule); Reacher uses the registered circular (sin/cos) probe
+after the raw-angle probe failed its gate, both outcomes reported.}
+\label{tab:calibration}
+\begin{tabular}{lccccc}
+\toprule
+& probe $R^{2}$ & $\rho$(rel, state) & FA & FR & acc p50 / radius \\
+\midrule
+Cube & .992 & .72 & .000 & .59 & .013 / .04 \\
+PushT & .983 & .49 & .102 & .58 & 6.5 / 20 \\
+Reacher (circ.) & .997 & \textbf{.978} & .400 & .045 & .040 / .05 \\
+Two-Room & .998 & .36 & .522 & .13 & 17.2 / 16 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{figs/cert_cal}
+\caption{\textbf{Calibration against ground truth.} \textbf{Left:} false-accept
+rate as the readout radius sweeps around each task's own success radius
+(decisions and $\tau$ fixed): the residual false accepts are near-boundary,
+collapsing to $0.064$/$0.130$ at twice the Reacher/Two-Room radii and to
+$0.003$ at three times on Reacher; Cube is already exact at its criterion.
+\textbf{Right:} the Reacher operating scatter, replayed serving decisions
+against true wrapped angular distance: the latent test ranks physical truth at
+$\rho=0.978$, with the derived $\tau$ separating the two populations.}
+\label{fig:cert-cal}
+\end{figure}
+
+\textbf{The derived $\tau$ localizes closed-loop detection.} Displacing every
+drafted waypoint by relative noise $\sigma$ (at every draft, the deployed
+semantics) and serving through the unchanged verifier, the call ratio ignites from
+its banked baseline to total rejection exactly as $\sigma$ crosses the derived
+threshold: $0.59\to0.66\to1.00\to1.00$ across $\sigma=0/0.1/0.2/0.4$ (free
+advances $518\to420\to2\to0$), the ignition point our offline derivation predicted
+before the sweep ran. The companion prediction failed honestly and is reported:
+success itself was flat for both verified and blind arms at every $\sigma$,
+because fresh-draw isotropic jitter is temporally averaged by \emph{any}
+consumption policy; verification's success-rate value is against
+\emph{autocorrelated} divergence (\Cref{sec:why-verifier}), not white noise.
+
+\textbf{What the decision carries: rate, not per-event selectivity.} The sharpest
+question a certificate must survive is whether its decisions matter at all. We
+pre-registered a matched-rate random-rejection control: replace the accept test
+with an i.i.d.\ coin that rejects at the banked cells' own measured per-event
+rejection probability ($0.494$/$0.490$, reconstructed exactly from serving-log
+counters), everything else byte-identical. The coin \emph{ties} certified
+spec-accept on both $t{=}150$ headline cells ($98.05$ vs.\ $98.14$ on PushT;
+$90.33$ vs.\ $91.11$ on Reacher, the residual $+0.78$pp consistent across seeds
+but below our $3$pp bar). A pre-registered dose-response below the matched rate
+completes the decomposition: success climbs monotonically with rejection rate on
+Reacher ($84.6$ at $p{=}0$, the blind floor, to $90.4$ by $p{=}0.25$) and is a
+step function on PushT (blind commitment loses $18$pp; $p{=}0.125$ already
+recovers to within $1.2$pp). At nominal operation, then, \emph{which} replans are
+rejected is not load-bearing; \emph{how often} is. Three things the coin cannot
+do keep the verifier essential, and each is measured above: its matched rate
+exists only in hindsight, read off the verifier's own telemetry; a fixed coin
+cannot ignite when reality diverges (the corruption sweep); and its decisions
+certify nothing (the calibration table is a property of the latent test, not of a
+schedule). Verification, on this evidence, is a \emph{calibrated, adaptive
+controller of the re-anchoring rate}, and the paper's mechanism claims are stated
+at that strength and no more.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{figs/cert_decision}
+\caption{\textbf{What the accept decision buys, measured three ways.}
+\textbf{Left:} under drafter corruption the verifier's call ratio ignites from
+its banked baseline to total rejection exactly as $\sigma$ crosses the
+offline-derived $\tau$ (shaded: the pre-registered $[\tau/2,2\tau]$ band); blind
+consumption sits at its mechanical floor throughout. \textbf{Middle, right:} the
+pre-registered rejection-rate dose-response. Random rejection at the verifier's
+own measured rate (star) ties it on both headline cells; below that rate,
+success is a step function on PushT (blind commit-3 loses $18$pp; $p{=}0.125$
+already recovers) and graded on Reacher (knee ${\sim}0.25$). The rate is
+load-bearing; per-event selectivity is not, and the rate itself is knowable only
+from the verifier's telemetry.}
+\label{fig:cert-decision}
+\end{figure}
+
+\textbf{The serving loop measures its own regime.} Mined over every banked grid
+cell ($1{,}526$ log rows), the call ratio falls with goal distance exactly as the
+regime map predicts: PushT $0.88\to0.57$ and Reacher $0.75\to0.58$ across
+$t{=}25\to150$, with Two-Room's $0.96$ the registered weak-encoder exception. The
+verifier's telemetry is thus a free, per-episode regime diagnostic, the same
+signal the $c^{*}$ arbiter reads at episode scope.
+
+\textbf{The same audit runs at foundation scale.} The calibration methodology is
+not tied to its substrate. Applied to V-JEPA 2 ViT-g pooled latents over $400$
+recorded DROID episodes, pre-registered as a \emph{dataset-pair} characteristic
+(no serving loop exists on that stack; both frames of every pair are real, so
+ground truth is recorded rather than probed), the transferred $\tau{=}0.20$
+accepts $85\%$ of within-episode pairs across the far-goal horizon, rejects
+$99.9\%$ of cross-episode pairs, and the accept statistic rank-tracks
+end-effector distance at $\rho=0.53$, above PushT's own deployed row. The
+threshold is metrically \emph{loose} there (median accepted pair $=12.7$\,cm of
+end-effector motion; DROID defines no task radius), so the row certifies rank
+sensitivity and scene discrimination rather than a success-radius guarantee,
+exactly the distinction this table is designed to expose.
+
 \subsection{Held-out environments}
 \label{sec:results-heldout}
 % The generalization test the calibration protocol was designed for:
@@ -1131,12 +1282,17 @@ fires only on real divergence; when there is none, it is behaviorally equivalent
 not checking. This tie is a \emph{prediction} of the floor calibration, not a
 failure of it.
 
-\textbf{Where drafts genuinely diverge, verification is load-bearing.} On Reacher
-(exploratory data; drafts inherit the collection policy's meanders), the verifier
-fires constantly (call ratio $0.62$), and removing it costs real success: blind
-commitment scores $87.9/89.8$ at $t{=}100/150$ vs.\ spec-accept's $95.5/95.7$, a $+5.9$--$7.6$pp gap. The rejections are re-anchoring events, exactly where the
-regime map's data-conditionality leg (\Cref{sec:why-regime}) predicts plans and
-reality part ways.
+\textbf{Where drafts genuinely diverge, re-anchoring is load-bearing, and the
+verifier is what sets its rate.} On Reacher (exploratory data; drafts inherit the
+collection policy's meanders), the verifier fires constantly (call ratio $0.62$),
+and removing re-anchoring costs real success: blind commitment scores $87.9/89.8$
+at $t{=}100/150$ vs.\ spec-accept's $95.5/95.7$, a $+5.9$--$7.6$pp gap. The
+certification battery (\Cref{sec:results-cert}) sharpens the attribution: a
+rate-matched random-rejection control ties the verifier here, so the value at
+nominal operation is the re-anchoring \emph{rate} the verifier discovers and
+holds, not the identity of the rejected replans; the rejections land exactly
+where the regime map's data-conditionality leg (\Cref{sec:why-regime}) predicts
+plans and reality part ways.
 
 \textbf{Where drafts are \emph{unconverged}, naive verification backfires, as the
 floor theory itself explains.} At the PushT $k{\leq}2$ cliff, blind commit-2
@@ -1153,10 +1309,15 @@ of floor-calibrated verification rather than hide it.
 hyperparameter with its own cliff: depth. Commit-2 is safe on PushT; commit-3 loses
 $18$pp there (\Cref{sec:negatives}) and blind commitment loses $6$--$8$pp on Reacher
 at the depth its block provides, and blindness has no signal for which regime it
-is in. Spec-accept subsumes the whole family ($\tau{\to}0$ is every-step,
-$\tau{\to}\infty$ is blind), the measured floor picks the operating point, and the
-realized call ratio is a free, per-episode regime diagnostic: ${\approx}0.5$ means
-verification is idle insurance; ${<}0.7$ and falling means it is earning its keep.
+is in. The dose-response of \Cref{sec:results-cert} maps the cliff precisely: the
+loss is confined to (near-)zero re-anchoring rates, and a \emph{random} rejection
+ladder recovers success once its rate reaches the knee, but that ladder's rate is
+only knowable from the verifier's own telemetry, cannot ignite under divergence,
+and certifies nothing. Spec-accept subsumes the whole family ($\tau{\to}0$ is
+every-step, $\tau{\to}\infty$ is blind), the measured floor picks the operating
+point, and the realized call ratio is a free, per-episode regime diagnostic:
+${\approx}0.5$ means verification is idle insurance; ${<}0.7$ and falling means it
+is earning its keep.
 
 \paragraph{The churn thesis.} These results and three earlier ones are one
 mechanism: \emph{closed-loop control pays for target consistency; re-drafting
