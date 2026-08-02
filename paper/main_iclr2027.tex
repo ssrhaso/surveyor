@@ -665,6 +665,28 @@ evaluations per replan; the verification gap makes the precondition
 measurable in advance ($+15.4$pp on Two-Room when it fails and is repaired);
 any world model that plans by rollout can grade its own homework.
 
+\section*{Reproducibility Statement}
+Every quantitative claim in this paper traces to a pre-registered prediction
+document whose frozen definitions and banked verdicts are included, in
+anonymized form, in the supplementary material, together with the evaluation
+code, serving configurations, and figure scripts. \Cref{app:repro} details
+the baseline reconstruction and its closed-loop anchor certification; the
+appendices give the full protocols, populations, seeds, and thresholds for
+every cell. The released dependency specification was itself validated by a
+clean-room rebuild, which caught and fixed two undocumented dependencies
+before release; all four environments were then re-run end-to-end from the
+fresh environment on never-used seeds, with serving mechanics consistent
+with the banked runs.
+
+\section*{The Use of Large Language Models}
+Large language models were used throughout this project as an engineering
+and writing assistant: implementing and refactoring experiment code,
+orchestrating cluster runs, analyzing logs, and drafting and editing the
+manuscript. All experimental designs, pre-registered predictions, and
+scientific claims were specified and reviewed by the authors; every number
+reported traces to a logged run, and the authors take full responsibility
+for the content of the paper.
+
 \bibliography{references}
 \bibliographystyle{iclr2027_conference}
 
@@ -1006,9 +1028,9 @@ floors (\Cref{tab:floor}).}
 \toprule
 & $\tau{=}0.10$ & $0.15$ & $0.20$ & $0.25$ & $0.30$ & $0.40$ \\
 \midrule
-PushT $t{=}100$, $k{=}4$        & 64.1 (.87) & --- & 65.0 (.58) & --- & 65.0 (.47) & --- \\
-PushT val split $t{=}150$, $k{=}8$ & --- & 63.5 (.61) & 64.5 (.50) & 63.7 (.45) & 63.7 (.42) & --- \\
-Reacher $t{=}100$, $k{=}4$      & 95.9 (.84) & --- & 95.5 (.63) & --- & 94.1 (.52) & 90.2 (.46) \\
+PushT $t{=}100$, $k{=}4$        & 64.1 (.87) & 64.3 (.69) & 65.0 (.58) & 64.1 (.51) & 65.0 (.47) & 65.8 (.42) \\
+PushT val split $t{=}150$, $k{=}8$ & 64.3 (.81) & 63.5 (.61) & 64.5 (.50) & 63.7 (.45) & 63.7 (.42) & 64.3 (.39) \\
+Reacher $t{=}100$, $k{=}4$      & 95.9 (.84) & 95.9 (.70) & 95.5 (.63) & 93.6 (.56) & 94.1 (.52) & 90.2 (.46) \\
 \bottomrule
 \end{tabular}
 \end{table}

@@ -12,7 +12,10 @@ DINOv2 ViT-S/14 `x_norm_patchtokens` (384-d, pooled per frame for the
 verifier metric), their ViT predictor, MPC-CEM planner (300 samples, 30 opt
 steps), frameskip 5, goal_H 5, success = pos<20px AND angle<pi/9, n_evals 50
 seed 99, max_iter capped at 12 (episode budget; same cap in every arm).
-Anchor: flat baseline success rate = ____ (job 2299529; paper's number = ____).
+Anchor: flat baseline success rate = 0.86 (job 2299529; paper's number = 0.90).
+(Field filled 2026-08-02 from the job log: final `Success rate: 0.86` printed at
+the last planning iteration, n=50 seed 99, log line 3607; the run then OOM'd in
+the post-eval VQVAE video decode — after scoring, cosmetic only.)
 
 ## Instrument reading (measured 2026-07-26, gap_dinowm_*.json — FROZEN)
 

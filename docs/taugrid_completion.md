@@ -25,4 +25,42 @@ Declared expectations (descriptive, falsifiable, from the banked neighbors):
 - Call ratios monotone decreasing in tau everywhere.
 Any excursion is reported as-is; no re-run, no tau added after readout.
 
-## READOUT (pending)
+## READOUT (2026-08-02, job 2309056, 18/18 COMPLETED; all cells fresh, no
+## banked cell touched; per-seed numbers from the job logs — pusht A/B cells
+## live in the array logs taufill_2309056_{0..9}.log, reacher C cells in
+## reacher_taufill_t100_tau0.*_seed4?.log; 20deg criterion throughout)
+
+- **A pusht t100 k4** (pool 512 = 2 seeds x 256):
+  - tau .15: **64.26** (166+163; per-seed 64.84 / 63.67), call_ratio .698/.678 -> **.69**
+  - tau .25: **64.06** (164+164; 64.06 / 64.06), cr .515/.501 -> **.51**
+  - tau .40: **65.82** (170+167; 66.41 / 65.23), cr .417/.417 -> **.42**
+  - vs declared: tau .15/.25 on the plateau (neighbors 64.1/65.0/65.0) CONFIRMED.
+    **Band-edge probe: pusht tau .40 does NOT drop** — 65.8 is the row's
+    highest cell (+0.8pp vs plateau, inside binomial noise at n=512), against
+    reacher's banked tau .40 loss of 5.3pp. The floor-ordering sentence in
+    sec 5.1 STANDS as written; no re-scope needed.
+- **B pusht val t150 k8** (pool 512 = 2 seeds x 256):
+  - tau .10: **64.26** (166+163; 64.84 / 63.67), cr .805/.818 -> **.81**
+  - tau .40: **64.26** (163+166; 63.67 / 64.84), cr .385/.386 -> **.39**
+  - vs declared: tau .10 "~63.5 with more calls" — SR +0.8pp above the point
+    expectation (well inside noise, SE ~2.1pp), calls confirmed the row's
+    highest. tau .40 "~63.7 flat band" — confirmed flat. Row now reads
+    64.3 / 63.5 / 64.5 / 63.7 / 63.7 / 64.3: flat across the entire grid.
+- **C reacher t100 k4** (pool 512 = 4 seeds x 128):
+  - tau .15: **95.90** (123+125+120+123; 96.09/97.66/93.75/96.09),
+    cr .710/.715/.687/.703 -> **.70** — declared [95.5, 95.9]: IN BRACKET
+    (at the top edge).
+  - tau .25: **93.55** (119+123+120+117; 92.97/96.09/93.75/91.41),
+    cr .559/.584/.555/.546 -> **.56** — declared [94.1, 95.5]:
+    **EXCURSION, 0.55pp BELOW the bracket** (reported as-is per the frozen
+    rule; ~0.5 SE at n=512 where SE ~1.1pp). Creates a mild interior dip vs
+    the banked tau .30 cell (94.1); consistent with reacher's earlier
+    degradation onset (narrower floor), not with any new mechanism. No
+    re-run, no tau added.
+- **Call ratios monotone decreasing in tau in all three rows** (declared):
+  A .87/.69/.58/.51/.47/.42 | B .81/.61/.50/.45/.42/.39 |
+  C .84/.70/.63/.56/.52/.46.
+- tab:taugrid is now COMPLETE — zero dashes. Verdict summary: 6/7 cells land
+  on their declared expectations; the single excursion (reacher tau .25) is
+  recorded above and changes no paper sentence (sec 5.1's ordering claim is
+  about the tau .40 band edge, which came out CONFIRMED).
