@@ -1,0 +1,69 @@
+{
+ "args": {
+  "env": "pusht",
+  "h5": "/lustre/home/ha676/data/pusht/pusht_expert_train.h5",
+  "source": "pretrained",
+  "encoder_id": "quentinll/lewm-pusht",
+  "local_dir": null,
+  "swm_src": null,
+  "gdm_ckpt": null,
+  "device": "cuda",
+  "batch_size": 256,
+  "n_anchors": 512,
+  "pair_pool": 40000,
+  "n_cond": 128,
+  "n_draws": 8,
+  "ks": [
+   1,
+   2,
+   4,
+   8,
+   16,
+   50
+  ],
+  "stride": 10,
+  "goal_gap": 100,
+  "episode_min": 0,
+  "pos_thresh": 20.0,
+  "qpos_tol": 0.05,
+  "cube_tol": 0.04,
+  "tau": 0.2,
+  "verify_space": "dino",
+  "seed": 42,
+  "json_out": "Results/gap_stat/floor_pusht_dino.json"
+ },
+ "env": "pusht",
+ "verify_space": "dino",
+ "temporal_floor_disp1": {
+  "mean": 0.06948689380078577,
+  "std": 0.04330128137609945,
+  "p10": 0.038533159717917445,
+  "p50": 0.059015581384301186,
+  "p90": 0.10634545460343368,
+  "n": 512
+ },
+ "disp_S10": {
+  "mean": 0.16057750929758186,
+  "std": 0.06339094988434399,
+  "p10": 0.08725732937455177,
+  "p50": 0.1498555913567543,
+  "p90": 0.2404702886939049,
+  "n": 512
+ },
+ "criterion_floor_20deg": {
+  "mean": 0.1290413831364705,
+  "std": 0.0659013324708457,
+  "p10": 0.05173228681087494,
+  "p50": 0.11822404339909554,
+  "p90": 0.21207518279552462,
+  "n": 458
+ },
+ "criterion_floor_5deg": {
+  "mean": 0.11212135029426955,
+  "std": 0.05317988464625827,
+  "p10": 0.04820170998573303,
+  "p50": 0.10670985281467438,
+  "p90": 0.17577798664569855,
+  "n": 436
+ }
+}

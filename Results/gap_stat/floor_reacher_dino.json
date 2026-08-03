@@ -1,0 +1,61 @@
+{
+ "args": {
+  "env": "reacher",
+  "h5": "/lustre/home/ha676/data/reacher/reacher.h5",
+  "source": "pretrained",
+  "encoder_id": "quentinll/lewm-reacher",
+  "local_dir": null,
+  "swm_src": null,
+  "gdm_ckpt": null,
+  "device": "cuda",
+  "batch_size": 256,
+  "n_anchors": 512,
+  "pair_pool": 120000,
+  "n_cond": 128,
+  "n_draws": 8,
+  "ks": [
+   1,
+   2,
+   4,
+   8,
+   16,
+   50
+  ],
+  "stride": 10,
+  "goal_gap": 100,
+  "episode_min": 8000,
+  "pos_thresh": 20.0,
+  "qpos_tol": 0.05,
+  "cube_tol": 0.04,
+  "tau": 0.2,
+  "verify_space": "dino",
+  "seed": 42,
+  "json_out": "Results/gap_stat/floor_reacher_dino.json"
+ },
+ "env": "reacher",
+ "verify_space": "dino",
+ "temporal_floor_disp1": {
+  "mean": 0.06710795914659684,
+  "std": 0.024945390680962184,
+  "p10": 0.03803055100142956,
+  "p50": 0.06419182941317558,
+  "p90": 0.10090482309460641,
+  "n": 512
+ },
+ "disp_S10": {
+  "mean": 0.12146110957473866,
+  "std": 0.039430635273421215,
+  "p10": 0.07338154166936875,
+  "p50": 0.11716029047966003,
+  "p90": 0.17490349858999252,
+  "n": 512
+ },
+ "criterion_floor_reacher": {
+  "mean": 0.050052224978001096,
+  "std": 0.0191256771172152,
+  "p10": 0.027901581674814224,
+  "p50": 0.04848694987595081,
+  "p90": 0.07586138993501665,
+  "n": 510
+ }
+}
