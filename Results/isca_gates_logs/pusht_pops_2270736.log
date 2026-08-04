@@ -1,4 +1,0 @@
-Traceback (most recent call last):
-  File "/lustre/home/ha676/le-wm/batch/isca/pusht/build_pusht_populations.py", line 18, in <module>
-    from specaccept.envs.pusht.eval import sample_long
-ModuleNotFoundError: No module named 'specaccept'
