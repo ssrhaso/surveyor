@@ -1,8 +1,8 @@
-"""GDM latent diffusion planner: model, diffusion process, and checkpoint
-I/O. A conditional DDPM over length-N subgoal latent sequences (DiT
-backbone, epsilon objective) operating on per-dim standardized latents with
-the stats stored in the checkpoint and inverted on sampling. Never touches
-the frozen LeWM.
+"""GDM latent diffusion planner: model, diffusion process, and checkpoint I/O.
+
+A conditional DDPM over length-N subgoal latent sequences (DiT backbone, epsilon
+objective) on per-dim standardized latents, with the stats stored in the
+checkpoint and inverted on sampling. Never touches the frozen LeWM.
 """
 
 from __future__ import annotations
@@ -88,9 +88,9 @@ class GDMConfig:
 
 
 class GDM(nn.Module):
-    """DiT denoiser over a length-N latent sequence, conditioned on the
-    conditioning latent(s) and diffusion timestep. forward(x_noised (B,N,D),
-    cond (B,wg,D) or (B,D), t (B,)) -> predicted noise (B,N,D)."""
+    """DiT denoiser over a length-N latent sequence, conditioned on the context
+    latent(s) and the diffusion timestep. forward(x_noised (B,N,D), cond (B,wg,D)
+    or (B,D), t (B,)) -> predicted noise (B,N,D)."""
 
     def __init__(self, cfg: GDMConfig | None = None, **kw):
         super().__init__()
@@ -148,9 +148,10 @@ class GDM(nn.Module):
 
 # Gaussian diffusion (DDPM training / DDIM sampling)
 def _cosine_alphas_cumprod(timesteps: int, s: float = 0.008) -> torch.Tensor:
-    """Nichol & Dhariwal (2021) cosine bar-alpha schedule (float64).
-    Returns a length-`timesteps` alphas_cumprod in (0,1], strictly decreasing.
-    Less probability mass sits at extreme high-t than a linear beta schedule."""
+    """Nichol & Dhariwal (2021) cosine bar-alpha schedule, computed in float64.
+
+    Returns a strictly decreasing length-`timesteps` alphas_cumprod in (0,1],
+    with less mass at extreme high-t than a linear beta schedule."""
     steps = torch.arange(timesteps + 1, dtype=torch.float64)
     f = torch.cos(((steps / timesteps) + s) / (1 + s) * math.pi / 2) ** 2
     acp = f / f[0]
@@ -158,11 +159,12 @@ def _cosine_alphas_cumprod(timesteps: int, s: float = 0.008) -> torch.Tensor:
 
 
 class GaussianDiffusion:
-    """DDPM training with DDIM (eta=0) or ancestral sampling. Flag-gated
-    knobs: parameterization ("eps" or "v"), schedule ("linear" or "cosine"),
-    and optional Min-SNR loss weighting. pred_from_model is the single place
-    the parameterization is decoded, keeping loss, sampling, and diagnostics
-    consistent by construction.
+    """DDPM training with DDIM (eta=0) or ancestral sampling.
+
+    Flag-gated knobs: parameterization ("eps" or "v"), schedule ("linear" or
+    "cosine"), and optional Min-SNR loss weighting. pred_from_model is the only
+    place the parameterization is decoded, so loss, sampling, and diagnostics
+    stay consistent by construction.
     """
 
     def __init__(self, timesteps: int = 1000, beta_start: float = 1e-4,
@@ -222,8 +224,8 @@ class GaussianDiffusion:
 
     def pred_from_model(self, model_out: torch.Tensor, x_t: torch.Tensor,
                         t: torch.Tensor):
-        """Decode a model output to (x0_hat, eps_hat) per the active
-        parameterization; the only place eps/v is interpreted."""
+        """Decode a model output to (x0_hat, eps_hat) under the active
+        parameterization. The only place eps/v is interpreted."""
         a, b = self._ab(t, x_t.ndim)
         if self.parameterization == "eps":
             eps = model_out
@@ -236,8 +238,8 @@ class GaussianDiffusion:
     def p_losses(self, model: GDM, x0: torch.Tensor, cond: torch.Tensor,
                  t: torch.Tensor | None = None, noise: torch.Tensor | None = None,
                  goal: torch.Tensor | None = None):
-        """One DDPM training loss on (x0, cond[, goal]). MSE in the prediction
-        space (eps or v); Min-SNR-gamma reweighted when min_snr_gamma>0."""
+        """One DDPM training loss on (x0, cond[, goal]): MSE in the prediction
+        space (eps or v), Min-SNR-gamma reweighted when min_snr_gamma > 0."""
         B = x0.shape[0]
         if t is None:
             t = torch.randint(0, self.timesteps, (B,), device=x0.device)
@@ -260,10 +262,10 @@ class GaussianDiffusion:
                     eta: float = 0.0, generator: torch.Generator | None = None,
                     goal: torch.Tensor | None = None,
                     noise_scale: float = 1.0) -> torch.Tensor:
-        """DDIM sampling (eta=0): cond (B,wg,D) or (B,D), shape (B,N,D) ->
-        x0 estimate in the DM's standardized space. With eta=0 the initial
-        draw is the only stochasticity, so noise_scale directly modulates the
-        conditional spread (0 = mode-seeking, 1 = native)."""
+        """DDIM sampling: cond (B,wg,D) or (B,D), shape (B,N,D) -> x0 estimate in
+        the DM's standardized space. At eta=0 the initial draw is the only
+        stochasticity, so noise_scale sets the conditional spread directly
+        (0 = mode-seeking, 1 = native)."""
         B = shape[0]
         device = cond.device
         x = noise_scale * torch.randn(shape, device=device, generator=generator)
@@ -293,8 +295,8 @@ class GaussianDiffusion:
                     noise_scale: float = 1.0) -> torch.Tensor:
         """Ancestral DDPM sampling over every reverse step (n_steps ignored),
         drawing posterior noise at each step except t=0. clip_x0 clamps the
-        predicted x0 to [-1,1] (minmax-normalized data only). Returns the x0
-        estimate in the DM's standardized space."""
+        predicted x0 to [-1,1], valid for minmax-normalized data only. Returns
+        the x0 estimate in the DM's standardized space."""
         B = shape[0]
         device = cond.device
         x = noise_scale * torch.randn(shape, device=device, generator=generator)
@@ -323,8 +325,8 @@ class GaussianDiffusion:
 
 # Standardization (native E-space <-> DM space) + checkpoint bundle
 class GDMPlanner:
-    """Bundles the trained GDM, diffusion process, and standardization stats:
-    converts native encoder-space latents in, samples, and inverts back out.
+    """Trained GDM, diffusion process, and standardization stats in one object:
+    takes native encoder-space latents in, samples, and inverts back out.
     sample_next returns the immediately next subgoal z_{m+1} in native space.
     """
 
@@ -360,16 +362,15 @@ class GDMPlanner:
     def sample_sequence(self, z_cond_native: torch.Tensor, n_steps: int = 50,
                         generator: torch.Generator | None = None,
                         z_goal_native: torch.Tensor | None = None) -> torch.Tensor:
-        """z_cond_native: (B, D) current latent in native E-space.
-        Returns (B, N, D) predicted future subgoals in native E-space.
-        z_goal_native: (B, D) goal latent (native), used only if goal_cond."""
+        """(B, D) current latent in native E-space -> (B, N, D) predicted future
+        subgoals, also native. z_goal_native is used only when goal_cond."""
         B = z_cond_native.shape[0]
         cond = self.standardize(z_cond_native)                       # (B, D)
         goal = (self.standardize(z_goal_native)
                 if (self.goal_cond and z_goal_native is not None) else None)
         shape = (B, self.cfg.n_future, self.cfg.latent_dim)
-        # gamma dose-response knob: set `planner.noise_scale = gamma` (default 1.0
-        # = native behavior, bit-identical to the pre-knob code path)
+        # gamma dose-response knob: set `planner.noise_scale = gamma`. The 1.0
+        # default is native behavior, bit-identical to the pre-knob path.
         gamma = float(getattr(self, "noise_scale", 1.0))
         if getattr(self.diffusion, "sampler", "ddim") == "ddpm":
             seq_std = self.diffusion.ddpm_sample(
@@ -394,8 +395,8 @@ class GDMPlanner:
 def save_gdm(path, model: GDM, diffusion: GaussianDiffusion, stat_a: torch.Tensor,
              stat_b: torch.Tensor, normalization: str = "standardize",
              extra: dict | None = None):
-    """Persist everything needed to reconstruct a GDMPlanner. stat_a/stat_b are
-    (mean,std) for standardize or (min,max) for minmax."""
+    """Persist everything a GDMPlanner needs to be reconstructed. stat_a/stat_b
+    are (mean,std) for standardize, (min,max) for minmax."""
     torch.save({
         "model_state": model.state_dict(),
         "gdm_config": asdict(model.cfg),

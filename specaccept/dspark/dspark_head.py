@@ -1,20 +1,19 @@
-"""DSpark refinement head: standalone residual refiner for a block of N
-drafted subgoal latents.
+"""DSpark refinement head: residual refiner for a block of N drafted subgoals.
 
-Torch-only, so it ports unchanged to other planners. Takes a raw draft block
-(B, N, D) and the conditioning latent (B, D); returns a refined block in the
-same native latent space:
+Torch-only, so it ports unchanged to other planners. Maps a raw draft block
+(B, N, D) plus the conditioning latent (B, D) to a refined block in the same
+native latent space:
 
     z_refined_i = z_draft_i + MLP([z_cond, z_draft_i, cond_prev, pos_emb_i])
 
-Weights are shared across positions; a sinusoidal position embedding gives
+Weights are shared across positions and a sinusoidal position embedding gives
 arbitrary-N generalization. The final linear is zero-initialized (adaLN-Zero
-convention) so training starts as an identity pass-through. Inputs are per-dim
+convention) so training starts as identity pass-through; inputs are per-dim
 standardized and outputs inverted. mode='causal' feeds the previously refined
-latent as cond_prev (sequential unroll); mode='noncausal' uses the raw
-previous draft plus a block summary, fully parallel. Trained only on real
-frozen-drafter chains (see build_real_chains.py), never on ground-truth
-prefixes or injected noise.
+latent as cond_prev (sequential unroll), mode='noncausal' uses the raw previous
+draft plus a block summary and is fully parallel. Trained only on real
+frozen-drafter chains (build_real_chains.py), never on ground-truth prefixes or
+injected noise.
 """
 
 from __future__ import annotations
@@ -124,12 +123,11 @@ class DSparkHead(nn.Module):
 class ConfidenceHead(nn.Module):
     """Per-position acceptance confidence c_k for the DSpark speculative commit.
 
-    Single model (no ensemble), deployable at the cost of one drafter sample.
-    Predicts P(refined subgoal k is good enough, i.e. rel_err < tau_k) from
-    (refined_k, draft_k, cond, residual_k, pos). At deploy time the cumulative
-    product over c_1..c_k sets the commit depth
-    k* = max{k : prod(c_1..c_k) > theta}: the confidence-scheduled
-    speculative-decoding rule adapted to continuous latents.
+    A single model, no ensemble, costing one drafter sample to deploy. Predicts
+    P(rel_err of refined subgoal k < tau_k) from (refined_k, draft_k, cond,
+    residual_k, pos). At deploy time the cumulative product over c_1..c_k sets
+    the commit depth k* = max{k : prod(c_1..c_k) > theta}, the
+    confidence-scheduled speculative-decoding rule on continuous latents.
     """
 
     def __init__(self, dim: int, mean: torch.Tensor, std: torch.Tensor,
@@ -172,21 +170,21 @@ class ConfidenceHead(nn.Module):
 
 
 def commit_depth(conf: torch.Tensor, theta: float, max_commit: int) -> int:
-    """conf: (N,) per-position confidence in [0,1]. Returns
-    k* = max{k : prod(c_1..c_k) > theta}, clamped to [1, max_commit]. The
-    cumulative product is monotone decreasing, so the accepted set is a
-    prefix."""
+    """conf: (N,) per-position confidence in [0,1] -> k* = max{k :
+    prod(c_1..c_k) > theta}, clamped to [1, max_commit]. The cumulative product
+    decreases monotonically, so the accepted set is always a prefix."""
     cum = torch.cumprod(conf.clamp(0, 1), dim=0)
     k = int((cum > theta).sum().item())
     return max(1, min(k, max_commit))
 
 
 class OracleFloorHead(nn.Module):
-    """Probe-0 ceiling head: conditions on GROUND-TRUTH z_{i-1} (plus z_cond
-    and the full raw draft block) to predict z_i. Best-case any-conditioning
-    ceiling; NOT deployable (ground truth is unavailable at inference). Exists
-    only to measure how much of the horizon error is recoverable in principle
-    vs horizon-intrinsic. High capacity, direct prediction (not residual).
+    """Probe-0 ceiling head: predicts z_i from GROUND-TRUTH z_{i-1} plus z_cond
+    and the full raw draft block.
+
+    NOT deployable, since ground truth is unavailable at inference. It exists to
+    measure how much horizon error is recoverable in principle rather than
+    horizon-intrinsic. High capacity, direct prediction rather than residual.
     """
 
     def __init__(self, dim: int, mean: torch.Tensor, std: torch.Tensor,
