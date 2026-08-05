@@ -1,11 +1,10 @@
 """Subgoal injection layer: cost model, subgoal sources, and the FF-JEPA policy.
 
-SubgoalCostModel reads a per-env subgoal latent from info_dict['subgoal_emb']
-in place of the goal image (reducing to the flat LeWM cost when the two are
-equal); FFJEPAPolicy injects per-env subgoals at each replan boundary from a
-pluggable source (oracle, GDM drafter, regressor, spec-accept, DSpark, lerp,
-horizon-gated, c*-retire). Injected latents must match the encoder's native
-output exactly; no renormalization or projection is applied.
+SubgoalCostModel scores rollouts against info_dict['subgoal_emb'] instead of the
+goal image, reducing to the flat LeWM cost when the two are equal. FFJEPAPolicy
+injects a per-env subgoal at every replan boundary from a pluggable source
+(oracle, GDM, regressor, spec-accept, DSpark, lerp, horizon-gated, c*-retire).
+Injected latents must be native encoder outputs; nothing is renormalized.
 """
 
 from __future__ import annotations
@@ -21,9 +20,10 @@ from specaccept import encoder
 
 # Cost model: swap the goal-latent source, keep LeWM's rollout + criterion math
 class SubgoalCostModel(nn.Module):
-    """Frozen-LeWM cost model: terminal L2^2 of the predictor rollout to the
-    per-env subgoal latent in info_dict['subgoal_emb']. An nn.Module only so
-    CEMSolver can read parameter dtype/device; owns no parameters itself.
+    """Terminal L2^2 from the frozen predictor rollout to info_dict['subgoal_emb'].
+
+    An nn.Module only so CEMSolver can read parameter dtype/device; owns no
+    parameters itself.
     """
 
     SUBGOAL_KEY = "subgoal_emb"
@@ -42,15 +42,14 @@ class SubgoalCostModel(nn.Module):
 
     @staticmethod
     def _terminal_l2sq(predicted_emb: torch.Tensor, z: torch.Tensor) -> torch.Tensor:
-        """Terminal L2^2 of each candidate's final predicted latent vs z;
-        math-identical to LeWM.criterion. (B,S,L,D) x (B,D) -> (B,S)."""
+        """(B,S,L,D) x (B,D) -> (B,S). Math-identical to LeWM.criterion."""
         pred_terminal = predicted_emb[..., -1, :]          # (B,S,D)
         return ((pred_terminal - z.unsqueeze(1)) ** 2).sum(dim=-1)  # (B,S)
 
     def get_cost(self, info_dict: dict, action_candidates: torch.Tensor) -> torch.Tensor:
-        """Roll out the frozen predictor under the candidates and return
-        terminal L2^2 to the subgoal latent, ignoring info_dict['goal'].
-        Mutates info_dict (as LeWM.get_cost does) so the 'emb' cache persists
+        """Terminal L2^2 to the subgoal latent, ignoring info_dict['goal'].
+
+        Mutates info_dict, as LeWM.get_cost does, so the 'emb' cache survives
         across CEM iterations.
         """
         assert self.SUBGOAL_KEY in info_dict, (
@@ -72,11 +71,12 @@ class SubgoalCostModel(nn.Module):
 
 # Subgoal sources (pluggable)
 # Common API: current(sg_steps, obs_latent=None, replan_idx=None) -> (n_envs, 192).
-# `needs_obs` tells FFJEPAPolicy whether to encode the current frame at replan and
-# pass it as obs_latent (closed-loop). The oracle ignores obs_latent (precomputed).
+# `needs_obs` asks FFJEPAPolicy to encode the current frame at replan and pass it
+# as obs_latent (closed-loop); the oracle is precomputed and ignores it.
 class OracleSubgoalSource:
-    """Per-env table of TRUE demo subgoal latents. `current(sg_steps)` returns
-    (n_envs, 192) where row i = subgoal[clamp(sg_steps[i], 0, K_i-1)]."""
+    """Per-env table of TRUE demo subgoal latents.
+
+    Row i of current(sg_steps) is subgoal[clamp(sg_steps[i], 0, K_i-1)]."""
 
     needs_obs = False
     needs_goal = False
@@ -97,13 +97,14 @@ class OracleSubgoalSource:
 
 
 class VerifiedOracleSource:
-    """TRUE demo waypoints consumed the way spec-accept consumes drafts:
-    advance to the next waypoint only when the ACHIEVED latent verifies
-    against the current one (rel L2 <= tau), re-anchored at every replan.
-    The clean subgoal-serving ceiling; OracleSubgoalSource advances on a
-    schedule (sg_steps) regardless of achievement and goes stale (see the
-    7/2 retraction), so its SR is a scheduling-contaminated lower bound.
-    ptr starts at 1 (table[0] is the start frame, not a target)."""
+    """TRUE demo waypoints consumed the way spec-accept consumes drafts.
+
+    Advances to the next waypoint only when the ACHIEVED latent verifies
+    against the current one (rel L2 <= tau), re-anchored at every replan, so
+    this is the clean subgoal-serving ceiling. OracleSubgoalSource instead
+    advances on a schedule regardless of achievement and goes stale, making its
+    SR a contaminated lower bound. ptr starts at 1: table[0] is the start frame,
+    not a target."""
 
     needs_obs = True
     needs_goal = False
@@ -143,9 +144,9 @@ class VerifiedOracleSource:
 
 
 class GDMSubgoalSource:
-    """Every-step drafting source: at each replan, condition the GDM planner
-    on the achieved latent and sample the next subgoal z_{m+1} in native
-    encoder space. Cached per env; deterministic given the seeded generator.
+    """Every-step drafting: condition the GDM planner on the achieved latent at
+    each replan and sample the next subgoal z_{m+1} in native encoder space.
+    Cached per env, deterministic given the seeded generator.
     """
 
     needs_obs = True
@@ -186,8 +187,8 @@ class GDMSubgoalSource:
 class RegressorSubgoalSource:
     """Deterministic z_cond -> m+1 subgoal source (train_regressor.py checkpoint).
 
-    The regression arm of the diffusion-vs-regression closed-loop comparison.
-    Same current() contract as GDMSubgoalSource; re-anchors at every replan."""
+    The regression arm of the diffusion-vs-regression comparison. Same current()
+    contract as GDMSubgoalSource, re-anchored at every replan."""
 
     needs_obs = True
     needs_goal = False
@@ -226,14 +227,13 @@ class RegressorSubgoalSource:
 class SpecAcceptSubgoalSource:
     """Speculative subgoal consumption with reality as the verifier.
 
-    At each replan boundary the achieved latent is checked against the
-    subgoal last pursued: within tau (relative L2) the next pre-drafted
-    block position is served with no diffusion call; on rejection or block
-    exhaustion the N-block is re-drafted from the achieved state.
-    Goal-conditioned drafters are supported; verification itself is
-    goal-free. goal_gate=True additionally serves a waypoint only if it
-    reduces latent distance to the goal, substituting the goal latent
-    otherwise (an arrival filter for goal-near tasks)."""
+    At each replan the achieved latent is checked against the subgoal last
+    pursued. Within tau (relative L2) the next pre-drafted block position is
+    served with no diffusion call; on rejection or block exhaustion the N-block
+    is re-drafted from the achieved state. Goal-conditioned drafters work here,
+    but verification is goal-free. goal_gate=True serves a waypoint only if it
+    reduces latent distance to the goal and substitutes the goal latent
+    otherwise, an arrival filter for goal-near tasks."""
 
     needs_obs = True
 
@@ -242,9 +242,8 @@ class SpecAcceptSubgoalSource:
                  readout=None, readout_tau=None, draft_noise=0.0,
                  random_reject=None):
         # readout: optional gap-maximizing verification lens (learn_readout.py).
-        # Verification-side ONLY: drafting, cost, and planner stay in native
-        # space; when set, accept iff ||r(z_now) - r(tgt)|| <= readout_tau
-        # (unit-norm readout distance, tau derived from the reopened gap).
+        # Verification-side ONLY, so drafting/cost/planner stay in native space:
+        # accept iff ||r(z_now) - r(tgt)|| <= readout_tau (unit-norm distance).
         self.readout = readout
         self.readout_tau = None if readout_tau is None else float(readout_tau)
         self.planner = planner
@@ -264,20 +263,20 @@ class SpecAcceptSubgoalSource:
         self._gen.manual_seed(int(seed))
         self.record = record
         self.trace = []
-        # calibration event log (docs/certification_prereg.md M1): one entry
-        # per VERIFICATION event -- (env, rel, accepted, z_achieved, target)
-        # -- so accepts and rejects are both recorded (the draft-only trace
-        # cannot reconstruct accepted replans' achieved latents). record-gated.
+        # calibration event log (docs/certification_prereg.md M1), record-gated:
+        # one (env, rel, accepted, z_achieved, target) per VERIFICATION event, so
+        # accepts are logged too (the draft-only trace cannot reconstruct the
+        # achieved latent of an accepted replan).
         self.cal = []
-        # corruption sweep (docs/certification_prereg.md): every drafted
-        # waypoint w is displaced by draft_noise * ||w|| along a random unit
-        # direction, at EVERY draft including re-drafts (deployed semantics).
-        # 0.0 = off. Verification and traces see the corrupted (served) block.
+        # corruption sweep (docs/certification_prereg.md): displace every drafted
+        # waypoint w by draft_noise * ||w|| along a random unit direction, at
+        # EVERY draft including re-drafts (deployed semantics). 0.0 = off.
+        # Verification and traces see the corrupted, served block.
         self.draft_noise = float(draft_noise)
         # matched-rate random-rejection control (docs/randreject_prereg.md):
-        # when set, every verification event rejects with this probability via
-        # a DEDICATED coin generator, so the draft-sampling stream is untouched
-        # relative to a normal spec run at the same seed.
+        # reject every verification event with this probability, drawn from a
+        # DEDICATED coin generator so the draft-sampling stream matches a normal
+        # spec run at the same seed.
         self.random_reject = None if random_reject is None else float(random_reject)
         self._coin_gen = torch.Generator()
         self._coin_gen.manual_seed(int(seed) + 777001)
@@ -286,9 +285,9 @@ class SpecAcceptSubgoalSource:
         self.n_advance = 0   # positions served from the queue (calls skipped)
         self.n_reject = 0    # verification failures (subset of redrafts)
         self.n_gate = 0      # goal-progress failures: replans served with the raw goal
-        # per-replan event log for filmstrips: exactly ONE (env, kind, rel)
-        # appended per env per current() call, aligning the k-th event of env i
-        # with the k-th strip frame the policy captured for env i.
+        # per-replan event log for filmstrips: exactly ONE (env, kind, rel) per
+        # env per current() call, so the k-th event of env i aligns with the
+        # k-th strip frame the policy captured for env i.
         self.events = []
 
     @torch.no_grad()
@@ -308,8 +307,8 @@ class SpecAcceptSubgoalSource:
                 q, tgt = self._queue[i], self._target[i]
 
                 if z_goal_rows is not None and self._gated[i] and q is not None:
-                    # goal-fallback mode: consume-and-discard through the stale
-                    # block (zero diffusion); resume waypoints on first pass
+                    # goal-fallback: consume-and-discard through the stale block
+                    # (zero diffusion), resuming waypoints on the first pass
                     if self._ptr[i] < self.N:
                         cand = q[self._ptr[i]]
                         self._ptr[i] += 1
@@ -341,8 +340,8 @@ class SpecAcceptSubgoalSource:
                                     / z_now[r].norm().clamp_min(1e-8))
                         verified = rel <= self.tau
                     if self.random_reject is not None:
-                        # coin control: the coin, not the latent test, decides;
-                        # rel is still computed so telemetry stays comparable
+                        # coin control: the coin decides, not the latent test.
+                        # rel is still computed to keep telemetry comparable
                         verified = bool(float(torch.rand(
                             (), generator=self._coin_gen)) >= self.random_reject)
                     if self.record:
@@ -407,7 +406,7 @@ class SpecAcceptSubgoalSource:
 
 
 class LerpSubgoalSource:
-    """Straight-line diagnostic source: subgoal = a fixed fraction along the
+    """Straight-line control: the subgoal is a fixed fraction along the
     current-to-goal latent segment, re-anchored each replan. frac=1.0
     degenerates to flat goal planning. A diagnostic arm, not a method."""
 
@@ -439,9 +438,10 @@ class LerpSubgoalSource:
 
 @torch.no_grad()
 def cem_flat_cstar(lewm, cost_model, z0, z_goal, cem, adim=2):
-    """One flat CEM plan per row -> predicted terminal rel to the goal
-    (the exact replan-0 call the flat policy would execute; emb pre-injected
-    so the rollout skips the pixel encode). `adim`: env action dim."""
+    """One flat CEM plan per row -> predicted terminal rel to the goal.
+
+    The exact replan-0 call the flat policy would execute, with emb pre-injected
+    so the rollout skips the pixel encode. `adim` is the env action dim."""
     import stable_worldmodel as swm
     from gymnasium.spaces import Box
 
@@ -450,10 +450,9 @@ def cem_flat_cstar(lewm, cost_model, z0, z_goal, cem, adim=2):
     config = swm.PlanConfig(horizon=cem["horizon"],
                             receding_horizon=cem["horizon"],
                             action_block=cem["action_block"])
-    # SDPA kernel limit: batch x num_samples rollouts per solve step. Cap the
-    # solver batch inside the validated 128x300 envelope (128x600 and 256x300
-    # both raise CUDA invalid-configuration); CEMSolver chunks n_envs by
-    # batch_size internally (proven: pusht route pass, 256 rows @ batch 128).
+    # SDPA kernel limit: batch x num_samples rollouts per solve step. Stay inside
+    # the validated 128x300 envelope (128x600 and 256x300 both raise CUDA
+    # invalid-configuration); CEMSolver chunks n_envs by batch_size internally.
     batch = max(1, min(n, 38400 // int(cem["num_samples"])))
     solver = swm.solver.CEMSolver(model=cost_model, batch_size=batch,
                                   num_samples=cem["num_samples"],
@@ -478,16 +477,16 @@ def cem_flat_cstar(lewm, cost_model, z0, z_goal, cem, adim=2):
 
 
 class CstarRetireSource:
-    """Unified spec-accept: draft only while the planner certifies the goal
-    is out of reach.
+    """Unified spec-accept: draft only while the planner certifies the goal is
+    out of reach.
 
-    Each unretired env re-reads c* = rel(z_hat_H, z_goal) of one flat CEM
-    plan at every replan; the first time c* <= tau the drafter RETIRES,
-    one-way, and the goal latent is served thereafter (zero diffusion).
-    Replaces the latent-distance goal_gate (which saturates at range); the
-    first-replan check doubles as the episode router's fire test. One
-    threshold (the verifier's tau) at every scope. Cost: one extra batched
-    CEM solve per replan on unretired envs only."""
+    Every unretired env re-reads c* = rel(z_hat_H, z_goal) from one flat CEM plan
+    at each replan. The first time c* <= tau the drafter RETIRES, one-way, and
+    the goal latent is served thereafter with zero diffusion. This replaces the
+    latent-distance goal_gate, which saturates at range, and the first-replan
+    check doubles as the episode router's fire test, so one threshold (the
+    verifier's tau) covers every scope. Costs one extra batched CEM solve per
+    replan on unretired envs."""
 
     needs_obs = True
     needs_goal = True
@@ -564,13 +563,13 @@ class CstarRetireSource:
 class HorizonGatedSource:
     """Episode-level planner-reachability gate (gate v3): route flat vs spec.
 
-    At each env's first replan the source runs one flat CEM plan toward the
-    goal latent and reads c*, the predicted terminal discrepancy of the plan
-    the policy would execute. If c* <= tau the env serves the goal latent
-    for its whole episode (zero drafter calls); otherwise it is delegated to
-    an internal SpecAcceptSubgoalSource. One decision per env, never
-    revisited. c* predicts per-episode flat success (AUC 0.85 to 0.92), so
-    fire-rate tracks flat-solvability rather than vanishing with horizon.
+    At each env's first replan, one flat CEM plan toward the goal latent gives
+    c*, the predicted terminal discrepancy of the plan the policy would execute.
+    c* <= tau serves the goal latent for the whole episode (zero drafter calls);
+    otherwise the env is delegated to an internal SpecAcceptSubgoalSource. One
+    decision per env, never revisited. c* predicts per-episode flat success
+    (AUC 0.85 to 0.92), so fire-rate tracks flat-solvability instead of
+    vanishing with horizon.
     """
 
     needs_obs = True
@@ -653,11 +652,12 @@ def load_dspark_heads(path, device):
 
 
 class DSparkSubgoalSource:
-    """DSpark source: confidence-scheduled commitment with semi-autoregressive
-    refinement over the frozen GDM's drafted block. The confidence head sets
-    the commit depth (adaptive or fixed); committed subgoals are consumed one
-    per replan, so re-drafting runs once per depth. Reduces to
-    GDMSubgoalSource at fixed depth 1.
+    """Confidence-scheduled commitment with semi-autoregressive refinement over
+    the frozen GDM's drafted block.
+
+    The confidence head sets the commit depth (adaptive or fixed) and committed
+    subgoals are consumed one per replan, so re-drafting runs once per depth.
+    Reduces to GDMSubgoalSource at fixed depth 1.
     """
 
     needs_obs = True
@@ -700,8 +700,8 @@ class DSparkSubgoalSource:
 
     @torch.no_grad()
     def _draft_block(self, zc):
-        """Draft a length-block_n block, AR-chaining the native-N drafter (re-condition
-        on its own last latent each hop) when block_n > native_n."""
+        """Draft a length-block_n block. When block_n > native_n, AR-chain the
+        native-N drafter by re-conditioning on its own last latent each hop."""
         if self.block_n <= self.native_n:
             return self.planner.sample_sequence(zc, n_steps=self.n_steps,
                                                 generator=self._gen)[:, :self.block_n]
@@ -750,9 +750,9 @@ class DSparkSubgoalSource:
 @torch.no_grad()
 def build_oracle_table(h5_path, model, episodes_idx, start_steps, goal_offset,
                        stride=25, device="cpu", batch_size=256):
-    """Encode per-episode demo subgoal frames at start, start+stride, ...,
-    start+goal_offset. Returns a list of (K_i, 192) tensors via the harness
-    goal-encode path."""
+    """Encode demo subgoal frames at start, start+stride, ..., start+goal_offset.
+
+    Returns one (K_i, 192) tensor per episode, via the harness goal-encode path."""
     import h5py
 
     n_sg = goal_offset // stride + 1
@@ -786,9 +786,9 @@ def build_oracle_table(h5_path, model, episodes_idx, start_steps, goal_offset,
 
 # Policy: advance subgoal at each replan boundary, inject into info_dict
 class FFJEPAPolicy:
-    """Mixin-style wrapper requiring WorldModelPolicy as base. Constructed by
-    `make_ffjepa_policy` so the swm base class is resolved at call time (the box
-    has it pip-installed; CPU uses the source checkout)."""
+    """Mixin-style wrapper over WorldModelPolicy. Built by `make_ffjepa_policy`
+    so the swm base class resolves at call time (pip-installed on the box, source
+    checkout on CPU)."""
 
 
 def make_ffjepa_policy(base_cls):
@@ -803,33 +803,30 @@ def make_ffjepa_policy(base_cls):
             self.cost_model = cost_model
             self.subgoal_source = subgoal_source
             self._sg_step = None  # per-env subgoal index, init in set_env
-            # optional wall-clock instrumentation (additive; zero overhead when off):
-            # t_drafter = frame-encode + subgoal_source.current(...); t_cem = the CEM
-            # solve inside super().get_action(...). CUDA ops are async, so each
-            # boundary is torch.cuda.synchronize()'d before the timestamp is taken.
+            # optional wall-clock instrumentation, zero overhead when off:
+            # t_drafter = frame-encode + subgoal_source.current(), t_cem = the CEM
+            # solve inside super().get_action(). CUDA ops are async, so every
+            # boundary is synchronized before the timestamp is taken.
             self.time_instrument = time_instrument
             self.t_drafter = 0.0
             self.t_cem = 0.0
             self._timed_steps = 0
             # optional per-env frame capture for the random-init visual sanity
-            # check (additive; a few numpy copies/step, only when opted in): the
-            # FIRST info_dict['pixels']/['goal'] this policy ever sees per env is
-            # the raw reset frame (get_action is called BEFORE env.step at t=0),
-            # and _frame_last is refreshed every call so the final overwrite
-            # (the call where info_dict['terminated'][i] first flips True) holds
-            # the true terminal frame (env freezes afterward under reset_mode='wait').
+            # check, a few numpy copies per step when opted in. The FIRST
+            # info_dict['pixels']/['goal'] per env is the raw reset frame, since
+            # get_action runs before env.step at t=0. _frame_last is refreshed
+            # every call, so its final value is the true terminal frame: the env
+            # freezes once terminated flips under reset_mode='wait'.
             self.dump_frames = dump_frames
             self._frame_start = None
             self._frame_goal = None
             self._frame_last = None
             self._captured_start = None
-            # per-replan frame capture for qualitative filmstrips (poster/paper).
-            # dump_strip = M > 0 captures, for envs 0..M-1, the raw frame at
-            # EVERY replan boundary (the achieved state the verifier sees),
-            # tagged with the replan ordinal. Additive: a few numpy copies per
-            # replan for M envs, nothing when 0. Alignment guarantee: the k-th
-            # strip frame of env i corresponds to the k-th current() event of
-            # env i, because both are appended exactly once per replan of i.
+            # per-replan frame capture for qualitative filmstrips. dump_strip =
+            # M > 0 captures, for envs 0..M-1, the raw frame at EVERY replan
+            # boundary (the achieved state the verifier sees), tagged with the
+            # replan ordinal. The k-th strip frame of env i matches the k-th
+            # current() event of env i: both append exactly once per replan.
             self.dump_strip = int(dump_strip)
             self._strip = None
 
@@ -850,9 +847,9 @@ def make_ffjepa_policy(base_cls):
                 self._sg_step[:] = 0
 
         def _frame_kwargs(self, frames, gframes):
-            """Raw replan frames for sources that certify OUTSIDE the LeWM
-            latent space (specaccept.paired). Opt-in via `wants_frames`, so
-            every other source's call signature is unchanged."""
+            """Raw replan frames for sources that certify OUTSIDE the LeWM latent
+            space (specaccept.paired). Opt-in via `wants_frames`, so every other
+            source keeps its call signature."""
             if not getattr(self.subgoal_source, "wants_frames", False):
                 return {}
             return {"frames": frames, "goal_frames": gframes}
@@ -896,9 +893,9 @@ def make_ffjepa_policy(base_cls):
                         self._strip[i].append(
                             (int(self._sg_step[i]), np.array(fr, copy=True)))
 
-            # closed-loop sources (GDM) need the CURRENT achieved frame latent at
-            # replan: encode the raw env frame with the frozen E (== goal-encode
-            # path, native E-space). Oracle sources set needs_obs=False.
+            # closed-loop sources need the achieved frame latent at replan: encode
+            # the raw env frame with the frozen E, the same path the goal takes.
+            # Oracle sources are precomputed and set needs_obs=False.
             if not self.time_instrument:
                 obs_latent = None
                 goal_latent = None
