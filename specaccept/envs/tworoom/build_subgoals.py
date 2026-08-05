@@ -1,12 +1,11 @@
 """Subgoal-dataset builder for TwoRoom.
 
-TwoRoom analog of the PushT builder (success filter, stride subsample,
-encode, pack) with its own success rule: the target is sampled per episode
-and recorded in the h5, so success is the final-row distance_to_target below
-the env threshold (see encoder.tworoom_success). Accepts multiple --h5
-files, concatenated with per-episode source tags. --require-cross-room drops
-episodes where agent and target start in the same room (about half the
-collected episodes are trivially same-room).
+TwoRoom analog of the PushT builder (success filter, stride subsample, encode,
+pack) with its own success rule: the target is sampled per episode and recorded
+in the h5, so success is the final-row distance_to_target below the env
+threshold (encoder.tworoom_success). Accepts multiple --h5 files, concatenated
+with per-episode source tags. --require-cross-room drops episodes where agent
+and target start in the same room, roughly half the collected episodes.
 """
 
 from __future__ import annotations
@@ -127,9 +126,9 @@ def main():
             print(f"[data] {h5_path}: {n_total} episodes total; considering {len(ep_ids)} "
                   f"(mode={args.sample_mode})")
 
-            # Pass 1: success filter (final distance-to-target) + optional
-            # cross-room filter (agent/target start in different rooms, the
-            # intended task; see --require-cross-room help)
+            # Pass 1: success filter (final distance-to-target) plus the optional
+            # cross-room filter, which keeps only the intended task of agent and
+            # target starting in different rooms (see --require-cross-room help)
             kept_rows_per_ep = []
             n_drop = 0
             n_drop_same_room = 0
@@ -161,7 +160,7 @@ def main():
                   f"({100*n_kept_file/max(len(ep_ids),1):.1f}% kept)")
 
             # Pass 2: encode kept stride-H frames, one contiguous h5 slice per
-            # episode (fast; avoids scattered point-selection, see build_subgoals.py).
+            # episode, avoiding slow scattered point-selection (build_subgoals.py)
             n_rows_file = sum(len(r) for r in kept_rows_per_ep)
             done = 0
             for ep_i, rows in enumerate(kept_rows_per_ep):

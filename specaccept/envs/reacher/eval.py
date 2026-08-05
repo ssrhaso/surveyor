@@ -1,11 +1,10 @@
 """Reacher (DMControl qpos_match) evaluation driver.
 
-Reacher analog of the PushT driver, reusing the policy, cost model, and
-subgoal sources. Success is the env's own qpos_match rule; state and goal
-callables set the start-frame state and the goal-frame target qpos. The
-dataset is random-policy data, so drafting arms expect a goal-conditioned
-drafter; the policy encodes the goal image at each replan and sources pass
-it through.
+Reacher analog of the PushT driver, reusing the policy, cost model, and subgoal
+sources. Success is the env's own qpos_match rule, and the callables set the
+start-frame state and the goal-frame target qpos. The dataset is random-policy
+data, so drafting arms expect a goal-conditioned drafter: the policy encodes the
+goal image at each replan and sources pass it through.
 """
 
 from __future__ import annotations

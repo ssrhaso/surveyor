@@ -1,9 +1,9 @@
 """Subgoal-dataset builder for Reacher.
 
-Reacher analog of the PushT builder. The dataset is random-policy data, so
-no success filter applies and the drafter must be goal-conditioned; every
-frame of every episode is encoded (stride 1) so hindsight window goals can
-be drawn at training time.
+Reacher analog of the PushT builder. The dataset is random-policy data, so no
+success filter applies and the drafter must be goal-conditioned. Every frame of
+every episode is encoded at stride 1, so hindsight window goals can be drawn at
+training time.
 """
 
 from __future__ import annotations
@@ -75,7 +75,7 @@ def main():
               f"(mode={args.sample_mode}); ep_len min={ep_len.min()} max={ep_len.max()} "
               f"mean={ep_len.mean():.1f}")
 
-        # no success filter (random-policy data: every episode kept)
+        # random-policy data has no success filter, so every episode is kept
         kept_rows_per_ep = []
         kept_ids, kept_len = [], []
         for e in ep_ids:
@@ -90,8 +90,8 @@ def main():
         print(f"[subsample] stride={args.stride}: {n_total_rows} frames to encode; "
               f"n_sg/episode min={lengths.min()} max={lengths.max()} mean={lengths.mean():.2f}")
 
-        # encode, one contiguous h5 slice per episode (fast; avoids scattered
-        # point-selection - see build_subgoals.py)
+        # encode, one contiguous h5 slice per episode, avoiding slow scattered
+        # point-selection (see build_subgoals.py)
         lat_chunks = []
         done = 0
         for ep_i, rows in enumerate(kept_rows_per_ep):

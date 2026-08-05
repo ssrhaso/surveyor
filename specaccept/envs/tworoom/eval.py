@@ -1,11 +1,11 @@
 """TwoRoom evaluation driver.
 
-TwoRoom analog of the PushT driver; reuses the policy, cost model, subgoal
+TwoRoom analog of the PushT driver, reusing the policy, cost model, subgoal
 sources, and episode sampling unmodified. Simpler than PushT: the env's own
 step() sets terminated when dist(agent, target) < 16 and world.evaluate reads
-that flag directly, so no eval_state monkeypatch or angle sweep is needed.
-State and goal callables map to TwoRoomEnv's _set_state/_set_goal_state and
-the h5's state/goal_state columns.
+that flag directly, so there is no eval_state monkeypatch and no angle sweep.
+State and goal callables map to TwoRoomEnv's _set_state/_set_goal_state and the
+h5's state/goal_state columns.
 """
 
 from __future__ import annotations
@@ -206,8 +206,8 @@ def tworoom_success_mask(h5, pos_thresh=encoder.TWOROOM_POS_THRESH):
 
 
 def cross_room_mask(h5, wall_center=112.0):
-    """Per-episode flags: agent and target START in different rooms (the
-    intended door-crossing task; mirrors build_subgoals_tworoom's filter)."""
+    """Per-episode flags: agent and target START in different rooms, the intended
+    door-crossing task. Mirrors build_subgoals_tworoom's filter."""
     import h5py
     with h5py.File(h5, "r") as f:
         rows = f["ep_offset"][:]
@@ -232,7 +232,7 @@ def main():
     eval_budget = args.eval_budget or (50 if args.mode == "short" else 150)
     cem_seed = args.cem_seed if args.cem_seed is not None else args.seed
 
-    # Window-rule composite: dispatch BEFORE any model/source construction so
+    # Window-rule composite: dispatch BEFORE any model or source is built, so
     # each branch is bit-identical to the corresponding fixed arm's code path.
     if args.composite_crossover is not None:
         if goal_offset <= args.composite_crossover:
@@ -321,13 +321,12 @@ def main():
 
     config = swm.PlanConfig(horizon=args.horizon, receding_horizon=args.receding_horizon,
                             action_block=args.action_block)
-    # LeWM's own config (config/eval/tworoom.yaml) sets the goal from
-    # `goal_proprio`, the agent's proprio at the goal frame, whereas we have
-    # always used `goal_state`, the episode's fixed target. Those are different
-    # tasks: theirs is "reach where the demo was goal_offset steps later", ours
-    # is "reach the episode target". They coincide only when the goal frame is
-    # the episode's last frame. This is one of three protocol differences
-    # between our number and their reported 87 on Two-Room.
+    # LeWM's own config (config/eval/tworoom.yaml) takes the goal from
+    # `goal_proprio`, the agent's proprio at the goal frame; we have always used
+    # `goal_state`, the episode's fixed target. Those are different tasks, "reach
+    # where the demo was goal_offset steps later" versus "reach the episode
+    # target", and they coincide only when the goal frame is the last frame. One
+    # of three protocol differences between our number and their reported 87.
     goal_key = "goal_proprio" if args.goal_from_proprio else "goal_state"
     callables = [
         {"method": "_set_state", "args": {"state": {"value": "state", "in_dataset": True}}},
@@ -361,10 +360,10 @@ def main():
                                              goal_gate=args.goal_gate)
         elif args.subgoal == "specpaired":
             # plan in LeWM space, CERTIFY in frozen-DINOv2 space. LeWM's TwoRoom
-            # latents are metrically degenerate (equiv p90 1.393 > hop p10 1.018),
-            # so no tau certifies there; the drafted waypoint carries its own
-            # DINOv2 half and the accept test runs on that. tau MUST come from
-            # probe_dino_gap.py, which measures in this exact space.
+            # latents are metrically degenerate (equiv p90 1.393 > hop p10 1.018)
+            # so no tau certifies there; instead the drafted waypoint carries its
+            # own DINOv2 half and the accept test runs on that. tau MUST come
+            # from probe_dino_gap.py, which measures in this exact space.
             from specaccept.paired import PairedEncoder, SpecAcceptPairedSource, load_dinov2
             penc = PairedEncoder(model, load_dinov2(device=args.device),
                                  device=args.device)
@@ -446,11 +445,11 @@ def main():
     world.close()
 
     # ---- where does the headroom actually live? -------------------------
-    # TwoRoom's only structural obstacle is the wall, so split the result by
-    # whether the episode's start and goal sit in different rooms. If a method
-    # solves same-room and fails cross-room, the door route is the entire
-    # remaining headroom and that is what a subgoal has to supply. Printed for
-    # every arm so flat and spec are directly comparable on the same split.
+    # The wall is TwoRoom's only structural obstacle, so split the result by
+    # whether start and goal sit in different rooms. A method that solves
+    # same-room and fails cross-room leaves the door route as the entire
+    # remaining headroom, which is exactly what a subgoal has to supply. Printed
+    # for every arm so flat and spec compare on the same split.
     try:
         succ = np.asarray(metrics["episode_successes"], dtype=bool)
         import h5py as _h5
