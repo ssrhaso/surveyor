@@ -2,11 +2,11 @@
 with the full file.
 
 Per-episode arrays keep their full length-10000 shape, with ep_len[e]=0 for
-dropped episodes (ineligible under every existing sampler/eligibility filter
-without any flag changes) and ep_offset re-pointed into the subset's row
-space for kept episodes. Row-level columns (pixels/qpos/...) contain only the
-kept episodes' rows, in episode order. Compression and chunking are mirrored
-from the source so readability is identical.
+dropped episodes, which makes them ineligible under every existing sampler
+without any flag changes, and ep_offset re-pointed into the subset's row space
+for kept episodes. Row-level columns (pixels/qpos/...) hold only the kept
+episodes' rows, in episode order. Compression and chunking are mirrored from the
+source so readability is identical.
 
 Usage (on the box that has the full file):
   python batch/make_holdout_subset.py --src data/reacher/reacher.h5 \

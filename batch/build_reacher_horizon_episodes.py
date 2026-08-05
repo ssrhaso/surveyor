@@ -1,10 +1,10 @@
 """Build the fixed-population episode file for the Reacher horizon sweep.
 
-Samples n (episode, start) pairs from holdout episodes whose starts are
-valid for the largest sweep offset, so one file serves every goal-offset:
-starts are byte-identical across the curve and horizon is the only variable
-(the per-offset-sampling confound, applied up front). Deterministic given
---seed, so concurrent array tasks regenerate it identically.
+Samples n (episode, start) pairs from holdout episodes whose starts are valid
+for the largest sweep offset, so one file serves every goal-offset: starts stay
+byte-identical across the curve and horizon is the only variable, avoiding the
+per-offset-sampling confound. Deterministic given --seed, so concurrent array
+tasks regenerate it identically.
 """
 import argparse
 import json

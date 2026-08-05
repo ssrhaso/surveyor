@@ -32,7 +32,7 @@ OUT = Path("/lustre/home/ha676/data/dinowm/pusht_lat")
 TOK = OUT / "tokens"
 GRID = OUT / "grids"    # (T, 257, 384) fp16: 256 visual tokens + 1 proprio
 OUT.mkdir(parents=True, exist_ok=True)  # token (raw normalized 2-d proprio in
-TOK.mkdir(exist_ok=True)                # dims :2, zero-pad) — drafter food in
+TOK.mkdir(exist_ok=True)                # dims :2, zero-padded), drafter food in
 GRID.mkdir(exist_ok=True)               # the vjepa2 train_drafter npy format
 N_TOKEN_EPS = {"train": 100, "valid": 60}   # full-grid subset per split
 CHUNK = 64
@@ -61,7 +61,7 @@ for split in ("train", "valid"):
         if dst.exists() and gdst.exists():
             continue
         obs, act, state, *_ = dset[i]
-        # dset[i] visual is ALREADY transformed (T,C,H,W) float — the exact
+        # dset[i] visual is ALREADY transformed (T,C,H,W) float, the exact
         # tensors the model trained on; only proprio needs normalizing.
         vis = torch.as_tensor(np.asarray(obs["visual"]))[None].float().to(dev)
         pro = pre.normalize_proprios(

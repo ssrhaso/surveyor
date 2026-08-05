@@ -7,8 +7,8 @@ per-run logs from run_reacher_local.sh) for:
   * spec-accept telemetry: "[specaccept] ... call_ratio=0.532 ..."
 
 Prints (a) the arms table, per-config SR mean +/- sd over seeds with mean
-call_ratio for the spec arms, and (b) the horizon table, arm x offset for
-both budget regimes. Run from the repo root on the box that ran the stage:
+call_ratio for the spec arms, and (b) the horizon table, arm x offset for both
+budget regimes. Run from the repo root on the box that ran the stage:
   python batch/aggregate_reacher_results.py
 """
 import glob

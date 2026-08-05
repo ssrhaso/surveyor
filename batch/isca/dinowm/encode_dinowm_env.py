@@ -49,7 +49,7 @@ for split in ("train", "valid"):
         if dst.exists():
             continue
         obs, act, state, *_ = dset[i]
-        # dset[i] visual is ALREADY transformed (T,C,H,W) float — the exact
+        # dset[i] visual is ALREADY transformed (T,C,H,W) float, the exact
         # tensors the model trained on; only proprio needs normalizing.
         vis = torch.as_tensor(np.asarray(obs["visual"]))[None].float().to(dev)
         pro = pre.normalize_proprios(

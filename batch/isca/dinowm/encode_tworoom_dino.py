@@ -1,9 +1,10 @@
 """TwoRoom pixels through RAW frozen DINOv2 (ViT-S/14, imagenet norm) -> pooled
-per-frame latents -> gap-stat food. Purpose: LeWM's ViT-tiny is SATURATED on
-TwoRoom (gap inverted at every scale, measured 7/22-23); does a generic frozen
-encoder restore the gap? h5 layout is FLAT (pixels (F,224,224,3) uint8) with
-an episode-boundary array — introspected below. Needs hdf5plugin (compression
-filter)."""
+per-frame latents -> gap-stat food.
+
+LeWM's ViT-tiny is SATURATED on TwoRoom, its gap inverted at every scale, so
+this asks whether a generic frozen encoder restores it. The h5 layout is FLAT,
+pixels (F,224,224,3) uint8 plus an episode-boundary array, introspected below.
+Needs hdf5plugin for the compression filter."""
 from pathlib import Path
 
 import hdf5plugin  # noqa: F401  (registers HDF5 compression filters)
