@@ -1,7 +1,8 @@
 """Shared I/O for the frozen LeWM world model: loading, frame encoding, the
-canonical PushT target, and tolerance-parameterized success criteria. The
-pretrained and local load paths produce the identical frozen model; nothing
-is trained or unfrozen here.
+canonical PushT target, and tolerance-parameterized success criteria.
+
+The pretrained and local load paths produce the identical frozen model. Nothing
+here is trained or unfrozen.
 """
 
 from __future__ import annotations
@@ -24,10 +25,9 @@ POS_THRESH = 20.0  # env-native positional tolerance (pixels, 4-D agent+block)
 
 
 # TwoRoom (stable_worldmodel/envs/two_room/env.py). Unlike PushT the target is
-# sampled per episode and already recorded in the h5 (state=agent xy,
-# goal_state=target xy, distance_to_target=precomputed dist), so no
-# canonical-target reconstruction is needed. Matches env.py step(): terminated
-# = dist(agent, target) < 16.0 (no angle).
+# sampled per episode and recorded in the h5 (state=agent xy, goal_state=target
+# xy, distance_to_target=precomputed dist), so nothing needs reconstructing.
+# Matches env.py step(): terminated = dist(agent, target) < 16.0, no angle.
 TWOROOM_POS_THRESH = 16.0
 
 
@@ -37,8 +37,8 @@ def tworoom_success(dist_to_target: float, pos_thresh: float = TWOROOM_POS_THRES
 
 
 def eval_state_tol(goal_state, cur_state, angle_deg, pos_thresh: float = POS_THRESH):
-    """Tolerance-parameterized copy of PushT.eval_state, verified identical
-    to the bound env method at 20 deg. Returns the success bool only."""
+    """Tolerance-parameterized copy of PushT.eval_state, verified identical to
+    the bound env method at 20 deg. Returns the success bool only."""
     goal_state = np.asarray(goal_state, dtype=np.float64)
     cur_state = np.asarray(cur_state, dtype=np.float64)
     pos_diff = np.linalg.norm(goal_state[:4] - cur_state[:4])
@@ -48,10 +48,11 @@ def eval_state_tol(goal_state, cur_state, angle_deg, pos_thresh: float = POS_THR
 
 
 def canonical_target_for(final_state):
-    """Build the 7-D canonical goal_state for an episode's final state: block
-    pose set to the canonical target, agent terms copied from final_state so
-    they contribute zero, realizing the block-only success criterion with the
-    exact env math."""
+    """Build the 7-D canonical goal_state for an episode's final state.
+
+    The block pose becomes the canonical target and the agent terms are copied
+    from final_state so they contribute zero, which gives the block-only success
+    criterion under the exact env math."""
     final_state = np.asarray(final_state, dtype=np.float64)
     target = final_state.copy()
     target[2:4] = TARGET_BLOCK_XY
@@ -61,8 +62,8 @@ def canonical_target_for(final_state):
 
 # Model loading (frozen)
 def _ensure_swm_importable(swm_src: str | None):
-    """Make `stable_worldmodel` importable without a full install (CPU path):
-    add the source checkout to sys.path and stub the unused lancedb dep."""
+    """Make `stable_worldmodel` importable without a full install (CPU path) by
+    adding the source checkout to sys.path and stubbing the unused lancedb dep."""
     try:
         import stable_worldmodel  # noqa: F401
         return
@@ -167,9 +168,9 @@ def preprocess_frames(frames):
 
 @torch.no_grad()
 def encode_frames(model, frames, device="cpu", batch_size=256):
-    """Encode frames (N,H,W,3) uint8 to (N,192) latents via the exact
-    LeWM.encode path. Runs in eval() so projector BatchNorm uses running
-    stats, making latents independent of batch composition."""
+    """Encode frames (N,H,W,3) uint8 to (N,192) latents via the exact LeWM.encode
+    path. eval() is required so projector BatchNorm uses running stats, keeping
+    latents independent of batch composition."""
     assert not model.training, "model must be in eval() before encoding"
     x = preprocess_frames(frames)
     out = []

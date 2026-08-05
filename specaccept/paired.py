@@ -4,21 +4,23 @@ Motivation (TwoRoom, measured). LeWM's TwoRoom encoder is metrically
 degenerate: consecutive frames sit at rel L2 p50 0.876 while unrelated frames
 sit at 1.456, and equiv p90 (1.393) exceeds hop p10 (1.018), so no threshold
 separates "arrived" from "not arrived" (Results/gap_stat/gap_tworoom*.json).
-Flat CEM planning is untouched by this -- it never consults that metric -- and
-reaches 68 percent at t=25. Only the VERIFIER is blocked.
+Flat CEM planning never consults that metric and still reaches 68 percent at
+t=25, so only the VERIFIER is blocked.
 
-The fix is to decouple the two roles. The planner keeps consuming LeWM
-latents; the verifier certifies arrival in a space where the gap is open
-(frozen DINOv2). Both halves of a waypoint have to describe the SAME imagined
-future, so a single drafter emits the concatenation
+The fix is to decouple the two roles: the planner keeps consuming LeWM latents
+while the verifier certifies arrival in a space where the gap is open (frozen
+DINOv2). Both halves of a waypoint must describe the SAME imagined future, so a
+single drafter emits the concatenation
+
     z = [ z_lewm (192) | z_dino (384) ]
-and we split it at serving: the LeWM half goes to SubgoalCostModel, the DINOv2
-half is what the accept test compares. Drafting them independently would let
-the two halves disagree about which future they mean.
+
+which is split at serving, the LeWM half going to SubgoalCostModel and the
+DINOv2 half to the accept test. Drafting the halves independently would let them
+disagree about which future they mean.
 
 This generalizes the lens (learn_readout), which already certifies in a learned
-readout of the planner's space rather than the space itself; here the readout
-is simply a frozen general-purpose encoder instead of a trained one.
+readout of the planner's space rather than the space itself. Here the readout is
+a frozen general-purpose encoder instead of a trained one.
 """
 
 from __future__ import annotations
@@ -48,9 +50,9 @@ def encode_frames_dino(model, frames, device="cpu", batch_size=128):
 
     Preprocessing is encoder.preprocess_frames verbatim (uint8 -> /255 ->
     ImageNet normalize; TwoRoom renders natively at 224 so there is no resize),
-    and pooling is the mean over patch tokens -- the space the gap statistic is
-    computed in. Any tau used with this function must be derived from a probe
-    that encodes through this same function."""
+    and pooling is the mean over patch tokens, the space the gap statistic is
+    computed in. Any tau used here must come from a probe that encodes through
+    this same function."""
     assert not model.training, "DINOv2 must be in eval() before encoding"
     x = encoder.preprocess_frames(frames)
     out = []
@@ -89,16 +91,16 @@ class SpecAcceptPairedSource:
     """Spec-accept whose verifier lives in the DINOv2 half of a paired draft.
 
     Identical control flow to SpecAcceptSubgoalSource (draft a block of N
-    waypoints; at each replan accept the pursued waypoint iff the achieved
-    state verifies against it, else re-draft from reality), with two changes:
-      * the drafted block is (N, 576); the LeWM half is served to the cost
-        model and the DINOv2 half is what the accept test compares;
+    waypoints, accept the pursued one at each replan iff the achieved state
+    verifies against it, else re-draft from reality), with two changes:
+      * the drafted block is (N, 576): the LeWM half is served to the cost
+        model, the DINOv2 half is what the accept test compares;
       * the achieved state is encoded by BOTH encoders, so the source needs the
         raw frames at each replan (wants_frames).
 
     tau is a relative L2 in the pooled-DINOv2 space and MUST come from a gap
-    probe run through encode_frames_dino at the serving hop -- never
-    transferred from another space.
+    probe run through encode_frames_dino at the serving hop, never transferred
+    from another space.
     """
 
     needs_obs = True
@@ -110,67 +112,63 @@ class SpecAcceptPairedSource:
                  best_of_k=1, bok_score="goal", route_goal_hop=None,
                  verify_half="dino"):
         # Best-of-k drafting. Sample k candidate blocks per re-draft and serve
-        # the one that scores best IN THE DINOv2 HALF -- the same principle as
-        # the two mechanisms that measured positive on TwoRoom (verify in
-        # DINOv2, jointly-trained halves): use the structured space for
-        # DECISIONS, the planner's space for execution. Scoring rules, both
-        # zero-constant reuses of the verifier's own metric:
+        # the one that scores best IN THE DINOv2 HALF, following the principle
+        # behind both mechanisms that measured positive on TwoRoom: structured
+        # space for DECISIONS, planner space for execution. The two scoring
+        # rules reuse the verifier's own metric, adding no constant:
         #   goal  rel L2 of the block's FINAL waypoint to the goal (progress);
         #   feas  rel L2 of the block's FIRST waypoint to the current state
-        #         (achievability -- the quantity verification will test).
-        # k is derived OFFLINE by probe_bok.py (saturation of the selected
-        # score), never against a closed-loop number.
+        #         (achievability, the quantity verification will test).
+        # k is derived OFFLINE by probe_bok.py from where the selected score
+        # saturates, never against a closed-loop number.
         self.best_of_k = int(best_of_k)
         self.bok_score = str(bok_score)
         assert self.bok_score in ("goal", "feas")
         self.bok_margins = []   # median-candidate minus selected score, per pick
-        # Proximity router (short-horizon protection). At each replan, if the
-        # GOAL itself is within one certified hop in the verification space
-        # (rel L2 <= route_goal_hop, the measured hop-S10 scale from the gap
-        # probe -- a derived constant, not tuned), serve the goal directly and
-        # draft nothing: an intermediate waypoint cannot help inside one
-        # serving stride, and the oracle measured decomposition NEGATIVE at
-        # short horizon. This is the c*-retire idea transplanted to the
-        # verification space; unlike the (null) arrival gate it is re-evaluated
-        # EVERY replan, not a one-way retirement.
+        # Proximity router (short-horizon protection). When the GOAL itself is
+        # within one certified hop in the verification space (rel L2 <=
+        # route_goal_hop, the measured hop-S10 scale from the gap probe, derived
+        # rather than tuned), serve the goal directly and draft nothing: an
+        # intermediate waypoint cannot help inside one serving stride, and the
+        # oracle measured decomposition NEGATIVE at short horizon. This is
+        # c*-retire transplanted to the verification space, but re-evaluated
+        # EVERY replan instead of retiring one-way.
         self.route_goal_hop = None if route_goal_hop is None else float(route_goal_hop)
         self.n_route = 0
-        # Which half the ACCEPT TEST reads. 'dino' is the method (certify in
-        # the external structured space); 'lewm' is the control arm for the
+        # Which half the ACCEPT TEST reads. 'dino' is the method, certifying in
+        # the external structured space; 'lewm' is the control arm for the
         # verify-space question on substrates whose own gap is open (pusht
-        # C1/C2): same drafter, same serving, only the verifier's ruler
-        # changes. Router/bok/snap stay in the DINOv2 half regardless (their
-        # constants were derived there).
+        # C1/C2), changing the verifier's ruler and nothing else. Router, bok,
+        # and snap stay in the DINOv2 half, where their constants came from.
         self.verify_half = str(verify_half)
         assert self.verify_half in ("dino", "lewm")
-        # readout: optional time-contrastive lens over the DINOv2 half. The
-        # TwoRoom gap in raw pooled DINOv2 is CLOSED at every hop (equiv p90
-        # 0.210 vs hop10 p10 0.074) with bulks separated ~1.7x -- the reacher
-        # shape, for which the instrument prescribes a lens rather than a fixed
-        # threshold. When set, accept iff ||r(d_now) - r(d_tgt)|| <= readout_tau.
+        # readout: optional time-contrastive lens over the DINOv2 half. TwoRoom's
+        # gap in raw pooled DINOv2 is CLOSED at every hop (equiv p90 0.210 vs
+        # hop10 p10 0.074) with bulks separated ~1.7x, the reacher shape, for
+        # which the instrument prescribes a lens rather than a fixed threshold.
+        # When set, accept iff ||r(d_now) - r(d_tgt)|| <= readout_tau.
         self.readout = readout
         self.readout_tau = None if readout_tau is None else float(readout_tau)
         # Arrival gate. Once the achieved state verifies against the FINAL GOAL
         # the env retires, one way, and the goal is served for the rest of the
-        # episode at zero drafter cost. This is the mechanism that turned Cube
-        # from a loss into a win (+32pp of the total margin there came from the
-        # overshoot tax alone). It reuses the accept test, so it adds no tuned
-        # constant. TwoRoom gives twice the budget the goal needs, so there is
-        # ample room to arrive and then be walked back off the target.
+        # episode at zero drafter cost. This is what turned Cube from a loss into
+        # a win, where the overshoot tax alone accounted for +32pp of the margin.
+        # It reuses the accept test, so it adds no tuned constant. TwoRoom grants
+        # twice the budget the goal needs, leaving ample room to arrive and then
+        # be walked back off the target.
         self.goal_gate = bool(goal_gate)
         self.retired = np.zeros(n_envs, dtype=bool)
         self.n_gate = 0
         # Retrieval snapping. LeWM's TwoRoom encoder puts consecutive frames at
         # rel L2 0.876 against a random-pair baseline of 1.456, so a GENERATED
-        # latent in that space need not correspond to any reachable state, and
-        # the closed loop confirms it: achieved-vs-waypoint distance sits at
-        # 0.211 against a cross-pair baseline of 0.226. Flat is unharmed because
-        # its target is a real encoded frame. So snap every drafted waypoint to
-        # its nearest REAL frame from the training bank, making waypoints
-        # reachable by construction. The nearest-neighbour search runs in the
-        # DINOv2 half, which is well structured (equiv 0.098 vs cross 0.226),
-        # and the retrieved frame's LeWM half is what the planner is served, so
-        # both halves come from one real frame and cannot disagree.
+        # latent there need not correspond to any reachable state, and the closed
+        # loop confirms it: achieved-vs-waypoint distance is 0.211 against a
+        # cross-pair baseline of 0.226. Flat is unharmed because its target is a
+        # real encoded frame. Snapping every drafted waypoint to its nearest REAL
+        # training-bank frame makes waypoints reachable by construction. The
+        # nearest-neighbour search runs in the well-structured DINOv2 half (equiv
+        # 0.098 vs cross 0.226) and the planner is served the retrieved frame's
+        # LeWM half, so both halves come from one real frame and cannot disagree.
         self.snap = None
         if snap_bank is not None:
             bank = snap_bank.to(device).float()
@@ -206,11 +204,11 @@ class SpecAcceptPairedSource:
         self.n_advance = 0
         self.n_reject = 0
         self.rels = []       # every verification distance, for the mechanics report
-        # per-replan event log for filmstrips: exactly ONE (env, kind, rel)
-        # appended per env per current() call, so the k-th event of env i
-        # aligns with the k-th strip frame the policy captured for env i.
-        # kind: 'advance' (verified, waypoint served from queue), 'redraft'
-        # (rejected or no queue), 'gate' (retired, goal served).
+        # per-replan event log for filmstrips: exactly ONE (env, kind, rel) per
+        # env per current() call, so the k-th event of env i aligns with the k-th
+        # strip frame the policy captured for env i. kind is 'advance' (verified,
+        # waypoint served from queue), 'redraft' (rejected or no queue), or
+        # 'gate' (retired, goal served).
         self.events = []
 
     @torch.no_grad()
@@ -220,11 +218,11 @@ class SpecAcceptPairedSource:
 
         With snap_progress and the current/goal latents supplied, candidates are
         first restricted to bank frames strictly CLOSER to the goal than the
-        agent already is. A waypoint that does not reduce distance to the goal
-        is not a subgoal, and unconstrained nearest-neighbour will happily
-        return one, since the drafted point it is matching may itself point
-        nowhere useful. Rows with no qualifying candidate fall back to the
-        unconstrained match rather than being dropped."""
+        agent already is. A waypoint that does not reduce distance to the goal is
+        not a subgoal, and unconstrained nearest-neighbour will happily return
+        one, since the drafted point it matches may itself point nowhere useful.
+        Rows with no qualifying candidate fall back to the unconstrained match
+        rather than being dropped."""
         if self.snap is None:
             return block
         R, N, _ = block.shape
@@ -254,9 +252,9 @@ class SpecAcceptPairedSource:
 
     @torch.no_grad()
     def _accepts(self, d_a, d_b, want_dist=False):
-        """Is d_a at d_b, in the verification space? One test, used for both
-        waypoint acceptance and the arrival gate, so the gate stays free of
-        any threshold of its own."""
+        """Is d_a at d_b, in the verification space? One test serves both
+        waypoint acceptance and the arrival gate, so the gate needs no threshold
+        of its own."""
         if self.readout is not None:
             dist = float((self.readout(d_a) - self.readout(d_b)).norm())
             ok = dist <= self.readout_tau
@@ -281,9 +279,9 @@ class SpecAcceptPairedSource:
         if replan_idx is None or len(replan_idx) == 0 or frames is None:
             return self._cache.clone()
 
-        # achieved paired latent for the replanning envs. The policy has
-        # already run the LeWM encode (obs_latent), so only the DINOv2 half is
-        # computed here; both halves come from the SAME frames either way.
+        # achieved paired latent for the replanning envs. The policy already ran
+        # the LeWM encode (obs_latent), so only the DINOv2 half is computed here;
+        # both halves come from the SAME frames either way.
         z_now = self._pair(frames, obs_latent)                        # (R, 576)
         _, d_now = split_paired(z_now)
         # the half the ACCEPT TEST reads (router/bok/snap stay on d_now/dino)
@@ -325,9 +323,9 @@ class SpecAcceptPairedSource:
                 verified, rel = self._accepts(v_now[r], tgt, want_dist=True)
                 self.rels.append(rel)
                 if self.record:
-                    # calibration event log (certification prereg M1): the
+                    # calibration event log (certification prereg M1): store the
                     # verify-half latents, so tworoom's row calibrates in the
-                    # DINOv2 space the accept test actually reads
+                    # DINOv2 space the accept test reads
                     self.cal.append((int(i), float(rel), bool(verified),
                                      v_now[r].detach().float().cpu(),
                                      tgt.detach().float().cpu()))
