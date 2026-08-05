@@ -1,10 +1,10 @@
 """PushT evaluation driver.
 
-Runs FFJEPAPolicy + SubgoalCostModel through the stable_worldmodel harness,
-reporting success at 20 deg (headline) and 5 deg (strict) under the same
-eval_state pin as the baseline. Subgoal sources are selected via --subgoal;
-horizon modes follow the paper protocol (final-N window, goal = last frame)
-with short, long, and random_init variants.
+Runs FFJEPAPolicy + SubgoalCostModel through the stable_worldmodel harness and
+reports success at 20 deg (headline) and 5 deg (strict) under the same
+eval_state pin as the baseline. --subgoal selects the source; horizon modes
+follow the paper protocol (final-N window, goal = last frame) in short, long,
+and random_init variants.
 """
 
 from __future__ import annotations
@@ -25,8 +25,8 @@ from specaccept.sources import (SubgoalCostModel, OracleSubgoalSource,
 
 # success-criterion pin (mirrors run_eval.py): pos<20 AND angle<ANGLE_DEG
 def patch_eval_state(PushT, angle_deg, score_mode="env"):
-    """score_mode: 'env' = pos_diff over 4-D agent+block (env-native, baseline-
-    comparable); 'block' = block xy only (the paper's criterion, agent ignored)."""
+    """score_mode: 'env' takes pos_diff over 4-D agent+block (env-native,
+    baseline-comparable), 'block' over block xy only (the paper's criterion)."""
     def eval_state(self, goal_state, cur_state):
         if score_mode == "block":
             pos_diff = np.linalg.norm(goal_state[2:4] - cur_state[2:4])
@@ -208,9 +208,9 @@ def build_process(dataset, keys):
 
 
 def success_mask(h5, angle_deg):
-    """Per-episode success flags under the Task-A canonical block-only filter
-    (same math as build_subgoals: block within 20px AND angle < angle_deg of the
-    canonical target, agent term neutralized)."""
+    """Per-episode success flags under the Task-A canonical block-only filter:
+    block within 20px AND angle < angle_deg of the canonical target, agent term
+    neutralized. Same math as build_subgoals."""
     import h5py
     with h5py.File(h5, "r") as f:
         ep_off = f["ep_offset"][:]
@@ -224,7 +224,7 @@ def success_mask(h5, angle_deg):
 
 
 def sample_short(h5, num_eval, goal_offset, seed, ep_mask=None):
-    """Replicate eval.py's random-valid-start sampling (baseline-comparable).
+    """eval.py's random-valid-start sampling, so runs stay baseline-comparable.
     ep_mask (per-episode bool) optionally restricts to successful demos."""
     import h5py
     with h5py.File(h5, "r") as f:
@@ -264,11 +264,13 @@ def sample_long(h5, num_eval, last_n, seed, ep_mask=None):
 
 
 def sample_random_init_goals(h5, num_eval, seed, angle_deg=20.0):
-    """Per-episode-random goal states for --mode random_init (paper III-A: goal =
-    final position of a random successful episode, not one fixed canonical target).
-    Draws num_eval goal states with replacement from episodes whose own final
-    frame passes the success filter; goal = that episode's final block pose
-    (agent zeroed, since score=block ignores the agent term)."""
+    """Per-episode-random goal states for --mode random_init.
+
+    Paper III-A puts the goal at the final position of a random successful
+    episode, not at one fixed canonical target. Draws num_eval goals with
+    replacement from episodes whose final frame passes the success filter, each
+    goal being that episode's final block pose with the agent zeroed (score=block
+    ignores the agent term)."""
     import h5py
     mask = success_mask(h5, angle_deg)
     eligible = np.nonzero(mask)[0]
@@ -351,11 +353,10 @@ def main():
 
     # ---- episode sampling
     #   paper FF-JEPA protocol (default): the final `goal_offset` steps of each
-    #   episode, with the LAST frame (T at the target) as the goal; same for
-    #   short (25) and long (75). `--start random` falls back to eval.py's
-    #   common 25-step setting (random valid start, goal = start+goal_offset).
-    #   random_init mode skips this whole block entirely; no episode is sampled
-    #   from the dataset at all, see the world.evaluate(episodes=...) branch below.
+    #   episode with the LAST frame as the goal, for short (25) and long (75)
+    #   alike. `--start random` falls back to eval.py's common 25-step setting
+    #   (random valid start, goal = start+goal_offset). random_init samples no
+    #   episode at all, see the world.evaluate(episodes=...) branch below.
     use_final = (args.mode == "long") or (args.start == "final")
     episodes_idx = start_steps = None
     random_init_goals = None
@@ -509,13 +510,12 @@ def main():
                 options = [{"goal_state": gv} for gv in random_init_goals]
                 eval_kwargs = {}
                 if args.dump_frames_dir:
-                    # default reset_mode for episodic eval is 'auto' (finished envs
-                    # are immediately reset to start a NEW episode so the run keeps
-                    # going until `episodes` total complete); that can reuse an env
-                    # slot for a 2nd, DIFFERENT episode before the run ends, which
-                    # would desync the frame capture (start frame from episode 1,
-                    # last frame from episode 2). 'wait' freezes each env after its
-                    # own first episode, guaranteeing one episode per env slot.
+                    # episodic eval defaults to reset_mode='auto', which restarts
+                    # finished envs until `episodes` complete and so can reuse an
+                    # env slot for a second, DIFFERENT episode. That would desync
+                    # the frame capture (start frame from episode 1, last frame
+                    # from episode 2). 'wait' freezes each env after its own first
+                    # episode, guaranteeing one episode per env slot.
                     eval_kwargs["reset_mode"] = "wait"
                 metrics = world.evaluate(episodes=args.num_eval, seed=cem_seed,
                                          options=options, **eval_kwargs)
@@ -534,12 +534,12 @@ def main():
                 from PIL import Image
                 outdir = Path(args.dump_frames_dir) / f"{score_mode}_{angle:g}"
                 outdir.mkdir(parents=True, exist_ok=True)
-                # world.terminateds is per-env-slot (env_idx order); with
-                # reset_mode='wait' every env terminates exactly once by the time
-                # evaluate() returns, so this is the per-episode success flag
-                # aligned with the frames captured under the SAME env index
-                # (metrics['episode_successes'] is ordered by COMPLETION order,
-                # not env_idx, so it is NOT used here).
+                # world.terminateds is in env_idx order and, under
+                # reset_mode='wait', every env terminates exactly once before
+                # evaluate() returns, so it is the per-episode success flag
+                # aligned with the frames captured at the SAME env index.
+                # metrics['episode_successes'] follows COMPLETION order instead,
+                # so it cannot be used here.
                 term = np.asarray(world.terminateds).astype(bool)
                 manifest = []
                 for i in range(args.num_eval):

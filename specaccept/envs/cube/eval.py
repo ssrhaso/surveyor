@@ -1,11 +1,11 @@
 """OGBench-Cube (single) evaluation driver.
 
-Cube analog of the Reacher/PushT drivers, reusing the policy, cost model,
-and subgoal sources. Env is swm/OGBCube-v0; success is the env's own
-criterion (cube within 0.04 m of target). Callables set the start-frame
-MuJoCo state and the goal-frame cube position, so evaluation is hindsight
-goal-reaching. tau and k follow the derive-first protocol (probe_floor on
-the frozen cube encoder, registered before any closed-loop cell).
+Cube analog of the Reacher/PushT drivers, reusing their policy, cost model, and
+subgoal sources. The env is swm/OGBCube-v0 and success is its own criterion,
+cube within 0.04 m of target. Callables set the start-frame MuJoCo state and the
+goal-frame cube position, making evaluation hindsight goal-reaching. tau and k
+follow the derive-first protocol: probe_floor on the frozen cube encoder,
+registered before any closed-loop cell.
 """
 
 from __future__ import annotations
@@ -202,10 +202,10 @@ def main():
 
     config = swm.PlanConfig(horizon=args.horizon, receding_horizon=args.receding_horizon,
                             action_block=args.action_block)
-    # manip-space callables (World._extract_init_goal exposes start-frame columns
-    # as init_state and the frame at start+goal_offset as goal_<col>): initialise
-    # from the start frame's MuJoCo state (qpos/qvel), set the goal to the GOAL
-    # frame's cube position (hindsight target), so success is goal-reaching.
+    # manip-space callables. World._extract_init_goal exposes start-frame columns
+    # as init_state and the frame at start+goal_offset as goal_<col>, so we
+    # initialise from the start frame's MuJoCo state (qpos/qvel) and set the goal
+    # to the GOAL frame's cube position, making success goal-reaching.
     callables = [
         {"method": "set_state", "args": {"qpos": {"value": "qpos"},
                                          "qvel": {"value": "qvel"}}},

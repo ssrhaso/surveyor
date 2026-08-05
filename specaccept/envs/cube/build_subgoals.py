@@ -1,10 +1,9 @@
 """Subgoal-dataset builder for OGBench-Cube (single).
 
-Cube analog of the PushT/Reacher builders. Every episode is a successful
-expert demo, so no success filter applies; dense (stride-1) frames of every
-episode are encoded so training can carve any stride from one file. Touches
-only the frozen cube encoder and the dataset; tau and k come from the floor
-probe, registered separately.
+Cube analog of the PushT/Reacher builders. Every episode is a successful expert
+demo, so no success filter applies, and dense stride-1 frames are encoded so
+training can carve any stride from one file. Touches only the frozen cube encoder
+and the dataset; tau and k come from the separately registered floor probe.
 """
 
 from __future__ import annotations

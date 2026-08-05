@@ -1,9 +1,9 @@
 """Subgoal-dataset builder for PushT (offline).
 
 Builds per-episode stride-H subgoal-latent sequences from successful expert
-episodes: success-filter against the canonical target (block-only criterion,
-with the strict 5 deg subset flagged per episode), subsample at stride H,
-encode with the frozen encoder, and pack to one .pt with metadata.
+episodes: filter against the canonical target (block-only criterion, with the
+strict 5 deg subset flagged per episode), subsample at stride H, encode with the
+frozen encoder, and pack into one .pt with metadata.
 """
 
 from __future__ import annotations
@@ -123,13 +123,12 @@ def main():
         print(f"[subsample] stride={args.stride}: {int(all_rows.size)} subgoal frames to encode; "
               f"n_sg/episode min={lengths.min()} max={lengths.max()} mean={lengths.mean():.2f}")
 
-        # Pass 2: encode kept stride-H frames. Read each episode as a CONTIGUOUS
-        # h5 slice (hyperslab) and subsample in RAM, instead of fancy-indexing
-        # scattered rows (pixels[row_list]): h5py point-selection over a list is
-        # dramatically slower than a slice, especially on a network filesystem,
-        # and dominates wall-clock for the dense (stride=1) build. Episode order
-        # is preserved (kept_rows_per_ep is in kept-episode order), so lengths/
-        # offsets stay valid.
+        # Pass 2: encode kept stride-H frames. Each episode is read as one
+        # CONTIGUOUS h5 slice and subsampled in RAM rather than fancy-indexed by
+        # scattered rows, because h5py point-selection over a list is far slower
+        # than a slice on a network filesystem and dominates wall-clock for the
+        # dense stride-1 build. kept_rows_per_ep stays in kept-episode order, so
+        # lengths and offsets remain valid.
         lat_chunks = []
         bs = args.batch_size
         n_total_rows = int(all_rows.size)
