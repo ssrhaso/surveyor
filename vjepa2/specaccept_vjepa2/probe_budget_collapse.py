@@ -1,26 +1,26 @@
 """Flagship V-JEPA 2 probe: budget collapse + demo agreement.
 
-Two claims, measured together on HELD-OUT DROID episodes (lat_*.npz - no
-re-encoding; tokens + states suffice, the AC predictor does the planning):
+Two claims, measured together on HELD-OUT DROID episodes. lat_*.npz needs no
+re-encoding: tokens plus states suffice, and the AC predictor does the planning.
 
-  CAPABILITY: their planner is myopic (rollout=2, capped step). For far
-  goals, flat CEM's plan should stop agreeing with what the human
-  demonstrator actually did; planning toward a NEAR drafted subgoal should
-  keep agreeing. Metric: cosine between the plan's total xyz displacement
-  and the demonstrator's true displacement over the same window (+ magnitude
-  ratio). Grounded - no model-space self-grading.
+  CAPABILITY: their planner is myopic (rollout=2, capped step), so for far
+  goals flat CEM's plan should stop agreeing with what the human demonstrator
+  actually did, while planning toward a NEAR drafted subgoal should keep
+  agreeing. Metric: cosine between the plan's total xyz displacement and the
+  demonstrator's true displacement over the same window, plus the magnitude
+  ratio. Grounded, with no model-space self-grading.
 
   SPEED: CEM toward a near subgoal is an easier optimization problem than
   toward a far goal. Sweep the sample budget; if the subgoal arm matches
-  full-budget flat quality at a fraction of the budget, the wall-clock claim
-  at 1B scale is measured, not argued. Solve seconds recorded per cell.
+  full-budget flat quality at a fraction of the budget, the wall-clock claim at
+  1B scale is measured rather than argued. Solve seconds recorded per cell.
 
-Arms: flat (goal tokens), spec (first TokenGDM subgoal, k DDIM steps,
-drafted ONCE per anchor and reused across budgets; the draft is
-budget-independent), lerp (first straight-line subgoal: the decomposition
-control separating "subgoals help" from "the learned drafter helps").
-Anchors are frames where the demo moves (xyz displacement over the plan
-window > --move-thresh); expected shape: parity at t<=S, divergence beyond.
+Arms: flat (goal tokens); spec (first TokenGDM subgoal at k DDIM steps, drafted
+ONCE per anchor and reused across budgets, since the draft is
+budget-independent); lerp (first straight-line subgoal, the decomposition
+control separating "subgoals help" from "the learned drafter helps"). Anchors
+are frames where the demo moves, xyz displacement over the plan window >
+--move-thresh. Expected shape: parity at t<=S, divergence beyond.
 
   python -m specaccept_vjepa2.probe_budget_collapse --ckpt gdm_vj2_s10.pt \
       --episodes droid_lat/lat_droid_ep09*.npz --device cuda

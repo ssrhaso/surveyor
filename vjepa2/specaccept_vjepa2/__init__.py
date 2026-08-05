@@ -1,9 +1,9 @@
 """Certified spec-accept transplanted onto V-JEPA 2-AC.
 
-The method is the paper's unified rule, unchanged: draft subgoals only while
-the planner certifies the goal is out of reach (c* > tau); the first-replan
-c* check is the episode router, the per-replan check is one-way retirement.
-What changes is the substrate:
+The method is the paper's unified rule, unchanged: draft subgoals only while the
+planner certifies the goal is out of reach (c* > tau), with the first-replan c*
+check acting as the episode router and the per-replan check as one-way
+retirement. Only the substrate changes:
 
   latent        LeWM 192-d vector      -> V-JEPA 2 token grid (T_tok, D)
   world model   lewm.rollout           -> VisionTransformerPredictorAC (frame-causal AR)
@@ -13,12 +13,12 @@ What changes is the substrate:
 Space contract (the one transplant decision):
   * Targets handed to the planner are TOKEN GRIDS, passed as `goal_frame` to
     the unmodified upstream CEM. Serving the true goal tokens is therefore
-    bit-identical to Meta's flat planning protocol; the reduction property
-    the LeWM SubgoalCostModel had by construction is preserved exactly.
-  * Verification, c*, retirement, and routing read MEAN-POOLED vectors with
+    bit-identical to Meta's flat planning protocol, preserving exactly the
+    reduction property the LeWM SubgoalCostModel had by construction.
+  * Verification, c*, retirement, and routing read MEAN-POOLED vectors under
     relative L2, the paper's instrument. tau=0.20 is the frozen transfer
-    hypothesis; re-derive from the new setting's criterion floor only if the
-    pre-registered transfer fails.
+    hypothesis; re-derive it from the new setting's criterion floor only if
+    the pre-registered transfer fails.
 
 Anchor rule (cube lesson): reproduce upstream's flat CEM behavior on the
 bundled Franka trajectory before enabling any drafting. probe_offline.py runs

@@ -1,11 +1,11 @@
 """Flat planning + the c* certificate on V-JEPA 2-AC.
 
 flat_plan() is a thin pass-through to upstream's cem() with the target token
-grid as `goal_frame` - serving a drafted subgoal instead of the goal is the
-whole cost-model swap, the planner itself is untouched. cstar() is the port
-of specaccept.sources.cem_flat_cstar: one flat CEM solve toward the goal
-tokens, the returned plan re-rolled once, and the relative pooled distance of
-the predicted terminal to the goal read off as the certificate.
+grid as `goal_frame`. Serving a drafted subgoal instead of the goal is the whole
+cost-model swap; the planner itself is untouched. cstar() ports
+specaccept.sources.cem_flat_cstar: one flat CEM solve toward the goal tokens,
+the returned plan re-rolled once, and the relative pooled distance from the
+predicted terminal to the goal read off as the certificate.
 """
 
 from __future__ import annotations

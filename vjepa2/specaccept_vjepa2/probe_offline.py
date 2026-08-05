@@ -1,28 +1,27 @@
 """Offline transplant probe on upstream's bundled Franka trajectory.
 
-No robot, no simulator: everything runs against the recorded episode that
-ships with the clone (notebooks/franka_example_traj.npz). Four stages, each
-skippable:
+No robot, no simulator: everything runs against the recorded episode that ships
+with the clone (notebooks/franka_example_traj.npz). Four skippable stages:
 
-  1. ANCHOR   - upstream CEM from frame 0 toward the final frame, compared
-                to the ground-truth first action (the notebook's own sanity
-                check). Must look sane before anything else is trusted.
-  2. C*       - the certificate vs goal offset: c*(frame0 -> frame_t) for a
-                ladder of offsets, printed next to the raw pooled encoder
-                distance (the gate-v1 instrument that saturates; c* is the
-                one that worked). The substrate's regime map.
-  3. FLOOR    - rel pooled distance between frames S apart, for several S:
-                the criterion-floor shape that tells us where tau must sit
-                on this substrate (transfer hypothesis: 0.20).
-  4. PLUMBING - certified spec-accept teacher-forced along the recorded
-                trajectory with the data-free lerp drafter: achieved latents
-                come from the recording, the source runs verify/serve/
-                redraft/retire exactly as it would closed-loop. Exercises
-                every code path without a trained TokenGDM.
+  1. ANCHOR    upstream CEM from frame 0 toward the final frame, compared to
+               the ground-truth first action (the notebook's own sanity check).
+               Must look sane before anything else is trusted.
+  2. C*        the certificate vs goal offset: c*(frame0 -> frame_t) over a
+               ladder of offsets, printed next to the raw pooled encoder
+               distance, the gate-v1 instrument that saturates where c* did
+               not. The substrate's regime map.
+  3. FLOOR     rel pooled distance between frames S apart, for several S: the
+               criterion-floor shape that says where tau must sit on this
+               substrate (transfer hypothesis 0.20).
+  4. PLUMBING  certified spec-accept teacher-forced along the recorded
+               trajectory with the data-free lerp drafter. Achieved latents
+               come from the recording while the source runs
+               verify/serve/redraft/retire exactly as it would closed-loop,
+               exercising every code path without a trained TokenGDM.
 
-First run downloads the ViT-g AC weights (~several GB) via torch.hub.
-CPU works with the default tiny CEM budgets (the notebook's own CPU
-setting); raise --cem-samples/--cem-steps on a GPU.
+The first run downloads the ViT-g AC weights (several GB) via torch.hub. CPU
+works at the default tiny CEM budgets, the notebook's own CPU setting; raise
+--cem-samples/--cem-steps on a GPU.
 
   python -m specaccept_vjepa2.probe_offline --device cpu --dump-latents lat_franka.npz
 """

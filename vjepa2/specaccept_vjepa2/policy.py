@@ -1,12 +1,12 @@
 """Closed-loop certified spec-accept policy for a single V-JEPA 2-AC agent.
 
 The upstream deployment loop (energy notebook / DROID protocol) is: encode
-current frame -> CEM toward goal tokens -> execute first action -> repeat.
-This policy keeps that loop verbatim and changes ONE thing: the target
-handed to CEM comes from the certified source (goal tokens once retired,
-drafted subgoal tokens while the certificate says the goal is out of reach).
-With use_certificate=False and a frac=1.0 lerp drafter it reduces exactly to
-upstream flat planning; the anchor arm.
+current frame -> CEM toward goal tokens -> execute first action -> repeat. This
+policy keeps that loop verbatim and changes ONE thing: the target handed to CEM
+comes from the certified source, meaning goal tokens once retired and drafted
+subgoal tokens while the certificate says the goal is out of reach. With
+use_certificate=False and a frac=1.0 lerp drafter it reduces exactly to upstream
+flat planning, which is the anchor arm.
 """
 
 from __future__ import annotations

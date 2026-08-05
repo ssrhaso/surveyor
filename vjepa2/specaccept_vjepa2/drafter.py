@@ -1,17 +1,16 @@
 """Token-grid GDM: the spec-accept drafter at V-JEPA 2 scale.
 
-Same DiT-denoiser design as specaccept.drafter.GDM, drafting a block of
-n_future SUBGOAL TOKEN GRIDS (each tokens_per_frame x D) instead of n_future
-192-d vectors, so drafted subgoals live in the exact space upstream's CEM
-scores against. The diffusion process, blocks, and sampling loops are
-imported from the validated LeWM-stack implementation, not re-derived:
-TokenGDM keeps GDM's forward contract (x_noised, cond, t, goal) so
-GaussianDiffusion works verbatim; only the sample shape changes from
-(B, N, D) to (B, N*T_tok, D).
+Same DiT-denoiser design as specaccept.drafter.GDM, drafting a block of n_future
+SUBGOAL TOKEN GRIDS (each tokens_per_frame x D) rather than n_future 192-d
+vectors, so drafted subgoals live in the exact space upstream's CEM scores
+against. The diffusion process, blocks, and sampling loops are imported from the
+validated LeWM-stack implementation instead of re-derived: TokenGDM keeps GDM's
+forward contract (x_noised, cond, t, goal) so GaussianDiffusion works verbatim,
+and only the sample shape changes from (B, N, D) to (B, N*T_tok, D).
 
-Conditioning is the POOLED current-frame latent (+ pooled goal when
-goal_cond); the drafter proposes where to go from a summary of where it is;
-the full-resolution comparison happens in the planner's cost, not here.
+Conditioning is the POOLED current-frame latent, plus the pooled goal when
+goal_cond, so the drafter proposes where to go from a summary of where it is.
+The full-resolution comparison happens in the planner's cost, not here.
 """
 
 from __future__ import annotations

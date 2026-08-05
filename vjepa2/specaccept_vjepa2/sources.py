@@ -4,15 +4,15 @@ Faithful ports of specaccept.sources.SpecAcceptSubgoalSource and
 CstarRetireSource with two substrate changes and nothing else:
   * served targets are token grids (T_tok, D) consumed by upstream cem() as
     `goal_frame`;
-  * verification / goal-gate / retirement read pooled vectors (rel L2,
+  * verification, goal-gate, and retirement read pooled vectors (rel L2,
     tau=0.20 frozen); see the package docstring's space contract.
 
-Drafter protocol (dependency-injected so sources stay pure torch):
+Drafter protocol, dependency-injected so sources stay pure torch:
   draft(z_now_tokens (R, T_tok, D), goal_tokens (R, T_tok, D) | None, k)
       -> (R, N, T_tok, D)
-TokenGDMPlanner is adapted via GDMDraft (pools internally); LerpBlockDrafter
-is the data-free decomposition control (and frac=1.0 recovers flat exactly,
-the validated instrumented-flat tautology from the timing grid).
+GDMDraft adapts TokenGDMPlanner and pools internally. LerpBlockDrafter is the
+data-free decomposition control, and frac=1.0 recovers flat exactly, the
+instrumented-flat tautology validated in the timing grid.
 
 c* is injected as cstar_fn(z_tokens (1,T_tok,D), pose (1,1,7),
 goal_tokens (1,T_tok,D)) -> float, normally partial(planner.cstar, wm).

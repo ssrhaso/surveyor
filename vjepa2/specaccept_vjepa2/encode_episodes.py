@@ -4,7 +4,7 @@ For each probe-format episode npz (observations (1,T,H,W,3), states (1,T,7))
 writes lat_<name>.npz with
   tokens (T, tokens_per_frame, D) float16   layer-normed V-JEPA 2 reps
   states (T, 7) float32
-- the `tokens` key is exactly what train_drafter.py consumes.
+The `tokens` key is exactly what train_drafter.py consumes.
 
   python -m specaccept_vjepa2.encode_episodes --episodes droid_eps/droid_ep*.npz \
       --out-dir droid_lat --device cuda

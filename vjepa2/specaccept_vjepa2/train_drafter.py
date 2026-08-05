@@ -2,10 +2,10 @@
 
 Pairs mirror the LeWM-stack build: for every anchor frame m with m + N*S in
 range, cond = tokens[m], target block = tokens at m+S..m+N*S, goal = final
-frame. Pairs are indexed lazily (tokens held in RAM as fp16, ~0.7MB/frame at
-ViT-g); materializing all blocks in fp32 would need tens of GB. Per-dim
-standardization stats (shared across tokens) come from a frame subsample;
-pooling commutes with the affine standardize, so pooled conditioning here
+frame. Pairs are indexed lazily, with tokens held in RAM as fp16 (~0.7MB/frame
+at ViT-g), since materializing all blocks in fp32 would need tens of GB. Per-dim
+standardization stats, shared across tokens, come from a frame subsample.
+Pooling commutes with the affine standardize, so pooled conditioning here
 matches GDMDraft's pool-then-standardize at inference exactly.
 
 The last --val-files files are held out; val loss is printed every log

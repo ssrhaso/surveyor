@@ -1,4 +1,4 @@
-"""Aggregate the overnight rollout-agreement fleet and evaluate the
+"""Aggregate the overnight rollout-agreement fleet and score it against the
 pre-registered bars frozen in run_rollout32_v1.sbatch."""
 import glob
 import re

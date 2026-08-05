@@ -1,11 +1,11 @@
 """V-JEPA 2-AC world-model wrapper: load, encode, frame-causal rollout.
 
 Upstream imports are lazy so the rest of the package stays importable without
-the clone's dependencies on the path (sources/drafter are pure torch).
-Conventions mirror notebooks/utils/world_model_wrapper.py exactly: each frame
-is duplicated along time to fill one tubelet before encoding, reps are
-layer-normed when normalize_reps, and one predictor step appends the last
-tokens_per_frame outputs as the next frame.
+the clone's dependencies on the path (sources and drafter are pure torch).
+Conventions mirror notebooks/utils/world_model_wrapper.py exactly: each frame is
+duplicated along time to fill one tubelet before encoding, reps are layer-normed
+under normalize_reps, and one predictor step appends the last tokens_per_frame
+outputs as the next frame.
 """
 
 from __future__ import annotations

@@ -1,16 +1,15 @@
 """c*-v2 instrument probe: can the certificate be rescued on DROID?
 
-Stage-1 finding: pooled c* is flat at ~0.4 across all offsets (the AC
-rollout's prediction-error floor swamps the reachability signal). Two rescue
-candidates, measured here as full ladders per episode:
-  1. TOKEN metric  - mean L1 over tokens (upstream's own CEM energy);
-                     pooling may be what destroys the spatial signal.
-  2. SELF-FLOOR CALIBRATION - c*_cal(t) = c*(t) - c*(self), where c*(self)
-     targets the CURRENT frame's own tokens ("plan to stay put"): whatever
-     error remains is the per-state model floor, subtracted out.
-Both combine, giving 4 ladders: pooled / pooled-cal / token / token-cal.
-A usable v2 instrument must rise with offset (separation) with spread
-clearly above its own jitter.
+Stage-1 finding: pooled c* is flat at ~0.4 across all offsets, the AC rollout's
+prediction-error floor swamping the reachability signal. Two rescue candidates,
+measured here as full ladders per episode:
+  1. TOKEN metric: mean L1 over tokens, upstream's own CEM energy, on the
+     suspicion that pooling is what destroys the spatial signal.
+  2. SELF-FLOOR CALIBRATION: c*_cal(t) = c*(t) - c*(self), where c*(self)
+     targets the CURRENT frame's own tokens ("plan to stay put"), subtracting
+     out the per-state model floor.
+The two combine into 4 ladders: pooled, pooled-cal, token, token-cal. A usable
+v2 instrument must rise with offset, with spread clearly above its own jitter.
 
   python -m specaccept_vjepa2.probe_cstar2 --traj droid_eps/droid_ep000.npz \
       --device cuda --offsets 1 2 4 8 16 32
