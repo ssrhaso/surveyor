@@ -1,13 +1,13 @@
 """Gate validity post-mortem: score routing signals against recorded
 per-episode outcomes.
 
-Diagnostic, post-hoc analysis; not a pre-registered test. Any episode-level
-gate's closed-loop result is exactly determined by the dumped per-episode
-success flags of the fixed arms (fire an episode: it gets flat's recorded
-outcome; otherwise spec's), so candidate signals (h, c*, drafter arrival)
-are evaluated exactly, offline, with zero new rollouts. All thresholds are
-read from prior derivations; nothing is fitted here. Runs entirely from
-artifacts on disk (traces, dense latents, floor json, drafter checkpoint).
+Diagnostic post-hoc analysis, not a pre-registered test. The dumped per-episode
+success flags of the fixed arms determine any episode-level gate's closed-loop
+result exactly (a fired episode gets flat's recorded outcome, otherwise spec's),
+so candidate signals (h, c*, drafter arrival) are evaluated exactly and offline
+with zero new rollouts. Every threshold is read from a prior derivation, nothing
+is fitted here, and the whole probe runs from artifacts on disk: traces, dense
+latents, floor json, drafter checkpoint.
 """
 
 from __future__ import annotations

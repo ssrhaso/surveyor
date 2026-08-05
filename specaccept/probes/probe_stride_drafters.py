@@ -1,7 +1,8 @@
 """Offline block-quality battery for stride-S drafters: per-position sampled
 fidelity (suffix decay) plus across-seed conditional spread in one pass.
-Collapsed spread is flagged here before any closed-loop spend; windows reuse
-the anchor's episodes-file convention so strides are directly comparable.
+
+Collapsed spread is flagged here before any closed-loop spend, and windows reuse
+the anchor's episodes-file convention so strides stay directly comparable.
 """
 
 from __future__ import annotations

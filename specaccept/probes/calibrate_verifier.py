@@ -1,22 +1,24 @@
 """Verifier calibration against ground-truth state (certification prereg M1).
 
-Self-contained per env: (1) sample dataset frames + their recorded ground-truth
-state from the h5 and encode them through the SAME encode path the verifier
-reads (native LeWM latents; the DINOv2 pooled half for tworoom's paired
-verifier); (2) fit a ridge probe latent -> state, report held-out R^2 against
-the frozen quality gate (0.90 on the criterion-relevant dims; below the gate
-the env's row is declared unavailable, never fudged); (3) load the calibration
-event lists dumped by the trace-collection runs (one (env, rel, accepted,
-z_achieved, target) tuple per VERIFICATION event) and read out, per event, the
-probe-state distance between the achieved state and the pursued waypoint's
-decoded state; (4) report the frozen readouts: accept-vs-reject separation,
-Spearman rho(rel, state distance), and the false-accept / false-reject rates
-at the env's own success-criterion radius.
+Self-contained per env:
+  1. sample dataset frames plus their recorded ground-truth state from the h5
+     and encode them through the SAME path the verifier reads (native LeWM
+     latents, or the pooled DINOv2 half for tworoom's paired verifier);
+  2. fit a ridge probe latent -> state and report held-out R^2 against the
+     frozen 0.90 quality gate on the criterion-relevant dims, declaring the
+     env's row unavailable below the gate rather than fudging it;
+  3. load the calibration event lists dumped by the trace-collection runs, one
+     (env, rel, accepted, z_achieved, target) per VERIFICATION event, and read
+     the probe-state distance between the achieved state and the pursued
+     waypoint's decoded state;
+  4. report the frozen readouts: accept-vs-reject separation, Spearman
+     rho(rel, state distance), and false-accept / false-reject rates at the
+     env's own success-criterion radius.
 
-Definitions are frozen in docs/certification_prereg.md and may not be altered
-after the first number is seen. Caveat recorded there: probing a DRAFTED
-target assumes near-manifold drafts (LeWM drafters pass norm/faithfulness
-gates); probe outputs on drafts are sanity-checked against state bounds.
+Definitions are frozen in docs/certification_prereg.md and may not change after
+the first number is seen. Caveat recorded there: probing a DRAFTED target
+assumes near-manifold drafts (LeWM drafters pass the norm and faithfulness
+gates), so probe outputs on drafts are sanity-checked against state bounds.
 """
 from __future__ import annotations
 

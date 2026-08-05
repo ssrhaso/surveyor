@@ -1,12 +1,11 @@
 """Where does an encoder saturate, as a function of subgoal stride?
 
 Motivation. spec-accept serves a subgoal S frames ahead and the planner scores
-CEM candidates by terminal L2 to it. If the encoder's distance to a frame S
-ahead has already reached the level of two UNRELATED frames, the planner cannot
-tell that subgoal from the far goal it was meant to replace, and drafting
-cannot help however good the drafter is. That is a property of the encoder and
-the stride, it is measurable offline in seconds, and it is not the same
-question as the verification gap (which asks whether ARRIVAL is detectable).
+CEM candidates by terminal L2 to it. Once the encoder's distance to a frame S
+ahead reaches the level of two UNRELATED frames, the planner cannot tell that
+subgoal from the far goal it was meant to replace, and no drafter can help. That
+is a property of the encoder and the stride, measurable offline in seconds, and
+distinct from the verification gap, which asks whether ARRIVAL is detectable.
 
 Reports, per candidate stride S:
   hop(S)      distance between frames S apart, within an episode
@@ -15,9 +14,9 @@ Reports, per candidate stride S:
   gap         [equiv p90, hop p10]; open means a fixed threshold can certify
               arrival at that stride.
 
-S should be the largest stride that stays inside the informative range. This
-turns S, currently the method's one tuned knob, into a derived one, using the
-same cached latents the gap statistic already uses.
+S should be the largest stride that stays inside the informative range, which
+turns the method's one tuned knob into a derived one using the same cached
+latents the gap statistic already reads.
 
 Works on either a subgoals .pt (LeWM latents) or an npz glob (pooled DINOv2),
 so the two verification spaces can be compared on one axis.

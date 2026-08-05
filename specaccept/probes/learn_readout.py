@@ -1,22 +1,22 @@
 """Gap-maximizing verification readout: derive the METRIC, not just tau.
 
 The gap statistic (gap_stat.py) shows the verifier's operating interval
-[equiv p90, hop p10] is closed on some substrates (TwoRoom saturated, DROID
-pooled compressed, Reacher tail-overlapped). The information often exists
-(token-space c* separates on DROID); the fixed readout loses it. This
-script learns a small lens used ONLY by the verifier (world model + planner
-stay frozen; the plug-in claim is untouched):
+[equiv p90, hop p10] is closed on some substrates: TwoRoom saturated, DROID
+pooled compressed, Reacher tail-overlapped. The information often survives
+anyway (token-space c* separates on DROID), it is the fixed readout that loses
+it. This script learns a small lens used ONLY by the verifier, leaving the world
+model and planner frozen and the plug-in claim untouched:
 
   vector mode   z (D,)          -> L2-normalized W z            (linear, D->d)
   attentive     tokens (T_tok,D) -> L2-normalized W (sum_i a_i z_i),
                 a = softmax(z q / sqrt(D))                      (query + linear)
 
-Training is time-contrastive InfoNCE on cached latent sequences: positives
-= frames <= equiv_stride apart, negatives = frames >= hop_stride apart in
-the same episode plus all cross-episode frames in the batch. That objective
-IS the gap: pull the equiv distribution down, push the hop distribution up.
-Afterward, re-run gap_stat with --readout <ckpt> and read tau off the new
-gap's midpoint. Report before/after; no closed-loop claim until the lens is
+Training is time-contrastive InfoNCE on cached latent sequences: positives are
+frames <= equiv_stride apart, negatives are frames >= hop_stride apart in the
+same episode plus every cross-episode frame in the batch. That objective IS the
+gap, pulling the equiv distribution down and pushing the hop distribution up.
+Afterward, re-run gap_stat with --readout <ckpt> and read tau off the new gap's
+midpoint. Report before and after; no closed-loop claim until the lens is
 validated there.
 
   python -m specaccept.probes.learn_readout --name reacher \

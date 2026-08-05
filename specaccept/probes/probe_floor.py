@@ -1,12 +1,12 @@
 """Floor probe: derive tau and k from offline measurements of the stack.
 
 Three measurements in the accept test's unit, rel(a, b) = ||a-b|| / ||a||:
-(A) temporal floor, consecutive-frame distance; (B) criterion floor, the
-primary tau basis: distance between frames whose ground-truth states are
-equivalent under the benchmark's own success criterion; (C) per-k sampler
-dispersion and bias to the k=50 mean, the k basis. Rejecting below the
-criterion floor is re-drafting on noise, so tau is set to the floor itself.
-Offline only: no CEM, no closed loop; one GPU, minutes per environment.
+  A  temporal floor: consecutive-frame distance;
+  B  criterion floor, the primary tau basis: distance between frames whose
+     ground-truth states are equivalent under the benchmark's own criterion;
+  C  per-k sampler dispersion and bias to the k=50 mean, the k basis.
+Rejecting below the criterion floor is re-drafting on noise, so tau is the floor
+itself. Offline only: no CEM, no closed loop, minutes per env on one GPU.
 """
 
 from __future__ import annotations

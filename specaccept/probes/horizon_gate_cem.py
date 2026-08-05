@@ -1,14 +1,14 @@
 """Horizon-gate probe v2 (offline): planner-predicted reachability c*.
 
-After v1's encoder-distance signal failed (rel saturates by t=50), this
-probe asks the planner instead: run one flat CEM plan from z0 toward z_goal
-and read c* = rel(z_hat_H, z_goal), the predicted terminal discrepancy of
-the exact plan the policy would execute at replan 0. No environment
-stepping. Gate rule: plan flat iff c* <= tau, with tau read from the floor
-probe's recorded value (the verifier's threshold, never swept here). CEM
-parameters are the eval driver's defaults through the shipped solver and
-cost model. Pre-registered kill condition on fire-rate separation, with a
-declared model-exploitation flag if fire stays high at every horizon.
+After v1's encoder-distance signal failed (rel saturates by t=50), this probe
+asks the planner instead: run one flat CEM plan from z0 toward z_goal and read
+c* = rel(z_hat_H, z_goal), the predicted terminal discrepancy of the exact plan
+the policy would execute at replan 0, with no environment stepping. Gate rule:
+plan flat iff c* <= tau, tau read from the floor probe's recorded value (the
+verifier's threshold, never swept here). CEM parameters are the eval driver's
+defaults through the shipped solver and cost model. Pre-registered kill
+condition on fire-rate separation, with a declared model-exploitation flag if
+fire stays high at every horizon.
 """
 
 from __future__ import annotations

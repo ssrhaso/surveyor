@@ -1,10 +1,9 @@
 """The verification-gap statistic: spec-accept's preflight applicability probe.
 
-The verifier compares the ACHIEVED latent against the TARGET it pursued for
-one subgoal interval. If the agent arrived, that distance is the
-criterion-equivalence noise (adjacent states, task-tolerance scale); if it
-failed to move, the distance stays at one full hop. tau must separate the
-two, so the applicability gap is
+The verifier compares the ACHIEVED latent against the TARGET it pursued for one
+subgoal interval. Arrival puts that distance at the criterion-equivalence noise
+scale (adjacent states, task tolerance); failure to move leaves it at one full
+hop. tau must separate the two, so the applicability gap is
 
     EQUIV p90  <  tau  <  HOP p10
 
@@ -14,11 +13,11 @@ two, so the applicability gap is
           the "did not move" scale the verifier must reject)
   CROSS = random entry vs episode end (context only)
 
-Empty/inverted interval => no tau exists => verification cannot operate.
-Two failure directions: EQUIV bulk above any usable tau (TwoRoom: even
-physically-arrived states read ~sqrt(2), the voracle advances=14/113
-behavioral evidence) and HOP bulk below tau (degenerate-accept: everything
-verifies, seen on DROID at tau=0.20 where hop p50 ~ 0.10).
+An empty or inverted interval means no tau exists and verification cannot
+operate. It fails in two directions: the EQUIV bulk above any usable tau
+(TwoRoom, where even physically-arrived states read ~sqrt(2), corroborated by
+voracle advances=14/113), or the HOP bulk below tau, the degenerate-accept case
+where everything verifies (DROID at tau=0.20, hop p50 ~ 0.10).
 
 Inputs: either a LeWM-stack subgoals .pt (latents/lengths/offsets) or a glob
 of lat_*.npz|npy episode files (V-JEPA 2 tokens; pooled over the token axis).

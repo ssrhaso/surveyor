@@ -1,13 +1,13 @@
 """Horizon-gate probe v1 (offline): is encoder distance rel(z0, z_goal) a
 usable episode-level horizon signal?
 
-Gate rule under test: plan flat for the whole episode iff h = rel(z0,
-z_goal) <= theta, with theta read from the floor probe's recorded
-disp_p50(S=10), never fitted here. Pre-registered kill condition: fire-rate
->= 0.70 at t=25 and <= 0.15 at t=150; theta is not amended to pass. Latents
-come from the raw h5 (encoded here) or the stride-1 dense dump, which are
-frame-identical. Offline only: two latents per episode-offset pair, no CEM,
-no closed loop. Result: FAILED as specified (rel saturates by t=50).
+Gate rule under test: plan flat for the whole episode iff h = rel(z0, z_goal)
+<= theta, with theta read from the floor probe's recorded disp_p50(S=10) and
+never fitted here. Pre-registered kill condition: fire-rate >= 0.70 at t=25 and
+<= 0.15 at t=150, with no amendment of theta to pass. Latents come from the raw
+h5 (encoded here) or the frame-identical stride-1 dense dump. Offline only: two
+latents per episode-offset pair, no CEM, no closed loop. Result: FAILED as
+specified, since rel saturates by t=50.
 """
 
 from __future__ import annotations

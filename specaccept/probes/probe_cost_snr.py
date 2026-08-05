@@ -1,10 +1,10 @@
 """CEM cost-signal SNR probe: is the fine-stride cost landscape informative
 or flat relative to noise?
 
-Scores real demo action blocks against decoys in the exact model CEM
-optimizes (frozen-predictor rollout, SubgoalCostModel cost) per stride,
-reporting the fraction of decoys costlier than the true continuation,
-decoy-cost dispersion, and terminal-latent action sensitivity. CPU-friendly.
+Scores real demo action blocks against decoys per stride, in the exact model CEM
+optimizes (frozen-predictor rollout, SubgoalCostModel cost), reporting the
+fraction of decoys costlier than the true continuation, decoy-cost dispersion,
+and terminal-latent action sensitivity. CPU-friendly.
 """
 
 from __future__ import annotations

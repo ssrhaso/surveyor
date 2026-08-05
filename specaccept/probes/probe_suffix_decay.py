@@ -1,7 +1,8 @@
-"""Per-position fidelity probe for the N-position subgoal block: does
-sampled quality degrade with block position (suffix decay)? Samples full
-blocks with the real diffusion sampler and reports the diag_gdm metrics
-broken out by position, from an existing episodes-file.
+"""Per-position fidelity probe for the N-position subgoal block: does sampled
+quality degrade with block position (suffix decay)?
+
+Samples full blocks with the real diffusion sampler and reports the diag_gdm
+metrics broken out by position, from an existing episodes-file.
 """
 
 from __future__ import annotations

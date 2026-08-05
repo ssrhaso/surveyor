@@ -1,10 +1,10 @@
 """Offline gate probes for the DSpark/GDM direction (no CEM, one data load).
 
-A1: few-step-draft acceptance curve (matched-seed DDIM, per-k error to the
-50-step reference). A2: speculative-acceptance simulator, a demo-replay
-proxy for the closed loop reporting per-tau call ratio, accepted depth, and
-consumed-subgoal error (an optimistic bound). A3: posterior multimodality
-via repeat draws with a per-condition two-means separation test.
+A1: few-step-draft acceptance curve, matched-seed DDIM with per-k error to the
+50-step reference. A2: speculative-acceptance simulator, a demo-replay proxy for
+the closed loop reporting per-tau call ratio, accepted depth, and
+consumed-subgoal error as an optimistic bound. A3: posterior multimodality via
+repeat draws with a per-condition two-means separation test.
 """
 
 from __future__ import annotations

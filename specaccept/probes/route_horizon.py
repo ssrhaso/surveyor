@@ -1,10 +1,10 @@
 """Ternary router (gate v4): offline routing pass for flat2 / flat5 / spec.
 
 Per episode, from its true start state: route to flat2 if c*_2 <= tau, else
-flat5 if c*_5 <= tau, else spec, where c* is the planner-predicted terminal
-rel of one flat CEM plan at the corresponding window depth. Writes one
-eval-compatible episodes file per branch; the companion sbatch executes each
-episode once under its routed arm, so the composite is a single policy with
+flat5 if c*_5 <= tau, else spec, where c* is the planner-predicted terminal rel
+of one flat CEM plan at the corresponding window depth. Writes one
+eval-compatible episodes file per branch, and the companion sbatch runs each
+episode once under its routed arm, so the composite stays a single policy with
 the planning-depth degree of freedom restored. tau is read from the floor
 probe's recorded value, never swept here.
 """
