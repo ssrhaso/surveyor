@@ -9,7 +9,7 @@
 #SBATCH --time=05:00:00
 #SBATCH --array=0-11
 #SBATCH --output=/lustre/home/ha676/le-wm/logs/trace_collect_%A_%a.log
-# ========= TRACE COLLECTION FOR VERIFIER CALIBRATION (M1) — NO QUOTABLE SR =========
+# ========= TRACE COLLECTION FOR VERIFIER CALIBRATION (M1) -- NO QUOTABLE SR =========
 # Registered in docs/certification_prereg.md ("R2" + same-day amendment): these
 # cells' success rates are NOT quotable (banked versions exist); the runs exist
 # solely to produce per-VERIFICATION calibration events (env, rel, accepted,

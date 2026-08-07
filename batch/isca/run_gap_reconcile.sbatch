@@ -11,7 +11,7 @@
 # ==== M1-FM RECONCILIATION DIAGNOSTIC (descriptive; no bar, no claim) ====
 # The M1-FM readout (droid2k, 400 eps) found cross-episode rel p50 = 0.496,
 # refuting P-FM-1's premise (July gap_droid.json cross p50 = 0.153 on the
-# 98-episode droid_lat pool). Hypothesis: population artifact — the first-
+# 98-episode droid_lat pool). Hypothesis: population artifact -- the first-
 # fetched 98 episodes are scene-homogeneous, depressing cross distances.
 # Test: the IDENTICAL frozen code path over the droid_lat 98-episode pool.
 # Explains the discrepancy either way; alters no frozen readout.
