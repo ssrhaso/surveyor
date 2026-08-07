@@ -38,8 +38,11 @@ def parse_args():
                    help="lerp source: waypoint this fraction along the latent segment "
                         "from the current latent to the goal (decomposition-tax control)")
     p.add_argument("--subgoal", choices=["oracle", "gdm", "baseline", "specaccept",
-                                         "lerp", "unified"],
+                                         "lerp", "unified", "random", "gcidm"],
                    default="baseline")
+    p.add_argument("--gcidm-ckpt", default=None,
+                   help="GC-IDM checkpoint (arXiv 2605.08732 comparator); amortised "
+                        "controller, one MLP forward per step and no solver")
     p.add_argument("--gdm-ckpt", default=None, help="trained planner checkpoint")
     p.add_argument("--gdm-steps", type=int, default=50, help="DDIM sampling steps for GDM")
     p.add_argument("--accept-tau", type=float, default=0.2,
@@ -142,7 +145,11 @@ def main():
     model = encoder.load_lewm(source=args.source, encoder_id=args.encoder_id,
                               local_dir=args.local_dir, swm_src=args.swm_src,
                               device=args.device)
-    is_baseline = args.subgoal == "baseline"
+    # random = swm's uniform action-space policy, LeWM Table I's chance floor.
+    # Both solver-free arms take the plain cost model and never build a subgoal.
+    is_random = args.subgoal == "random"
+    is_gcidm = args.subgoal == "gcidm"
+    is_baseline = args.subgoal in ("baseline", "random", "gcidm")
     cost_model = model if is_baseline else SubgoalCostModel(model)
     print(f"[model] frozen LeWM ({sum(p.numel() for p in model.parameters())/1e6:.2f}M), "
           f"device={args.device}, training={model.training}, subgoal={args.subgoal}")
@@ -243,7 +250,18 @@ def main():
                                   num_samples=args.num_samples, var_scale=args.var_scale,
                                   n_steps=args.n_steps, topk=args.topk,
                                   device=args.device, seed=cem_seed)
-    if is_baseline:
+    if is_random:
+        # seeded via set_policy() from .seed, deterministic at cem_seed like every arm
+        policy = swm.policy.RandomPolicy(seed=cem_seed)
+    elif is_gcidm:
+        from specaccept.gcidm import GCIDMPolicy, load_gcidm
+        gci, ascaler, gmeta = load_gcidm(args.gcidm_ckpt, device=args.device)
+        policy = GCIDMPolicy(gci, model, budget=eval_budget,
+                             device=args.device, action_scaler=ascaler)
+        print(f"[gcidm] {args.gcidm_ckpt}: H_max={gci.h_max} "
+              f"params={sum(p.numel() for p in gci.parameters())/1e6:.2f}M "
+              f"budget={eval_budget} (1 forward/step, no solver)")
+    elif is_baseline:
         policy = swm.policy.WorldModelPolicy(
             solver=solver, config=config, process=process, transform=transform)
     else:
@@ -285,6 +303,10 @@ def main():
         dataset=dataset, start_steps=list(start_steps), goal_offset=goal_offset,
         eval_budget=eval_budget, episodes_idx=list(episodes_idx), callables=callables,
     )
+    if is_gcidm:
+        # cost column: decisions per episode, one MLP forward each vs a CEM solve
+        print(f"[gcidm-cost] decisions={policy.n_calls / max(args.num_eval, 1):.1f} "
+              f"total={policy.n_calls} (1 MLP forward each, no solver)")
     sr = metrics["success_rate"]
     n_succ = int(metrics["episode_successes"].sum())
     world.close()

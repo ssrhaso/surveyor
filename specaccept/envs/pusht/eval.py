@@ -53,8 +53,12 @@ def parse_args():
                    help="swm dataset name (box: resolved under STABLEWM_HOME); --h5 used for oracle/state")
     # what to evaluate
     p.add_argument("--subgoal", choices=["oracle", "gdm", "baseline", "dspark", "specaccept",
-                                         "regressor", "unified", "lerp", "specpaired"],
+                                         "regressor", "unified", "lerp", "specpaired",
+                                         "random", "gcidm", "specgcidm"],
                    default="oracle")
+    p.add_argument("--gcidm-ckpt", default=None,
+                   help="GC-IDM checkpoint (arXiv 2605.08732 comparator); amortised "
+                        "controller, one MLP forward per step and no solver")
     p.add_argument("--verify-half", choices=["dino", "lewm"], default="dino",
                    help="specpaired: which half of the paired draft the accept "
                         "test reads. The C1/C2 verify-space control runs BOTH "
@@ -71,6 +75,10 @@ def parse_args():
                    help="specaccept: relative-L2 tolerance for the reality verifier "
                         "(accept the next drafted position iff the achieved latent is "
                         "within tau of the subgoal just driven toward)")
+    p.add_argument("--sg-steps", type=int, default=10,
+                   help="specgcidm: subgoal spacing S in env steps; the accept test "
+                        "runs at every S-step boundary and the executor's horizon "
+                        "clock counts steps to the next boundary")
     p.add_argument("--draft-noise", type=float, default=0.0,
                    help="corruption sweep (certification prereg): displace every "
                         "drafted waypoint by this relative-norm sigma along a "
@@ -289,8 +297,10 @@ def sample_random_init_goals(h5, num_eval, seed, angle_deg=20.0):
 
 def main():
     args = parse_args()
-    if args.subgoal in ("gdm", "specaccept", "unified", "specpaired") and not args.gdm_ckpt:
+    if args.subgoal in ("gdm", "specaccept", "unified", "specpaired", "specgcidm") and not args.gdm_ckpt:
         raise ValueError(f"--subgoal {args.subgoal} requires --gdm-ckpt <trained planner checkpoint>")
+    if args.subgoal == "specgcidm" and not args.gcidm_ckpt:
+        raise ValueError("--subgoal specgcidm requires --gcidm-ckpt (amortised executor)")
     if args.subgoal == "regressor" and not args.regressor_ckpt:
         raise ValueError("--subgoal regressor requires --regressor-ckpt (train_regressor.py)")
     if args.subgoal == "dspark":
@@ -316,7 +326,12 @@ def main():
     model = encoder.load_lewm(source=args.source, encoder_id=args.encoder_id,
                               local_dir=args.local_dir, swm_src=args.swm_src,
                               device=args.device)
-    is_baseline = args.subgoal == "baseline"
+    # random = swm's uniform action-space policy, LeWM Table I's chance floor.
+    # All solver-free arms take the plain cost model and never build a subgoal.
+    is_random = args.subgoal == "random"
+    is_gcidm = args.subgoal == "gcidm"
+    is_specgcidm = args.subgoal == "specgcidm"
+    is_baseline = args.subgoal in ("baseline", "random", "gcidm", "specgcidm")
     # baseline mode = raw LeWM + goal image (== eval.py), to isolate harness vs injection
     cost_model = model if is_baseline else SubgoalCostModel(model)
     print(f"[model] frozen LeWM ({sum(p.numel() for p in model.parameters())/1e6:.2f}M), "
@@ -324,7 +339,7 @@ def main():
 
     # GDM planner (goal-free) loaded once; the per-env source is rebuilt per run
     gdm_planner = None
-    if args.subgoal in ("gdm", "dspark", "specaccept", "unified", "specpaired"):
+    if args.subgoal in ("gdm", "dspark", "specaccept", "unified", "specpaired", "specgcidm"):
         from specaccept.drafter import load_gdm_planner, count_params
         gdm_planner = load_gdm_planner(args.gdm_ckpt, device=args.device)
         gdm_planner.noise_scale = args.gdm_noise_scale
@@ -429,7 +444,29 @@ def main():
                                           num_samples=args.num_samples, var_scale=args.var_scale,
                                           n_steps=args.n_steps, topk=args.topk,
                                           device=args.device, seed=cem_seed)
-            if is_baseline:
+            if is_random:
+                # seeded via set_policy() from .seed, deterministic at cem_seed like every arm
+                policy = swm.policy.RandomPolicy(seed=cem_seed)
+            elif is_gcidm:
+                from specaccept.gcidm import GCIDMPolicy, load_gcidm
+                gci, ascaler, gmeta = load_gcidm(args.gcidm_ckpt, device=args.device)
+                policy = GCIDMPolicy(gci, model, budget=eval_budget,
+                                     device=args.device, action_scaler=ascaler)
+                print(f"[gcidm] {args.gcidm_ckpt}: H_max={gci.h_max} "
+                      f"params={sum(p.numel() for p in gci.parameters())/1e6:.2f}M "
+                      f"budget={eval_budget} (1 forward/step, no solver)")
+            elif is_specgcidm:
+                from specaccept.gcidm import load_gcidm
+                from specaccept.spec_gcidm import SpecGCIDMPolicy
+                gci, ascaler, gmeta = load_gcidm(args.gcidm_ckpt, device=args.device)
+                policy = SpecGCIDMPolicy(gci, gdm_planner, model,
+                                         sg_steps=args.sg_steps, tau=args.accept_tau,
+                                         n_steps=args.gdm_steps, seed=cem_seed,
+                                         device=args.device, action_scaler=ascaler)
+                print(f"[specgcidm] executor={args.gcidm_ckpt} (H_max={gci.h_max}) "
+                      f"drafter={args.gdm_ckpt} S={args.sg_steps} tau={args.accept_tau} "
+                      f"k={args.gdm_steps} (accept rule unchanged, no CEM)")
+            elif is_baseline:
                 policy = swm.policy.WorldModelPolicy(
                     solver=solver, config=config, process=process, transform=transform)
             else:
@@ -528,6 +565,16 @@ def main():
             n_succ = int(metrics["episode_successes"].sum())
             results[(score_mode, angle)] = (sr, n_succ)
             print(f"[RESULT] score={score_mode} angle={angle:g}deg  SR={sr:.2f}%  ({n_succ}/{args.num_eval})")
+            if is_gcidm:
+                # one MLP forward per step against CEM's full solve; per episode
+                print(f"[gcidm-cost] decisions={policy.n_calls / max(args.num_eval, 1):.1f} "
+                      f"total={policy.n_calls} (1 MLP forward each, no solver)")
+            if is_specgcidm:
+                b = policy.n_redraft + policy.n_advance
+                print(f"[specgcidm-cost] exec_forwards={policy.n_calls} "
+                      f"redrafts={policy.n_redraft} advances={policy.n_advance} "
+                      f"rejects={policy.n_reject} call_ratio={policy.n_redraft / max(b, 1):.3f} "
+                      f"draft_s={policy.t_draft:.2f} exec_s={policy.t_exec:.2f}")
             if args.dump_frames_dir and not is_baseline and getattr(policy, "dump_frames", False):
                 import json
                 from pathlib import Path

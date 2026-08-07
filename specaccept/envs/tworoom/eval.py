@@ -33,7 +33,8 @@ def parse_args():
     p.add_argument("--device", default="cuda")
     # what to evaluate
     p.add_argument("--subgoal", choices=["oracle", "voracle", "gdm", "baseline",
-                                         "specaccept", "specpaired", "unified", "lerp"],
+                                         "specaccept", "specpaired", "unified", "lerp",
+                                         "random"],
                    default="oracle")
     p.add_argument("--lerp-frac", type=float, default=0.5,
                    help="lerp diagnostic source: fraction along current->goal "
@@ -114,6 +115,15 @@ def parse_args():
                    help="set the goal from goal_proprio (the agent's position at the "
                         "goal frame), as LeWM's own config/eval/tworoom.yaml does, "
                         "rather than goal_state (the episode's fixed target).")
+    p.add_argument("--goal-raw-target", action="store_true",
+                   help="serve the h5's RAW goal_state column (the episode's fixed "
+                        "target) by literal injection, bypassing swm's derived "
+                        "goal_{col} keys. Those derived keys resolve to "
+                        "column-at-goal-frame and SHADOW the raw column, so both "
+                        "--goal-from-proprio settings serve the same hindsight value "
+                        "(state==proprio in this h5); see prereg "
+                        "2026-08-07_composite_and_executor.md section D. The goal "
+                        "IMAGE the policy sees is unchanged (target unrendered).")
     p.add_argument("--require-cross-room", action="store_true",
                    help="restrict eval episodes to ones whose agent and target START in "
                         "different rooms (the intended door-crossing task; ~48%% of "
@@ -251,7 +261,10 @@ def main():
     model = encoder.load_lewm(source=args.source, encoder_id=args.encoder_id,
                               local_dir=args.local_dir, swm_src=args.swm_src,
                               device=args.device)
-    is_baseline = args.subgoal == "baseline"
+    # random = swm's uniform action-space policy, LeWM Table I's chance floor; it
+    # plans nothing and takes the plain cost model like baseline.
+    is_random = args.subgoal == "random"
+    is_baseline = args.subgoal in ("baseline", "random")
     cost_model = model if is_baseline else SubgoalCostModel(model)
     print(f"[model] frozen LeWM ({sum(p.numel() for p in model.parameters())/1e6:.2f}M), "
           f"device={args.device}, training={model.training}, subgoal={args.subgoal}")
@@ -333,16 +346,43 @@ def main():
         {"method": "_set_goal_state", "args": {"goal_state": {"value": goal_key, "in_dataset": True}}},
     ]
     print(f"[protocol] goal callable value = {goal_key}")
+    if args.goal_raw_target:
+        # the episode's fixed target, read from the RAW h5 column swm's derived
+        # goal_{col} naming shadows; constant per episode, taken at ep_offset
+        import h5py
+        with h5py.File(args.h5, "r") as f:
+            ep_off = f["ep_offset"][:]
+            # random starts may sample one episode at several start steps, so
+            # rows can repeat; h5py wants strictly increasing unique indices
+            rows = ep_off[np.asarray(episodes_idx)]
+            uniq, inv = np.unique(rows, return_inverse=True)
+            # float32: the env's variation-space Box rejects float64 on dtype
+            raw = f["goal_state"][uniq][inv].astype(np.float32)
+        print(f"[protocol] goal OVERRIDE = raw h5 goal_state (fixed target), "
+              f"per-env setter patch, first rows {np.round(raw[:3], 1).tolist()}")
 
     PolicyCls = make_ffjepa_policy(swm.policy.WorldModelPolicy)
 
     world = swm.World(env_name="swm/TwoRoom-v1", num_envs=args.num_eval,
                       max_episode_steps=2 * eval_budget, image_shape=(224, 224))
+    if args.goal_raw_target:
+        # swm hands literal callable values to every env WHOLE, so per-env targets
+        # are patched into each env's own setter (episodes_idx[i] -> env i); the
+        # derived-goal callable still fires per reset and is discarded
+        for _i in range(args.num_eval):
+            _env = world.envs.envs[_i].unwrapped
+            _orig = _env._set_goal_state
+            _env._set_goal_state = (
+                lambda goal_state, _f=_orig, _r=raw[_i]: _f(_r.copy()))
+        print(f"[protocol] {args.num_eval} env setters patched with raw fixed targets")
     solver = swm.solver.CEMSolver(model=cost_model, batch_size=1,
                                   num_samples=args.num_samples, var_scale=args.var_scale,
                                   n_steps=args.n_steps, topk=args.topk,
                                   device=args.device, seed=cem_seed)
-    if is_baseline:
+    if is_random:
+        # seeded via set_policy() from .seed, deterministic at cem_seed like every arm
+        policy = swm.policy.RandomPolicy(seed=cem_seed)
+    elif is_baseline:
         policy = swm.policy.WorldModelPolicy(
             solver=solver, config=config, process=process, transform=transform)
     else:
