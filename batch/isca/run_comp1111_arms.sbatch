@@ -34,7 +34,10 @@ cd /lustre/home/ha676/le-wm
 mkdir -p logs
 source /lustre/home/ha676/le-wm/.venv/bin/activate
 
-PUSHT_H5=/lustre/home/ha676/data/pusht/pusht_expert_train.h5
+# pusht arms MUST use the subset h5: extract_subset's episodes files index the
+# subset, not the full dataset (first submission ran subset indices against the
+# full h5 -- both arms collapsed identically; those cells are void)
+PUSHT_H5=pusht_c1111.h5
 REACHER_H5=$(find /lustre/home/ha676/data/reacher \( -name '*.h5' -o -name '*.hdf5' \) | head -1)
 ID=$SLURM_ARRAY_TASK_ID
 OFFS=(25 50 75 100 150)
