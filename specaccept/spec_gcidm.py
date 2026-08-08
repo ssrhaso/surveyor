@@ -7,11 +7,19 @@ every subgoal boundary (S env steps) the accept rule verifies the achieved
 latent against the waypoint just pursued -- within tau the next pre-drafted
 waypoint is served free, otherwise the block is re-drafted from reality.
 
-Mechanism bet (prereg/2026-08-07_composite_and_executor.md, P-EXEC-1): GC-IDM
-degrades with goal DISTANCE (its paper's Table 2), and the drafter's job is
-manufacturing NEAR goals -- a 10-step hop sits mid-distribution for the
-H_max=50 checkpoint (h = 10/50). The accept rule never inspects the executor,
-so tau, k and S all carry unchanged; no CEM runs anywhere in this arm.
+Mechanism bet (prereg/2026-08-07_composite_and_executor.md, P-EXEC-1, passed):
+GC-IDM degrades with goal DISTANCE (its paper's Table 2), and the drafter's job
+is manufacturing NEAR goals -- a 10-step hop sits mid-distribution for the
+H_max=50 checkpoint. The accept rule never inspects the executor, so tau, k and
+S carry unchanged; no CEM runs in the bare arm.
+
+cstar_route=True adds the certified scope (P-EXEC-6): at each env's FIRST
+boundary one flat CEM probe reads c* = rel(z_hat_H, z_goal), the planner's own
+self-assessment (the paper's certificate, same tau); c* <= tau routes the
+episode to plain GC-IDM (goal served directly, zero drafter calls). Drafting
+envs carry an ARRIVAL GATE at every boundary -- rel(z, z_goal) <= tau retires
+the drafter one-way (Cube's gate, no new constant). Cost: exactly one batched
+CEM solve per episode; execution stays fully amortised.
 """
 
 from __future__ import annotations
@@ -31,7 +39,8 @@ class SpecGCIDMPolicy:
     source so harvesters read this arm unchanged."""
 
     def __init__(self, gcidm_model, planner, lewm, *, sg_steps=10, tau=0.20,
-                 n_steps=3, seed=42, device="cuda", action_scaler=None):
+                 n_steps=3, seed=42, device="cuda", action_scaler=None,
+                 budget=None, cstar_route=False, cem=None, adim=2):
         self.model = gcidm_model
         self.planner = planner
         self.lewm = lewm
@@ -41,18 +50,34 @@ class SpecGCIDMPolicy:
         self.n_steps = int(n_steps)
         self.N = int(planner.cfg.n_future)
         self.dim = int(planner.cfg.latent_dim)
-        self.needs_goal = getattr(planner, "goal_cond", False)
+        self.goal_cond = getattr(planner, "goal_cond", False)
+        self.cstar_route = bool(cstar_route)
+        # goal frames must be encoded if the drafter is goal-conditioned OR the
+        # certificate / arrival gate needs the goal latent
+        self.needs_goal = self.goal_cond or self.cstar_route
+        self.budget = None if budget is None else int(budget)
         self.action_scaler = action_scaler
         self._gen = torch.Generator(device=planner.device)
         self._gen.manual_seed(int(seed))
         self.type = "specgcidm"
         self.env = None
+        if self.cstar_route:
+            if cem is None or self.budget is None:
+                raise ValueError("cstar_route needs cem=dict(...) and budget=")
+            from specaccept.sources import SubgoalCostModel
+            self.cost_model = SubgoalCostModel(lewm)
+            self.cem = dict(cem)
+            self.adim = int(adim)
         self.n_redraft = 0   # diffusion calls
         self.n_advance = 0   # positions served from the queue (calls skipped)
         self.n_reject = 0    # verification failures (subset of redrafts)
         self.n_calls = 0     # executor forwards, for the cost column
+        self.n_routed = 0    # envs routed direct at the first boundary (c*)
+        self.n_arrive = 0    # drafting envs retired by the arrival gate
         self.t_draft = 0.0   # wall-clock in the drafter (s)
         self.t_exec = 0.0    # wall-clock in encoder+executor (s)
+        self.t_probe = 0.0   # wall-clock in the c* probe (s)
+        self.c_first = None  # per-env first-boundary c*, for the router audit
         self.events = []     # (env, kind, rel) per boundary, filmstrip contract
 
     def set_env(self, env):
@@ -63,6 +88,8 @@ class SpecGCIDMPolicy:
         self._ptr = np.zeros(n, dtype=int)
         self._target = torch.zeros(n, self.dim, device=self.device)
         self._has_target = np.zeros(n, dtype=bool)
+        self._direct = np.zeros(n, dtype=bool)   # serving the goal, not waypoints
+        self.c_first = np.full(n, np.nan)
 
     @staticmethod
     def _latest(arr):
@@ -75,7 +102,7 @@ class SpecGCIDMPolicy:
         t0 = time.perf_counter()
         z_cond = z_now[rows].to(self.planner.device)
         zg = (z_goal[rows].to(self.planner.device)
-              if (self.needs_goal and z_goal is not None) else None)
+              if (self.goal_cond and z_goal is not None) else None)
         blocks = self.planner.sample_sequence(z_cond, n_steps=self.n_steps,
                                               generator=self._gen,
                                               z_goal_native=zg)  # (R, N, dim)
@@ -100,9 +127,32 @@ class SpecGCIDMPolicy:
             z_goal = encoder.encode_frames(self.lewm, goals, device=self.device).to(self.device)
         self.t_exec += time.perf_counter() - t0
 
+        # certificate, episode scope: one batched flat-CEM probe at t=0 only
+        if self.cstar_route and int(self._t[0]) == 0:
+            tp = time.perf_counter()
+            from specaccept.sources import cem_flat_cstar
+            cs = cem_flat_cstar(self.lewm, self.cost_model, z_t, z_goal,
+                                self.cem, adim=self.adim)
+            cs = np.asarray(cs, dtype=np.float64).reshape(-1)
+            self.c_first[:] = cs
+            self._direct = cs <= self.tau
+            self.n_routed = int(self._direct.sum())
+            self.t_probe += time.perf_counter() - tp
+
         boundary = (self._t % self.sg_steps == 0)
-        need = list(np.nonzero(boundary & ~self._has_target)[0])  # first draft
-        for i in np.nonzero(boundary & self._has_target)[0]:
+        drafting = ~self._direct
+        need = list(np.nonzero(boundary & drafting & ~self._has_target)[0])
+        for i in np.nonzero(boundary & drafting & self._has_target)[0]:
+            # arrival gate (certificate's replan scope, zero new constants):
+            # verified arrival at the FINAL goal retires the drafter one-way
+            if self.cstar_route:
+                relg = float((z_t[i] - z_goal[i]).norm()
+                             / z_t[i].norm().clamp_min(1e-8))
+                if relg <= self.tau:
+                    self._direct[i] = True
+                    self.n_arrive += 1
+                    self.events.append((int(i), "gate", relg))
+                    continue
             w = self._target[i]
             rel = float((z_t[i] - w).norm() / z_t[i].norm().clamp_min(1e-8))
             if rel <= self.tau and self._ptr[i] < self.N:
@@ -118,12 +168,21 @@ class SpecGCIDMPolicy:
         if need:
             self._draft(need, z_t, z_goal)
 
-        # the executor's clock: the pursued waypoint is `rem` steps away, the
-        # same "goal is h steps out" semantics GC-IDM trained on.
+        # executor clock: drafting envs count steps to the next boundary (the
+        # pursued waypoint is that many steps out); direct envs run plain
+        # GC-IDM semantics, remaining episode budget clamped at H_max
         t1 = time.perf_counter()
         rem = self.sg_steps - (self._t % self.sg_steps)
+        target = self._target
+        if self._direct.any():
+            target = self._target.clone()
+            d = np.nonzero(self._direct)[0]
+            if self.budget is not None:
+                rem = rem.copy()
+                rem[d] = np.maximum(self.budget - self._t[d], 1)
+            target[d] = z_goal[d]
         h = self.model.normalise_horizon(rem).to(self.device)
-        a = self.model(z_t, self._target, h)
+        a = self.model(z_t, target, h)
         self.n_calls += n
         a = a.float().cpu().numpy()
         if self.action_scaler is not None:

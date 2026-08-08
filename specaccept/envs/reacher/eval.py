@@ -37,7 +37,8 @@ def parse_args():
                         "segment from the CURRENT latent to the goal (re-anchored "
                         "each replan); frac=1.0 degenerates to flat planning")
     p.add_argument("--subgoal", choices=["oracle", "gdm", "baseline", "specaccept",
-                                         "lerp", "horizon_gated", "unified", "random", "gcidm"],
+                                         "lerp", "horizon_gated", "unified", "random", "gcidm",
+                                         "specgcidm"],
                    default="oracle")
     p.add_argument("--gcidm-ckpt", default=None,
                    help="GC-IDM checkpoint (arXiv 2605.08732 comparator); amortised "
@@ -52,6 +53,14 @@ def parse_args():
                    help="override the lens's derived tau (default: ckpt value)")
     p.add_argument("--accept-tau", type=float, default=0.2,
                    help="specaccept: relative-L2 tolerance for the reality verifier")
+    p.add_argument("--sg-steps", type=int, default=10,
+                   help="specgcidm: subgoal spacing S in env steps; accept test at "
+                        "every S-step boundary, executor horizon clock counts to it")
+    p.add_argument("--cstar-route", action="store_true",
+                   help="specgcidm: certified scope (P-EXEC-6). One flat-CEM c* "
+                        "probe at each env's first boundary routes the episode to "
+                        "plain GC-IDM when c* <= tau (arbiter window 2x5); drafting "
+                        "envs carry the tau arrival gate. One CEM solve/episode.")
     p.add_argument("--random-reject", type=float, default=None,
                    help="decision-content control (docs/randreject_prereg.md): "
                         "replace the accept test with an i.i.d. coin rejecting "
@@ -149,8 +158,10 @@ def build_process(dataset, keys):
 
 def main():
     args = parse_args()
-    if args.subgoal in ("gdm", "specaccept", "horizon_gated", "unified") and not args.gdm_ckpt:
+    if args.subgoal in ("gdm", "specaccept", "horizon_gated", "unified", "specgcidm") and not args.gdm_ckpt:
         raise ValueError(f"--subgoal {args.subgoal} requires --gdm-ckpt")
+    if args.subgoal == "specgcidm" and not args.gcidm_ckpt:
+        raise ValueError("--subgoal specgcidm requires --gcidm-ckpt (amortised executor)")
 
     encoder._ensure_swm_importable(args.swm_src)
     import stable_worldmodel as swm
@@ -166,13 +177,14 @@ def main():
     # Both solver-free arms take the plain cost model and never build a subgoal.
     is_random = args.subgoal == "random"
     is_gcidm = args.subgoal == "gcidm"
-    is_baseline = args.subgoal in ("baseline", "random", "gcidm")
+    is_specgcidm = args.subgoal == "specgcidm"
+    is_baseline = args.subgoal in ("baseline", "random", "gcidm", "specgcidm")
     cost_model = model if is_baseline else SubgoalCostModel(model)
     print(f"[model] frozen LeWM ({sum(p.numel() for p in model.parameters())/1e6:.2f}M), "
           f"device={args.device}, training={model.training}, subgoal={args.subgoal}")
 
     gdm_planner = None
-    if args.subgoal in ("gdm", "specaccept", "horizon_gated", "unified"):
+    if args.subgoal in ("gdm", "specaccept", "horizon_gated", "unified", "specgcidm"):
         from specaccept.drafter import load_gdm_planner, count_params
         gdm_planner = load_gdm_planner(args.gdm_ckpt, device=args.device)
         d = gdm_planner.diffusion
@@ -274,6 +286,26 @@ def main():
         print(f"[gcidm] {args.gcidm_ckpt}: H_max={gci.h_max} "
               f"params={sum(p.numel() for p in gci.parameters())/1e6:.2f}M "
               f"budget={eval_budget} (1 forward/step, no solver)")
+    elif is_specgcidm:
+        from specaccept.gcidm import load_gcidm
+        from specaccept.spec_gcidm import SpecGCIDMPolicy
+        gci, ascaler, gmeta = load_gcidm(args.gcidm_ckpt, device=args.device)
+        policy = SpecGCIDMPolicy(gci, gdm_planner, model,
+                                 sg_steps=args.sg_steps, tau=args.accept_tau,
+                                 n_steps=args.gdm_steps, seed=cem_seed,
+                                 device=args.device, action_scaler=ascaler,
+                                 budget=eval_budget,
+                                 cstar_route=args.cstar_route,
+                                 cem=dict(horizon=2, action_block=5,
+                                          num_samples=args.num_samples,
+                                          n_steps=args.n_steps, topk=args.topk,
+                                          var_scale=args.var_scale,
+                                          seed=cem_seed),
+                                 adim=2)
+        print(f"[specgcidm] executor={args.gcidm_ckpt} (H_max={gci.h_max}) "
+              f"drafter={args.gdm_ckpt} S={args.sg_steps} tau={args.accept_tau} "
+              f"k={args.gdm_steps} cstar_route={args.cstar_route} "
+              f"(accept rule unchanged)")
     elif is_baseline:
         policy = swm.policy.WorldModelPolicy(
             solver=solver, config=config, process=process, transform=transform)
@@ -358,6 +390,14 @@ def main():
     n_succ = int(metrics["episode_successes"].sum())
     world.close()
 
+    if is_specgcidm:
+        b = policy.n_redraft + policy.n_advance
+        print(f"[specgcidm-cost] exec_forwards={policy.n_calls} "
+              f"redrafts={policy.n_redraft} advances={policy.n_advance} "
+              f"rejects={policy.n_reject} call_ratio={policy.n_redraft / max(b, 1):.3f} "
+              f"routed={policy.n_routed} arrived={policy.n_arrive} "
+              f"draft_s={policy.t_draft:.2f} exec_s={policy.t_exec:.2f} "
+              f"probe_s={policy.t_probe:.2f}")
     if args.time_instrument and not is_baseline:
         t_d, t_c = policy.t_drafter, policy.t_cem
         t_tot = t_d + t_c

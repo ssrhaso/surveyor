@@ -79,6 +79,11 @@ def parse_args():
                    help="specgcidm: subgoal spacing S in env steps; the accept test "
                         "runs at every S-step boundary and the executor's horizon "
                         "clock counts steps to the next boundary")
+    p.add_argument("--cstar-route", action="store_true",
+                   help="specgcidm: certified scope (P-EXEC-6). One flat-CEM c* "
+                        "probe at each env's first boundary routes the episode to "
+                        "plain GC-IDM when c* <= tau (arbiter window 2x5); drafting "
+                        "envs carry the tau arrival gate. One CEM solve/episode.")
     p.add_argument("--draft-noise", type=float, default=0.0,
                    help="corruption sweep (certification prereg): displace every "
                         "drafted waypoint by this relative-norm sigma along a "
@@ -462,10 +467,19 @@ def main():
                 policy = SpecGCIDMPolicy(gci, gdm_planner, model,
                                          sg_steps=args.sg_steps, tau=args.accept_tau,
                                          n_steps=args.gdm_steps, seed=cem_seed,
-                                         device=args.device, action_scaler=ascaler)
+                                         device=args.device, action_scaler=ascaler,
+                                         budget=eval_budget,
+                                         cstar_route=args.cstar_route,
+                                         cem=dict(horizon=2, action_block=5,
+                                                  num_samples=args.num_samples,
+                                                  n_steps=args.n_steps, topk=args.topk,
+                                                  var_scale=args.var_scale,
+                                                  seed=cem_seed),
+                                         adim=2)
                 print(f"[specgcidm] executor={args.gcidm_ckpt} (H_max={gci.h_max}) "
                       f"drafter={args.gdm_ckpt} S={args.sg_steps} tau={args.accept_tau} "
-                      f"k={args.gdm_steps} (accept rule unchanged, no CEM)")
+                      f"k={args.gdm_steps} cstar_route={args.cstar_route} "
+                      f"(accept rule unchanged)")
             elif is_baseline:
                 policy = swm.policy.WorldModelPolicy(
                     solver=solver, config=config, process=process, transform=transform)
@@ -574,7 +588,9 @@ def main():
                 print(f"[specgcidm-cost] exec_forwards={policy.n_calls} "
                       f"redrafts={policy.n_redraft} advances={policy.n_advance} "
                       f"rejects={policy.n_reject} call_ratio={policy.n_redraft / max(b, 1):.3f} "
-                      f"draft_s={policy.t_draft:.2f} exec_s={policy.t_exec:.2f}")
+                      f"routed={policy.n_routed} arrived={policy.n_arrive} "
+                      f"draft_s={policy.t_draft:.2f} exec_s={policy.t_exec:.2f} "
+                      f"probe_s={policy.t_probe:.2f}")
             if args.dump_frames_dir and not is_baseline and getattr(policy, "dump_frames", False):
                 import json
                 from pathlib import Path
