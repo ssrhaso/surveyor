@@ -40,7 +40,8 @@ class SpecGCIDMPolicy:
 
     def __init__(self, gcidm_model, planner, lewm, *, sg_steps=10, tau=0.20,
                  n_steps=3, seed=42, device="cuda", action_scaler=None,
-                 budget=None, cstar_route=False, cem=None, adim=2):
+                 budget=None, cstar_route=False, cem=None, adim=2,
+                 goal_gate=False):
         self.model = gcidm_model
         self.planner = planner
         self.lewm = lewm
@@ -52,9 +53,13 @@ class SpecGCIDMPolicy:
         self.dim = int(planner.cfg.latent_dim)
         self.goal_cond = getattr(planner, "goal_cond", False)
         self.cstar_route = bool(cstar_route)
+        # goal_gate=True enables the arrival gate WITHOUT the c* route (no CEM
+        # probe, no cost model): the drafting-env gate below fires on either
+        # flag. Cube's confirmed CEM arm is gated, so its executor twin must be.
+        self.goal_gate = bool(goal_gate)
         # goal frames must be encoded if the drafter is goal-conditioned OR the
         # certificate / arrival gate needs the goal latent
-        self.needs_goal = self.goal_cond or self.cstar_route
+        self.needs_goal = self.goal_cond or self.cstar_route or self.goal_gate
         self.budget = None if budget is None else int(budget)
         self.action_scaler = action_scaler
         self._gen = torch.Generator(device=planner.device)
@@ -145,7 +150,7 @@ class SpecGCIDMPolicy:
         for i in np.nonzero(boundary & drafting & self._has_target)[0]:
             # arrival gate (certificate's replan scope, zero new constants):
             # verified arrival at the FINAL goal retires the drafter one-way
-            if self.cstar_route:
+            if self.cstar_route or self.goal_gate:
                 relg = float((z_t[i] - z_goal[i]).norm()
                              / z_t[i].norm().clamp_min(1e-8))
                 if relg <= self.tau:

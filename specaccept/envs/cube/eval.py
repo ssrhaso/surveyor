@@ -38,11 +38,14 @@ def parse_args():
                    help="lerp source: waypoint this fraction along the latent segment "
                         "from the current latent to the goal (decomposition-tax control)")
     p.add_argument("--subgoal", choices=["oracle", "gdm", "baseline", "specaccept",
-                                         "lerp", "unified", "random", "gcidm"],
+                                         "lerp", "unified", "random", "gcidm",
+                                         "specgcidm"],
                    default="baseline")
     p.add_argument("--gcidm-ckpt", default=None,
                    help="GC-IDM checkpoint (arXiv 2605.08732 comparator); amortised "
                         "controller, one MLP forward per step and no solver")
+    p.add_argument("--sg-steps", type=int, default=10,
+                   help="specgcidm: subgoal spacing S the executor tracks")
     p.add_argument("--gdm-ckpt", default=None, help="trained planner checkpoint")
     p.add_argument("--gdm-steps", type=int, default=50, help="DDIM sampling steps for GDM")
     p.add_argument("--accept-tau", type=float, default=0.2,
@@ -149,13 +152,14 @@ def main():
     # Both solver-free arms take the plain cost model and never build a subgoal.
     is_random = args.subgoal == "random"
     is_gcidm = args.subgoal == "gcidm"
+    is_specgcidm = args.subgoal == "specgcidm"
     is_baseline = args.subgoal in ("baseline", "random", "gcidm")
     cost_model = model if is_baseline else SubgoalCostModel(model)
     print(f"[model] frozen LeWM ({sum(p.numel() for p in model.parameters())/1e6:.2f}M), "
           f"device={args.device}, training={model.training}, subgoal={args.subgoal}")
 
     gdm_planner = None
-    if args.subgoal in ("gdm", "specaccept", "unified"):
+    if args.subgoal in ("gdm", "specaccept", "unified", "specgcidm"):
         from specaccept.drafter import load_gdm_planner, count_params
         gdm_planner = load_gdm_planner(args.gdm_ckpt, device=args.device)
         print(f"[gdm] planner from {args.gdm_ckpt}: "
@@ -261,6 +265,20 @@ def main():
         print(f"[gcidm] {args.gcidm_ckpt}: H_max={gci.h_max} "
               f"params={sum(p.numel() for p in gci.parameters())/1e6:.2f}M "
               f"budget={eval_budget} (1 forward/step, no solver)")
+    elif is_specgcidm:
+        from specaccept.gcidm import load_gcidm
+        from specaccept.spec_gcidm import SpecGCIDMPolicy
+        gci, ascaler, gmeta = load_gcidm(args.gcidm_ckpt, device=args.device)
+        policy = SpecGCIDMPolicy(gci, gdm_planner, model,
+                                 sg_steps=args.sg_steps, tau=args.accept_tau,
+                                 n_steps=args.gdm_steps, seed=cem_seed,
+                                 device=args.device, action_scaler=ascaler,
+                                 budget=eval_budget, cstar_route=False,
+                                 goal_gate=args.goal_gate, adim=5)
+        print(f"[specgcidm] executor={args.gcidm_ckpt} (H_max={gci.h_max}) "
+              f"drafter={args.gdm_ckpt} S={args.sg_steps} tau={args.accept_tau} "
+              f"k={args.gdm_steps} goal_gate={args.goal_gate} "
+              f"(accept rule unchanged, no CEM in the arm)")
     elif is_baseline:
         policy = swm.policy.WorldModelPolicy(
             solver=solver, config=config, process=process, transform=transform)
@@ -394,6 +412,12 @@ def main():
           f"budget={eval_budget} seed={args.seed} cem_seed={cem_seed} "
           f"S={args.receding_horizon * args.action_block}")
     print(f"  SR = {sr:.2f}%  ({n_succ}/{args.num_eval})")
+    if is_specgcidm:
+        bnd = policy.n_advance + policy.n_redraft
+        cr = policy.n_redraft / max(bnd, 1)
+        print(f"[specgcidm] redrafts={policy.n_redraft} advances={policy.n_advance} "
+              f"rejects={policy.n_reject} arrived={policy.n_arrive} "
+              f"call_ratio={cr:.3f} NFE/replan={cr * args.gdm_steps:.2f}")
 
 
 if __name__ == "__main__":
