@@ -34,8 +34,11 @@ def parse_args():
     # what to evaluate
     p.add_argument("--subgoal", choices=["oracle", "voracle", "gdm", "baseline",
                                          "specaccept", "specpaired", "unified", "lerp",
-                                         "random"],
+                                         "random", "gcidm"],
                    default="oracle")
+    p.add_argument("--gcidm-ckpt", default=None,
+                   help="GC-IDM checkpoint (arXiv 2605.08732 comparator); amortised "
+                        "controller, one MLP forward per step and no solver")
     p.add_argument("--lerp-frac", type=float, default=0.5,
                    help="lerp diagnostic source: fraction along current->goal "
                         "(1.0 = instrumented-flat tautology)")
@@ -264,7 +267,8 @@ def main():
     # random = swm's uniform action-space policy, LeWM Table I's chance floor; it
     # plans nothing and takes the plain cost model like baseline.
     is_random = args.subgoal == "random"
-    is_baseline = args.subgoal in ("baseline", "random")
+    is_gcidm = args.subgoal == "gcidm"
+    is_baseline = args.subgoal in ("baseline", "random", "gcidm")
     cost_model = model if is_baseline else SubgoalCostModel(model)
     print(f"[model] frozen LeWM ({sum(p.numel() for p in model.parameters())/1e6:.2f}M), "
           f"device={args.device}, training={model.training}, subgoal={args.subgoal}")
@@ -382,6 +386,14 @@ def main():
     if is_random:
         # seeded via set_policy() from .seed, deterministic at cem_seed like every arm
         policy = swm.policy.RandomPolicy(seed=cem_seed)
+    elif is_gcidm:
+        from specaccept.gcidm import GCIDMPolicy, load_gcidm
+        gci, ascaler, gmeta = load_gcidm(args.gcidm_ckpt, device=args.device)
+        policy = GCIDMPolicy(gci, model, budget=eval_budget,
+                             device=args.device, action_scaler=ascaler)
+        print(f"[gcidm] {args.gcidm_ckpt}: H_max={gci.h_max} "
+              f"params={sum(p.numel() for p in gci.parameters())/1e6:.2f}M "
+              f"budget={eval_budget} (1 forward/step, no solver)")
     elif is_baseline:
         policy = swm.policy.WorldModelPolicy(
             solver=solver, config=config, process=process, transform=transform)
