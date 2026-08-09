@@ -62,6 +62,23 @@ to cover Reacher.
 
 ---
 
+## OUTCOMES (banked 2026-08-09, jobs 2330058 / 2330062, all 8 tasks clean)
+
+A. Seed replicates: t=25 seed-stable (s0/s1/s2 = 100.0/99.6/100.0). t=150
+spans 60.6/62.9/69.1 -- spread 8.6pp > 3pp, so the range rule FIRES and every
+prose statement of the collapse now quotes 60.6-69.1 (exhibit, sec 5, sec 7,
+tab:executor caption, App H). Seed 0 (the quoted instantiation) is the WORST
+seed; the collapse holds at every seed; the best replicate stays 27pp below
+the executor arm's 96.1. No replicate reached 96.1, so the full-prominence
+clause did not trigger. Their-spec stays seed 0 in every table, per the rule.
+Best-swept row unchanged (62.9/69.1 < 86.3).
+
+B. P-EXEC-7: PASSED at both t. Blind (tau=999) pooled 85.94 (t=100, 220/256)
+and 87.89 (t=150, 225/256) vs banked tau=0.20 91.4/95.3 -> -5.5/-7.4pp, both
+past the frozen >=2pp bar, mirroring the CEM-executor blind losses (-6.6/
+-4.1). Verification's Reacher SR value is executor-independent, as is the
+tax. Folded into the exhibit's honesty clause, App C, and tab:negatives.
+
 ## Considered and NOT run tonight (recorded so the absence is auditable)
 
 - Composite PushT t=50 (the ambiguous cell): NOT extended. Extending only the
