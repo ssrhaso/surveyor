@@ -1,0 +1,44 @@
+# Dependency specification for the LeWM-substrate experiments (PushT, Reacher,
+# Cube, Two-Room). Validated by a clean-room rebuild into a fresh virtual
+# environment, which is what caught the four packages below that had previously
+# been installed ad hoc: see prereg/2026-08-01_repro_smoke.md.
+#
+#   python -m venv .venv && . .venv/bin/activate
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+#   pip install -r requirements.txt
+#
+# Install torch and torchvision first from the wheel index matching the local
+# CUDA version; they are listed here unpinned so this file stays portable.
+torch
+torchvision
+
+# world model, harness and training stack
+stable-worldmodel[train]
+stable-pretraining
+transformers==4.57.1
+
+# datasets and numerics
+h5py
+hdf5plugin
+scikit-learn
+
+# environments: dm_control and mujoco for Reacher, pygame/pymunk/shapely for
+# PushT, ogbench for Cube. Two-Room ships with stable-worldmodel.
+dm_control
+mujoco
+pygame
+pymunk
+shapely
+ogbench
+
+# rendering for the qualitative figures
+imageio
+imageio-ffmpeg
+
+# stable-worldmodel pulls in opencv-python, which needs a display; on a headless
+# machine replace it after installing the above:
+#   pip uninstall -y opencv-python && pip install --force-reinstall opencv-python-headless
+opencv-python-headless
+
+# The DINO-WM and V-JEPA 2 transplants (surveyor/dinowm, surveyor/vjepa2) run
+# against their upstream repositories and use those projects' own environments.
