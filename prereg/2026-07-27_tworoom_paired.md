@@ -35,7 +35,7 @@ space (`Results/gap_stat/gap_tworoom_dense.json`):
 Equivalent frames sit 60 percent of the way to unrelated frames, and equiv p90
 (1.393) is ABOVE hop p10 (1.018). No threshold separates "arrived" from "not
 arrived". CEM never consults this metric, which is why flat is unharmed; the
-accept test consults nothing else, which is why spec-accept cannot operate.
+accept test consults nothing else, which is why SURVEYOR cannot operate.
 
 ## The intervention
 
@@ -159,7 +159,7 @@ Written now so no result can be re-framed after the fact.
   certify, certification transplants to any space with an open gap.
 - **T3 passes, T4 fails, and `gdm` also fails to beat flat at t=75** ->
   drafting itself has no headroom on TwoRoom; the honest claim is confined to
-  verifier portability (spec-accept becomes applicable and stays SR-neutral at
+  verifier portability (SURVEYOR becomes applicable and stays SR-neutral at
   reduced drafter cost), and TwoRoom is a bounded row, not a win. This outcome
   must NOT be reported as a TwoRoom win.
 - **T3 passes, T4 fails, but `gdm` DOES beat flat at t=75** -> drafting helps
@@ -420,10 +420,10 @@ table). TwoRoom is the third horizon-extension win, at the anchored
 protocol.
 
 ## THEIR-PROTOCOL BATTERY (registered 2026-07-30 night, BEFORE any cell ran):
-## spec-accept AT LeWM's OWN published TwoRoom setup
+## SURVEYOR AT LeWM's OWN published TwoRoom setup
 
 Mission (user): replicate LeWM's Fig. 6 TwoRoom number (DONE: V5 = 85.33,
-their 87 in seed range) and now field the best certified spec-accept AT
+their 87 in seed range) and now field the best certified SURVEYOR AT
 THAT PROTOCOL. Protocol (paper App. F.1/D, config verbatim): start sampled
 randomly from a dataset trajectory, goal = the state 25 steps later in the
 SAME trajectory (goal_proprio), budget 50, CEM 300/30/30 var 1.0, horizon 5
@@ -478,7 +478,7 @@ pair RH2 70.31 | +bok 72.40 | +bok+router RH2 69.27 | +bok+router RH5 77.08.
   goal_offset is a known task parameter in this protocol, so the regime
   law's first leg applies with zero constants: goal within one planning
   window -> plan flat (84.9, ties their published 87 within noise); beyond
-  -> certified spec-accept (57.0 vs flat 41.7 at t=75, +15.4pp, 12 seeds).
+  -> certified SURVEYOR (57.0 vs flat 41.7 at t=75, +15.4pp, 12 seeds).
   TwoRoom is now measured on BOTH sides of the crossover at protocols
   anchored to LeWM's Fig. 6; the deployed policy never loses to flat.
 

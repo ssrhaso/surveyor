@@ -50,7 +50,7 @@ def parse_args():
     p.add_argument("--swm-src", default=None)
     p.add_argument("--device", default="cuda")
     p.add_argument("--dataset-name", default="pusht_expert_train",
-                   help="swm dataset name (box: resolved under STABLEWM_HOME); --h5 used for oracle/state")
+                   help="swm dataset name, resolved under STABLEWM_HOME; --h5 used for oracle/state")
     # what to evaluate
     p.add_argument("--subgoal", choices=["oracle", "ffjepa", "flat", "dspark", "surveyor",
                                          "regressor", "router+surveyor", "lerp", "paired+surveyor",
@@ -133,7 +133,7 @@ def parse_args():
                    help="JSON file from surveyor.envs.pusht.extract_subset (produces a small subset --h5 "
                         "plus this file). Bypasses sample_long/short entirely and uses the "
                         "exact precomputed (episode, start_step) pairs; for running against "
-                        "a transferred subset h5 on a box without the full dataset.")
+                        "a transferred subset h5 on a machine without the full dataset.")
     p.add_argument("--eval-filter", choices=["none", "success20", "success5"], default="none",
                    help="restrict eval episodes to demos whose FINAL frame reaches the "
                         "canonical target (paper III-A: the last frame, where the "
@@ -194,7 +194,7 @@ def img_transform():
 
 
 def img_transform_fallback():
-    # used when stable_pretraining isn't installed (CPU box): identical ImageNet stats
+    # used when stable_pretraining isn't installed (CPU only): identical ImageNet stats
     from torchvision.transforms import v2 as transforms
     return transforms.Compose([
         transforms.ToImage(),
@@ -358,7 +358,7 @@ def main():
               f"T={d.timesteps} sampler={samp} param={d.parameterization} "
               f"schedule={d.schedule} norm={gdm_planner.normalization}")
 
-    # ---- dataset (use local path so it works on CPU and box)
+    # ---- dataset (local path, so it works on CPU and GPU machines alike)
     from stable_worldmodel.data.formats.hdf5 import HDF5Dataset
     keys = ["action", "proprio", "state"]
     dataset = HDF5Dataset(path=args.h5, keys_to_cache=keys)

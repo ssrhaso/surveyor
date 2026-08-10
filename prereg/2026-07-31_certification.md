@@ -54,7 +54,7 @@ including re-drafts - the deployed semantics; implementation
 `--draft-noise` in surveyor/envs/pusht/eval.py + sources.py, corruption
 upstream of verification and of traces).
 
-Arms: verified (spec-accept, tau=0.20 derived, k=3, S=10, RH2 - the
+Arms: verified (SURVEYOR, tau=0.20 derived, k=3, S=10, RH2 - the
 headline config) vs BLIND consumption (identical except tau=999, which
 accepts everything = blind commit-N, the banked -18pp negative arm).
 sigma in {0, 0.1, 0.2, 0.4}; seeds 42-44; n=64; mode long, t=150, budget
@@ -102,7 +102,7 @@ accept test actually reads (native 192-d for pusht/reacher/cube; DINOv2
 384-d for tworoom paired). The queued trace jobs were cancelled and
 resubmitted with the extended recording, and R2 EXPANDS to all four
 environments so every M1 row is built from full accept+reject event logs:
-  + cube champion arm (specaccept gc, goal-gate, tau=0.20, k=3, RH2,
+  + cube champion arm (surveyor gc, goal-gate, tau=0.20, k=3, RH2,
     certified protocol) seeds 42-44
   + reacher spec t=150 (tau=0.20, k=8, S=10, RH2, max-offset-150
     population) seeds 42-44

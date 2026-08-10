@@ -104,13 +104,13 @@ def main():
             {"pixels": px_init.clone(), SubgoalCostModel.SUBGOAL_KEY: sub}, candidates.clone())
         cb, cm = cost_box.flatten().float(), cost_mine.flatten().float()
         order_match = bool((torch.argsort(cb) == torch.argsort(cm)).all())
-        print("[COST parity] box LeWM.get_cost vs SubgoalCostModel (same goal latent):")
+        print("[COST parity] installed LeWM.get_cost vs SubgoalCostModel (same goal latent):")
         print(f"   cost_box[:4] ={[round(x,4) for x in cb[:4].tolist()]}")
         print(f"   cost_mine[:4]={[round(x,4) for x in cm[:4].tolist()]}")
         print(f"   max|diff|={(cb - cm).abs().max().item():.3e}  argsort_match={order_match}")
     except Exception as e:
         import traceback; traceback.print_exc()
-        print("[COST parity] box get_cost raised (expected on the broken source checkout):", repr(e))
+        print("[COST parity] installed get_cost raised (expected on the broken source checkout):", repr(e))
 
 
 if __name__ == "__main__":

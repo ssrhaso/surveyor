@@ -1,7 +1,7 @@
 # DINO-WM PushT: pre-registered instrument prediction (prospective test #4)
 
 **Status: SKELETON - numbers get filled from `gap_dinowm_pusht_h*.json` and
-frozen BEFORE any closed-loop spec-accept run on this stack. The gap-stat
+frozen BEFORE any closed-loop SURVEYOR run on this stack. The gap-stat
 record as of freezing: 3-for-3 prospective (droid readout 8x, v3 drafter
 fidelity 20x, v3 planning value 20x).**
 
@@ -54,14 +54,14 @@ Decision rule (same as the five-substrate figure):
 - bulks separated but tails overlap -> router territory (reacher case)
 
 **PREDICTION (FROZEN):**
-- **P1 (pusht, primary):** spec-accept is APPLICABLE at S=25 raw frames
-  (= goal_H) with derived tau = 0.121 (gap midpoint). Certified spec-accept at
+- **P1 (pusht, primary):** SURVEYOR is APPLICABLE at S=25 raw frames
+  (= goal_H) with derived tau = 0.121 (gap midpoint). Certified SURVEYOR at
   tau=0.121 achieves SR >= flat - 2pp at the anchored protocol.
 - **P2 (pusht, mechanics):** at transfer tau=0.20 (ABOVE the gap) the verifier
   is degenerate-accept: reject rate ~0, spec degenerates to blind chaining.
   (SR direction under P2 not barred - DROID showed blind chaining can limp.)
 - **P3 (maze/wall, predictions only, no closed-loop planned):** plain
-  spec-accept at any fixed tau underperforms flat; per-episode routing would
+  SURVEYOR at any fixed tau underperforms flat; per-episode routing would
   be required. Recorded as instrument predictions.
 
 ## P3 amendment (2026-07-26 night, lens battery, frozen before any closed-loop)
@@ -77,7 +77,7 @@ failure (video-scale pooled compression).
 
 ## Closed-loop bars (frozen with the prediction)
 
-- B1: certified spec-accept SR >= flat SR - 2pp at the anchored protocol
+- B1: certified SURVEYOR SR >= flat SR - 2pp at the anchored protocol
   (n_evals=50, seeds 99-102, max_iter 12, same CEM budget per replan).
 - B2: reject/advance mechanics non-degenerate (not ~0%, not ~100% accept).
 - B3: if the instrument predicted a mechanism (gate/router), the PLAIN spec
@@ -166,7 +166,7 @@ in the raw space, lens opens it. The instrument therefore prescribes the
 lens-verified verifier here, and predicts that a fixed tau will not work.
 
 **PREDICTIONS (FROZEN, prospective test #5):**
-- **P6-tworoom:** plain spec-accept at the transfer tau=0.20 UNDERPERFORMS
+- **P6-tworoom:** plain SURVEYOR at the transfer tau=0.20 UNDERPERFORMS
   flat. (Raw gap closed; 0.20 is above equiv p90 = 0.096, so the verifier
   should be near degenerate-accept and spec should degrade toward blind
   chaining.)

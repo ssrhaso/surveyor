@@ -135,7 +135,7 @@ def load_lewm(source="pretrained", encoder_id="quentinll/lewm-pusht",
     """Load and FREEZE the LeWM world model. Returns model in eval() mode with
     requires_grad_(False). `source` in {"pretrained","local"}."""
     if source == "pretrained":
-        _ensure_swm_importable(swm_src)  # no-op if pip-installed (box)
+        _ensure_swm_importable(swm_src)  # no-op if pip-installed
         from stable_worldmodel.wm.utils import load_pretrained
         model = load_pretrained(encoder_id)
     elif source == "local":

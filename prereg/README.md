@@ -25,8 +25,11 @@ named by freeze date.
 | `2026-08-10_composite_v2.md` | the single route reassignment, P-COMP-2 |
 | `2026-08-11_route_v3_and_executor_seeds.md` | the route repair and executor training-seed robustness |
 
-Two conventions to read them by. Module paths and arm names were updated to the
-released spellings when the package was renamed, so the commands quoted here
-run as written; `surveyor/arms.py` maps the development names that appear in
-older logs. Scheduler job identifiers are kept as opaque provenance labels for
-the runs behind each verdict.
+Three conventions to read them by. Module paths, arm names and the method's name
+were updated to the released spellings when the package was renamed, so the
+commands quoted here run as written; `surveyor/arms.py` maps the development
+names that appear in older logs. Scheduler job identifiers are kept as opaque
+provenance labels for the runs behind each verdict. Citations of
+`batch/*.sbatch` name the job script that ran a cell: those scripts are
+site-specific wrappers around the commands in the root README and are not part
+of the released tree.

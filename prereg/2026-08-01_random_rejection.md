@@ -29,7 +29,7 @@ draft per env produces no event, and goal_gate=False in both banked arms, so:
     n_events           = advances + rejects + verified_exhausted
     p                  = rejects / n_events
 
-From the banked cells' own printed `[specaccept]` counters:
+From the banked cells' own printed `[surveyor]` counters:
 
 - **pusht t150** (logs pusht_v4_r_spec_t150_seed{42,43} +
   pusht_ext_spec_t150_seed{44,45}): redrafts 9583, advances 6441, rejects
@@ -46,12 +46,12 @@ event logs give per-event not-verified rates 0.4707 pusht / 0.5239 reacher.)
 
 ## Arms (the banked spec cells are NOT re-run; program rule stands)
 
-- **pusht-coin**: pusht.eval --subgoal specaccept --gdm-ckpt gdm_stride10.pt
+- **pusht-coin**: pusht.eval --subgoal surveyor --gdm-ckpt gdm_stride10.pt
   --accept-tau 0.20 --gdm-steps 3 --random-reject 0.4937 --mode long
   --episodes-file pusht.episodes150s5.json --goal-offset 150 --eval-budget 300
   --num-eval 256 --score block --angles 20 5 --horizon 2 --receding-horizon 2,
   seeds 42-45 (seed = cem-seed). Quoted stat: block-20, as everywhere.
-- **reacher-coin**: reacher.eval --subgoal specaccept --gdm-ckpt
+- **reacher-coin**: reacher.eval --subgoal surveyor --gdm-ckpt
   gdm_reacher_s10.pt --gdm-steps 8 --accept-tau 0.20 --random-reject 0.4902
   --episodes-file reacher_gatev4c.ep150.s999.json --goal-offset 150
   --eval-budget 300 --num-eval 128 --horizon 2 --receding-horizon 2,
@@ -152,7 +152,7 @@ same populations/seeds as B1, sub-matched rejection probabilities:
   blind3 cells live on the ep150.t4/t5 population family, not re-run).
 - **pusht t150** (spine s5 pop, n=256, seeds 42-45): p in {0.125, 0.25}.
   p=0 on this population IS banked (blind commit-3, the -18pp negative,
-  Isambard-era logs, cited as the endpoint; graveyard 10 forbids re-running
+  logs from the earlier cluster, cited as the endpoint; graveyard 10 forbids re-running
   it). The matched-rate endpoint (p=.4937 -> 98.05) is B1's cell.
 
 FROZEN PREDICTIONS:

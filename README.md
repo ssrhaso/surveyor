@@ -98,11 +98,13 @@ configurations behind the paper's cells:
 --subgoal flat   --horizon 5 --receding-horizon 5
 --subgoal ffjepa --gdm-ckpt gdm_stride10.pt --horizon 2 --receding-horizon 2
 
-# Reacher, routed
+# Reacher, routed. Its population file comes from
+#   python -m surveyor.envs.reacher.build_populations --h5 "$H5" \
+#       --out reacher_horizon150.json --n 128 --max-offset 150 --episode-min 8000
 python -m surveyor.envs.reacher.eval --subgoal router+surveyor \
     --gdm-ckpt gdm_reacher_s10.pt --gdm-steps 8 --accept-tau 0.20 \
     --source local --local-dir encoder_reacher --h5 "$H5" --device cuda \
-    --num-eval 128 --seed 42 --episodes-file reacher_horizon150.ep.t0.json \
+    --num-eval 128 --seed 42 --episodes-file reacher_horizon150.json \
     --goal-offset 150 --eval-budget 300 --horizon 2 --receding-horizon 2
 
 # Cube, GC-IDM as the executor, held out
@@ -168,7 +170,7 @@ amended only by appending the outcome, including the outcomes that missed.
 
 This repository extends [LeWM](https://github.com/lucas-maes/le-wm) (Maes, Le
 Lidec, Scieur, LeCun and Balestriero), whose JEPA world model, training script,
-evaluation harness and configs are kept here unmodified and carry the original
+evaluation harness and configs are carried here as released, under the original
 MIT licence in `LICENSE`. The substrate we build on is FF-JEPA's subgoal
 drafting on that model. The transplants target
 [DINO-WM](https://github.com/gaoyuezhou/dino_wm) and

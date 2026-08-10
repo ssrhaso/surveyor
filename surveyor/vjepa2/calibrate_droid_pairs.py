@@ -10,9 +10,9 @@ rows replay deployed serving decisions; this scores the same statistic over
 recorded-frame pairs).
 
   python -m surveyor.vjepa2.calibrate_droid_pairs \
-      --lat-dir /lustre/home/ha676/data/droid2k_lat \
-      --out-json Results/calibration/cal_vjepa2_droid.json \
-      --out-csv Results/calibration/events_vjepa2_droid.csv
+      --lat-dir <encoded DROID latents> \
+      --out-json cal_vjepa2_droid.json \
+      --out-csv events_vjepa2_droid.csv
 """
 
 from __future__ import annotations
