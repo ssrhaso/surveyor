@@ -12,7 +12,7 @@ drafter. The LeWM-stack reference shape (probe_suffix_decay): GDM rel_err
 0.159/0.229/0.318 vs no-op 7.2x/6.2x/4.5x worse - a real drafter must beat
 no-op at every position by a clear factor.
 
-  python -m specaccept_vjepa2.probe_drafter --ckpt gdm_vj2_s10.pt \
+  python -m specaccept.vjepa2.probe_drafter --ckpt gdm_vj2_s10.pt \
       --episodes droid_lat/lat_droid_ep09*.npz --stride 10
 """
 

@@ -10,6 +10,7 @@ outputs as the next frame.
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -17,7 +18,12 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-UPSTREAM = Path(__file__).resolve().parent.parent / "upstream"
+# Shallow clone of github.com/facebookresearch/vjepa2, pinned at
+# 204698b45b37 (2026-03-23). Untracked scratch: re-clone to relocate, or
+# point VJEPA2_UPSTREAM elsewhere.
+UPSTREAM = Path(os.environ.get(
+    "VJEPA2_UPSTREAM",
+    Path(__file__).resolve().parents[2] / "vjepa2" / "upstream"))
 
 
 def ensure_upstream_on_path():

@@ -22,7 +22,7 @@ control separating "subgoals help" from "the learned drafter helps"). Anchors
 are frames where the demo moves, xyz displacement over the plan window >
 --move-thresh. Expected shape: parity at t<=S, divergence beyond.
 
-  python -m specaccept_vjepa2.probe_budget_collapse --ckpt gdm_vj2_s10.pt \
+  python -m specaccept.vjepa2.probe_budget_collapse --ckpt gdm_vj2_s10.pt \
       --episodes droid_lat/lat_droid_ep09*.npz --device cuda
 """
 

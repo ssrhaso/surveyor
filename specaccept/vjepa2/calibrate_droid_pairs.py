@@ -9,7 +9,7 @@ computed; the row must be labeled dataset-pair wherever quoted (the LeWM M1
 rows replay deployed serving decisions; this scores the same statistic over
 recorded-frame pairs).
 
-  python -m specaccept_vjepa2.calibrate_droid_pairs \
+  python -m specaccept.vjepa2.calibrate_droid_pairs \
       --lat-dir /lustre/home/ha676/data/droid2k_lat \
       --out-json Results/calibration/cal_vjepa2_droid.json \
       --out-csv Results/calibration/events_vjepa2_droid.csv

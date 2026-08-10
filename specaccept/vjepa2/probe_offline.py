@@ -23,7 +23,7 @@ The first run downloads the ViT-g AC weights (several GB) via torch.hub. CPU
 works at the default tiny CEM budgets, the notebook's own CPU setting; raise
 --cem-samples/--cem-steps on a GPU.
 
-  python -m specaccept_vjepa2.probe_offline --device cpu --dump-latents lat_franka.npz
+  python -m specaccept.vjepa2.probe_offline --device cpu --dump-latents lat_franka.npz
 """
 
 from __future__ import annotations

@@ -20,9 +20,27 @@ Space contract (the one transplant decision):
     hypothesis; re-derive it from the new setting's criterion floor only if
     the pre-registered transfer fails.
 
-Anchor rule (cube lesson): reproduce upstream's flat CEM behavior on the
-bundled Franka trajectory before enabling any drafting. probe_offline.py runs
-that anchor plus the c* landscape without a robot or simulator.
+Anchor rule: reproduce upstream's flat CEM behavior on the bundled Franka
+trajectory before enabling any drafting. probe_offline.py runs that anchor plus
+the c* landscape without a robot or simulator.
+
+Upstream is a shallow clone of github.com/facebookresearch/vjepa2 pinned at
+204698b45b37 (2026-03-23), imported lazily and never edited in place; point
+VJEPA2_UPSTREAM at it, or leave it at vjepa2/upstream in the repo root.
+
+    wm.py                     encoder + AC predictor, frame-causal step/rollout
+    planner.py                pass-through to upstream cem(); c* certificate
+    drafter.py                token-grid DiT drafter, reusing the LeWM-stack
+                              diffusion machinery verbatim
+    sources.py                accept rule and c* retirement over token grids
+    policy.py                 upstream's deploy loop with the target swapped
+    train_drafter.py          block pair builder and training loop
+    encode_episodes.py        episodes to token grids
+    fetch_droid.py            DROID episodes to the encoder's input format
+    calibrate_droid_pairs.py  verifier calibration against recorded proprio
+    probe_offline.py          anchor, c* ladder, criterion floor, plumbing
+    probe_*.py                the remaining offline probes
+    smoke_test.py             CPU, tiny tensors, no weights
 """
 
 from .drafter import TokenGDM, TokenGDMConfig, TokenGDMPlanner, load_token_gdm, save_token_gdm

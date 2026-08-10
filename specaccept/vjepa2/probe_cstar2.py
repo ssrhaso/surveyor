@@ -11,7 +11,7 @@ measured here as full ladders per episode:
 The two combine into 4 ladders: pooled, pooled-cal, token, token-cal. A usable
 v2 instrument must rise with offset, with spread clearly above its own jitter.
 
-  python -m specaccept_vjepa2.probe_cstar2 --traj droid_eps/droid_ep000.npz \
+  python -m specaccept.vjepa2.probe_cstar2 --traj droid_eps/droid_ep000.npz \
       --device cuda --offsets 1 2 4 8 16 32
 """
 

@@ -19,7 +19,7 @@ sequential block consumption; stated, not hidden), lerp (first straight-line
 subgoal, recomputed each replan), route (token-cal certificate at the anchor
 picks flat or spec for the whole rollout).
 
-  python -m specaccept_vjepa2.probe_rollout_agreement --ckpt gdm_vj2_s10_v3.pt \
+  python -m specaccept.vjepa2.probe_rollout_agreement --ckpt gdm_vj2_s10_v3.pt \
       --episodes "droid2k_lat/lat_droid_ep19*.npy" --device cuda
 """
 

@@ -1,8 +1,7 @@
 """CPU smoke test: every package code path on tiny tensors, no upstream
 clone imports, no pretrained weights, seconds to run.
 
-  python -m specaccept_vjepa2.smoke_test        (from vjepa2/)
-  python -m vjepa2.specaccept_vjepa2.smoke_test (from le-wm root)
+  python -m specaccept.vjepa2.smoke_test
 """
 
 from __future__ import annotations

@@ -14,26 +14,26 @@ __pycache__/
 *.h5
 *.npz
 *.episodes*.json
-data/
-runs/
-encoder_reacher/
-encoder_tworoom/
-vjepa2/upstream/
+/data/
+/runs/
+/encoder_reacher/
+/encoder_tworoom/
+/vjepa2/upstream/
 
 # Cluster job scripts: thin SLURM wrappers around the commands the README
 # documents, carrying site-specific accounts, paths and queue names.
-batch/
+/batch/
 *.sbatch
 
 # Experiment outputs: logs, per-run JSON, mined CSVs, rendered rollouts.
-Results/
-strips/
-cld/
-archive/
+/Results/
+/strips/
+/cld/
+/archive/
 
 # Manuscript sources, figures and build artifacts. The code tree stands alone.
-paper/
-writeup/
+/paper/
+/writeup/
 *.tex
 *.pdf
 *.aux
@@ -47,4 +47,7 @@ writeup/
 PLAN.md
 DIRECTION_*.md
 RESULTS_*.md
-docs/
+/docs/
+
+# V-JEPA 2 scratch: the upstream clone, its job wrappers and encoded latents.
+/vjepa2/

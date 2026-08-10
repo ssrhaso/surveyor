@@ -11,7 +11,7 @@ matches GDMDraft's pool-then-standardize at inference exactly.
 The last --val-files files are held out; val loss is printed every log
 interval as the overfit check.
 
-  python -m specaccept_vjepa2.train_drafter --data droid_lat/lat_*.npz \
+  python -m specaccept.vjepa2.train_drafter --data droid_lat/lat_*.npz \
       --out gdm_vj2_s10.pt --stride 10 --epochs 150 --device cuda
 """
 

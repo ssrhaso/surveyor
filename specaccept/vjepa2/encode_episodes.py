@@ -6,7 +6,7 @@ writes lat_<name>.npz with
   states (T, 7) float32
 The `tokens` key is exactly what train_drafter.py consumes.
 
-  python -m specaccept_vjepa2.encode_episodes --episodes droid_eps/droid_ep*.npz \
+  python -m specaccept.vjepa2.encode_episodes --episodes droid_eps/droid_ep*.npz \
       --out-dir droid_lat --device cuda
 """
 
