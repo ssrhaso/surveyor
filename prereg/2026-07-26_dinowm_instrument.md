@@ -1,6 +1,6 @@
 # DINO-WM PushT: pre-registered instrument prediction (prospective test #4)
 
-**Status: SKELETON — numbers get filled from `gap_dinowm_pusht_h*.json` and
+**Status: SKELETON - numbers get filled from `gap_dinowm_pusht_h*.json` and
 frozen BEFORE any closed-loop spec-accept run on this stack. The gap-stat
 record as of freezing: 3-for-3 prospective (droid readout 8x, v3 drafter
 fidelity 20x, v3 planning value 20x).**
@@ -15,36 +15,36 @@ seed 99, max_iter capped at 12 (episode budget; same cap in every arm).
 Anchor: flat baseline success rate = 0.86 (job 2299529; paper's number = 0.90).
 (Field filled 2026-08-02 from the job log: final `Success rate: 0.86` printed at
 the last planning iteration, n=50 seed 99, log line 3607; the run then OOM'd in
-the post-eval VQVAE video decode — after scoring, cosmetic only.)
+the post-eval VQVAE video decode - after scoring, cosmetic only.)
 
-## Instrument reading (measured 2026-07-26, gap_dinowm_*.json — FROZEN)
+## Instrument reading (measured 2026-07-26, gap_dinowm_*.json - FROZEN)
 
 Gap stat on the VALID split, pooled DINOv2 frame latents, rel L2, equiv=1:
 
 **pusht** (episodes ~200+ frames):
 | hop (raw frames) | equiv p90 | hop p10 | gap | tau=0.20 in gap? |
 |---|---|---|---|---|
-| 5 (1 model step)  | 0.108 | 0.069 | closed | — |
-| 25 (goal_H hop)   | 0.108 | 0.135 | **OPEN [0.108, 0.135]** | **NO — tau 0.20 ABOVE gap** |
-| 50 (2x goal_H)    | 0.108 | (see json) | — | — |
+| 5 (1 model step)  | 0.108 | 0.069 | closed | - |
+| 25 (goal_H hop)   | 0.108 | 0.135 | **OPEN [0.108, 0.135]** | **NO - tau 0.20 ABOVE gap** |
+| 50 (2x goal_H)    | 0.108 | (see json) | - | - |
 
-**point_maze**: h10 equiv p90 0.061 vs hop p10 0.050; h25 0.061 vs 0.056 —
+**point_maze**: h10 equiv p90 0.061 vs hop p10 0.050; h25 0.061 vs 0.056 -
 closed, but bulks separated 2.1x (equiv p50 0.036 vs hop p50 0.075) with tail
 overlap = the REACHER SHAPE.
-**wall_single**: h10 0.078 vs 0.037; h20 0.078 vs 0.052 — closed, bulks
+**wall_single**: h10 0.078 vs 0.037; h20 0.078 vs 0.052 - closed, bulks
 separated ~2.7-3.2x, tail overlap (fat equiv tail p90 = 2x p50) = REACHER
 SHAPE again.
 **tworoom-dino (encoder-swap probe, job 2299550, measured 7/26)**: equiv
 p10/50/90 = 0.047/0.081/0.159; hop(25) = 0.099/0.214/0.338; cross p50 0.222.
-**Saturation CURED by the encoder swap** (LeWM ViT-tiny equiv p50 was 0.876 ≈
-√2 with cross ≈ equiv): bulks separated 2.6x, tails overlap = the REACHER
-SHAPE. Verdict: TwoRoom's verification failure was an ENCODER property —
+**Saturation CURED by the encoder swap** (LeWM ViT-tiny equiv p50 was 0.876 ~
+sqrt(2) with cross ~ equiv): bulks separated 2.6x, tails overlap = the REACHER
+SHAPE. Verdict: TwoRoom's verification failure was an ENCODER property -
 generic frozen features restore metric structure; a fixed-tau verifier still
 needs router-class machinery there. (Caveat: first 200 eps, unfiltered
 population.) Closed-loop TwoRoom-on-DINO not planned (would need a trained
 DINO-WM for tworoom); recorded as the diagnosis-confirmation row.
 
-## Frozen prediction (2026-07-26, BEFORE any closed-loop spec run — prospective #4)
+## Frozen prediction (2026-07-26, BEFORE any closed-loop spec run - prospective #4)
 
 Decision rule (same as the five-substrate figure):
 - gap EMPTY/INVERTED at every usable hop -> inapplicable (TwoRoom-on-LeWM case)
@@ -59,7 +59,7 @@ Decision rule (same as the five-substrate figure):
   tau=0.121 achieves SR >= flat - 2pp at the anchored protocol.
 - **P2 (pusht, mechanics):** at transfer tau=0.20 (ABOVE the gap) the verifier
   is degenerate-accept: reject rate ~0, spec degenerates to blind chaining.
-  (SR direction under P2 not barred — DROID showed blind chaining can limp.)
+  (SR direction under P2 not barred - DROID showed blind chaining can limp.)
 - **P3 (maze/wall, predictions only, no closed-loop planned):** plain
   spec-accept at any fixed tau underperforms flat; per-episode routing would
   be required. Recorded as instrument predictions.
@@ -82,7 +82,7 @@ failure (video-scale pooled compression).
 - B2: reject/advance mechanics non-degenerate (not ~0%, not ~100% accept).
 - B3: if the instrument predicted a mechanism (gate/router), the PLAIN spec
   arm's failure mode matches the diagnosis.
-- Compute: spec arm's diffusion calls logged (call_ratio analog) — efficiency
+- Compute: spec arm's diffusion calls logged (call_ratio analog) - efficiency
   is reported, not barred.
 
 ## Wall closed-loop extension (frozen 2026-07-27, BEFORE the wall battery ran)
@@ -222,7 +222,7 @@ Autopsy of the serving fault is post-poster work only, time-boxed, with a
 re-kill switch (see PLAN.md).
 
 ## AUTOPSY REGISTRATION (2026-07-31, frozen BEFORE any diagnostic GPU run;
-## user authorized pulling it forward from post-poster — GPUs idle, poster
+## user authorized pulling it forward from post-poster - GPUs idle, poster
 ## blocked on a template decision)
 
 TIME-BOX: three days, ends 2026-08-02 EOD. If the fault is not localized to
@@ -259,12 +259,12 @@ achieved state approaches the drafted grid.
 DIAGNOSTIC ARMS (all: n_evals=20, goal_H=5, max_iter=12, tau=0.121, k=8,
 seeds 99/100 unless noted; serving protocol identical to 2301459):
 - D1 GOAL-SERVE TAUTOLOGY (spec code path, target := the goal grid at every
-  iteration — real encoded tokens through the same _latent_goal branch).
+  iteration - real encoded tokens through the same _latent_goal branch).
   Frozen prediction: ~= flat (0.85-0.90). If instead it collapses, the
   latent-goal hand-off itself is broken -> bounded code-fix hunt.
 - D2 DRAFT-AND-SNAP (each drafted grid replaced by its nearest REAL grid
   from the train-split episode cache $DINOWM_DATA/
-  pusht_lat/grids/, matched in pooled-visual rel L2 — the TwoRoom snap-bank
+  pusht_lat/grids/, matched in pooled-visual rel L2 - the TwoRoom snap-bank
   mechanism, no new constant). Frozen prediction: advances >> 8 and SR
   materially above the 0.05-0.20 nogate band. If D1 healthy AND D2 lifts ->
   off-manifold diagnosis CONFIRMED and the fix is identified. If D1 healthy
@@ -284,27 +284,27 @@ again. Bank convention declared now: snap bank = train-split grids only
 (the drafter's own training population; the eval episodes are dset-drawn
 and disjoint).
 
-## AUTOPSY VERDICT (2308656, 5/5 COMPLETED, read 2026-07-31 evening —
+## AUTOPSY VERDICT (2308656, 5/5 COMPLETED, read 2026-07-31 evening -
 ## the decision tree resolves to the honest-negative branch)
 
 - **D1 GOAL-SERVE TAUTOLOGY: CONFIRMED HEALTHY.** 0.90 / 0.80 vs flat's
   0.90 / 0.90 (gate-test), rel_to_goal = 0.000, achieved state converges
   to rel_to_now ~ 0.12 ~ tau. **The latent-goal hand-off, cem branch,
-  grid encoding, and the whole serving integration are exonerated** —
+  grid encoding, and the whole serving integration are exonerated** -
   and D1 doubles as a validation of the serving stack + derived tau on
   the second architecture.
 - **D2 DRAFT-AND-SNAP: REFUTED.** 0.05 / 0.10 (the nogate band);
   advances 11 / 7 of ~250 (prediction was >> 8). Real-manifold targets
   do not restore acceptance or SR. The diag localizes why: snapped
-  targets sit rel_to_now ~ 0.17 AND rel_to_goal ~ 0.20 — the drafter's
+  targets sit rel_to_now ~ 0.17 AND rel_to_goal ~ 0.20 - the drafter's
   proposals are neither near reality nor nearer the goal.
 - **D3 AS-IS CONTROL:** fault reproduced (0.20); drafted grids' token
   MSE to the nearest real grid 0.47 vs the 0.28-0.32 real-frame bank
-  floor — the off-manifold excess is real but NOT the primary cause
+  floor - the off-manifold excess is real but NOT the primary cause
   (per D2).
 
 **DIAGNOSIS (replaces "unresolved serving-integration fault"):** the
-transplanted drafter's CONTENT fails on frozen DINOv2 features — its
+transplanted drafter's CONTENT fails on frozen DINOv2 features - its
 waypoints do not advance toward the goal. The verifier's ~97% rejection
 rate across every battery was CORRECT detection of a bad drafter:
 certification behaving exactly as designed. Per the frozen tree
@@ -314,7 +314,7 @@ competent drafter; the verdict table above is glossed accordingly.
 
 **DATA-SCALE FOLLOW-UP (2026-08-01, checked against records before any
 run):** the "data-starved drafter" hypothesis is REFUTED by the training
-log itself — the drafter trained on ALL 18,685 train episodes (~1.6M
+log itself - the drafter trained on ALL 18,685 train episodes (~1.6M
 pairs, ~100k optimizer steps = 2-3x the budget of every working LeWM
 drafter; the grid encode loop is uncapped). The content failure stands
 AT FULL DATA SCALE, consistent with the V-JEPA 2 20x-data null:

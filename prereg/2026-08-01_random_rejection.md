@@ -3,14 +3,14 @@
 Purpose: the decision-content control the 08-01 meat audit identified as the
 one experiment a reviewer will punish the paper for lacking. The banked
 evidence triangle (blind-commit -18pp = re-anchor rate zero; 2x-CEM fairness =
-compute; crossover / stale-oracle = regime) varies rate, compute, and regime —
+compute; crossover / stale-oracle = regime) varies rate, compute, and regime -
 none holds the RE-ANCHORING RATE fixed while destroying the DECISION CONTENT.
 Our own R1 verdict (P-CERT-2: verified SR ~= blind SR under white-noise
 corruption) hands a reviewer the question directly: does the accept test buy
 closed-loop SR beyond scheduling re-anchors?
 
 Mechanism under test: replace the verifier's per-event decision with an
-i.i.d. Bernoulli coin — reject with probability p, ignoring the latent test —
+i.i.d. Bernoulli coin - reject with probability p, ignoring the latent test -
 at the SAME per-event rejection probability the deployed verifier exhibited on
 the banked cells. Everything else (drafter, populations, seeds, budgets, CEM,
 tau bookkeeping, block mechanics incl. exhaustion) is byte-identical to the
@@ -77,7 +77,7 @@ event logs give per-event not-verified rates 0.4707 pusht / 0.5239 reacher.)
 | reacher | pooled | **91.11 (933/1024)** |
 
 (pusht seeds 42/43 come from the v4 confirm's r_spec cells, which at t=150
-are the full 256-episode population — the router sends 256/256 to drafting,
+are the full 256-episode population - the router sends 256/256 to drafting,
 recorded in the paper; seeds 44/45 from the seed extension's full-pop spec.)
 
 ## Validity gate (mechanics matched, frozen)
@@ -85,7 +85,7 @@ recorded in the paper; seeds 44/45 from the seed extension's full-pop spec.)
 The coin arm's pooled call_ratio must land within +/-0.05 of the banked arm's
 pooled call_ratio (pusht 0.598 = 9583/16024; reacher 0.612 = 6873/11237).
 A miss means the rate-matching failed mechanically; the cell is then reported
-as an invalid control AS-IS. No p adjustment, no resubmission — single shot.
+as an invalid control AS-IS. No p adjustment, no resubmission - single shot.
 
 ## Frozen bar and declared readings (all outcomes reportable)
 
@@ -93,7 +93,7 @@ Margin = banked spec pooled SR - coin pooled SR, per env.
 
 - **B-COIN-1 (per env): margin >= +3pp AND per-seed paired t >= 2**
   (pusht df=3, reacher df=7; paired on the shared seeds/populations)
-  -> the verifier's decision content — WHICH replans get rejected — carries
+  -> the verifier's decision content - WHICH replans get rejected - carries
   SR beyond rate-matched random re-anchoring; "certified" keeps its
   closed-loop teeth.
 - Coin within +/-3pp of spec -> at these cells the accept test's closed-loop
@@ -120,16 +120,16 @@ call_ratio .595 (banked .612). The control is valid.
 - **PushT: coin 98.05** (1004/1024; per-seed 249/254/254/247) vs banked spec
   98.14 -> margin **+0.10pp, paired t 0.16. TIE.**
 - **Reacher: coin 90.33** (925/1024; per-seed 116/115/117/113/117/115/116/116)
-  vs banked 91.11 -> margin **+0.78pp, paired t 2.65** — positive on 5/8 seeds
+  vs banked 91.11 -> margin **+0.78pp, paired t 2.65** - positive on 5/8 seeds
   and never negative, but far below the bar. TIE per the declared +/-3pp band.
 - **B-COIN-1 FAILS both envs.** The declared middle reading applies: at
   nominal operation (healthy drafter, in-regime cells) the accept test's
-  PER-EVENT SELECTIVITY is not load-bearing for closed-loop SR — rate-matched
+  PER-EVENT SELECTIVITY is not load-bearing for closed-loop SR - rate-matched
   random re-anchoring reproduces it. Verification's demonstrated closed-loop
   value is therefore: (a) SETTING the re-anchoring rate (the coin's p was
   parasitic on the verifier's measured rate; without verifying there is no
   signal for what p should be), (b) ADAPTING it under divergence (R1
-  tau-ignition: cr .59 -> 1.00 exactly at the derived tau — a fixed-p coin
+  tau-ignition: cr .59 -> 1.00 exactly at the derived tau - a fixed-p coin
   cannot ignite), and (c) the offline calibration table (M1 truth-tracking).
   Consistent with the paper's own sec:why-verifier framing ("verification is
   idle where drafts track reality, and correctly so"; blind commit-2 ties
@@ -140,7 +140,7 @@ call_ratio .595 (banked .612). The control is valid.
 
 # ============================================================
 # RATE-SWEEP AMENDMENT (registered 2026-08-01 AFTER the B1 verdict above
-# was read, BEFORE any sweep cell runs — stated openly)
+# was read, BEFORE any sweep cell runs - stated openly)
 # ============================================================
 
 B1's tie forces the rate-controller reading; this sweep is the dose-response
@@ -172,7 +172,7 @@ FROZEN PREDICTIONS:
 Single battery (20 jobs), no extension, no p added after readout.
 
 # ============================================================
-# RATE-SWEEP VERDICT — REACHER LEG (read 2026-08-01, job 2308892,
+# RATE-SWEEP VERDICT - REACHER LEG (read 2026-08-01, job 2308892,
 # reacher 12/12 COMPLETED; pusht 8 cells still running, readout pending)
 # ============================================================
 
@@ -182,7 +182,7 @@ Single battery (20 jobs), no extension, no p added after readout.
 | 0.125 | 85.74 (439/512) | 113/107/111/108 | .402-.419 |
 | 0.25 | 90.43 (463/512) | 116/116/120/111 | .458-.485 |
 | .4902 (B1 matched) | 90.33 | 116/115/117/113 | .591-.598 |
-| verifier (banked spec) | 90.82 (42-45) / 91.11 (42-49) | — | .612 |
+| verifier (banked spec) | 90.82 (42-45) / 91.11 (42-49) | - | .612 |
 
 - **P-RATE-1 CONFIRMED:** SR(p=0) = 84.57 <= 87.33 (coin - 3pp); paired
   per-seed diffs vs the matched coin +9/+3/+8/+8 of 128. The re-anchoring
@@ -191,7 +191,7 @@ Single battery (20 jobs), no extension, no p added after readout.
   measured curve (84.6 -> 85.7 -> 90.4 -> 90.3 -> 91.1).
 - **P-RATE-3 CONFIRMED:** call_ratio at p=0 sits at the mechanical 1/N
   floor (~0.357 vs predicted ~0.36) and rises with p.
-- Descriptive (declared axis): the SR curve saturates by p ~ 0.25 — the
+- Descriptive (declared axis): the SR curve saturates by p ~ 0.25 - the
   verifier's operating rate (0.49) sits ON the plateau, ~2x the knee. Read
   with R1: the adaptive headroom is what ignites to 1.0 under corruption;
   a fixed p=0.25 coin has no such response. Rate-controller decomposition
@@ -200,17 +200,17 @@ Single battery (20 jobs), no extension, no p added after readout.
   B1 tie at p=.4937).
 
 # ============================================================
-# RATE-SWEEP VERDICT — PUSHT LEG (read 2026-08-01, job 2308892,
+# RATE-SWEEP VERDICT - PUSHT LEG (read 2026-08-01, job 2308892,
 # 20/20 COMPLETED; battery closed)
 # ============================================================
 
 | p | SR pooled (seeds 42-45) | per-seed | call_ratio |
 |---|---|---|---|
-| 0 (banked commit-3) | ~80 (-18pp, banked; not re-run) | — | — |
+| 0 (banked commit-3) | ~80 (-18pp, banked; not re-run) | - | - |
 | 0.125 | **96.97** (993/1024) | 251/248/248/246 | .396-.406 |
 | 0.25 | 96.39 (987/1024) | 246/248/249/244 | .455-.460 |
-| .4937 (B1 matched) | 98.05 | — | .587-.594 |
-| verifier (banked spec) | 98.14 | — | .598 |
+| .4937 (B1 matched) | 98.05 | - | .587-.594 |
+| verifier (banked spec) | 98.14 | - | .598 |
 
 - **P-RATE-2 primary prediction FAILS; the declared alternative reading
   applies and is reported as-is:** both mid-p cells sit ABOVE spec - 3pp
@@ -223,10 +223,10 @@ Single battery (20 jobs), no extension, no p added after readout.
   ~.25); pusht = step at p=0 then flat. In BOTH, the verifier sits on the
   SR plateau, and per-event selectivity adds 0.1-0.8pp (B1).
 - HONEST NUANCE, recorded before a reviewer finds it: the verifier's
-  operating rate (.59-.61) is ABOVE the SR-knee on both envs — a fixed
+  operating rate (.59-.61) is ABOVE the SR-knee on both envs - a fixed
   coin at p~.25 matches SR with FEWER diffusion calls (call_ratio .46 vs
   .59). What the coin cannot do: (a) its p was DISCOVERED from the
-  verifier's own telemetry — there is no a-priori signal for the knee;
+  verifier's own telemetry - there is no a-priori signal for the knee;
   (b) it cannot ignite (R1: verifier cr .59 -> 1.00 exactly at the
   derived tau under corruption; a fixed coin stays fixed); (c) it carries
   no per-episode regime diagnostic (the call-ratio signal the paper

@@ -1,4 +1,4 @@
-"""Filmstrip renderer for --dump-strip npz files (poster/paper qualitative figs).
+"""Filmstrip renderer for --dump-strip npz files (qualitative figures).
 
 One row per episode: [start] [replan frames ...] [final] | [goal].
 Each replan frame shows the achieved state AT that replan boundary -- exactly

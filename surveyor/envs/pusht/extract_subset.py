@@ -23,7 +23,7 @@ from surveyor.envs.pusht.eval import sample_long, success_mask
 
 def parse_args():
     p = argparse.ArgumentParser(description="Extract a small subset h5 for transfer")
-    p.add_argument("--h5", required=True, help="the full source h5 (must actually work, e.g. ofs-v01)")
+    p.add_argument("--h5", required=True, help="the full source h5")
     p.add_argument("--out", required=True, help="output subset h5 path")
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--eval-filter", choices=["none", "success20", "success5"], default="success5")

@@ -39,7 +39,7 @@ def parse_args():
     p.add_argument("--n-draws", type=int, default=8)
     p.add_argument("--floor", type=float, default=0.098,
                    help="criterion floor p50 in the verification space "
-                        "(docs/tworoom_paired_prereg.md, gap probe 2300010)")
+                        "(prereg/2026-07-27_tworoom_paired.md, gap probe 2300010)")
     p.add_argument("--seed", type=int, default=0)
     return p.parse_args()
 

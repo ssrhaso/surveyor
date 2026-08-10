@@ -4,7 +4,7 @@ Dataset-pair operating characteristic of the transplant verifier's accept
 statistic (mean-pooled V-JEPA 2 tokens, rel L2, tau=0.20) against RECORDED
 DROID proprio ground truth. No closed loop, no probe error: both frames of
 every pair are real frames with recorded states. Definitions and predictions
-frozen in docs/certification_prereg.md ("M1-FM") before any number was
+frozen in prereg/2026-07-31_certification.md ("M1-FM") before any number was
 computed; the row must be labeled dataset-pair wherever quoted (the LeWM M1
 rows replay deployed serving decisions; this scores the same statistic over
 recorded-frame pairs).

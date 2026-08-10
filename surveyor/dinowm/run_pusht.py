@@ -58,7 +58,7 @@ if ARM == "spec":
     cfg["planner"]["accept_tau"] = float(os.environ.get("TAU", 0.121))
     cfg["planner"]["gdm_steps"] = int(os.environ.get("GDM_STEPS", 8))
     cfg["planner"]["spec_seed"] = cfg["seed"]
-    # autopsy serve modes (docs/dinowm_prereg.md AUTOPSY REGISTRATION):
+    # autopsy serve modes (prereg/2026-07-26_dinowm_instrument.md AUTOPSY REGISTRATION):
     # draft (production) | goal (D1 tautology) | snap (D2 draft-and-snap)
     cfg["planner"]["spec_serve"] = os.environ.get("SPEC_SERVE", "draft")
     if os.environ.get("SNAP_DIR"):

@@ -62,7 +62,7 @@ def parse_args():
                         "plain GC-IDM when c* <= tau (arbiter window 2x5); drafting "
                         "envs carry the tau arrival gate. One CEM solve/episode.")
     p.add_argument("--random-reject", type=float, default=None,
-                   help="decision-content control (docs/randreject_prereg.md): "
+                   help="decision-content control (prereg/2026-08-01_random_rejection.md): "
                         "replace the accept test with an i.i.d. coin rejecting "
                         "at this matched probability; all other mechanics "
                         "identical to the banked spec arm")

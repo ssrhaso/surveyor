@@ -1,11 +1,11 @@
-# GC-IDM branch registration — Reacher and Cube
+# GC-IDM branch registration - Reacher and Cube
 
 **Written:** 2026-08-07T12:24Z (13:24 local, Europe/London)
 **Companion to:** `prereg/2026-08-07_baselines.md` (P-GCIDM-1, P-GCIDM-2)
 
 ---
 
-## A. STATUS — THIS IS NOT A PRE-REGISTRATION. READ FIRST.
+## A. STATUS - THIS IS NOT A PRE-REGISTRATION. READ FIRST.
 
 This file was requested "before Reacher t=100/150 land", void once the cells
 report. **The cells had already reported.** Facts, exactly:
@@ -19,26 +19,26 @@ report. **The cells had already reported.** Facts, exactly:
   grid cell had been read.**
 
 So, exactly as with P-RF-1 in the companion file, everything below is a **blind
-interpretation rule** — a decision rule fixed while blind to the numbers — and
+interpretation rule** - a decision rule fixed while blind to the numbers - and
 **not** a pre-registration. It is weaker (the data existed and could in
 principle have been consulted) and stronger than a post-hoc reading. It must
 never be described as pre-registered.
 
 **This is the second time in one day the window has closed before the file was
 written.** The cause is the same both times: these arrays finish far faster than
-estimated (GC-IDM plans nothing — one MLP forward per step), so "write the
+estimated (GC-IDM plans nothing - one MLP forward per step), so "write the
 prereg while the jobs run" has failed twice. The working rule from here is that
 a prediction file is written and saved *before the array is submitted*, not
 while it is in flight. Recorded so the failure is not repeated a third time.
 
 ---
 
-## B. THE MECHANISM HYPOTHESIS — AND WHY ITS VALUE IS NOW LOST
+## B. THE MECHANISM HYPOTHESIS - AND WHY ITS VALUE IS NOW LOST
 
 The hypothesis, stated for the record:
 
 > GC-IDM collapses where the task requires **sequencing** beyond the planning
-> window, and holds where distance grows without compositional structure —
+> window, and holds where distance grows without compositional structure -
 > **transport** to a static target that the goal latent already encodes.
 > PushT is contact-rich routing (confirmed collapse, 100.0 -> 63.4). Reacher is
 > transport to a static target.
@@ -52,7 +52,7 @@ Cube.
 
 **Salvage, and the only way this axis becomes claimable:** it must be tested
 prospectively on a cell that has not been run. The clean candidate is
-**Two-Room** — navigation that requires routing around a wall, i.e. sequencing,
+**Two-Room** - navigation that requires routing around a wall, i.e. sequencing,
 on an environment where GC-IDM has never been trained or evaluated (no stride-1
 dense latent cache exists for it yet). The frozen prediction, registered here
 and now, genuinely in advance:
@@ -66,7 +66,7 @@ and now, genuinely in advance:
 > the sequencing/transport axis is refuted and must be dropped, not rescued.
 
 This requires a Two-Room dense latent build plus one GC-IDM training run. It is
-**proposed, not executed** — the standing instruction is that nothing further
+**proposed, not executed** - the standing instruction is that nothing further
 needs running, so this is the user's call. Absent that run, the
 sequencing/transport axis is reported as a post-hoc observation and explicitly
 labelled as one.
@@ -80,16 +80,16 @@ GC-IDM's own short-horizon cell on our populations: **100.0 at t=25**, 99.22 at
 t=50 (both already read before this file, and both already losses for us:
 -1.3pp and -2.9pp).
 
-**Branch A — GC-IDM lands below our arm at both t=100 and t=150.**
+**Branch A - GC-IDM lands below our arm at both t=100 and t=150.**
 PushT's collapse replicates on a second environment. The regime map is confirmed
 on two environments rather than one, and the paper's central claim strengthens:
 amortised control wins inside the planning window and fails beyond it, measured
 against a published, 100-130x cheaper controller.
 
-**Branch B — GC-IDM holds within a few points of its own t=25 cell (100.0).**
+**Branch B - GC-IDM holds within a few points of its own t=25 cell (100.0).**
 Then **Reacher is a loss and is reported as one**, plainly, in the table and in
 the text. The headline narrows to PushT and Cube. Under this branch the
-sequencing/transport story fits well — but per section B we do not get to claim
+sequencing/transport story fits well - but per section B we do not get to claim
 we predicted it, and the fit of an explanation is not evidence for it.
 
 **Stated in advance so it cannot be walked back:** Branch B is not a goalpost

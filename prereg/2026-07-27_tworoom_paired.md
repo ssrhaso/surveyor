@@ -734,7 +734,7 @@ FROZEN RULES:
 - No other verdict may change; +15.4pp headline and all banked cells
   untouched under every outcome.
 
-### VERDICT (2306870, all 12 tasks COMPLETED, read 2026-07-30 evening —
+### VERDICT (2306870, all 12 tasks COMPLETED, read 2026-07-30 evening -
 ### both extensions STRENGTHEN)
 
 - **FAIRNESS: pooled 12-seed control = 47.00** (ext seeds 42.19/45.31/
@@ -746,6 +746,6 @@ FROZEN RULES:
   weakest statistic (t~2.5 at 6 seeds) is now t~4.9 at 12.
 - **ORACLE CEILING: pooled 12-seed = 56.90** (seeds 42-47 reproduce
   57.81 exactly; ext 59.38/60.94/51.56/60.94/46.88/56.25 = 55.99).
-  Spec 57.03 vs pooled ceiling: diff +0.13pp, t ~ 0.06 — statistically
+  Spec 57.03 vs pooled ceiling: diff +0.13pp, t ~ 0.06 - statistically
   indistinguishable; **"at the oracle ceiling" STANDS**, now 12-seed on
   both sides. Ceiling re-stated as 56.9 wherever quoted.

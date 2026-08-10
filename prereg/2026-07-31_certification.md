@@ -1,13 +1,13 @@
 # Certification pre-registration (frozen 2026-07-31, BEFORE any run or readout)
 
-Purpose: give the word "certified" measured teeth. Two legs — (M1) a verifier
+Purpose: give the word "certified" measured teeth. Two legs - (M1) a verifier
 CALIBRATION readout against ground-truth state over per-replan traces, and
 (R1) a drafter CORRUPTION sweep showing what the accept test buys at serving
 time. Definitions and predictions frozen here before any number is computed.
 Trust order: this doc > memory > paper prose. Companion trace-collection runs
 (R2) produce traces only; NO success-rate from them may be quoted anywhere.
 
-## M1 — VERIFIER CALIBRATION (offline, existing + R2 traces)
+## M1 - VERIFIER CALIBRATION (offline, existing + R2 traces)
 
 Data: per-replan trace dumps (`--dump-traces`): for every draft event,
 `z_cond` (the achieved latent at that replan) and `block` (the served block).
@@ -45,16 +45,16 @@ FROZEN READOUTS (computed per env, over all replayed events):
    tau alongside the tau-robustness sweeps.
 These definitions may not be altered after the first number is seen.
 
-## R1 — DRAFTER CORRUPTION SWEEP (closed-loop, PushT t=150 headline cell)
+## R1 - DRAFTER CORRUPTION SWEEP (closed-loop, PushT t=150 headline cell)
 
 Mechanism question: what does reality-verification BUY when the drafter
 degrades? Every drafted waypoint w is displaced by sigma * ||w|| along a
 random unit direction (relative-norm corruption, applied at EVERY draft
-including re-drafts — the deployed semantics; implementation
+including re-drafts - the deployed semantics; implementation
 `--draft-noise` in surveyor/envs/pusht/eval.py + sources.py, corruption
 upstream of verification and of traces).
 
-Arms: verified (spec-accept, tau=0.20 derived, k=3, S=10, RH2 — the
+Arms: verified (spec-accept, tau=0.20 derived, k=3, S=10, RH2 - the
 headline config) vs BLIND consumption (identical except tau=999, which
 accepts everything = blind commit-N, the banked -18pp negative arm).
 sigma in {0, 0.1, 0.2, 0.4}; seeds 42-44; n=64; mode long, t=150, budget
@@ -65,7 +65,7 @@ FROZEN PREDICTIONS:
   relative size sigma lower-bounds the achievable rel-L2 of any real
   state to the corrupted waypoint, so accepts require sigma <~ tau.
   Prediction: the verified arm's call_ratio rises from its banked
-  baseline toward ~1.0 as sigma crosses the [tau/2, 2*tau] band — i.e.
+  baseline toward ~1.0 as sigma crosses the [tau/2, 2*tau] band - i.e.
   THE OFFLINE-DERIVED tau LOCALIZES THE CLOSED-LOOP IGNITION POINT.
   sigma=0.1 mild, sigma=0.2 substantial, sigma=0.4 near-total rejection.
 - P-CERT-2 (graceful vs compounding): SR_verified >= SR_blind at every
@@ -78,7 +78,7 @@ FROZEN PREDICTIONS:
 Failure of any prediction is reported as-is; no sigma grid extension or
 tau adjustment after readout.
 
-## R2 — TRACE COLLECTION (no quotable numbers)
+## R2 - TRACE COLLECTION (no quotable numbers)
 
 pusht spec t=150 (tau=0.20, k=3, S=10, RH2) seeds 42-44 and tworoom spec
 t=75 (specpaired, tau=0.098, RH2, anchored protocol) seeds 42-44, each
@@ -134,7 +134,7 @@ labeled) is quoted only if its probe passes the gate. Ridge + MLP both
 rerun; the conservative-row rule applies unchanged. If the amended probe
 also fails the gate, reacher's row stays unavailable, final.
 
-## M2 — ACCEPT-RATE vs REGIME (log mining, descriptive)
+## M2 - ACCEPT-RATE vs REGIME (log mining, descriptive)
 
 Mine call_ratio / advances / rejects from every banked grid cell's log
 across envs and horizons. Declared reading (descriptive, no bar): if the
@@ -148,7 +148,7 @@ not, nothing is claimed.
 # re-defined after readout)
 # ============================================================
 
-## M1 VERDICT — the calibration table (jobs 2308841/2308848/2308850/2308862)
+## M1 VERDICT - the calibration table (jobs 2308841/2308848/2308850/2308862)
 
 All rows: replay mismatches = 0 (the offline replay reproduces every
 deployed accept/reject decision exactly) and d_accept < d_reject.
@@ -184,11 +184,11 @@ its ranking stays near-perfect. Spearman: >= 0.5 on cube/reacher
 as such, per the frozen reading; the FA/FR/separation stand as
 measurements regardless).
 
-## R1 VERDICT — corruption sweep (2308689, 24/24 COMPLETED)
+## R1 VERDICT - corruption sweep (2308689, 24/24 COMPLETED)
 
 - **P-CERT-1 CONFIRMED (the headline):** verified arm call_ratio .59 ->
   .66 -> 1.00 -> 1.00 across sigma = 0 / .1 / .2 / .4; advances 518 ->
-  420 -> 2 -> 0. The rejection ignition sits between tau/2 and tau —
+  420 -> 2 -> 0. The rejection ignition sits between tau/2 and tau -
   **the offline-derived tau=0.20 localizes the closed-loop detection
   point exactly as frozen.** Blind arm flat at its mechanical 1/N floor
   (.34) at every sigma.
@@ -196,16 +196,16 @@ measurements regardless).
   (verified 61.5/59.9/61.5/60.9; blind 61.5/64.6/64.6/61.5 incl. the
   final sigma=.4 cells). Mechanism: fresh-draw zero-mean isotropic
   jitter is temporally averaged by both serving modes; no compounding.
-  Verification's SR value is against AUTOCORRELATED error — already
-  banked three ways (blind-commit-3 −18pp on the spine, the stale-oracle
+  Verification's SR value is against AUTOCORRELATED error - already
+  banked three ways (blind-commit-3 -18pp on the spine, the stale-oracle
   results, the crossover). Reported as-is; no grid extension.
 - **P-CERT-3:** the sigma=0 verified cells (~61.5) match the banked
   unfiltered-population drafted level (~59). Caveat recorded: the banked
-  blind-commit −18pp was measured on the filtered spine population; on
+  blind-commit -18pp was measured on the filtered spine population; on
   THIS unfiltered population blind ~= verified at sigma=0, so the blind
   anchor is population-mismatched and only the spec anchor is read.
 
-## R2 VERDICT — trace collection (2308713, 12/12 COMPLETED)
+## R2 VERDICT - trace collection (2308713, 12/12 COMPLETED)
 
 All four envs' headline arms produced full accept+reject calibration
 event logs under the amended recording (3,552 / 1,923 / 991 / 2,012
@@ -223,7 +223,7 @@ probe defense; registered here before any number is read:
    FA(r)/FR(r) as functions of a swept READOUT radius r around the env's
    criterion radius, plus the rel-vs-state-dist operating curve with the
    derived tau marked. This is a descriptive sensitivity axis on the readout
-   side only — explicitly NOT a tau re-derivation or re-thresholding
+   side only - explicitly NOT a tau re-derivation or re-thresholding
    (graveyard rule 3 untouched: decisions and tau are the deployed ones).
    Declared reading (descriptive): where FA(r) collapses just above the
    criterion radius, the false accepts are near-boundary, consistent with the
@@ -236,7 +236,7 @@ probe defense; registered here before any number is read:
    Descriptive, no bar, exactly as M2 was declared.
 
 Companion closed-loop control registered separately in
-docs/randreject_prereg.md (matched-rate random-rejection, frozen the same
+prereg/2026-08-01_random_rejection.md (matched-rate random-rejection, frozen the same
 day BEFORE any run).
 
 ### Extraction readout (08-01, same day; jobs 2308864 4/4)
@@ -244,28 +244,28 @@ day BEFORE any run).
 Per-event CSVs pulled local (Results/calibration/events_{env}.csv; 3552 /
 2012 / 991 / 1923 events pusht/reacher/cube/tworoom); the rerun pipeline
 reproduces every banked FA exactly (.102/.400/.000/.522). FA(r) declared
-reading CONFIRMED for the two scary rows — false accepts are near-boundary:
+reading CONFIRMED for the two scary rows - false accepts are near-boundary:
 - reacher: FA .400 at the 0.05-rad criterion -> .290 (r=0.06) -> .174
   (0.075) -> **.064 at 2x radius** -> .003 (0.15); accept p90 = 0.090.
 - tworoom: FA .522 at 16px -> .380 (20) -> .283 (24) -> **.130 at 2x
   radius** -> .000 (48px).
 - pusht: .102 -> .045 (25) -> .020 (30). cube: .000 at criterion (and
-  .194 at HALF the radius — the verifier is sharp exactly at scale).
+  .194 at HALF the radius - the verifier is sharp exactly at scale).
 Operating-curve data (rel vs state_dist with derived tau) now plottable
 from the same CSVs; figure work belongs to the writing bundle.
 
-## M1-FM — FOUNDATION-SCALE CALIBRATION ROW (registered 2026-08-01 BEFORE
+## M1-FM - FOUNDATION-SCALE CALIBRATION ROW (registered 2026-08-01 BEFORE
 ## any number was computed; dataset-pair variant, no closed loop)
 
-Purpose: the certification-frame matrix's one empty cell — the calibration
+Purpose: the certification-frame matrix's one empty cell - the calibration
 methodology beyond LeWM. Substrate: V-JEPA 2 ViT-g (vjepa2_ac_vit_giant
-encode path, layer-normed tokens, MEAN-POOLED — exactly the space the
+encode path, layer-normed tokens, MEAN-POOLED - exactly the space the
 transplant's verifier read; tau=0.20 = the frozen transfer value). Data:
 the 2,000 cached DROID episodes (data/droid2k_lat, (T,256,1408) fp16
 tokens + recorded 7-d proprio states). NO serving loop exists on this
 stack (chapter closed by supervisor agreement; this uses its assets
 without reviving its claims): this row is a DATASET-PAIR operating
-characteristic and must be labeled as such wherever quoted — the LeWM
+characteristic and must be labeled as such wherever quoted - the LeWM
 rows replay deployed serving decisions; this row scores the same accept
 statistic over recorded-frame pairs.
 
@@ -276,14 +276,14 @@ Frozen definitions:
   50 within-episode pairs each, (i, i+Delta), Delta ~ U{1..32} (the
   far-goal horizon) -> 20k pairs; plus 5k cross-episode pairs (different
   episodes, uniform frames).
-- Ground truth: RECORDED states (no probe error — both frames are real
+- Ground truth: RECORDED states (no probe error - both frames are real
   frames); criterion dims = EE position (dims 0-2), distance = L2 in
   meters. A ridge probe pooled->state is additionally fit (4k frames,
   80/20 split) and its R^2 on dims 0-2 reported as the decodability row
   under the standard 0.90 gate label.
 - Readouts, within-episode pairs: Spearman rho(rel, EE distance);
   FA(r)/FR(r) at tau=0.20 for r in {0.02, 0.04, 0.08, 0.16} m (DROID has
-  no task criterion radius — the CURVE is the deliverable, no
+  no task criterion radius - the CURVE is the deliverable, no
   single-radius headline); accept-vs-reject EE-distance p10/50/90;
   accept rate. Cross-episode pairs: accept rate ONLY (scene
   discrimination check).
@@ -311,29 +311,29 @@ Results/calibration/cal_vjepa2_droid.json (+ events CSV, 20k within /
 - **P-FM-1 REFUTED, in the favorable direction, reported as-is:** the
   accept test at tau=0.20 is NOT degenerate at foundation scale. Cross-
   episode accept rate = **0.0008** (predicted > 0.5; cross rel p50 =
-  0.496, far above tau — near-perfect scene discrimination) and within-
+  0.496, far above tau - near-perfect scene discrimination) and within-
   episode accept rate = 0.850 (predicted > 0.9). The prediction's
   premise (July gap_droid.json: cross p50 0.153 on the 98-episode
   droid_lat pool) is contradicted by the 2,000-episode measurement; a
   descriptive reconciliation diagnostic (identical code path over the
   old 98-episode pool) is in flight and its outcome will be recorded
   here either way. No frozen readout depends on it.
-- **P-FM-2: rho = 0.526 — the TRACKS band (>= 0.5),** better than
+- **P-FM-2: rho = 0.526 - the TRACKS band (>= 0.5),** better than
   pusht's own deployed row (.49) and tworoom's (.36): the pooled
   V-JEPA 2 verifier statistic rank-tracks physical end-effector
   distance over recorded-frame pairs.
 - Separation: accepts EE p10/50/90 = 0.020/0.127/0.340 m vs rejects
   0.136/0.283/0.474 (2.2x at p50); FR tiny (.007-.14 across the radius
   grid). FA(r) high against tight radii (.90/.80/.65/.40 at
-  2/4/8/16 cm): tau=0.20 is LOOSE in EE-meters here — DROID has no task
+  2/4/8/16 cm): tau=0.20 is LOOSE in EE-meters here - DROID has no task
   criterion radius, so this is the declared curve readout, no headline.
 - Decodability row: ridge probe R^2 (EE dims) = 0.585 -> **below the
   0.90 gate; row recorded unavailable** (the operating characteristic
-  is probe-free by construction — recorded states).
+  is probe-free by construction - recorded states).
 
 READING (within the frozen declarations): the calibration methodology
 runs unchanged at foundation scale, and the verifier statistic it
-audits is better-behaved there than the July gap verdict assumed —
+audits is better-behaved there than the July gap verdict assumed -
 scene-discriminating and distance-tracking (rho 0.53), with tau=0.20
 transferring as a rank-sensible but metrically loose threshold. The
 paper may quote this row ONLY with the dataset-pair label and the
@@ -348,7 +348,7 @@ within stats agreeing with July (within p50 .128 vs July hop(10) p50
 .121; rho there 0.593, cross-episode accepts 0/2000). Root cause found
 in code: gap_stat.py's "cross" row measures a random frame against the
 SAME episode's final frame (a goal-distance statistic, line 89), not
-cross-episode pairs — July's 0.153 sits inside the within-pair span and
+cross-episode pairs - July's 0.153 sits inside the within-pair span and
 is consistent with every new number. So no measurement contradicts any
 other; P-FM-1's cross clause was frozen on a misreading of that JSON
 key (recorded as such); the scene-discrimination finding (cross-episode
@@ -359,14 +359,14 @@ consistent with the July tau-above-gap serving concern and with the
 tracking rho. M1-FM row cleared for the paper under its required
 labels.
 
-## M2 VERDICT — CONFIRMED (Results/acceptrate_mine.csv, 1,514 rows)
+## M2 VERDICT - CONFIRMED (Results/acceptrate_mine.csv, 1,514 rows)
 
 call_ratio falls with goal distance: pusht .88 (t25) -> .68 (t50) ->
 .61 (t75) -> .57 (t150); reacher .75 -> .66 -> .64 -> .58 (t25->t150);
 cube (single-horizon, arrival-gated) .84. The accept rate rises as the
 goal exits the planning window: the serving loop independently measures
 the regime the window rule describes. (tworoom rows need a dedicated
-filename regex; its banked t=75 call ratio is 0.95 — the weak-encoder
+filename regex; its banked t=75 call ratio is 0.95 - the weak-encoder
 exception, consistent with its scope row.)
 
 ### M2 tworoom completion readout (08-01, per the extraction addendum)

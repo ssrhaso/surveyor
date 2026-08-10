@@ -31,7 +31,7 @@ seeds on all four environments"), backed by logs. Nothing else.
 
 - Stage 1 venv build: PASS (REPRO-VENV-DONE, all import checks OK).
 - **THE SMOKE FOUND A REAL BUG, its exact purpose:** the documented
-  bootstrap spec was INCOMPLETE — `pygame`, `pymunk`, `shapely` (PushT;
+  bootstrap spec was INCOMPLETE - `pygame`, `pymunk`, `shapely` (PushT;
   installed ad-hoc by pusht_deps.sh during setup, never folded back) and
   `ogbench` (Cube) exist only in the production venv. Clean-room rebuild
   failed on 2/4 envs with ModuleNotFoundError. Fix applied: packages

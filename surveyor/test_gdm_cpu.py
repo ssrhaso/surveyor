@@ -132,7 +132,7 @@ def test_planner_standardization_and_scale():
     # An UNTRAINED model predicts eps~0 (adaLN-Zero + zero final layer), so DDIM
     # just rescales the initial noise rather than denoising to the data manifold;
     # the unstandardized output is native-E-space-SCALED garbage. We only assert
-    # the scale here (>> unit). The real ||z||~13.9 check is post-training on the box.
+    # the scale here (>> unit). The real ||z||~13.9 check is post-training on GPU.
     out_norm = nxt.norm(dim=1).mean().item()
     assert out_norm > 1.0, f"output collapsed below native scale: ||z||={out_norm:.3f}"
     print(f"[4] standardization invertible; sample_next {tuple(nxt.shape)}; "

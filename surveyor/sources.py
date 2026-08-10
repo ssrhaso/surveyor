@@ -263,17 +263,17 @@ class SurveyorSource:
         self._gen.manual_seed(int(seed))
         self.record = record
         self.trace = []
-        # calibration event log (docs/certification_prereg.md M1), record-gated:
+        # calibration event log (prereg/2026-07-31_certification.md M1), record-gated:
         # one (env, rel, accepted, z_achieved, target) per VERIFICATION event, so
         # accepts are logged too (the draft-only trace cannot reconstruct the
         # achieved latent of an accepted replan).
         self.cal = []
-        # corruption sweep (docs/certification_prereg.md): displace every drafted
+        # corruption sweep (prereg/2026-07-31_certification.md): displace every drafted
         # waypoint w by draft_noise * ||w|| along a random unit direction, at
         # EVERY draft including re-drafts (deployed semantics). 0.0 = off.
         # Verification and traces see the corrupted, served block.
         self.draft_noise = float(draft_noise)
-        # matched-rate random-rejection control (docs/randreject_prereg.md):
+        # matched-rate random-rejection control (prereg/2026-08-01_random_rejection.md):
         # reject every verification event with this probability, drawn from a
         # DEDICATED coin generator so the draft-sampling stream matches a normal
         # spec run at the same seed.
@@ -787,7 +787,7 @@ def build_oracle_table(h5_path, model, episodes_idx, start_steps, goal_offset,
 # Policy: advance subgoal at each replan boundary, inject into info_dict
 class FFJEPAPolicy:
     """Mixin-style wrapper over WorldModelPolicy. Built by `make_ffjepa_policy`
-    so the swm base class resolves at call time (pip-installed on the box, source
+    so the swm base class resolves at call time (pip-installed in the environment, source
     checkout on CPU)."""
 
 

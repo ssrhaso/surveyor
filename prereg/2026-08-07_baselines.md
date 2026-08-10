@@ -1,7 +1,7 @@
 # Pre-registration: baseline battery (random floor, GC-IDM, cited comparators)
 
 **Written:** 2026-08-07T11:13Z (12:13 local, Europe/London)
-**Scope:** the baseline block requested 2026-08-07 — random-action floor
+**Scope:** the baseline block requested 2026-08-07 - random-action floor
 (job 2329041), GC-IDM as a flat comparator, DINO-WM horizon panel, and the
 transcription of LeWM Fig. 6.
 **Rule:** every prediction below is frozen at the timestamp on its own heading.
@@ -10,7 +10,7 @@ after a readout.
 
 ---
 
-## A. HONESTY NOTE ON THE RANDOM-FLOOR PREDICTION — READ FIRST
+## A. HONESTY NOTE ON THE RANDOM-FLOOR PREDICTION - READ FIRST
 
 The Cube random-floor prediction (P-RF-1) was requested "before job 2329041
 reports", void if written after the results land. **It was written after the
@@ -28,7 +28,7 @@ exactly:
 
 What is therefore still true and worth recording: **the author had not read any
 success-rate value from this array at the time of writing.** P-RF-1 below is
-consequently downgraded to a **blind interpretation rule** — a decision rule
+consequently downgraded to a **blind interpretation rule** - a decision rule
 fixed while blind to the number, which is weaker than pre-registration (the
 result existed and could in principle have been consulted) but stronger than a
 post-hoc reading. It is labelled as such wherever it appears and must never be
@@ -40,7 +40,7 @@ those are genuine pre-registrations.
 
 ---
 
-## P-RF-1 (BLIND INTERPRETATION RULE — NOT PRE-REGISTERED) — Cube random floor
+## P-RF-1 (BLIND INTERPRETATION RULE - NOT PRE-REGISTERED) - Cube random floor
 
 **Frozen blind to the value at:** 2026-08-07T11:13Z
 
@@ -54,7 +54,7 @@ operationalised as **SR in [0, 15]%** pooled over the eight seeds.
 **Declared falsifier, fixed in advance of reading:** if the pooled Cube random
 floor returns **>= 30%**, then our Cube protocol is *not* as separated from
 LeWM's as we have been claiming, and the held-out-environment framing for Cube
-needs revisiting — specifically the claim that Cube is a genuinely harder,
+needs revisiting - specifically the claim that Cube is a genuinely harder,
 independently-constructed protocol rather than a relabelling of theirs.
 
 This is a **bar over-specification**, not a goalpost move: the [0,15] band and
@@ -64,7 +64,7 @@ will be reported as such.
 
 ---
 
-## P-DISP-1 (PRE-REGISTERED) — Cube displacement probe
+## P-DISP-1 (PRE-REGISTERED) - Cube displacement probe
 
 **Frozen at:** 2026-08-07T11:13Z. Probe not yet written or run at this time.
 
@@ -74,8 +74,8 @@ protocol and (b) our certified protocol at goal offset 150. Report median and
 p90 for each, and the **fraction of LeWM-protocol episodes whose start-to-goal
 displacement is below the 0.04 m success radius**.
 
-**Prediction:** that fraction is **large** — operationalised as **>= 30%** of
-LeWM-protocol episodes starting already inside the success radius — which would
+**Prediction:** that fraction is **large** - operationalised as **>= 30%** of
+LeWM-protocol episodes starting already inside the success radius - which would
 be the mechanism explaining how a random policy reaches 48% there.
 
 **Consequence, declared now:** this number gates the citation block. If the
@@ -87,7 +87,7 @@ we say so.
 
 ---
 
-## P-GCIDM-1 (PRE-REGISTERED) — GC-IDM may displace LeWM-flat as "strongest flat"
+## P-GCIDM-1 (PRE-REGISTERED) - GC-IDM may displace LeWM-flat as "strongest flat"
 
 **Frozen at:** 2026-08-07T11:13Z. GC-IDM not implemented in this repo at this
 time; no GC-IDM cell has been run.
@@ -108,19 +108,19 @@ Grid cells in scope: PushT t{25,50,75,100,150}, Reacher t{25,50,100,150}
 
 ---
 
-## P-GCIDM-2 (PRE-REGISTERED) — GC-IDM collapses at long horizon
+## P-GCIDM-2 (PRE-REGISTERED) - GC-IDM collapses at long horizon
 
 **Frozen at:** 2026-08-07T11:13Z.
 
 **Prediction:** GC-IDM collapses at long horizon in the same manner as flat CEM,
-for the same structural reason — a single forward pass with no lookahead cannot
+for the same structural reason - a single forward pass with no lookahead cannot
 represent a goal that outruns the planning window.
 
 **Operationalisation:** GC-IDM's SR falls monotonically with goal offset on
 PushT and is **below its own t=25 cell by at least 40pp at t=150**.
 
-**Declared falsifier:** if GC-IDM does **not** collapse — if it holds within
-20pp of its short-horizon cell at t=150 — that is **headline-affecting**, because
+**Declared falsifier:** if GC-IDM does **not** collapse - if it holds within
+20pp of its short-horizon cell at t=150 - that is **headline-affecting**, because
 it would mean a cheap flat controller achieves what we attribute to verified
 subgoal consumption. It is reported as-is, prominently, not buried. In that case
 P-GCIDM-1 also applies and the margin row is recomputed against it.
@@ -135,7 +135,7 @@ comparison lands on the same footing as the existing cost accounting.
 
 # READOUTS
 
-## P-DISP-1 READOUT — CONFIRMED (2026-08-07T11:34Z)
+## P-DISP-1 READOUT - CONFIRMED (2026-08-07T11:34Z)
 
 `surveyor/probes/probe_cube_displacement.py`, 10,000 episodes (all ep_len 201),
 `Results/cube_displacement.json`. Displacement = `||block_pos[start+offset] -
@@ -151,7 +151,7 @@ block_pos[start]||` in metres; radius 0.04 m.
 **38.38% >= the declared 30% trigger: CONFIRMED.** Under LeWM's protocol more
 than a third of episodes begin with the cube already inside the success radius,
 so a policy that does nothing succeeds on them; that is the mechanism behind
-their Random entry of 48%. Under our protocol the figure is **0.00%** — not one
+their Random entry of 48%. Under our protocol the figure is **0.00%** - not one
 episode of 10,000 is vacuous, with or without the held-out episode floor, so the
 floor is not what creates the separation.
 
@@ -159,7 +159,7 @@ floor is not what creates the separation.
 only with this caveat attached. The two Cube protocols are not comparable, and
 their Random entry measures protocol geometry rather than task difficulty.
 
-## P-RF-1 READOUT — expectation met, at the top edge of the band (2026-08-07T11:36Z)
+## P-RF-1 READOUT - expectation met, at the top edge of the band (2026-08-07T11:36Z)
 
 Random floor, job 2329041, pooled over the declared seeds, all cells at full
 seed count (`Results/random_floor.csv`).
@@ -175,7 +175,7 @@ smoothed: the expectation was met, not comfortably.
 Read together with P-DISP-1 the two numbers are coherent and mutually
 reinforcing: 0.00% of our Cube episodes start inside the success radius, so the
 whole 14.84% is random actions genuinely nudging the cube into tolerance within
-300 steps, not vacuous cells. LeWM's 48% decomposes very differently — 38.38%
+300 steps, not vacuous cells. LeWM's 48% decomposes very differently - 38.38%
 vacuous starts plus a smaller genuine remainder.
 
 ## Random floor, full grid (context for the whole block)
@@ -204,8 +204,8 @@ both cut against us and must not be discovered later:**
    are therefore weakly discriminative: our +1.5pp margin over LeWM-flat at
    t=25 sits on top of a task a random policy already solves four times in five.
    This is an argument *for* separating short from long horizon in the results,
-   not against it — random falls 82.71 -> 0.10 across t=25 -> 150 while our arm
-   holds ~98-99 — but the t=25 cell should never be presented as evidence of
+   not against it - random falls 82.71 -> 0.10 across t=25 -> 150 while our arm
+   holds ~98-99 - but the t=25 cell should never be presented as evidence of
    anything on its own.
 2. **Reacher's random floor is horizon-independent at ~9-13%**, and it
    independently reproduces the "random-policy floor (8.6-11.3)" already quoted

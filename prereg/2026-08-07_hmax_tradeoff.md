@@ -23,10 +23,10 @@ Both are far below our arm's 98.1. The two failures have *different* causes:
 clamping feeds an out-of-distribution horizon signal, while widening `H_max`
 forces one 1.5M-parameter model to regress actions for goal pairs up to 300
 steps apart. The paper's own Table 3 shows the second effect in miniature
-(PushT: `H_max=50` → 85.0, `H_max=100` → 83.5, at budget 50).
+(PushT: `H_max=50` -> 85.0, `H_max=100` -> 83.5, at budget 50).
 
 **Hypothesis (H-TRADEOFF):** on a task whose difficulty genuinely scales with
-horizon, amortised inverse dynamics faces a bind with no good setting — small
+horizon, amortised inverse dynamics faces a bind with no good setting - small
 `H_max` incurs clamping shift, large `H_max` dilutes capacity across a harder
 regression problem. Subgoal decomposition escapes it by construction, because
 each waypoint is a short-horizon problem no matter how long the episode is.

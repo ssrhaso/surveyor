@@ -8,7 +8,7 @@ sub-planner, world model, and evaluator are untouched; cem.py has a 5-line
 guarded branch accepting pre-encoded latent goals.
 
 Verification metric, which MUST match the pre-registered gap space
-(docs/dinowm_prereg.md): rel L2 between POOLED VISUAL tokens, the mean over
+(prereg/2026-07-26_dinowm_instrument.md): rel L2 between POOLED VISUAL tokens, the mean over
 patch tokens only, excluding the proprio token as the gap statistic does.
 
 ARRIVAL GATE (added 2026-07-28). The first battery collapsed: flat climbed and
@@ -208,7 +208,7 @@ class SurveyorMPCPlanner(MPCPlanner):
             self.readout_tau = float(readout_tau if readout_tau is not None
                                      else ck["tau_derived"])
             print(f"[spec] lens={readout_ckpt} lens_tau={self.readout_tau:.3f}")
-        # ---- autopsy serve modes (docs/dinowm_prereg.md AUTOPSY REGISTRATION):
+        # ---- autopsy serve modes (prereg/2026-07-26_dinowm_instrument.md AUTOPSY REGISTRATION):
         # draft = production path | goal = D1 tautology (serve the goal grid
         # through the same latent-goal branch) | snap = D2 draft-and-snap
         # (every drafted grid replaced by its nearest REAL cached train grid,

@@ -90,7 +90,7 @@ def parse_args():
                         "random unit direction, every draft incl. re-drafts. "
                         "Blind consumption = --accept-tau 999 (accepts all).")
     p.add_argument("--random-reject", type=float, default=None,
-                   help="decision-content control (docs/randreject_prereg.md): "
+                   help="decision-content control (prereg/2026-08-01_random_rejection.md): "
                         "replace the accept test with an i.i.d. coin rejecting "
                         "at this matched probability; all other mechanics "
                         "identical to the banked spec arm")
@@ -176,7 +176,7 @@ def parse_args():
                         "first N envs (the achieved state the verifier sees), "
                         "plus per-replan advance/redraft/gate events for sources "
                         "that log them; saved as npz for filmstrip rendering "
-                        "(render_strips.py). Poster/paper qualitative figures.")
+                        "(render_strips.py), for the paper's qualitative figures.")
     p.add_argument("--dump-strip-out", default="strips",
                    help="output directory for --dump-strip npz files")
     return p.parse_args()

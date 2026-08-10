@@ -15,7 +15,7 @@ Self-contained per env:
      rho(rel, state distance), and false-accept / false-reject rates at the
      env's own success-criterion radius.
 
-Definitions are frozen in docs/certification_prereg.md and may not change after
+Definitions are frozen in prereg/2026-07-31_certification.md and may not change after
 the first number is seen. Caveat recorded there: probing a DRAFTED target
 assumes near-manifold drafts (LeWM drafters pass the norm and faithfulness
 gates), so probe outputs on drafts are sanity-checked against state bounds.
