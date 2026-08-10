@@ -25,7 +25,7 @@ minutes of GPU each on cached frames, so there is no reason not to have them.
 
 ## What runs
 
-`specaccept.probes.probe_floor --verify-space dino` on Reacher and Cube, the
+`surveyor.probes.probe_floor --verify-space dino` on Reacher and Cube, the
 same probe and the same flag that produced the existing PushT DINOv2 row. No
 `--gdm-ckpt`, so sampler dispersion (part C) is skipped: this measures the
 temporal floor, the criterion floor, and the S=10 hop displacement, all in

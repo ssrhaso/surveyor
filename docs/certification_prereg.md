@@ -51,7 +51,7 @@ Mechanism question: what does reality-verification BUY when the drafter
 degrades? Every drafted waypoint w is displaced by sigma * ||w|| along a
 random unit direction (relative-norm corruption, applied at EVERY draft
 including re-drafts — the deployed semantics; implementation
-`--draft-noise` in specaccept/envs/pusht/eval.py + sources.py, corruption
+`--draft-noise` in surveyor/envs/pusht/eval.py + sources.py, corruption
 upstream of verification and of traces).
 
 Arms: verified (spec-accept, tau=0.20 derived, k=3, S=10, RH2 — the

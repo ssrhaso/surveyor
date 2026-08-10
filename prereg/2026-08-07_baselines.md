@@ -137,7 +137,7 @@ comparison lands on the same footing as the existing cost accounting.
 
 ## P-DISP-1 READOUT — CONFIRMED (2026-08-07T11:34Z)
 
-`specaccept/probes/probe_cube_displacement.py`, 10,000 episodes (all ep_len 201),
+`surveyor/probes/probe_cube_displacement.py`, 10,000 episodes (all ep_len 201),
 `Results/cube_displacement.json`. Displacement = `||block_pos[start+offset] -
 block_pos[start]||` in metres; radius 0.04 m.
 

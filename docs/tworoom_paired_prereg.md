@@ -45,7 +45,7 @@ behaved (equiv p50 0.081 vs LeWM's 0.876). Both halves of a waypoint must
 describe the SAME imagined future, so a single drafter emits
 `z = [ z_lewm (192) | z_dino (384) ]` and serving splits it: the LeWM half goes
 to the cost model, the DINOv2 half is what the accept test compares
-(`specaccept/paired.py`).
+(`surveyor/paired.py`).
 
 This generalises the lens: `learn_readout` already certifies in a learned
 readout of the planner's space rather than the space itself. Here the readout
@@ -129,7 +129,7 @@ Four arms, so the claim carries its own controls:
 |---|---|
 | `baseline` | flat CEM to the goal latent (the anchor) |
 | `gdm` | draft every replan, no verification (drafting without certification) |
-| `specaccept` tau=0.20 | verify in LeWM space (PREDICTED DEGENERATE-REJECT) |
+| `surveyor` tau=0.20 | verify in LeWM space (PREDICTED DEGENERATE-REJECT) |
 | `specpaired` tau=0.20 | verify in frozen-DINOv2 space, transfer default (primary) |
 | `specpaired` tau=0.098 | same, at the band floor (secondary) |
 | `specpaired` + lens | the prescribed mechanism, run even though its gap stayed closed |
@@ -139,7 +139,7 @@ Four arms, so the claim carries its own controls:
 - **T1 (applicability).** `specpaired` mechanics are non-degenerate:
   call_ratio strictly inside (0.05, 0.95). The verifier must actually both
   accept and reject.
-- **T2 (control, isolates the verifier).** `specaccept` at the same tau IS
+- **T2 (control, isolates the verifier).** `surveyor` at the same tau IS
   degenerate: call_ratio >= 0.95, and its SR is within noise of `gdm`. This is
   the measurement proving the paired SPACE is what changed the outcome, not the
   drafter and not the extra parameters.
@@ -179,7 +179,7 @@ The first battery collapsed because both TwoRoom drafters emitted latents about
 epochs, norm ratio 0.934). But repairing it exposed a deeper fault that no
 drafter can fix.
 
-`specaccept/probes/probe_stride_saturation.py` measures, per stride S, how far
+`surveyor/probes/probe_stride_saturation.py` measures, per stride S, how far
 a frame S ahead sits relative to two UNRELATED frames. The planner scores CEM
 candidates by terminal L2 to the served subgoal, so once that ratio approaches
 1.0 the subgoal is indistinguishable from noise and drafting cannot help at any
@@ -269,7 +269,7 @@ quoted as a win.
 
 ### Best-of-k drafting, registered before any run
 
-Mechanism (`--best-of-k`, `specaccept/paired.py`): sample k candidate blocks
+Mechanism (`--best-of-k`, `surveyor/paired.py`): sample k candidate blocks
 per re-draft, serve the one scoring best in the DINOv2 half. Same principle
 as the two mechanisms that measured positive (decisions in the structured
 space, execution in the planner's space). Two zero-constant scoring rules:
@@ -308,7 +308,7 @@ protocol +5.47pp as an internal result.
 ## Log
 
 - 2026-07-27: diagnosis re-confirmed from raw logs and gap JSONs; paired
-  verifier implemented (`specaccept/paired.py`, opt-in `wants_frames` hook in
+  verifier implemented (`surveyor/paired.py`, opt-in `wants_frames` hook in
   `sources.py`, `--dino-pair` in the TwoRoom builder, `specpaired` arm in the
   TwoRoom driver); prep job 2300008 submitted (gap probe -> paired subgoals ->
   576-d joint drafter). Bars above frozen before it returned.
@@ -629,7 +629,7 @@ while the composite table's flat comparators are 12-seed; precision-only
 extensions close the asymmetry.
 
 COMPOSITE ARM (one policy, driver-internal dispatch: --composite-crossover
-45 in specaccept/envs/tworoom/eval.py). At each t the driver routes on the
+45 in surveyor/envs/tworoom/eval.py). At each t the driver routes on the
 task's KNOWN goal distance: goal_offset <= 45 (the measured crossover,
 midpoint of the confirmed [40,50] band -- the ONE constant) -> flat
 branch; else -> certified spec branch (specpaired, tau=0.098 derived,
