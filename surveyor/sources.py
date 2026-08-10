@@ -3,7 +3,7 @@
 SubgoalCostModel scores rollouts against info_dict['subgoal_emb'] instead of the
 goal image, reducing to the flat LeWM cost when the two are equal. FFJEPAPolicy
 injects a per-env subgoal at every replan boundary from a pluggable source
-(oracle, GDM, regressor, spec-accept, DSpark, lerp, horizon-gated, c*-retire).
+(oracle, GDM, regressor, Surveyor, DSpark, lerp, horizon-gated, c*-retire).
 Injected latents must be native encoder outputs; nothing is renormalized.
 """
 
@@ -97,7 +97,7 @@ class OracleSubgoalSource:
 
 
 class VerifiedOracleSource:
-    """TRUE demo waypoints consumed the way spec-accept consumes drafts.
+    """TRUE demo waypoints consumed the way Surveyor consumes drafts.
 
     Advances to the next waypoint only when the ACHIEVED latent verifies
     against the current one (rel L2 <= tau), re-anchored at every replan, so
@@ -224,7 +224,7 @@ class RegressorSubgoalSource:
         return self._cache.clone()
 
 
-class SpecAcceptSubgoalSource:
+class SurveyorSource:
     """Speculative subgoal consumption with reality as the verifier.
 
     At each replan the achieved latent is checked against the subgoal last
@@ -477,7 +477,7 @@ def cem_flat_cstar(lewm, cost_model, z0, z_goal, cem, adim=2):
 
 
 class CstarRetireSource:
-    """Unified spec-accept: draft only while the planner certifies the goal is
+    """Routed Surveyor: draft only while the planner certifies the goal is
     out of reach.
 
     Every unretired env re-reads c* = rel(z_hat_H, z_goal) from one flat CEM plan
@@ -494,7 +494,7 @@ class CstarRetireSource:
     def __init__(self, planner, lewm, n_envs, device="cpu", n_steps=50, seed=42,
                  tau=0.2, horizon=2, action_block=5, num_samples=300,
                  cem_steps=30, topk=30, var_scale=1.0, adim=2, record=False):
-        self.spec = SpecAcceptSubgoalSource(planner, n_envs, device=device,
+        self.spec = SurveyorSource(planner, n_envs, device=device,
                                             n_steps=n_steps, seed=seed, tau=tau,
                                             record=record)  # latent goal_gate OFF by design
         self.lewm = lewm
@@ -547,7 +547,7 @@ class CstarRetireSource:
                     self._cache[i] = z_goal[r]
                 self._replans[i] += 1
 
-            # live envs: plain spec-accept (rows re-aligned)
+            # live envs: plain Surveyor (rows re-aligned)
             sub = [(r, i) for r, i in enumerate(replan_idx) if not self._retired[i]]
             if sub:
                 rows = [r for r, _ in sub]
@@ -566,7 +566,7 @@ class HorizonGatedSource:
     At each env's first replan, one flat CEM plan toward the goal latent gives
     c*, the predicted terminal discrepancy of the plan the policy would execute.
     c* <= tau serves the goal latent for the whole episode (zero drafter calls);
-    otherwise the env is delegated to an internal SpecAcceptSubgoalSource. One
+    otherwise the env is delegated to an internal SurveyorSource. One
     decision per env, never revisited. c* predicts per-episode flat success
     (AUC 0.85 to 0.92), so fire-rate tracks flat-solvability instead of
     vanishing with horizon.
@@ -578,7 +578,7 @@ class HorizonGatedSource:
     def __init__(self, planner, lewm, n_envs, device="cpu", n_steps=50, seed=42,
                  tau=0.2, horizon=2, action_block=5, num_samples=300,
                  cem_steps=30, topk=30, var_scale=1.0, record=False):
-        self.spec = SpecAcceptSubgoalSource(planner, n_envs, device=device,
+        self.spec = SurveyorSource(planner, n_envs, device=device,
                                             n_steps=n_steps, seed=seed, tau=tau,
                                             record=record)
         self.lewm = lewm
@@ -626,7 +626,7 @@ class HorizonGatedSource:
                 if self._fired[i]:
                     self._cache[i] = z_goal[r]
 
-            # unfired envs: whole episode on spec-accept (rows re-aligned)
+            # unfired envs: whole episode on Surveyor (rows re-aligned)
             sub = [(r, i) for r, i in enumerate(replan_idx) if not self._fired[i]]
             if sub:
                 rows = [r for r, _ in sub]

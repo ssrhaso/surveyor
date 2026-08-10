@@ -13,7 +13,7 @@ with the clone (notebooks/franka_example_traj.npz). Four skippable stages:
   3. FLOOR     rel pooled distance between frames S apart, for several S: the
                criterion-floor shape that says where tau must sit on this
                substrate (transfer hypothesis 0.20).
-  4. PLUMBING  certified spec-accept teacher-forced along the recorded
+  4. PLUMBING  certified Surveyor teacher-forced along the recorded
                trajectory with the data-free lerp drafter. Achieved latents
                come from the recording while the source runs
                verify/serve/redraft/retire exactly as it would closed-loop,
@@ -144,7 +144,7 @@ def main():
               f"true progress; if not, tau is re-derived, per the paper's rule)")
 
     if not args.skip_plumbing:
-        print("\n==== PLUMBING (certified spec-accept, teacher-forced, lerp drafter) ====")
+        print("\n==== PLUMBING (certified Surveyor, teacher-forced, lerp drafter) ====")
         drafter = LerpBlockDrafter(n_future=args.n_future)
         cstar_fn = partial(cstar, wm, cem_args=cem_args)
         src = CstarRetireTokenSource(drafter, cstar_fn, n_envs=1,

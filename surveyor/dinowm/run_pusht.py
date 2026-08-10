@@ -52,7 +52,7 @@ cfg["planner"]["max_iter"] = int(os.environ.get("MAX_ITER", 12))
 
 if ARM == "spec":
     from surveyor.dinowm import planner  # noqa: F401  (register for hydra)
-    cfg["planner"]["_target_"] = "surveyor.dinowm.planner.SpecMPCPlanner"
+    cfg["planner"]["_target_"] = "surveyor.dinowm.planner.SurveyorMPCPlanner"
     cfg["planner"]["gdm_ckpt"] = os.environ.get(
         "GDM_CKPT", f"{DATA}/gdm_dinowm_pusht_s25.pt")
     cfg["planner"]["accept_tau"] = float(os.environ.get("TAU", 0.121))

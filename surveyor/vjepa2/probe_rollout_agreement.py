@@ -13,7 +13,7 @@ the whole resulting POSE trajectory against the demonstrator's:
 Pose evolution is action arithmetic (compute_new_pose), so the score is
 grounded in what the plan DOES, with ~K/H times the signal of one plan.
 
-Arms: flat (goal tokens), spec (drafter via SpecAcceptTokenSource; note the
+Arms: flat (goal tokens), spec (drafter via SurveyorTokenSource; note the
 pooled verifier is degenerate-accept on DROID per gap-stat, so spec here ==
 sequential block consumption; stated, not hidden), lerp (first straight-line
 subgoal, recomputed each replan), route (token-cal certificate at the anchor
@@ -36,7 +36,7 @@ import torch
 
 from .drafter import load_token_gdm
 from .planner import cstar, flat_plan
-from .sources import GDMDraft, LerpBlockDrafter, SpecAcceptTokenSource
+from .sources import GDMDraft, LerpBlockDrafter, SurveyorTokenSource
 from .train_drafter import _load_tokens
 from .wm import VJEPA2WM
 
@@ -128,7 +128,7 @@ def main():
                 if arm == "route" and tcal is None:
                     continue
                 mode = arm if arm != "route" else ("flat" if tcal <= args.router_theta else "spec")
-                source = (SpecAcceptTokenSource(GDMDraft(planner, seed=args.seed),
+                source = (SurveyorTokenSource(GDMDraft(planner, seed=args.seed),
                                                 n_envs=1, device=str(wm.device),
                                                 tau=args.tau, k=args.k)
                           if mode == "spec" else None)

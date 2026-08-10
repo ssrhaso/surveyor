@@ -1,6 +1,6 @@
-"""Certified spec-accept on the DINO-WM stack (PushT).
+"""Surveyor on the DINO-WM stack (PushT).
 
-SpecMPCPlanner subclasses their MPCPlanner with an identical outer loop, except
+SurveyorMPCPlanner subclasses their MPCPlanner with an identical outer loop, except
 that each MPC iteration serves a DRAFTED subgoal latent (a (P+1, D) grid of P
 DINOv2 patch tokens plus 1 proprio token) as the sub-planner's goal instead of
 the final goal, verifying against reality at every replan boundary. The CEM
@@ -55,7 +55,7 @@ def pooled_all(grid):
     return grid.mean(dim=1)
 
 
-class SpecAcceptGridSource:
+class SurveyorGridSource:
     """Per-env verify/advance/re-draft state machine over drafted grid blocks.
     LeWM-faithful semantics: draft a block of N subgoal grids; at each replan
     verify the pursued target in pooled-visual rel L2 (<= tau = arrived ->
@@ -171,12 +171,12 @@ class SpecAcceptGridSource:
         cr = self.re_drafts / max(self.steps, 1)
         g = (f" gated_serves={self.gated} retired={sum(self.retired)}/{self.n}"
              if self.goal_gate else "")
-        return (f"[specaccept] tau={self.tau} k={self.k} re-drafts={self.re_drafts} "
+        return (f"[surveyor] tau={self.tau} k={self.k} re-drafts={self.re_drafts} "
                 f"advances={self.advances} rejects={self.rejects} "
                 f"call_ratio={cr:.3f} (every-step=1.000){g}")
 
 
-class SpecMPCPlanner(MPCPlanner):
+class SurveyorMPCPlanner(MPCPlanner):
     """MPCPlanner with per-iteration drafted-subgoal serving + verification.
     Extra cfg keys: gdm_ckpt, accept_tau, gdm_steps, spec_seed, goal_gate."""
 
@@ -185,7 +185,7 @@ class SpecMPCPlanner(MPCPlanner):
                  goal_gate=False, arrive_tau=None, spec_serve="draft",
                  snap_dir=None, snap_max=6000, **kwargs):
         super().__init__(*args, **kwargs)
-        assert gdm_ckpt, "SpecMPCPlanner needs gdm_ckpt"
+        assert gdm_ckpt, "SurveyorMPCPlanner needs gdm_ckpt"
         self.gdm = load_token_gdm(gdm_ckpt, device=str(self.device))
         self.accept_tau = float(accept_tau)
         self.gdm_steps = int(gdm_steps)
@@ -309,7 +309,7 @@ class SpecMPCPlanner(MPCPlanner):
         self.action_len = np.full(n_evals, np.inf)
         init_obs_0, init_state_0 = self.evaluator.get_init_cond()
 
-        source = SpecAcceptGridSource(self.gdm, n_evals, self.accept_tau,
+        source = SurveyorGridSource(self.gdm, n_evals, self.accept_tau,
                                       self.gdm_steps, self.device,
                                       seed=self.spec_seed, readout=self.readout,
                                       readout_tau=self.readout_tau,

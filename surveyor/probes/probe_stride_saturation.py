@@ -1,6 +1,6 @@
 """Where does an encoder saturate, as a function of subgoal stride?
 
-Motivation. spec-accept serves a subgoal S frames ahead and the planner scores
+Motivation. Surveyor serves a subgoal S frames ahead and the planner scores
 CEM candidates by terminal L2 to it. Once the encoder's distance to a frame S
 ahead reaches the level of two UNRELATED frames, the planner cannot tell that
 subgoal from the far goal it was meant to replace, and no drafter can help. That

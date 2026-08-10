@@ -17,7 +17,7 @@ import torch
 from surveyor import encoder
 from surveyor.envs.pusht.eval import sample_short, sample_long
 from surveyor.sources import (SubgoalCostModel, OracleSubgoalSource,
-                                    GDMSubgoalSource, SpecAcceptSubgoalSource,
+                                    GDMSubgoalSource, SurveyorSource,
                                     LerpSubgoalSource, HorizonGatedSource,
                                     CstarRetireSource,
                                     build_oracle_table, make_ffjepa_policy)
@@ -36,9 +36,9 @@ def parse_args():
                    help="lerp source: waypoint at this fraction along the latent "
                         "segment from the CURRENT latent to the goal (re-anchored "
                         "each replan); frac=1.0 degenerates to flat planning")
-    p.add_argument("--subgoal", choices=["oracle", "gdm", "baseline", "specaccept",
-                                         "lerp", "horizon_gated", "unified", "random", "gcidm",
-                                         "specgcidm"],
+    p.add_argument("--subgoal", choices=["oracle", "ffjepa", "flat", "surveyor",
+                                         "lerp", "horizon_gated", "router+surveyor", "random", "gcidm",
+                                         "gcidm+surveyor"],
                    default="oracle")
     p.add_argument("--gcidm-ckpt", default=None,
                    help="GC-IDM checkpoint (arXiv 2605.08732 comparator); amortised "
@@ -52,12 +52,12 @@ def parse_args():
     p.add_argument("--readout-tau", type=float, default=None,
                    help="override the lens's derived tau (default: ckpt value)")
     p.add_argument("--accept-tau", type=float, default=0.2,
-                   help="specaccept: relative-L2 tolerance for the reality verifier")
+                   help="surveyor: relative-L2 tolerance for the reality verifier")
     p.add_argument("--sg-steps", type=int, default=10,
-                   help="specgcidm: subgoal spacing S in env steps; accept test at "
+                   help="gcidm+surveyor: subgoal spacing S in env steps; accept test at "
                         "every S-step boundary, executor horizon clock counts to it")
     p.add_argument("--cstar-route", action="store_true",
-                   help="specgcidm: certified scope (P-EXEC-6). One flat-CEM c* "
+                   help="gcidm+surveyor: certified scope (P-EXEC-6). One flat-CEM c* "
                         "probe at each env's first boundary routes the episode to "
                         "plain GC-IDM when c* <= tau (arbiter window 2x5); drafting "
                         "envs carry the tau arrival gate. One CEM solve/episode.")
@@ -67,7 +67,7 @@ def parse_args():
                         "at this matched probability; all other mechanics "
                         "identical to the banked spec arm")
     p.add_argument("--goal-gate", action="store_true",
-                   help="specaccept: serve a drafted waypoint only if it reduces "
+                   help="surveyor: serve a drafted waypoint only if it reduces "
                         "latent distance to the goal; otherwise serve the goal "
                         "itself (native-regime parity, no extra diffusion)")
     p.add_argument("--goal-offset", type=int, default=25,
@@ -158,10 +158,10 @@ def build_process(dataset, keys):
 
 def main():
     args = parse_args()
-    if args.subgoal in ("gdm", "specaccept", "horizon_gated", "unified", "specgcidm") and not args.gdm_ckpt:
+    if args.subgoal in ("ffjepa", "surveyor", "horizon_gated", "router+surveyor", "gcidm+surveyor") and not args.gdm_ckpt:
         raise ValueError(f"--subgoal {args.subgoal} requires --gdm-ckpt")
-    if args.subgoal == "specgcidm" and not args.gcidm_ckpt:
-        raise ValueError("--subgoal specgcidm requires --gcidm-ckpt (amortised executor)")
+    if args.subgoal == "gcidm+surveyor" and not args.gcidm_ckpt:
+        raise ValueError("--subgoal gcidm+surveyor requires --gcidm-ckpt (amortised executor)")
 
     encoder._ensure_swm_importable(args.swm_src)
     import stable_worldmodel as swm
@@ -177,14 +177,14 @@ def main():
     # Both solver-free arms take the plain cost model and never build a subgoal.
     is_random = args.subgoal == "random"
     is_gcidm = args.subgoal == "gcidm"
-    is_specgcidm = args.subgoal == "specgcidm"
-    is_baseline = args.subgoal in ("baseline", "random", "gcidm", "specgcidm")
+    is_gcidm_surveyor = args.subgoal == "gcidm+surveyor"
+    is_baseline = args.subgoal in ("flat", "random", "gcidm", "gcidm+surveyor")
     cost_model = model if is_baseline else SubgoalCostModel(model)
     print(f"[model] frozen LeWM ({sum(p.numel() for p in model.parameters())/1e6:.2f}M), "
           f"device={args.device}, training={model.training}, subgoal={args.subgoal}")
 
     gdm_planner = None
-    if args.subgoal in ("gdm", "specaccept", "horizon_gated", "unified", "specgcidm"):
+    if args.subgoal in ("ffjepa", "surveyor", "horizon_gated", "router+surveyor", "gcidm+surveyor"):
         from surveyor.drafter import load_gdm_planner, count_params
         gdm_planner = load_gdm_planner(args.gdm_ckpt, device=args.device)
         d = gdm_planner.diffusion
@@ -286,11 +286,11 @@ def main():
         print(f"[gcidm] {args.gcidm_ckpt}: H_max={gci.h_max} "
               f"params={sum(p.numel() for p in gci.parameters())/1e6:.2f}M "
               f"budget={eval_budget} (1 forward/step, no solver)")
-    elif is_specgcidm:
+    elif is_gcidm_surveyor:
         from surveyor.gcidm import load_gcidm
-        from surveyor.spec_gcidm import SpecGCIDMPolicy
+        from surveyor.gcidm_executor import SurveyorGCIDMPolicy
         gci, ascaler, gmeta = load_gcidm(args.gcidm_ckpt, device=args.device)
-        policy = SpecGCIDMPolicy(gci, gdm_planner, model,
+        policy = SurveyorGCIDMPolicy(gci, gdm_planner, model,
                                  sg_steps=args.sg_steps, tau=args.accept_tau,
                                  n_steps=args.gdm_steps, seed=cem_seed,
                                  device=args.device, action_scaler=ascaler,
@@ -302,7 +302,7 @@ def main():
                                           var_scale=args.var_scale,
                                           seed=cem_seed),
                                  adim=2)
-        print(f"[specgcidm] executor={args.gcidm_ckpt} (H_max={gci.h_max}) "
+        print(f"[gcidm+surveyor] executor={args.gcidm_ckpt} (H_max={gci.h_max}) "
               f"drafter={args.gdm_ckpt} S={args.sg_steps} tau={args.accept_tau} "
               f"k={args.gdm_steps} cstar_route={args.cstar_route} "
               f"(accept rule unchanged)")
@@ -310,12 +310,12 @@ def main():
         policy = swm.policy.WorldModelPolicy(
             solver=solver, config=config, process=process, transform=transform)
     else:
-        if args.subgoal == "gdm":
+        if args.subgoal == "ffjepa":
             source = GDMSubgoalSource(gdm_planner, n_envs=args.num_eval,
                                       dim=gdm_planner.cfg.latent_dim,
                                       device=args.device, n_steps=args.gdm_steps,
                                       seed=cem_seed, record=bool(args.dump_traces))
-        elif args.subgoal == "specaccept":
+        elif args.subgoal == "surveyor":
             readout, rtau = None, None
             if args.verify_readout:
                 from surveyor.probes.learn_readout import Readout
@@ -330,7 +330,7 @@ def main():
                 print(f"[readout-verify] lens={args.verify_readout} "
                       f"({ck['dim']}->{ck['out_dim']}), tau={rtau:.3f} "
                       f"(gap after: {ck['gap_after']})")
-            source = SpecAcceptSubgoalSource(gdm_planner, n_envs=args.num_eval,
+            source = SurveyorSource(gdm_planner, n_envs=args.num_eval,
                                              device=args.device,
                                              n_steps=args.gdm_steps, seed=cem_seed,
                                              tau=args.accept_tau,
@@ -353,8 +353,8 @@ def main():
                                         record=bool(args.dump_traces))
             print(f"[horizon-gate] episode-level c* gate: tau={args.accept_tau} "
                   f"plan window={args.horizon * args.action_block} steps; "
-                  f"fired episodes run flat on the goal latent, others spec-accept")
-        elif args.subgoal == "unified":
+                  f"fired episodes run flat on the goal latent, others surveyor")
+        elif args.subgoal == "router+surveyor":
             source = CstarRetireSource(gdm_planner, model, n_envs=args.num_eval,
                                        device=args.device, n_steps=args.gdm_steps,
                                        seed=cem_seed, tau=args.accept_tau,
@@ -364,7 +364,7 @@ def main():
                                        cem_steps=args.n_steps, topk=args.topk,
                                        var_scale=args.var_scale, adim=2,
                                        record=bool(args.dump_traces))
-            print(f"[unified] c*-retire spec-accept: tau={args.accept_tau}, "
+            print(f"[router+surveyor] c*-retire surveyor: tau={args.accept_tau}, "
                   f"retire window={args.horizon * args.action_block} steps; "
                   f"drafting only while the goal is out of certified reach")
         elif args.subgoal == "lerp":
@@ -390,9 +390,9 @@ def main():
     n_succ = int(metrics["episode_successes"].sum())
     world.close()
 
-    if is_specgcidm:
+    if is_gcidm_surveyor:
         b = policy.n_redraft + policy.n_advance
-        print(f"[specgcidm-cost] exec_forwards={policy.n_calls} "
+        print(f"[gcidm+surveyor cost] exec_forwards={policy.n_calls} "
               f"redrafts={policy.n_redraft} advances={policy.n_advance} "
               f"rejects={policy.n_reject} call_ratio={policy.n_redraft / max(b, 1):.3f} "
               f"routed={policy.n_routed} arrived={policy.n_arrive} "
@@ -422,10 +422,10 @@ def main():
               f"call_ratio={sp.n_redraft / max(sp_total, 1):.3f} "
               f"(fired episodes make zero drafter calls by construction)")
 
-    if args.subgoal == "specaccept":
+    if args.subgoal == "surveyor":
         total = source.n_redraft + source.n_advance
         total_all = total + source.n_gate
-        print(f"[specaccept] tau={args.accept_tau} gdm_steps={args.gdm_steps} "
+        print(f"[surveyor] tau={args.accept_tau} gdm_steps={args.gdm_steps} "
               f"goal_gate={args.goal_gate} "
               f"re-drafts={source.n_redraft} advances={source.n_advance} "
               f"rejects={source.n_reject} gate_serves={source.n_gate} "
@@ -433,7 +433,7 @@ def main():
               f"call_ratio_all={source.n_redraft / max(total_all, 1):.3f} "
               f"(every-step=1.000; lower = fewer diffusion calls)")
 
-    if args.subgoal == "unified":
+    if args.subgoal == "router+surveyor":
         seen = source._seen
         retired = int(source._retired.sum())
         fire0 = int((source.c_first[seen] <= source.tau).sum())
@@ -441,7 +441,7 @@ def main():
         cf = source.c_first[seen]
         sp = source.spec
         sp_total = sp.n_redraft + sp.n_advance
-        print(f"[unified] tau={source.tau} retired={retired}/{int(seen.sum())} "
+        print(f"[router+surveyor] tau={source.tau} retired={retired}/{int(seen.sum())} "
               f"(fired-at-first-replan={fire0}, == the router fire test) "
               f"retire_replan p10/p50/p90="
               + (f"{np.percentile(rr, 10):.0f}/{np.percentile(rr, 50):.0f}/"

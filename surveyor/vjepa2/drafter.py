@@ -1,4 +1,4 @@
-"""Token-grid GDM: the spec-accept drafter at V-JEPA 2 scale.
+"""Token-grid GDM: the Surveyor drafter at V-JEPA 2 scale.
 
 Same DiT-denoiser design as surveyor.drafter.GDM, drafting a block of n_future
 SUBGOAL TOKEN GRIDS (each tokens_per_frame x D) rather than n_future 192-d

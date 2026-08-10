@@ -1,4 +1,4 @@
-"""The verification-gap statistic: spec-accept's preflight applicability probe.
+"""The verification-gap statistic: Surveyor's preflight applicability probe.
 
 The verifier compares the ACHIEVED latent against the TARGET it pursued for one
 subgoal interval. Arrival puts that distance at the criterion-equivalence noise

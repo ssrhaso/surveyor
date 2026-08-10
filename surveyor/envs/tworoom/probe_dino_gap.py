@@ -70,7 +70,7 @@ def pct(x):
 
 def rel(a, b):
     """Relative L2 in the verifier's convention: ||a - b|| / ||b||, where b is
-    the pursued waypoint (SpecAcceptPairedSource divides by the target norm)."""
+    the pursued waypoint (SurveyorPairedSource divides by the target norm)."""
     return float(np.linalg.norm(a - b) / max(np.linalg.norm(b), 1e-8))
 
 

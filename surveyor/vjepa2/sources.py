@@ -1,6 +1,6 @@
-"""Subgoal sources ported to token-grid targets: spec-accept + c*-retire.
+"""Subgoal sources ported to token-grid targets: the accept rule + c*-retire.
 
-Faithful ports of surveyor.sources.SpecAcceptSubgoalSource and
+Faithful ports of surveyor.sources.SurveyorSource and
 CstarRetireSource with two substrate changes and nothing else:
   * served targets are token grids (T_tok, D) consumed by upstream cem() as
     `goal_frame`;
@@ -65,7 +65,7 @@ class GDMDraft:
         return out
 
 
-class SpecAcceptTokenSource:
+class SurveyorTokenSource:
     """Speculative subgoal consumption with reality as the verifier (token
     substrate). At each replan the achieved pooled latent is checked against
     the pooled target last pursued: within tau the next pre-drafted grid is
@@ -177,7 +177,7 @@ class SpecAcceptTokenSource:
 
 
 class CstarRetireTokenSource:
-    """Unified certified spec-accept: draft only while the planner certifies
+    """Routed certified Surveyor: draft only while the planner certifies
     the goal is out of reach. Each unretired env re-reads c* (one flat CEM
     solve toward the goal tokens) at every replan; the first time c* <= tau
     the drafter RETIRES one-way and the goal tokens are served thereafter.
@@ -185,7 +185,7 @@ class CstarRetireTokenSource:
 
     def __init__(self, drafter, cstar_fn, n_envs: int = 1, device: str = "cpu",
                  tau: float = 0.2, k: int = 8, record: bool = False):
-        self.spec = SpecAcceptTokenSource(drafter, n_envs=n_envs, device=device,
+        self.spec = SurveyorTokenSource(drafter, n_envs=n_envs, device=device,
                                           tau=tau, k=k, goal_gate=False,
                                           record=record)
         self.cstar_fn = cstar_fn
@@ -227,7 +227,7 @@ class CstarRetireTokenSource:
 
     def stats(self) -> str:
         fired = int(np.nansum(self.c_first <= self.tau))
-        return (f"[unified] tau={self.tau} retired={int(self._retired.sum())}/{self.n_envs} "
+        return (f"[router+surveyor] tau={self.tau} retired={int(self._retired.sum())}/{self.n_envs} "
                 f"(fired-at-first-replan={fired}) "
                 f"c*_first p50={np.nanmedian(self.c_first):.3f} | "
                 f"spec: re-drafts={self.spec.n_redraft} advances={self.spec.n_advance} "

@@ -18,7 +18,7 @@ import torch
 from surveyor import encoder
 from surveyor.envs.pusht.eval import sample_short, sample_long
 from surveyor.sources import (SubgoalCostModel, OracleSubgoalSource,
-                                    GDMSubgoalSource, SpecAcceptSubgoalSource,
+                                    GDMSubgoalSource, SurveyorSource,
                                     CstarRetireSource, LerpSubgoalSource,
                                     build_oracle_table, make_ffjepa_policy)
 
@@ -32,8 +32,8 @@ def parse_args():
     p.add_argument("--swm-src", default=None)
     p.add_argument("--device", default="cuda")
     # what to evaluate
-    p.add_argument("--subgoal", choices=["oracle", "voracle", "gdm", "baseline",
-                                         "specaccept", "specpaired", "unified", "lerp",
+    p.add_argument("--subgoal", choices=["oracle", "voracle", "ffjepa", "flat",
+                                         "surveyor", "paired+surveyor", "router+surveyor", "lerp",
                                          "random", "gcidm"],
                    default="oracle")
     p.add_argument("--gcidm-ckpt", default=None,
@@ -45,9 +45,9 @@ def parse_args():
     p.add_argument("--gdm-ckpt", default=None, help="(Task C) trained planner checkpoint")
     p.add_argument("--gdm-steps", type=int, default=50, help="DDIM sampling steps for GDM")
     p.add_argument("--accept-tau", type=float, default=0.2,
-                   help="specaccept: relative-L2 tolerance for the reality verifier")
+                   help="surveyor: relative-L2 tolerance for the reality verifier")
     p.add_argument("--snap-bank", default=None,
-                   help="specpaired: paired subgoals .pt whose latents form a bank of "
+                   help="paired+surveyor: paired subgoals .pt whose latents form a bank of "
                         "REAL encoded frames. Every drafted waypoint is replaced by its "
                         "nearest bank entry, matched on the DINOv2 half, so waypoints "
                         "are reachable states by construction rather than free points "
@@ -67,13 +67,13 @@ def parse_args():
                         "available on TwoRoom, whose budget is twice what the goal "
                         "needs and therefore leaves room to overshoot after arrival.")
     p.add_argument("--readout-ckpt", default=None,
-                   help="specpaired: time-contrastive lens (learn_readout.py) applied "
+                   help="paired+surveyor: time-contrastive lens (learn_readout.py) applied "
                         "to the DINOv2 verification half. The instrument prescribes "
                         "this when the raw gap is closed with separated bulks.")
     p.add_argument("--readout-tau", type=float, default=None,
                    help="override the lens checkpoint's derived tau")
     p.add_argument("--best-of-k", type=int, default=1,
-                   help="specpaired: sample k candidate blocks per re-draft and "
+                   help="paired+surveyor: sample k candidate blocks per re-draft and "
                         "serve the one scoring best in the DINOv2 half. k is "
                         "derived offline by probe_bok.py, never closed-loop.")
     p.add_argument("--bok-score", choices=["goal", "feas"], default="goal",
@@ -82,7 +82,7 @@ def parse_args():
                         "state (achievability). Both reuse the verifier metric "
                         "with no constant of their own.")
     p.add_argument("--route-goal-hop", type=float, default=None,
-                   help="specpaired proximity router: serve the GOAL directly at "
+                   help="paired+surveyor proximity router: serve the GOAL directly at "
                         "any replan where it verifies within this rel-L2 in the "
                         "DINOv2 half (derive from the gap probe's hop-S10 scale; "
                         "an intermediate waypoint cannot help inside one serving "
@@ -93,7 +93,7 @@ def parse_args():
                         "to the flat branch when goal_offset <= this value (the "
                         "measured crossover constant; 45 = midpoint of the "
                         "confirmed [40,50] band), else to the certified spec "
-                        "branch (specpaired + verify at --accept-tau). One "
+                        "branch (paired+surveyor, verify at --accept-tau). One "
                         "invocation, one policy; the branch is a function of the "
                         "task's known goal distance only, never picked per cell.")
     p.add_argument("--composite-flat-rh", type=int, default=2,
@@ -235,7 +235,7 @@ def cross_room_mask(h5, wall_center=112.0):
 
 def main():
     args = parse_args()
-    if args.subgoal in ("gdm", "specaccept", "specpaired", "unified") and not args.gdm_ckpt:
+    if args.subgoal in ("ffjepa", "surveyor", "paired+surveyor", "router+surveyor") and not args.gdm_ckpt:
         raise ValueError(f"--subgoal {args.subgoal} requires --gdm-ckpt <trained planner checkpoint>")
 
     encoder._ensure_swm_importable(args.swm_src)
@@ -253,7 +253,7 @@ def main():
             args.receding_horizon = args.composite_flat_rh
             branch = "flat"
         else:
-            args.subgoal = "specpaired"
+            args.subgoal = "paired+surveyor"
             args.receding_horizon = args.composite_spec_rh
             branch = "spec"
         print(f"[composite] window rule: goal_offset={goal_offset} "
@@ -268,13 +268,13 @@ def main():
     # plans nothing and takes the plain cost model like baseline.
     is_random = args.subgoal == "random"
     is_gcidm = args.subgoal == "gcidm"
-    is_baseline = args.subgoal in ("baseline", "random", "gcidm")
+    is_baseline = args.subgoal in ("flat", "random", "gcidm")
     cost_model = model if is_baseline else SubgoalCostModel(model)
     print(f"[model] frozen LeWM ({sum(p.numel() for p in model.parameters())/1e6:.2f}M), "
           f"device={args.device}, training={model.training}, subgoal={args.subgoal}")
 
     gdm_planner = None
-    if args.subgoal in ("gdm", "specaccept", "specpaired", "unified"):
+    if args.subgoal in ("ffjepa", "surveyor", "paired+surveyor", "router+surveyor"):
         from surveyor.drafter import load_gdm_planner, count_params
         gdm_planner = load_gdm_planner(args.gdm_ckpt, device=args.device)
         d = gdm_planner.diffusion
@@ -398,25 +398,25 @@ def main():
         policy = swm.policy.WorldModelPolicy(
             solver=solver, config=config, process=process, transform=transform)
     else:
-        if args.subgoal == "gdm":
+        if args.subgoal == "ffjepa":
             source = GDMSubgoalSource(gdm_planner, n_envs=args.num_eval,
                                       dim=gdm_planner.cfg.latent_dim,
                                       device=args.device, n_steps=args.gdm_steps,
                                       seed=cem_seed, record=bool(args.dump_traces))
-        elif args.subgoal == "specaccept":
-            source = SpecAcceptSubgoalSource(gdm_planner, n_envs=args.num_eval,
+        elif args.subgoal == "surveyor":
+            source = SurveyorSource(gdm_planner, n_envs=args.num_eval,
                                              device=args.device,
                                              n_steps=args.gdm_steps, seed=cem_seed,
                                              tau=args.accept_tau,
                                              record=bool(args.dump_traces),
                                              goal_gate=args.goal_gate)
-        elif args.subgoal == "specpaired":
+        elif args.subgoal == "paired+surveyor":
             # plan in LeWM space, CERTIFY in frozen-DINOv2 space. LeWM's TwoRoom
             # latents are metrically degenerate (equiv p90 1.393 > hop p10 1.018)
             # so no tau certifies there; instead the drafted waypoint carries its
             # own DINOv2 half and the accept test runs on that. tau MUST come
             # from probe_dino_gap.py, which measures in this exact space.
-            from surveyor.paired import PairedEncoder, SpecAcceptPairedSource, load_dinov2
+            from surveyor.paired import PairedEncoder, SurveyorPairedSource, load_dinov2
             penc = PairedEncoder(model, load_dinov2(device=args.device),
                                  device=args.device)
             ro, ro_tau = None, None
@@ -434,7 +434,7 @@ def main():
                         "pick it from a closed-loop number.")
                 ro_tau = float(args.readout_tau if args.readout_tau is not None
                                else ck["tau_derived"])
-                print(f"[specpaired] lens={args.readout_ckpt} lens_tau={ro_tau:.4f}")
+                print(f"[paired+surveyor] lens={args.readout_ckpt} lens_tau={ro_tau:.4f}")
             bank = None
             if args.snap_bank:
                 _b = torch.load(args.snap_bank, map_location="cpu", weights_only=False)
@@ -442,9 +442,9 @@ def main():
                 assert bank.shape[1] == 576, (
                     f"snap bank must be paired 576-d, got {bank.shape[1]}; "
                     "rebuild subgoals with --dino-pair")
-                print(f"[specpaired] snap bank {args.snap_bank}: "
+                print(f"[paired+surveyor] snap bank {args.snap_bank}: "
                       f"{bank.shape[0]} real frames")
-            source = SpecAcceptPairedSource(gdm_planner, penc, n_envs=args.num_eval,
+            source = SurveyorPairedSource(gdm_planner, penc, n_envs=args.num_eval,
                                             device=args.device, n_steps=args.gdm_steps,
                                             seed=cem_seed, tau=args.accept_tau,
                                             record=bool(args.dump_traces),
@@ -454,7 +454,7 @@ def main():
                                             best_of_k=args.best_of_k,
                                             bok_score=args.bok_score,
                                             route_goal_hop=args.route_goal_hop)
-            print(f"[specpaired] verify-space=dino384{'-lens' if ro else ''} "
+            print(f"[paired+surveyor] verify-space=dino384{'-lens' if ro else ''} "
                   f"tau={ro_tau if ro else args.accept_tau} "
                   f"N={source.N} (planner still consumes the LeWM half)"
                   + (f" best_of_k={args.best_of_k} score={args.bok_score}"
@@ -468,7 +468,7 @@ def main():
                                           tau=args.accept_tau)
             print(f"[voracle] achievement-verified oracle: tau={args.accept_tau}, "
                   f"advance only when the achieved latent reaches the waypoint")
-        elif args.subgoal == "unified":
+        elif args.subgoal == "router+surveyor":
             source = CstarRetireSource(gdm_planner, model, n_envs=args.num_eval,
                                        device=args.device, n_steps=args.gdm_steps,
                                        seed=cem_seed, tau=args.accept_tau,
@@ -478,7 +478,7 @@ def main():
                                        cem_steps=args.n_steps, topk=args.topk,
                                        var_scale=args.var_scale, adim=2,
                                        record=bool(args.dump_traces))
-            print(f"[unified] c*-retire spec-accept: tau={args.accept_tau}, "
+            print(f"[router+surveyor] c*-retire surveyor: tau={args.accept_tau}, "
                   f"retire window={args.horizon * args.action_block} steps; "
                   f"drafting only while the goal is out of certified reach")
         else:
@@ -525,14 +525,14 @@ def main():
     except Exception as _e:      # diagnostic only, never fail an eval over it
         print(f"[split] unavailable: {_e}")
 
-    if args.subgoal == "specaccept":
+    if args.subgoal == "surveyor":
         total = source.n_redraft + source.n_advance
-        print(f"[specaccept] tau={args.accept_tau} gdm_steps={args.gdm_steps} "
+        print(f"[surveyor] tau={args.accept_tau} gdm_steps={args.gdm_steps} "
               f"re-drafts={source.n_redraft} advances={source.n_advance} "
               f"rejects={source.n_reject} "
               f"call_ratio={source.n_redraft / max(total, 1):.3f} "
               f"(every-step=1.000; lower = fewer diffusion calls)")
-    if args.subgoal == "specpaired":
+    if args.subgoal == "paired+surveyor":
         print(source.stats())
     if args.subgoal == "voracle":
         pt = source._ptr
@@ -540,7 +540,7 @@ def main():
               f"final ptr p10/p50/p90={np.percentile(pt, 10):.0f}/"
               f"{np.percentile(pt, 50):.0f}/{np.percentile(pt, 90):.0f} "
               f"(K={source.table[0].shape[0]})")
-    if args.subgoal == "unified":
+    if args.subgoal == "router+surveyor":
         seen = source._seen
         retired = int(source._retired.sum())
         fire0 = int((source.c_first[seen] <= source.tau).sum())
@@ -548,7 +548,7 @@ def main():
         cf = source.c_first[seen]
         sp = source.spec
         sp_total = sp.n_redraft + sp.n_advance
-        print(f"[unified] tau={source.tau} retired={retired}/{int(seen.sum())} "
+        print(f"[router+surveyor] tau={source.tau} retired={retired}/{int(seen.sum())} "
               f"(fired-at-first-replan={fire0}, == the router fire test) "
               f"retire_replan p10/p50/p90="
               + (f"{np.percentile(rr, 10):.0f}/{np.percentile(rr, 50):.0f}/"

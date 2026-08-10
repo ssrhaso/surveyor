@@ -1,4 +1,4 @@
-"""Paired-latent spec-accept: plan in the world model's space, CERTIFY in another.
+"""Paired-latent Surveyor: plan in the world model's space, CERTIFY in another.
 
 Motivation (TwoRoom, measured). LeWM's TwoRoom encoder is metrically
 degenerate: consecutive frames sit at rel L2 p50 0.876 while unrelated frames
@@ -87,10 +87,10 @@ def split_paired(z):
 
 
 # ------------------------------------------------------------------- source
-class SpecAcceptPairedSource:
-    """Spec-accept whose verifier lives in the DINOv2 half of a paired draft.
+class SurveyorPairedSource:
+    """Surveyor whose verifier lives in the DINOv2 half of a paired draft.
 
-    Identical control flow to SpecAcceptSubgoalSource (draft a block of N
+    Identical control flow to SurveyorSource (draft a block of N
     waypoints, accept the pursued one at each replan iff the achieved state
     verifies against it, else re-draft from reality), with two changes:
       * the drafted block is (N, 576): the LeWM half is served to the cost
@@ -419,7 +419,7 @@ class SpecAcceptPairedSource:
         if self.route_goal_hop is not None:
             gate += (f" router_hop={self.route_goal_hop} "
                      f"routed={self.n_route}")
-        return (f"[specpaired]{gate} tau={tau_used} verify-space={space} "
+        return (f"[paired+surveyor]{gate} tau={tau_used} verify-space={space} "
                 f"re-drafts={self.n_redraft} advances={self.n_advance} "
                 f"rejects={self.n_reject} "
                 f"call_ratio={self.n_redraft / max(total, 1):.3f} "

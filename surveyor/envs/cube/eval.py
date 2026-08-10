@@ -18,7 +18,7 @@ import torch
 from surveyor import encoder
 from surveyor.envs.pusht.eval import sample_short, sample_long
 from surveyor.sources import (SubgoalCostModel, OracleSubgoalSource,
-                                    GDMSubgoalSource, SpecAcceptSubgoalSource,
+                                    GDMSubgoalSource, SurveyorSource,
                                     LerpSubgoalSource, CstarRetireSource,
                                     build_oracle_table, make_ffjepa_policy)
 
@@ -37,19 +37,19 @@ def parse_args():
     p.add_argument("--lerp-frac", type=float, default=0.5,
                    help="lerp source: waypoint this fraction along the latent segment "
                         "from the current latent to the goal (decomposition-tax control)")
-    p.add_argument("--subgoal", choices=["oracle", "gdm", "baseline", "specaccept",
-                                         "lerp", "unified", "random", "gcidm",
-                                         "specgcidm"],
+    p.add_argument("--subgoal", choices=["oracle", "ffjepa", "flat", "surveyor",
+                                         "lerp", "router+surveyor", "random", "gcidm",
+                                         "gcidm+surveyor"],
                    default="baseline")
     p.add_argument("--gcidm-ckpt", default=None,
                    help="GC-IDM checkpoint (arXiv 2605.08732 comparator); amortised "
                         "controller, one MLP forward per step and no solver")
     p.add_argument("--sg-steps", type=int, default=10,
-                   help="specgcidm: subgoal spacing S the executor tracks")
+                   help="gcidm+surveyor: subgoal spacing S the executor tracks")
     p.add_argument("--gdm-ckpt", default=None, help="trained planner checkpoint")
     p.add_argument("--gdm-steps", type=int, default=50, help="DDIM sampling steps for GDM")
     p.add_argument("--accept-tau", type=float, default=0.2,
-                   help="specaccept: relative-L2 tolerance for the reality verifier "
+                   help="surveyor: relative-L2 tolerance for the reality verifier "
                         "(derive from probe_floor on the cube encoder before use)")
     p.add_argument("--goal-gate", action="store_true")
     p.add_argument("--goal-offset", type=int, default=25,
@@ -135,7 +135,7 @@ def build_process(dataset, keys):
 
 def main():
     args = parse_args()
-    if args.subgoal in ("gdm", "specaccept", "unified") and not args.gdm_ckpt:
+    if args.subgoal in ("ffjepa", "surveyor", "router+surveyor") and not args.gdm_ckpt:
         raise ValueError(f"--subgoal {args.subgoal} requires --gdm-ckpt")
 
     encoder._ensure_swm_importable(args.swm_src)
@@ -152,14 +152,14 @@ def main():
     # Both solver-free arms take the plain cost model and never build a subgoal.
     is_random = args.subgoal == "random"
     is_gcidm = args.subgoal == "gcidm"
-    is_specgcidm = args.subgoal == "specgcidm"
-    is_baseline = args.subgoal in ("baseline", "random", "gcidm")
+    is_gcidm_surveyor = args.subgoal == "gcidm+surveyor"
+    is_baseline = args.subgoal in ("flat", "random", "gcidm")
     cost_model = model if is_baseline else SubgoalCostModel(model)
     print(f"[model] frozen LeWM ({sum(p.numel() for p in model.parameters())/1e6:.2f}M), "
           f"device={args.device}, training={model.training}, subgoal={args.subgoal}")
 
     gdm_planner = None
-    if args.subgoal in ("gdm", "specaccept", "unified", "specgcidm"):
+    if args.subgoal in ("ffjepa", "surveyor", "router+surveyor", "gcidm+surveyor"):
         from surveyor.drafter import load_gdm_planner, count_params
         gdm_planner = load_gdm_planner(args.gdm_ckpt, device=args.device)
         print(f"[gdm] planner from {args.gdm_ckpt}: "
@@ -265,17 +265,17 @@ def main():
         print(f"[gcidm] {args.gcidm_ckpt}: H_max={gci.h_max} "
               f"params={sum(p.numel() for p in gci.parameters())/1e6:.2f}M "
               f"budget={eval_budget} (1 forward/step, no solver)")
-    elif is_specgcidm:
+    elif is_gcidm_surveyor:
         from surveyor.gcidm import load_gcidm
-        from surveyor.spec_gcidm import SpecGCIDMPolicy
+        from surveyor.gcidm_executor import SurveyorGCIDMPolicy
         gci, ascaler, gmeta = load_gcidm(args.gcidm_ckpt, device=args.device)
-        policy = SpecGCIDMPolicy(gci, gdm_planner, model,
+        policy = SurveyorGCIDMPolicy(gci, gdm_planner, model,
                                  sg_steps=args.sg_steps, tau=args.accept_tau,
                                  n_steps=args.gdm_steps, seed=cem_seed,
                                  device=args.device, action_scaler=ascaler,
                                  budget=eval_budget, cstar_route=False,
                                  goal_gate=args.goal_gate, adim=5)
-        print(f"[specgcidm] executor={args.gcidm_ckpt} (H_max={gci.h_max}) "
+        print(f"[gcidm+surveyor] executor={args.gcidm_ckpt} (H_max={gci.h_max}) "
               f"drafter={args.gdm_ckpt} S={args.sg_steps} tau={args.accept_tau} "
               f"k={args.gdm_steps} goal_gate={args.goal_gate} "
               f"(accept rule unchanged, no CEM in the arm)")
@@ -283,18 +283,18 @@ def main():
         policy = swm.policy.WorldModelPolicy(
             solver=solver, config=config, process=process, transform=transform)
     else:
-        if args.subgoal == "gdm":
+        if args.subgoal == "ffjepa":
             source = GDMSubgoalSource(gdm_planner, n_envs=args.num_eval,
                                       dim=gdm_planner.cfg.latent_dim,
                                       device=args.device, n_steps=args.gdm_steps,
                                       seed=cem_seed, record=bool(args.dump_traces))
-        elif args.subgoal == "specaccept":
-            source = SpecAcceptSubgoalSource(gdm_planner, n_envs=args.num_eval,
+        elif args.subgoal == "surveyor":
+            source = SurveyorSource(gdm_planner, n_envs=args.num_eval,
                                              device=args.device, n_steps=args.gdm_steps,
                                              seed=cem_seed, tau=args.accept_tau,
                                              goal_gate=args.goal_gate,
                                              record=bool(args.dump_traces))
-        elif args.subgoal == "unified":
+        elif args.subgoal == "router+surveyor":
             source = CstarRetireSource(gdm_planner, model, n_envs=args.num_eval,
                                        device=args.device, n_steps=args.gdm_steps,
                                        seed=cem_seed, tau=args.accept_tau,
@@ -304,7 +304,7 @@ def main():
                                        cem_steps=args.n_steps, topk=args.topk,
                                        var_scale=args.var_scale, adim=5,
                                        record=bool(args.dump_traces))
-            print(f"[unified] c*-retire spec-accept: tau={args.accept_tau}, "
+            print(f"[router+surveyor] c*-retire surveyor: tau={args.accept_tau}, "
                   f"retire window={args.horizon * args.action_block} steps; "
                   f"drafting only while the goal is out of certified reach")
         elif args.subgoal == "lerp":
@@ -338,15 +338,15 @@ def main():
               f"'cem_ms': {1000.0 * t_c / max(args.num_eval, 1)}, "
               f"'total_ms': {1000.0 * t_tot / max(args.num_eval, 1)}}}")
 
-    if args.subgoal == "specaccept":
+    if args.subgoal == "surveyor":
         total = source.n_redraft + source.n_advance
-        print(f"[specaccept] tau={args.accept_tau} gdm_steps={args.gdm_steps} "
+        print(f"[surveyor] tau={args.accept_tau} gdm_steps={args.gdm_steps} "
               f"re-drafts={source.n_redraft} advances={source.n_advance} "
               f"rejects={source.n_reject} "
               f"call_ratio={source.n_redraft / max(total, 1):.3f} "
               f"(every-step=1.000; lower = fewer diffusion calls)")
 
-    if args.subgoal == "unified":
+    if args.subgoal == "router+surveyor":
         seen = source._seen
         retired = int(source._retired.sum())
         fire0 = int((source.c_first[seen] <= source.tau).sum())
@@ -354,7 +354,7 @@ def main():
         cf = source.c_first[seen]
         sp = source.spec
         sp_total = sp.n_redraft + sp.n_advance
-        print(f"[unified] tau={source.tau} retired={retired}/{int(seen.sum())} "
+        print(f"[router+surveyor] tau={source.tau} retired={retired}/{int(seen.sum())} "
               f"(fired-at-first-replan={fire0}, == the router fire test) "
               f"retire_replan p10/p50/p90="
               + (f"{np.percentile(rr, 10):.0f}/{np.percentile(rr, 50):.0f}/"
@@ -412,10 +412,10 @@ def main():
           f"budget={eval_budget} seed={args.seed} cem_seed={cem_seed} "
           f"S={args.receding_horizon * args.action_block}")
     print(f"  SR = {sr:.2f}%  ({n_succ}/{args.num_eval})")
-    if is_specgcidm:
+    if is_gcidm_surveyor:
         bnd = policy.n_advance + policy.n_redraft
         cr = policy.n_redraft / max(bnd, 1)
-        print(f"[specgcidm] redrafts={policy.n_redraft} advances={policy.n_advance} "
+        print(f"[gcidm+surveyor] redrafts={policy.n_redraft} advances={policy.n_advance} "
               f"rejects={policy.n_reject} arrived={policy.n_arrive} "
               f"call_ratio={cr:.3f} NFE/replan={cr * args.gdm_steps:.2f}")
 

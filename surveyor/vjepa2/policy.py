@@ -1,4 +1,4 @@
-"""Closed-loop certified spec-accept policy for a single V-JEPA 2-AC agent.
+"""Closed-loop certified Surveyor policy for a single V-JEPA 2-AC agent.
 
 The upstream deployment loop (energy notebook / DROID protocol) is: encode
 current frame -> CEM toward goal tokens -> execute first action -> repeat. This
@@ -17,11 +17,11 @@ import numpy as np
 import torch
 
 from . import planner as _planner
-from .sources import CstarRetireTokenSource, SpecAcceptTokenSource
+from .sources import CstarRetireTokenSource, SurveyorTokenSource
 from .wm import VJEPA2WM
 
 
-class CertifiedSpecAcceptPolicy:
+class CertifiedSurveyorPolicy:
     def __init__(self, wm: VJEPA2WM, drafter, goal_tokens: torch.Tensor,
                  tau: float = 0.2, k: int = 8, cem_args: dict | None = None,
                  cstar_cem_args: dict | None = None,
@@ -38,7 +38,7 @@ class CertifiedSpecAcceptPolicy:
                                                  device=wm.device, tau=tau, k=k,
                                                  record=record)
         else:
-            self.source = SpecAcceptTokenSource(drafter, n_envs=1,
+            self.source = SurveyorTokenSource(drafter, n_envs=1,
                                                 device=wm.device, tau=tau, k=k,
                                                 record=record)
         self.replans = 0

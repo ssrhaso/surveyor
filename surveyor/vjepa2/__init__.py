@@ -1,4 +1,4 @@
-"""Certified spec-accept transplanted onto V-JEPA 2-AC.
+"""Certified Surveyor transplanted onto V-JEPA 2-AC.
 
 The method is the paper's unified rule, unchanged: draft subgoals only while the
 planner certifies the goal is out of reach (c* > tau), with the first-replan c*
@@ -48,11 +48,11 @@ from .sources import (
     CstarRetireTokenSource,
     GDMDraft,
     LerpBlockDrafter,
-    SpecAcceptTokenSource,
+    SurveyorTokenSource,
     pool,
 )
 
 __all__ = [
     "TokenGDM", "TokenGDMConfig", "TokenGDMPlanner", "load_token_gdm", "save_token_gdm",
-    "CstarRetireTokenSource", "GDMDraft", "LerpBlockDrafter", "SpecAcceptTokenSource", "pool",
+    "CstarRetireTokenSource", "GDMDraft", "LerpBlockDrafter", "SurveyorTokenSource", "pool",
 ]

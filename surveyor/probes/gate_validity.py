@@ -21,6 +21,7 @@ import warnings
 import numpy as np
 import torch
 
+from surveyor.arms import canonical_arm
 from surveyor.drafter import load_gdm_planner
 from surveyor.probes.horizon_gate import make_latent_lookup
 from surveyor.probes.horizon_gate_cem import flat_plan_c_star
@@ -70,11 +71,12 @@ def load_traces(pattern):
         key = (hash((eps, starts)), t)
         succ = np.asarray(r["successes"], dtype=float)
         arm = None
-        if a.get("subgoal") == "baseline":
+        recorded = canonical_arm(a.get("subgoal"))
+        if recorded == "flat":
             arm = "flat"
-        elif a.get("subgoal") == "gdm":
+        elif recorded == "ffjepa":
             arm = "gdm"
-        elif a.get("subgoal") == "specaccept":
+        elif recorded == "surveyor":
             if a.get("goal_gate"):
                 arm = "gated"
             elif a.get("accept_tau") == 0.2 and a.get("gdm_steps") == 8:

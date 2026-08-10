@@ -10,7 +10,7 @@ import numpy as np
 import torch
 
 from .drafter import GaussianDiffusion, TokenGDM, TokenGDMConfig, TokenGDMPlanner
-from .sources import CstarRetireTokenSource, GDMDraft, LerpBlockDrafter, SpecAcceptTokenSource
+from .sources import CstarRetireTokenSource, GDMDraft, LerpBlockDrafter, SurveyorTokenSource
 from .wm import pool
 
 D, T_TOK, N = 32, 16, 3
@@ -49,7 +49,7 @@ def test_lerp_drafter():
 
 def test_spec_source():
     goal = torch.randn(1, T_TOK, D)
-    src = SpecAcceptTokenSource(LerpBlockDrafter(n_future=N), n_envs=1,
+    src = SurveyorTokenSource(LerpBlockDrafter(n_future=N), n_envs=1,
                                 tau=0.2, k=0)
     z = torch.randn(1, T_TOK, D)
     t1 = src.current(z, [0], goal)                    # first call -> redraft

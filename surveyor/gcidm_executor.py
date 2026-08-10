@@ -32,9 +32,9 @@ import torch
 from surveyor import encoder
 
 
-class SpecGCIDMPolicy:
+class SurveyorGCIDMPolicy:
     """Mirrors GCIDMPolicy's swm contract (set_env / get_action) and
-    SpecAcceptSubgoalSource's accept semantics (queue / ptr / target /
+    SurveyorSource's accept semantics (queue / ptr / target /
     redraft-on-reject-or-exhaustion), minus the solver. Counter names match the
     source so harvesters read this arm unchanged."""
 
@@ -64,7 +64,7 @@ class SpecGCIDMPolicy:
         self.action_scaler = action_scaler
         self._gen = torch.Generator(device=planner.device)
         self._gen.manual_seed(int(seed))
-        self.type = "specgcidm"
+        self.type = "gcidm+surveyor"
         self.env = None
         if self.cstar_route:
             if cem is None or self.budget is None:

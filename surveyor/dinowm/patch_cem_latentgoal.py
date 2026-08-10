@@ -15,7 +15,7 @@ else:
         )
         z_obs_g = self.wm.encode_obs(trans_obs_g)"""
     new = """        if isinstance(obs_g, dict) and "z_visual" in obs_g:
-            # pre-encoded latent goal (spec-accept serving): skip encode_obs
+            # pre-encoded latent goal (drafted-subgoal serving): skip encode_obs
             z_obs_g = {"visual": obs_g["z_visual"].to(self.device),
                        "proprio": obs_g["z_proprio"].to(self.device)}
         else:
