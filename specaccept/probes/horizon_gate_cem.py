@@ -49,7 +49,7 @@ def parse_args():
                    help="probe_floor output; tau is READ from its recorded args "
                         "(the frozen verifier threshold), never set here")
     # flat branch: RH=2 = flat's strongest short-range config (strongbase sweep);
-    # CEM params = the eval driver's defaults, used unmodified by every reacher sbatch
+    # CEM params = the eval driver's defaults, used unmodified by every reacher run
     p.add_argument("--horizon", type=int, default=2)
     p.add_argument("--receding-horizon", type=int, default=2)
     p.add_argument("--action-block", type=int, default=5)
@@ -113,7 +113,7 @@ def main():
         floor = json.load(fh)
     tau = float(floor["args"]["tau"])
     print(f"[tau] {tau:.2f} = the frozen accept-test threshold recorded by "
-          f"{args.floor_json} (closed-loop sbatches pin --accept-tau {tau:.2f}); "
+          f"{args.floor_json} (closed-loop runs pin --accept-tau {tau:.2f}); "
           f"criterion-floor-derived, second use, not swept here")
     print(f"[pre-registered] fire-rate >= {FIRE_MIN_SHORT} at t={T_SHORT} and "
           f"<= {FIRE_MAX_LONG} at t={T_LONG}; high fire at EVERY t = model "

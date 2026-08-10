@@ -6,13 +6,17 @@ pusht.episodes150.val.json: 256 (episode, start) pairs from the same eligibility
 pool at seed 777, with any episode index overlapping the test set removed BEFORE
 truncation to 256. Selection sweeps run on val, then the chosen configuration is
 reported on the untouched test set.
+
+Usage: python -m specaccept.envs.pusht.build_valsplit [dataset.h5]
 """
 import json
+import os
 import sys
 
 from specaccept.envs.pusht.eval import sample_long
 
-H5 = sys.argv[1] if len(sys.argv) > 1 else "/lustre/home/ha676/data/pusht/pusht_expert_train.h5"
+H5 = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser(
+    "~/data/pusht/pusht_expert_train.h5")
 N, LAST = 256, 150
 
 with open("pusht.episodes150.json") as f:

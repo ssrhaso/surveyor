@@ -1,8 +1,11 @@
 """Idempotent patch: teach CEMPlanner.plan to accept a pre-encoded latent goal
-(spec-accept serving). Flat path byte-identical."""
+(drafted-subgoal serving). Flat path byte-identical.
+
+The DINO-WM clone is located by $DINOWM_REPO (default ~/dino_wm)."""
+import os
 from pathlib import Path
 
-p = Path("/lustre/home/ha676/dino_wm/planning/cem.py")
+p = Path(os.environ.get("DINOWM_REPO", os.path.expanduser("~/dino_wm"))) / "planning" / "cem.py"
 src = p.read_text()
 if "z_visual" in src:
     print("already patched")

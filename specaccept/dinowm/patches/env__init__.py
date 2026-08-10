@@ -1,4 +1,4 @@
-# ISCA patch of dino_wm/env/__init__.py: guard the eager pointmaze import
+# Patch of dino_wm/env/__init__.py: guard the eager pointmaze import
 # (pulls gym.envs.mujoco -> mujoco_py, not installed here). PushT-only port;
 # registration entry_points stay lazy, so the other envs remain registered.
 from gym.envs.registration import register

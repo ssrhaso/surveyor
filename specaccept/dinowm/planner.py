@@ -29,16 +29,18 @@ previously recorded arm reproduces exactly.
 """
 import os
 import sys
+from pathlib import Path
 
-sys.path.insert(0, "/lustre/home/ha676/le-wm/vjepa2")
-sys.path.insert(0, "/lustre/home/ha676/le-wm")
+# This module is imported from inside the DINO-WM tree, whose own utils and
+# planning packages shadow ours, so the repo root goes on sys.path explicitly.
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import numpy as np
 import torch
 
 from planning.mpc import MPCPlanner
 from utils import move_to_device, slice_trajdict_with_t
-from specaccept_vjepa2.drafter import load_token_gdm
+from specaccept.vjepa2.drafter import load_token_gdm
 
 
 def pooled_visual(grid):

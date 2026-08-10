@@ -16,10 +16,11 @@ Exit code 0 only if R and D pass at tolerance; the battery scripts depend on it.
 """
 import sys
 
-sys.path.insert(0, "/lustre/home/ha676/dino_wm")
+REPO = os.environ.get("DINOWM_REPO", os.path.expanduser("~/dino_wm"))
+sys.path.insert(0, REPO)
 import os  # noqa: E402
 
-os.chdir("/lustre/home/ha676/dino_wm")
+os.chdir(REPO)
 
 import hdf5plugin  # noqa: F401,E402  (registers HDF5 compression filters)
 import h5py  # noqa: E402
@@ -30,7 +31,8 @@ from env.tworoom.tworoom_env_wrapper import (  # noqa: E402
     AGENT_SPEED, DOOR_POSITION, SUCCESS_RADIUS, WALL_CENTER, TwoRoomEnvWrapper,
 )
 
-H5 = "/lustre/home/ha676/data/tworoom/tworoom.h5"
+H5 = os.environ.get("TWOROOM_H5",
+                    os.path.expanduser("~/data/tworoom/tworoom.h5"))
 N_EPS = 12          # episodes sampled for the pixel/dynamics checks
 N_FRAMES = 8        # frames per episode for the pixel check
 PIX_TOL = 1.0       # mean abs pixel difference we will accept

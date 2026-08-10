@@ -5,6 +5,7 @@ LeWM's ViT-tiny is SATURATED on TwoRoom, its gap inverted at every scale, so
 this asks whether a generic frozen encoder restores it. The h5 layout is FLAT,
 pixels (F,224,224,3) uint8 plus an episode-boundary array, introspected below.
 Needs hdf5plugin for the compression filter."""
+import os
 from pathlib import Path
 
 import hdf5plugin  # noqa: F401  (registers HDF5 compression filters)
@@ -13,8 +14,10 @@ import numpy as np
 import torch
 from torchvision import transforms
 
-H5 = "/lustre/home/ha676/data/tworoom/tworoom.h5"
-OUT = Path("/lustre/home/ha676/data/dinowm/tworoom_dino_lat")
+H5 = os.environ.get("TWOROOM_H5",
+                    os.path.expanduser("~/data/tworoom/tworoom.h5"))
+OUT = Path(os.environ.get("DINOWM_DATA",
+                          os.path.expanduser("~/data/dinowm"))) / "tworoom_dino_lat"
 OUT.mkdir(parents=True, exist_ok=True)
 MAX_EPS = 200
 dev = "cuda" if torch.cuda.is_available() else "cpu"

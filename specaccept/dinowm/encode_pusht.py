@@ -2,7 +2,7 @@
 (Preprocessor.transform_obs -> VWorldModel.encode_obs), dumping per-episode
 latents for the gap statistic and later drafter training.
 
-Outputs to /lustre/home/ha676/data/dinowm/pusht_lat/:
+Outputs to $DINOWM_DATA/pusht_lat/:
   lat_pusht_<split>_<i>.npz   tokens=(T,384) fp16 POOLED visual patch mean,
                               proprio=(T,dp) fp16 normalized, state=(T,Ds) fp32
   tokens/tok_pusht_<split>_<i>.npy  (T,P,384) fp16 full grids (subset, for
@@ -13,7 +13,8 @@ frames, goal_H=5 model steps = 25 raw frames = the natural subgoal hop.
 import os
 import sys
 
-REPO = "/lustre/home/ha676/dino_wm"
+REPO = os.environ.get("DINOWM_REPO", os.path.expanduser("~/dino_wm"))
+DATA = os.environ.get("DINOWM_DATA", os.path.expanduser("~/data/dinowm"))
 sys.path.insert(0, REPO)
 os.chdir(REPO)
 
@@ -28,7 +29,7 @@ torch.hub.load("facebookresearch/dinov2", "dinov2_vits14")  # importable (cache 
 from plan import load_model  # noqa: E402
 from preprocessor import Preprocessor  # noqa: E402
 
-OUT = Path("/lustre/home/ha676/data/dinowm/pusht_lat")
+OUT = Path(DATA) / "pusht_lat"
 TOK = OUT / "tokens"
 GRID = OUT / "grids"    # (T, 257, 384) fp16: 256 visual tokens + 1 proprio
 OUT.mkdir(parents=True, exist_ok=True)  # token (raw normalized 2-d proprio in
@@ -38,7 +39,7 @@ N_TOKEN_EPS = {"train": 100, "valid": 60}   # full-grid subset per split
 CHUNK = 64
 
 dev = "cuda" if torch.cuda.is_available() else "cpu"
-MP = "/lustre/home/ha676/data/dinowm/checkpoints/outputs/pusht/"
+MP = f"{DATA}/checkpoints/outputs/pusht/"
 cfg = OmegaConf.load(MP + "hydra.yaml")
 model = load_model(Path(MP) / "checkpoints" / "model_latest.pth", cfg,
                    cfg.num_action_repeat, dev)

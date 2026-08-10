@@ -5,7 +5,8 @@ lat_<name>_<split>_<i>.npz (tokens = pooled (T,384) fp16) for gap_stat."""
 import os
 import sys
 
-REPO = "/lustre/home/ha676/dino_wm"
+REPO = os.environ.get("DINOWM_REPO", os.path.expanduser("~/dino_wm"))
+DATA = os.environ.get("DINOWM_DATA", os.path.expanduser("~/data/dinowm"))
 sys.path.insert(0, REPO)
 os.chdir(REPO)
 
@@ -21,13 +22,13 @@ from plan import load_model  # noqa: E402
 from preprocessor import Preprocessor  # noqa: E402
 
 NAME = os.environ["MODEL_NAME"]
-OUT = Path(f"/lustre/home/ha676/data/dinowm/{NAME}_lat")
+OUT = Path(DATA) / f"{NAME}_lat"
 OUT.mkdir(parents=True, exist_ok=True)
 CHUNK = 64
 MAX_PER_SPLIT = int(os.environ.get("MAX_PER_SPLIT", 400))
 
 dev = "cuda" if torch.cuda.is_available() else "cpu"
-MP = f"/lustre/home/ha676/data/dinowm/checkpoints/outputs/{NAME}/"
+MP = f"{DATA}/checkpoints/outputs/{NAME}/"
 cfg = OmegaConf.load(MP + "hydra.yaml")
 model = load_model(Path(MP) / "checkpoints" / "model_latest.pth", cfg,
                    cfg.num_action_repeat, dev)

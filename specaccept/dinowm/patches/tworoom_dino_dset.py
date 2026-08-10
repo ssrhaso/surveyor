@@ -105,7 +105,8 @@ class TwoRoomDINODataset(TrajDataset):
 
 def load_tworoom_dino_slice_train_val(
     transform,
-    data_path="/lustre/home/ha676/data/tworoom/tworoom.h5",
+    data_path=os.environ.get("TWOROOM_H5",
+                             os.path.expanduser("~/data/tworoom/tworoom.h5")),
     n_rollout=None,
     normalize_action=True,
     split_ratio=0.9,

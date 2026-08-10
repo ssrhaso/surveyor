@@ -3,7 +3,7 @@
 Per episode, from its true start state: route to flat2 if c*_2 <= tau, else
 flat5 if c*_5 <= tau, else spec, where c* is the planner-predicted terminal rel
 of one flat CEM plan at the corresponding window depth. Writes one
-eval-compatible episodes file per branch, and the companion sbatch runs each
+eval-compatible episodes file per branch, and the eval driver then runs each
 episode once under its routed arm, so the composite stays a single policy with
 the planning-depth degree of freedom restored. tau is read from the floor
 probe's recorded value, never swept here.
@@ -41,7 +41,7 @@ def parse_args():
     p.add_argument("--offsets", type=int, nargs="+", required=True)
     p.add_argument("--floor-json", default="Results/floor_reacher.json",
                    help="probe_floor output; tau is READ from its recorded args")
-    # CEM = the eval driver's defaults, used unmodified by every reacher sbatch
+    # CEM = the eval driver's defaults, used unmodified by every reacher run
     p.add_argument("--action-block", type=int, default=5)
     p.add_argument("--num-samples", type=int, default=300)
     p.add_argument("--n-steps", type=int, default=30)
