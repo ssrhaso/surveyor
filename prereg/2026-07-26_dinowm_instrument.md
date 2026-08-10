@@ -263,7 +263,7 @@ seeds 99/100 unless noted; serving protocol identical to 2301459):
   Frozen prediction: ~= flat (0.85-0.90). If instead it collapses, the
   latent-goal hand-off itself is broken -> bounded code-fix hunt.
 - D2 DRAFT-AND-SNAP (each drafted grid replaced by its nearest REAL grid
-  from the train-split episode cache /lustre/home/ha676/data/dinowm/
+  from the train-split episode cache $DINOWM_DATA/
   pusht_lat/grids/, matched in pooled-visual rel L2 — the TwoRoom snap-bank
   mechanism, no new constant). Frozen prediction: advances >> 8 and SR
   materially above the 0.05-0.20 nogate band. If D1 healthy AND D2 lifts ->

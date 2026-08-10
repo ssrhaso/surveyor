@@ -63,7 +63,7 @@ all carry unchanged. If this works, the consumption layer turns a ~100x cheaper
 amortized policy into a long-horizon method: their policy fixes our cost, our
 drafter fixes their distance limit, reality remains the verifier.
 
-ARM (frozen configuration; implemented in `surveyor/spec_gcidm.py`, served by
+ARM (frozen configuration; implemented in `surveyor/gcidm_executor.py`, served by
 `--subgoal specgcidm`): PushT goal-free drafter S=10, k=3 DDIM (the derived k),
 tau=0.20 (the derived tau), N=3 block, accept test every S=10 env steps;
 executor = GC-IDM `gcidm_pusht_h50.pt` fed (z_t, w_j, h = steps-to-boundary);
@@ -218,6 +218,6 @@ hindsight-task. No banked number is deleted; labels change.
 
 ---
 
-Files this doc governs: `surveyor/spec_gcidm.py`,
+Files this doc governs: `surveyor/gcidm_executor.py`,
 `batch/isca/run_specgcidm_smoke.sbatch`, `batch/isca/run_gcidm_hmax_seeds.sbatch`,
 `batch/isca/tworoom/run_tworoom_goalkey_nonfinal.sbatch`.

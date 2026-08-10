@@ -2,7 +2,7 @@
 
 Frozen 2026-08-09, BEFORE submission of either job. Both extend banked arcs;
 neither may alter a banked verdict. Code wiring added for these runs:
-spec_gcidm.py gains a gate-only mode (goal_gate without cstar_route), the cube
+gcidm_executor.py gains a gate-only mode (goal_gate without cstar_route), the cube
 driver gains --subgoal specgcidm, the tworoom driver gains --subgoal gcidm.
 
 ---

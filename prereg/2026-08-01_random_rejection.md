@@ -15,7 +15,7 @@ at the SAME per-event rejection probability the deployed verifier exhibited on
 the banked cells. Everything else (drafter, populations, seeds, budgets, CEM,
 tau bookkeeping, block mechanics incl. exhaustion) is byte-identical to the
 banked fixed-spec arm. Implementation: `--random-reject p` in the pusht and
-reacher drivers -> `SpecAcceptSubgoalSource(random_reject=p)`; the coin draws
+reacher drivers -> `SurveyorSource(random_reject=p)`; the coin draws
 from a DEDICATED generator (seed = cem_seed + 777001) so the draft-sampling
 RNG stream is untouched relative to a normal spec run.
 
