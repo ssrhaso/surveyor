@@ -249,7 +249,7 @@ def main():
     # each branch is bit-identical to the corresponding fixed arm's code path.
     if args.composite_crossover is not None:
         if goal_offset <= args.composite_crossover:
-            args.subgoal = "baseline"
+            args.subgoal = "flat"
             args.receding_horizon = args.composite_flat_rh
             branch = "flat"
         else:

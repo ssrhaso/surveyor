@@ -40,7 +40,7 @@ def parse_args():
     p.add_argument("--subgoal", choices=["oracle", "ffjepa", "flat", "surveyor",
                                          "lerp", "router+surveyor", "random", "gcidm",
                                          "gcidm+surveyor"],
-                   default="baseline")
+                   default="flat")
     p.add_argument("--gcidm-ckpt", default=None,
                    help="GC-IDM checkpoint (arXiv 2605.08732 comparator); amortised "
                         "controller, one MLP forward per step and no solver")
