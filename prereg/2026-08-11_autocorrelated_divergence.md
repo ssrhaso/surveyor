@@ -190,6 +190,38 @@ blind consumption at `d=N` rather than at the safe depth. It remains a genuine
 "does not look at reality" control; it is simply not the depth the document
 named, and P-DRIFT-1 does not depend on it.
 
+## Stage 2 arm-engagement check, and a caveat recorded before scoring (2026-08-12)
+
+Both arms verified live on the first cells, before any comparison was read.
+
+* **Blind arm** (`--accept-tau 999`): realised call ratio **0.368**, i.e. `1/N`
+  at `N=3`. It accepts everything and serves the full block, as intended.
+* **Coin arm**: engages, but **is not rate-matched in realised terms**.
+  Specified `p=0.6735` (the stage-1 accept arm's realised ratio) produces a
+  realised ratio of **0.718--0.739**, about 6pp *above* the arm it controls
+  for.
+
+The cause is structural rather than a bug. The coin rejects with probability
+`p` at each verification event, but a block is *also* re-drafted on exhaustion,
+so the realised ratio exceeds `p`. Inverting the cost model of the paper's own
+`eq:cost`, `ratio = q/(1-(1-q)^N)` at `N=3`, the rate needed to *realise* 0.674
+is `q ~ 0.645`, not 0.6735.
+
+**Decision: the cells stand as run, and the caveat is reported with them.**
+Re-running at `q~0.645` would make stage 2 inconsistent with the banked
+`2026-08-01_random_rejection.md` control, which matched the coin to the
+measured call ratio under the same convention; consistency with the result this
+one extends is worth more than the 6pp.
+
+**Direction of the bias, stated now.** The coin receives *more* drafting than
+the test, and on these environments more re-anchoring helps (Extension A of the
+P-RATE document: every-step drafting beats the accept rule on Reacher by up to
++9.37pp). So the bias runs **in the coin's favour**. If the test beats the coin,
+it does so despite the handicap and P-DRIFT-1 is conservative. If the coin ties
+or beats the test, some unquantified part of that is the extra drafting rather
+than the decision content, and the refutation must be reported with that
+qualification rather than as a clean win for the coin.
+
 ## Outcome
 
 *(stage 2 appended after the runs)*
