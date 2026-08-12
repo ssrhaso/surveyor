@@ -164,17 +164,24 @@ exists but is a per-stack constant that must be known in advance. The appendix
 (`app:negatives`) already said blindness "is not uniformly wrong, it ties where
 verification is idle"; the main text now matches it.
 
-Two pre-existing statements should be re-read against this table rather than
-left standing unexamined:
+Two pre-existing statements were re-read against this table. One survives
+untouched; the other does not.
 
-* `sec:results-executor` says blind commitment at `tau=infinity` "ties the
-  PushT cell". At `tau=infinity` = `d=3` on these populations it does not tie
-  at `t=150` (-2.64pp). The banked claim is on different populations, so this
-  is not a contradiction, but the two should be reconciled before submission.
-* `app:negatives` says fixed depth fails unsignaled at "depth-3 on PushT, any
-  depth on Reacher". The depth-3 half is now directly confirmed. The "any
-  depth" half rests on the banked `tau=infinity` result, which is one depth,
-  and Reacher fixed-depth has never been swept.
+* **`sec:results-executor`, "blind commitment at `tau=infinity` ties the PushT
+  cell": stands, and an apparent conflict with this table was a
+  misreading on our part.** The banked cell is `subgoal=specgcidm`, i.e. the
+  **GC-IDM executor with no CEM in the arm**, on `pusht.episodes150s5.json`;
+  its own audit job (`2329658`) ran three arms on that identical cell and reads
+  blind `96.09` against the accept rule's `97.27` and every-step's `97.66`, so
+  `-1.18`pp at `n=256` is a tie. The sweep above is the **CEM** executor on the
+  `c2222` populations: a different executor *and* a different population, so the
+  two were never in disagreement. No reconciliation run is needed and none was
+  performed.
+* **`app:negatives`, fixed depth fails unsignaled at "depth-3 on PushT, any
+  depth on Reacher": retracted in part.** The depth-3-on-PushT half is now
+  directly confirmed. The "any depth on Reacher" half was never measured, and
+  this sweep refutes it: `d=1` does not fail on Reacher, it beats the accept
+  rule at every horizon.
 
 ### Voided run: job `2331836` (recorded, not used)
 
