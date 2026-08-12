@@ -81,6 +81,15 @@ def parse_args():
                         "probe at each env's first boundary routes the episode to "
                         "plain GC-IDM when c* <= tau (arbiter window 2x5); drafting "
                         "envs carry the tau arrival gate. One CEM solve/episode.")
+    # Corruption sweep. PushT has carried --draft-noise since the certification
+    # prereg; Reacher never needed it until P-DRIFT
+    # (2026-08-11_autocorrelated_divergence.md) made it a two-environment test.
+    p.add_argument("--draft-noise", type=float, default=0.0,
+                   help="displace every drafted waypoint by this relative-norm "
+                        "sigma, every draft incl. re-drafts")
+    p.add_argument("--draft-noise-rho", type=float, default=0.0,
+                   help="AR(1) autocorrelation of the corruption direction across "
+                        "re-drafts. 0 = uncorrelated control; ->1 = persistent drift.")
     p.add_argument("--random-reject", type=float, default=None,
                    help="decision-content control (prereg/2026-08-01_random_rejection.md): "
                         "replace the accept test with an i.i.d. coin rejecting "
@@ -369,6 +378,8 @@ def main():
                                              tau=args.accept_tau,
                                              goal_gate=args.goal_gate,
                                              readout=readout, readout_tau=rtau,
+                                             draft_noise=args.draft_noise,
+                                             draft_noise_rho=args.draft_noise_rho,
                                              random_reject=args.random_reject,
                                              record=bool(args.dump_traces))
             if args.random_reject is not None:

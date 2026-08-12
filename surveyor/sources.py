@@ -9,6 +9,7 @@ Injected latents must be native encoder outputs; nothing is renormalized.
 
 from __future__ import annotations
 
+import math
 import time
 
 import numpy as np
@@ -240,7 +241,7 @@ class SurveyorSource:
     def __init__(self, planner, n_envs, device="cpu", n_steps=50, seed=42,
                  tau=0.2, record=False, goal_gate=False,
                  readout=None, readout_tau=None, draft_noise=0.0,
-                 random_reject=None):
+                 draft_noise_rho=0.0, random_reject=None):
         # readout: optional gap-maximizing verification lens (learn_readout.py).
         # Verification-side ONLY, so drafting/cost/planner stay in native space:
         # accept iff ||r(z_now) - r(tgt)|| <= readout_tau (unit-norm distance).
@@ -273,6 +274,26 @@ class SurveyorSource:
         # EVERY draft including re-drafts (deployed semantics). 0.0 = off.
         # Verification and traces see the corrupted, served block.
         self.draft_noise = float(draft_noise)
+        # AUTOCORRELATED corruption (prereg/2026-08-11_autocorrelated_divergence.md).
+        # The draw above is white by construction: a fresh direction every draft,
+        # so consecutive corruptions cancel in expectation and any consumption
+        # policy averages them out. That is why SR stayed flat under the
+        # certification sweep, and it leaves the paper's "verification's value is
+        # against autocorrelated divergence" sentence untested.
+        #
+        # Here one unit drift vector per env persists across re-drafts,
+        #   d <- rho*d + sqrt(1-rho^2)*u,  renormalised,
+        # and is shared across the N waypoints of a block, so at rho->1 the
+        # corruption is a slowly turning bias rather than noise. rho=0 is the
+        # control: an uncorrelated draw, still shared within a block, so rho is
+        # the ONLY quantity that varies across arms and the dose-response of
+        # P-DRIFT-3 is unconfounded. (The frozen document also calls rho=0 "the
+        # existing draw exactly"; that is true of its statistics but not of its
+        # per-waypoint structure, and the unconfounded reading was chosen and
+        # recorded in the prereg's Outcome section before any cell was run.)
+        self.draft_noise_rho = float(draft_noise_rho)
+        self._drift = None   # (n_envs, dim) unit vectors, lazily initialised
+        self.drift_log = []  # [(env_rows, unit dirs)] per draft, for the smoke gate
         # matched-rate random-rejection control (prereg/2026-08-01_random_rejection.md):
         # reject every verification event with this probability, drawn from a
         # DEDICATED coin generator so the draft-sampling stream matches a normal
@@ -378,11 +399,31 @@ class SurveyorSource:
                                                       generator=self._gen,
                                                       z_goal_native=z_goal)  # (R', N, dim)
                 if self.draft_noise > 0:
-                    u = torch.randn(blocks.shape, generator=self._gen,
+                    # One direction per ENV (not per waypoint), evolved as an
+                    # AR(1) walk on the unit sphere so it persists across
+                    # re-drafts. rho=0 makes each step an independent draw.
+                    if self._drift is None:
+                        self._drift = torch.zeros(self.n_envs, blocks.shape[-1],
+                                                  device=blocks.device,
+                                                  dtype=blocks.dtype)
+                    rho = self.draft_noise_rho
+                    u = torch.randn((len(need_rows), blocks.shape[-1]),
+                                    generator=self._gen,
                                     device=blocks.device, dtype=blocks.dtype)
                     u = u / u.norm(dim=-1, keepdim=True).clamp_min(1e-8)
+                    prev = self._drift[need_envs].to(blocks.device)
+                    d = rho * prev + math.sqrt(max(1.0 - rho * rho, 0.0)) * u
+                    d = d / d.norm(dim=-1, keepdim=True).clamp_min(1e-8)
+                    self._drift[need_envs] = d.to(self._drift.device)
+                    # broadcast the env's single direction over its N waypoints
                     blocks = blocks + (self.draft_noise
-                                       * blocks.norm(dim=-1, keepdim=True) * u)
+                                       * blocks.norm(dim=-1, keepdim=True)
+                                       * d.unsqueeze(1))
+                    # the realised unit displacement direction per draft, so the
+                    # engagement smoke test can measure cos(d_t, d_{t-1})
+                    # directly instead of inferring it from SR
+                    self.drift_log.append((np.asarray(need_envs).copy(),
+                                           d.detach().float().cpu().clone()))
                 blocks = blocks.to(self.device)
                 if self.record:
                     self.trace.append({"replan_idx": np.asarray(need_envs),

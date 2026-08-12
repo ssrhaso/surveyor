@@ -99,6 +99,49 @@ once with the identical command and otherwise reported missing.
 
 `batch/isca/run_drift.sbatch` (to be written after the smoke test passes).
 
+## Interpretation recorded before any cell (2026-08-12)
+
+The design above contains one internal conflict, resolved here in writing
+*before* the mechanism was implemented and before any cell was run, so the
+choice cannot be argued backwards from a result.
+
+It asks for a drift vector "shared across the `N` waypoints of a block", and
+also says "`rho=0` reduces to the existing draw **exactly**". Those cannot both
+hold: the existing draw is *per waypoint* (`N` independent directions per
+block), so a shared vector at `rho=0` is not it.
+
+**Chosen: always shared, `rho=0` being a fresh shared draw.** Under this
+reading `rho` is the only quantity that differs between arms, so the
+dose-response of **P-DRIFT-3** measures autocorrelation alone. Under the
+literal alternative, `rho=0` and `rho>0` would differ in *two* ways at once
+(per-waypoint vs shared, and uncorrelated vs correlated), and a positive
+P-DRIFT-1 could then be produced by block coherence rather than by
+autocorrelation, which is precisely the claim under test.
+
+The cost is that `rho=0` is no longer bit-identical to the banked corruption
+sweep. It remains white noise, so **P-DRIFT-2** should still reproduce the
+banked tie behaviourally, and P-DRIFT-2 failing is already defined above as
+invalidating the comparison. That is the intended check on this decision.
+
+## Engagement smoke test: **PASS** (2026-08-12, before any array)
+
+Run as `surveyor/test_draft_drift_cpu.py`, on the realised displacement
+directions rather than inferred from SR. Criterion as fixed above (`sigma=0.2`,
+`rho=0.99` cos `>0.9` against `~0`):
+
+| `rho` | mean cos between consecutive drafts |
+|-------|-------------------------------------|
+| 0.0   | **-0.023** |
+| 0.9   | **+0.899** |
+| 0.99  | **+0.990** |
+
+Measured cos tracks `rho` to three decimals, as AR(1) predicts. The knob
+engages and is monotone, so P-DRIFT-3 can be attributed to the mechanism if it
+holds. Two further guards are pinned in the same file: the corruption is one
+unit direction per env shared over all `N` waypoints at every `rho`, and at
+`sigma=0` no corruption is injected and no drift state is allocated, so every
+banked cell in the paper is untouched.
+
 ## Outcome
 
 *(appended after the runs)*

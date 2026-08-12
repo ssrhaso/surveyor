@@ -89,6 +89,12 @@ def parse_args():
                         "drafted waypoint by this relative-norm sigma along a "
                         "random unit direction, every draft incl. re-drafts. "
                         "Blind consumption = --accept-tau 999 (accepts all).")
+    p.add_argument("--draft-noise-rho", type=float, default=0.0,
+                   help="AR(1) autocorrelation of the corruption direction across "
+                        "re-drafts (prereg 2026-08-11_autocorrelated_divergence). "
+                        "0 = uncorrelated (the banked white-noise control); "
+                        "->1 = a persistent drift the accept test can see but a "
+                        "fixed-rate coin structurally cannot.")
     p.add_argument("--random-reject", type=float, default=None,
                    help="decision-content control (prereg/2026-08-01_random_rejection.md): "
                         "replace the accept test with an i.i.d. coin rejecting "
@@ -503,6 +509,7 @@ def main():
                                                      n_steps=args.gdm_steps, seed=cem_seed,
                                                      tau=args.accept_tau,
                                                      draft_noise=args.draft_noise,
+                                                     draft_noise_rho=args.draft_noise_rho,
                                                      random_reject=args.random_reject,
                                                      record=bool(args.dump_traces))
                     if args.random_reject is not None:
