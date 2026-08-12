@@ -142,6 +142,54 @@ unit direction per env shared over all `N` waypoints at every `rho`, and at
 `sigma=0` no corruption is injected and no drift state is allocated, so every
 banked cell in the paper is untouched.
 
+## Stage 1 result, and a scoping decision recorded before stage 2 (2026-08-12)
+
+The design specifies three arms per cell. The other two are not runnable until
+the accept arm has run: the coin must be matched to each cell's **realised**
+call ratio, which moves with the corruption and cannot be reused from the
+uncorrupted cells; and blind commitment is "at the safe depth", which on
+Reacher was still being measured by Extension A of the P-RATE document. Stage 1
+therefore ran the accept arm alone and harvested the rates stage 2 needs.
+Job `2334493`, `t=100`, seeds 42-45, `n=256`/`128`.
+
+| env | `sigma` | `rho=0` | `rho=0.9` | `rho=0.99` |
+|-----|---------|---------|-----------|------------|
+| PushT | 0.1 | 96.39 (r .674) | 95.99 (r .680) | 95.21 (r .679) |
+| PushT | 0.2 | 95.21 (r 1.000) | 94.63 (r 1.000) | 94.82 (r 1.000) |
+| Reacher | 0.1 | 91.21 (r .661) | 91.02 (r .663) | 91.80 (r .657) |
+| Reacher | 0.2 | 93.94 (r .990) | 95.51 (r .990) | 95.70 (r .990) |
+
+**Scoping decision, fixed here before stage 2 runs: `sigma=0.2` is dropped as
+degenerate, and stage 2 runs at `sigma=0.1` only.** At `sigma=0.2` the call
+ratio saturates at 1.00/0.99, i.e. total rejection, reproducing the banked
+corruption sweep. A test that rejects every boundary consumes nothing and *is*
+every-step drafting, and a coin matched at rate 1.0 is byte-identical to it by
+construction. Those cells cannot discriminate test from coin whatever the
+answer, so scoring them would pad the grid with six guaranteed ties. This is a
+statement about the arm being degenerate, not about the result, and it is
+recorded before the comparison is run.
+
+**Adverse early signal, stated now rather than after stage 2.** At the
+informative `sigma=0.1`, the realised call ratio does **not** move with `rho`
+(PushT .674/.680/.679; Reacher .661/.663/.657). The test is not igniting more
+under correlated drift than under white noise. If ignition does not respond to
+`rho`, it is hard to see how its *decisions* could beat a rate-matched coin,
+which is exactly P-DRIFT-1. Absolute SR is also flat to mildly *decreasing* in
+`rho` on PushT. Stage 2 is still run, because P-DRIFT-1 is a test-vs-coin
+comparison rather than an absolute-SR one, but the expectation going in is
+refutation, and that expectation is on record.
+
+**Blind-commitment arm, deviation recorded.** "The safe depth" is `d=2` on
+PushT but does **not exist** on Reacher: Extension A of the P-RATE document
+measured every depth failing somewhere there. Additionally
+`DSparkSubgoalSource` carries no corruption path, so a depth-`d` arm under
+injected noise is not available without a further change to a shared class that
+holds banked results. Stage 2 therefore uses the codebase's existing blind
+idiom, `--accept-tau 999` (accept everything, serve the full block), which is
+blind consumption at `d=N` rather than at the safe depth. It remains a genuine
+"does not look at reality" control; it is simply not the depth the document
+named, and P-DRIFT-1 does not depend on it.
+
 ## Outcome
 
-*(appended after the runs)*
+*(stage 2 appended after the runs)*

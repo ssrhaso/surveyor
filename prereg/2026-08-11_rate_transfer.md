@@ -197,13 +197,63 @@ written down in advance: `d=1 -> redraft/advance 1.000`, `d=3 -> about .33`,
 entirely from that corrected array, whose per-depth ratios (1.00 / .52-.73 /
 .35-.65) confirm the knob engaged in every cell.
 
-### Extension A, Reacher leg: **missing**
+### Extension A, Reacher leg: **run 2026-08-12. P-RATE-2 holds by the letter, and its justification clause is false.**
 
-Not run. Reacher's evaluator has no `dspark` subgoal choice and no
-`--commit`/`--commit-k` flags, so the sweep needs a port first, not a
-resubmission. `DSparkSubgoalSource` itself is env-agnostic (it consumes a
-`gdm_planner` and latents only), so the port is mechanical, but it is a code
-change and is recorded here as outstanding rather than quietly skipped.
+Two blockers had to be cleared first, both found by an engagement gate rather
+than by a failed array. (i) Reacher's evaluator had no `dspark` choice and no
+`--commit`/`--commit-k`. (ii) `DSparkSubgoalSource` hardcoded
+`needs_goal=False` and never forwarded a goal latent: PushT's drafter is
+goal-*free* so this never surfaced, but Reacher's is goal-conditioned and the
+drafter asserts outright, so the source physically could not draft here. The
+goal-free path is pinned bit-identical by regression test, so the banked PushT
+depth cells are untouched. Gate before submission (criterion fixed first):
+`d=1 -> 1.000`, `d=3 -> 0.371`, gap `0.629`. **PASS**, and `0.371` is the same
+value PushT's `t=100` cell produced, as a policy-level property should be.
+
+Adaptive reference = the banked `tau=0.20` arm (job `2331806`, tasks 59-62),
+same episodes and seeds, so every comparison is paired. `n=128`, seeds 42-45.
+
+| `t` | adaptive | `d=1` | `d=2` | `d=3` |
+|-----|----------|-------|-------|-------|
+| 25  | 55.66 (r.64) | **65.04** (r1.00) | 57.42 (r.60) | 50.78 (r.43) |
+| 50  | 79.49 (r.61) | **87.69** | 76.17 | 68.16 |
+| 100 | 89.84 (r.61) | **96.29** | 91.02 | 84.77 |
+| 150 | 91.41 (r.63) | 92.38 | 91.21 | 87.50 |
+
+Deficit against the adaptive arm: `d=1` **+9.37/+8.20/+6.45/+0.97**;
+`d=2` +1.76/**-3.32**/+1.17/-0.20; `d=3` -4.88/**-11.33**/-5.08/-3.91.
+
+**Verdict.** No fixed depth is within 2.0pp at every horizon of *both*
+environments: `d=2` is on PushT but misses Reacher `t=50` by 3.32pp. By the
+letter of the prediction, **P-RATE-2 is not refuted**.
+
+**But the consequence clause cannot be stated as written.** It reads "every
+fixed alternative fails somewhere, and none signals which regime it is in,
+whereas the adaptive test does not fail anywhere." That is false here. `d=1`,
+every-step drafting with no consumption policy at all, **beats** the accept
+rule on Reacher at every horizon, by up to `+9.37`pp. It does not fail; the
+adaptive arm does. What actually holds is much weaker:
+
+> Per environment, a fixed consumption policy matches the accept rule (PushT,
+> `d=2`, at a *lower* call ratio) or beats it (Reacher, `d=1`). No *single*
+> depth does both, which is all P-RATE-2 ever claimed. The accept rule's
+> defence is therefore that one constant serves two environments, not that it
+> is the best policy in either.
+
+This is **corroborated, not an artefact**. `2026-08-11_tau_per_env.md` already
+measured Reacher's derived floor at `0.106` against the transferred `0.20`,
+worth `+6.6`pp at `t=25`. `d=1` is the `tau -> 0` limit and gains `+9.37`pp at
+the same cell: same direction, larger magnitude, monotone in how much
+re-anchoring is forced. Three independent probes now agree that `tau=0.20`
+under-re-anchors on Reacher, and the cost of that is far larger than the
+paper's "SR-neutral" framing admits.
+
+**Applied to the paper.** The "SR-neutral" claim is scoped to PushT, where it
+was measured; it is not asserted of Reacher at the served `tau`. The
+`app:negatives` claim that fixed depth fails unsignaled at "any depth on
+Reacher" is **retracted**: `d=1` does not fail there, it wins. What is true,
+and now measured rather than assumed, is that no depth is safe at every
+horizon of both environments.
 
 ### Extension B (drafter training seeds)
 
