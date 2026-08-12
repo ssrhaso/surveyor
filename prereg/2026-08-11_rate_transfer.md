@@ -125,4 +125,87 @@ Runner: `batch/isca/run_drafter_seeds.sbatch`.
 
 ## Outcome
 
-*(appended after the runs; see below)*
+### Extension A (P-RATE-2), PushT leg: **refuted by `d=2`**
+
+*Appended 2026-08-12, after the PushT array completed. Reacher is reported
+missing, not as a result; see "voided run" below for why the first attempt does
+not count.*
+
+Adaptive reference = the `tau=0.20` arm run in the same batch
+(job `2331806`, tasks 54-58), same episodes and same seeds, so every comparison
+below is paired. Mean SR over seeds 42-45, `n=256`/cell, 20 deg criterion;
+call ratio in brackets.
+
+| `t` | adaptive | `d=1` | `d=2` | `d=3` |
+|-----|----------|-------|-------|-------|
+| 25  | 98.93 (.84) | 99.22 (1.00) | 98.93 (.73) | 98.63 (.65) |
+| 50  | 95.99 (.65) | 96.19 (1.00) | 96.68 (.56) | 95.90 (.42) |
+| 75  | 96.68 (.63) | 95.80 (1.00) | 95.90 (.54) | 95.21 (.38) |
+| 100 | 96.68 (.61) | 94.34 (1.00) | 97.46 (.53) | 96.09 (.37) |
+| 150 | 98.25 (.61) | 98.34 (1.00) | 98.25 (.52) | 95.60 (.35) |
+
+Deficit against the adaptive arm, worst cell per depth:
+`d=1` **-2.34** (`t=100`), `d=2` **-0.78** (`t=75`), `d=3` **-2.64** (`t=150`).
+
+`d=2` is within the frozen 2.0pp band at **every** PushT horizon, at a *lower*
+call ratio than the adaptive arm everywhere (.52-.73 against .61-.84). On this
+environment the accept test is matched by a constant depth that also drafts
+less. `d=1` and `d=3` each fail at some horizon, and neither signals it.
+
+**Consequence applied.** P-RATE-2 is stated over *both* environments, and the
+Reacher leg was not run, so the prediction is **not yet decided** and the full
+refutation consequence (restating the accept rule's contribution) has **not**
+been invoked. What was applied is the narrower correction the PushT data
+compels: `sec:method-analysis` previously asserted that blind commitment "fails
+without signalling it" and has an environment-dependent safe depth. That
+sentence now reads that `d=1` and `d=3` each fall short at some horizon *while
+`d=2` matches the adaptive arm at all five for less drafting*, so a safe depth
+exists but is a per-stack constant that must be known in advance. The appendix
+(`app:negatives`) already said blindness "is not uniformly wrong, it ties where
+verification is idle"; the main text now matches it.
+
+Two pre-existing statements should be re-read against this table rather than
+left standing unexamined:
+
+* `sec:results-executor` says blind commitment at `tau=infinity` "ties the
+  PushT cell". At `tau=infinity` = `d=3` on these populations it does not tie
+  at `t=150` (-2.64pp). The banked claim is on different populations, so this
+  is not a contradiction, but the two should be reconciled before submission.
+* `app:negatives` says fixed depth fails unsignaled at "depth-3 on PushT, any
+  depth on Reacher". The depth-3 half is now directly confirmed. The "any
+  depth" half rests on the banked `tau=infinity` result, which is one depth,
+  and Reacher fixed-depth has never been swept.
+
+### Voided run: job `2331836` (recorded, not used)
+
+The first Extension A array passed
+`--subgoal specaccept ... --commit fixed --commit-k D`, but `--commit`/
+`--commit-k` are read only by `DSparkSubgoalSource`, built only under
+`--subgoal dspark`. `SurveyorSource` never saw them, so the flags were silently
+ignored and all fifteen PushT tasks ran the plain `tau=0.20` accept rule.
+The tell is the call ratio: .605/.608/.611 at `d=1/2/3`, where `d=1` must be
+1.000 and `d=3` about .33. Fifteen tasks were three mislabelled replicas of one
+configuration, and their SR differed only by GPU nondeterminism. No number from
+that job appears anywhere. The Reacher half of the same array failed loudly
+instead, because those flags do not exist in its evaluator at all.
+
+The corrected runner (`run_commit_depth_v2.sbatch`, job `2332870`) uses the raw
+open-loop path `--subgoal dspark --no-refine`, which loads no checkpoint, and
+was smoke-tested **before** submission (job `2332784`) against a pass criterion
+written down in advance: `d=1 -> redraft/advance 1.000`, `d=3 -> about .33`,
+"0.61 for both = still inert". Measured 1.000 and .371. The table above comes
+entirely from that corrected array, whose per-depth ratios (1.00 / .52-.73 /
+.35-.65) confirm the knob engaged in every cell.
+
+### Extension A, Reacher leg: **missing**
+
+Not run. Reacher's evaluator has no `dspark` subgoal choice and no
+`--commit`/`--commit-k` flags, so the sweep needs a port first, not a
+resubmission. `DSparkSubgoalSource` itself is env-agnostic (it consumes a
+`gdm_planner` and latents only), so the port is mechanical, but it is a code
+change and is recorded here as outstanding rather than quietly skipped.
+
+### Extension B (drafter training seeds)
+
+Completed and already reported: two further PushT training seeds move SR by at
+most 1.8pp, against 8.5pp for GC-IDM. In the paper's limitations paragraph.
