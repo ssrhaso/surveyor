@@ -17,7 +17,8 @@ import torch
 from surveyor import encoder
 from surveyor.envs.pusht.eval import sample_short, sample_long
 from surveyor.sources import (SubgoalCostModel, OracleSubgoalSource,
-                                    GDMSubgoalSource, SurveyorSource,
+                                    GDMSubgoalSource, DSparkSubgoalSource,
+                                    SurveyorSource,
                                     LerpSubgoalSource, HorizonGatedSource,
                                     CstarRetireSource,
                                     build_oracle_table, make_ffjepa_policy)
@@ -36,10 +37,29 @@ def parse_args():
                    help="lerp source: waypoint at this fraction along the latent "
                         "segment from the CURRENT latent to the goal (re-anchored "
                         "each replan); frac=1.0 degenerates to flat planning")
-    p.add_argument("--subgoal", choices=["oracle", "ffjepa", "flat", "surveyor",
+    p.add_argument("--subgoal", choices=["oracle", "ffjepa", "flat", "dspark", "surveyor",
                                          "lerp", "horizon_gated", "router+surveyor", "random", "gcidm",
                                          "gcidm+surveyor"],
                    default="oracle")
+    # Blind fixed-depth commitment (--subgoal dspark --no-refine), the Reacher
+    # analogue of the PushT sweep: serve --commit-k waypoints per draft, then
+    # re-draft unconditionally. Ported 2026-08-12 for prereg
+    # 2026-08-11_rate_transfer.md Extension A, whose Reacher leg could not run
+    # because these flags existed only in the PushT driver. Same argument names,
+    # same defaults and the same env-agnostic DSparkSubgoalSource as PushT, so
+    # the two legs are directly comparable.
+    p.add_argument("--dspark-ckpt", default=None, help="train_dspark_head.py checkpoint")
+    p.add_argument("--commit", choices=["adaptive", "fixed"], default="adaptive",
+                   help="commit-depth policy: adaptive (confidence k*=max{k:Pi c_i>theta}) or fixed")
+    p.add_argument("--commit-theta", type=float, default=0.5, help="adaptive commit threshold")
+    p.add_argument("--commit-k", type=int, default=None, help="fixed commit depth (<=N)")
+    p.add_argument("--no-sts", action="store_true", help="disable sequential temperature scaling")
+    p.add_argument("--chain-n", type=int, default=None,
+                   help="AR-chain the native-N drafter to this block length; "
+                        "default = drafter's native N")
+    p.add_argument("--no-refine", action="store_true",
+                   help="skip the DSparkHead: use the RAW draft block. Requires "
+                        "--commit fixed. This is the blind-commitment arm.")
     p.add_argument("--gcidm-ckpt", default=None,
                    help="GC-IDM checkpoint (arXiv 2605.08732 comparator); amortised "
                         "controller, one MLP forward per step and no solver")
@@ -162,6 +182,12 @@ def main():
         raise ValueError(f"--subgoal {args.subgoal} requires --gdm-ckpt")
     if args.subgoal == "gcidm+surveyor" and not args.gcidm_ckpt:
         raise ValueError("--subgoal gcidm+surveyor requires --gcidm-ckpt (amortised executor)")
+    if args.subgoal == "dspark":
+        if not args.gdm_ckpt:
+            raise ValueError("--subgoal dspark requires --gdm-ckpt (frozen drafter)")
+        if not args.no_refine and not args.dspark_ckpt:
+            raise ValueError("--subgoal dspark requires --dspark-ckpt (refiner/confidence); "
+                             "or pass --no-refine to use the raw draft block")
 
     encoder._ensure_swm_importable(args.swm_src)
     import stable_worldmodel as swm
@@ -184,7 +210,7 @@ def main():
           f"device={args.device}, training={model.training}, subgoal={args.subgoal}")
 
     gdm_planner = None
-    if args.subgoal in ("ffjepa", "surveyor", "horizon_gated", "router+surveyor", "gcidm+surveyor"):
+    if args.subgoal in ("ffjepa", "dspark", "surveyor", "horizon_gated", "router+surveyor", "gcidm+surveyor"):
         from surveyor.drafter import load_gdm_planner, count_params
         gdm_planner = load_gdm_planner(args.gdm_ckpt, device=args.device)
         d = gdm_planner.diffusion
@@ -315,6 +341,13 @@ def main():
                                       dim=gdm_planner.cfg.latent_dim,
                                       device=args.device, n_steps=args.gdm_steps,
                                       seed=cem_seed, record=bool(args.dump_traces))
+        elif args.subgoal == "dspark":
+            source = DSparkSubgoalSource(gdm_planner, args.dspark_ckpt,
+                                         n_envs=args.num_eval, device=args.device,
+                                         n_steps=args.gdm_steps, seed=cem_seed,
+                                         commit=args.commit, theta=args.commit_theta,
+                                         fixed_k=args.commit_k, use_sts=not args.no_sts,
+                                         chain_n=args.chain_n, refine=not args.no_refine)
         elif args.subgoal == "surveyor":
             readout, rtau = None, None
             if args.verify_readout:
@@ -421,6 +454,18 @@ def main():
               f"rejects={sp.n_reject} "
               f"call_ratio={sp.n_redraft / max(sp_total, 1):.3f} "
               f"(fired episodes make zero drafter calls by construction)")
+
+    if args.subgoal == "dspark":
+        # The engagement check for the fixed-depth sweep: redraft/advance must
+        # read 1.000 at --commit-k 1 and about 1/N at full block depth. A run
+        # where every depth reports the same ratio means the knob is inert
+        # (prereg 2026-08-11_rate_transfer.md, "voided run").
+        cd = source.commit_depths
+        ratio = source.n_redraft / max(source.n_advance, 1)
+        print(f"[dspark] commit={args.commit} theta={args.commit_theta} "
+              f"re-drafts={source.n_redraft} advances={source.n_advance} "
+              f"mean_commit_depth={np.mean(cd) if cd else 0:.2f} "
+              f"redraft/advance={ratio:.3f} (GDM=1.000; lower=fewer diffusion calls)")
 
     if args.subgoal == "surveyor":
         total = source.n_redraft + source.n_advance
