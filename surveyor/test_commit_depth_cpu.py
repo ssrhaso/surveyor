@@ -45,20 +45,71 @@ def _synth_latents(n, seed=0):
     return z / z.norm(dim=1, keepdim=True) * math.sqrt(D)
 
 
-def _planner(seed=11):
+def _planner(seed=11, goal_cond=False):
     z = _synth_latents(2000, seed=seed)
-    cfg = GDMConfig(latent_dim=D, n_future=N, wg=1, hidden=64, depth=2, heads=4)
+    cfg = GDMConfig(latent_dim=D, n_future=N, wg=1, hidden=64, depth=2, heads=4,
+                    goal_cond=goal_cond)
     return GDMPlanner(GDM(cfg), GaussianDiffusion(timesteps=100, device=DEV),
                       z.mean(0), z.std(0).clamp_min(1e-6), device=DEV)
 
 
-def _drive(src, n_envs, n_boundaries, seed=12):
+def _drive(src, n_envs, n_boundaries, seed=12, goal=None):
     """Run n_boundaries replan boundaries with every env replanning each time,
     which is how both env drivers call the source at a fixed receding horizon."""
     idx = list(range(n_envs))
     for b in range(n_boundaries):
         obs = _synth_latents(n_envs, seed=seed + b)
-        src.current(np.full(n_envs, b, dtype=np.int64), obs_latent=obs, replan_idx=idx)
+        src.current(np.full(n_envs, b, dtype=np.int64), obs_latent=obs,
+                    replan_idx=idx, goal_latent=goal)
+
+
+def test_goal_conditioned_drafter_is_served_a_goal():
+    """Reacher's drafter is goal-conditioned where PushT's is goal-free, and the
+    drafter asserts outright if goal_cond=True and no goal latent reaches it.
+    This source hardcoded needs_goal=False, so the Reacher fixed-depth sweep
+    died on `goal_cond=True but no goal latent passed` at the first draft.
+
+    Pins both halves of the fix: needs_goal now follows the planner, and the
+    goal actually reaches sample_sequence (a goal-conditioned draft must run at
+    all, and must still obey the depth accounting)."""
+    n_envs, n_bounds, d = 4, 9, 3
+    p = _planner(goal_cond=True)
+    assert p.goal_cond is True
+    src = DSparkSubgoalSource(p, None, n_envs=n_envs, device=DEV, n_steps=5,
+                              seed=42, commit="fixed", fixed_k=d, refine=False)
+    assert src.needs_goal is True, "needs_goal must follow the planner's goal_cond"
+
+    goal = _synth_latents(n_envs, seed=99)
+    _drive(src, n_envs, n_bounds, goal=goal)          # asserts inside the drafter if unfixed
+    assert abs(src.n_redraft / src.n_advance - 1.0 / d) < 1e-9, \
+        "goal conditioning must not disturb the depth accounting"
+    print(f"[commit] goal-conditioned drafter served; ratio still 1/{d} exactly")
+
+
+def test_goal_free_path_is_untouched():
+    """The regression guard that matters: this class carries the banked PushT
+    fixed-depth cells, and PushT's drafter is goal-free. With goal_cond=False
+    the source must stay on needs_goal=False and produce bit-identical blocks
+    whether or not a goal latent is handed to it, so the goal support cannot
+    have perturbed any existing result."""
+    n_envs, n_bounds, d = 3, 6, 2
+    p = _planner(goal_cond=False)
+    src_a = DSparkSubgoalSource(p, None, n_envs=n_envs, device=DEV, n_steps=5,
+                                seed=5, commit="fixed", fixed_k=d, refine=False)
+    assert src_a.needs_goal is False
+    _drive(src_a, n_envs, n_bounds, seed=70)
+    out_a = src_a.current(np.zeros(n_envs, dtype=np.int64), obs_latent=None, replan_idx=[])
+
+    src_b = DSparkSubgoalSource(p, None, n_envs=n_envs, device=DEV, n_steps=5,
+                                seed=5, commit="fixed", fixed_k=d, refine=False)
+    _drive(src_b, n_envs, n_bounds, seed=70, goal=_synth_latents(n_envs, seed=123))
+    out_b = src_b.current(np.zeros(n_envs, dtype=np.int64), obs_latent=None, replan_idx=[])
+
+    assert torch.equal(out_a, out_b), \
+        "a goal latent changed a goal-FREE draft: the banked PushT cells are not reproducible"
+    assert src_a.n_redraft == src_b.n_redraft and src_a.n_advance == src_b.n_advance
+    print(f"[commit] goal-free path bit-identical with and without a goal latent "
+          f"({src_a.n_redraft} redrafts / {src_a.n_advance} advances)")
 
 
 def test_fixed_depth_sets_the_call_ratio():

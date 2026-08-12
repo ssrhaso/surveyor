@@ -669,6 +669,11 @@ class DSparkSubgoalSource:
         from surveyor.dspark.dspark_head import commit_depth
         self._commit_depth = commit_depth
         self.planner = gdm_planner
+        # Shadow the class attribute per planner, exactly as GDMSubgoalSource
+        # does. PushT's drafter is goal-free and this stays False, leaving the
+        # goal-free path byte-identical; Reacher's is goal-conditioned, where
+        # the drafter asserts if no goal latent reaches it.
+        self.needs_goal = getattr(gdm_planner, "goal_cond", False)
         self.native_n = gdm_planner.cfg.n_future
         # block_n = length of the (possibly AR-chained) drafted block to work on
         self.block_n = int(chain_n) if chain_n else self.native_n
@@ -699,16 +704,23 @@ class DSparkSubgoalSource:
         self.commit_depths = []
 
     @torch.no_grad()
-    def _draft_block(self, zc):
+    def _draft_block(self, zc, z_goal=None):
         """Draft a length-block_n block. When block_n > native_n, AR-chain the
-        native-N drafter by re-conditioning on its own last latent each hop."""
+        native-N drafter by re-conditioning on its own last latent each hop.
+
+        z_goal is the episode goal, so it is held fixed across hops while the
+        conditioning latent advances; it is ignored unless the planner is
+        goal-conditioned (drafter.sample_sequence gates on its own goal_cond)."""
         if self.block_n <= self.native_n:
             return self.planner.sample_sequence(zc, n_steps=self.n_steps,
-                                                generator=self._gen)[:, :self.block_n]
+                                                generator=self._gen,
+                                                z_goal_native=z_goal)[:, :self.block_n]
         hops = (self.block_n + self.native_n - 1) // self.native_n
         blocks, cond = [], zc
         for _ in range(hops):
-            blk = self.planner.sample_sequence(cond, n_steps=self.n_steps, generator=self._gen)
+            blk = self.planner.sample_sequence(cond, n_steps=self.n_steps,
+                                               generator=self._gen,
+                                               z_goal_native=z_goal)
             blocks.append(blk); cond = blk[:, -1]
         return torch.cat(blocks, dim=1)[:, :self.block_n]
 
@@ -721,7 +733,12 @@ class DSparkSubgoalSource:
                     if self._queue[i] is None or self._ptr[i] >= self._queue[i].shape[0]]
             if need:
                 zc = obs_latent[need].to(self.planner.device)                  # (Rn, D) native
-                block = self._draft_block(zc)                                  # (Rn, block_n, D)
+                # goal_latent is (R, D) aligned with replan_idx, as in
+                # GDMSubgoalSource, so `need` (positions into replan_idx)
+                # selects each env's own goal.
+                z_goal = (goal_latent[need].to(self.planner.device)
+                          if (self.needs_goal and goal_latent is not None) else None)
+                block = self._draft_block(zc, z_goal)                          # (Rn, block_n, D)
                 if self.refine:
                     refined = self.head(block, zc)                             # (Rn, block_n, D)
                     cvals = self.conf(refined, block, zc, temperature=self.sts_temp)
