@@ -222,6 +222,59 @@ or beats the test, some unquantified part of that is the extra drafting rather
 than the decision content, and the refutation must be reported with that
 qualification rather than as a clean win for the coin.
 
-## Outcome
+## Outcome (stage 2, job 2334555, 12/12 tasks, harvested from logs 2026-08-13)
 
-*(stage 2 appended after the runs)*
+*Appended during the 2026-08-13 audit: the numbers below were in the paper but
+this section had been left empty, against convention. Means over seeds 42--45,
+`t=100`, `sigma=0.1`; test = the stage-1 accept arm (job 2334493), same
+episodes and seeds.*
+
+| env | arm | `rho=0` | `rho=0.9` | `rho=0.99` |
+|-----|-----|---------|-----------|------------|
+| PushT (n=256) | test | 96.39 | 95.99 | 95.21 |
+| PushT | coin | 96.58 | 96.68 | 97.07 |
+| PushT | blind (`tau=999`) | 96.48 | 95.99 | 96.10 |
+| Reacher (n=128) | test | 91.21 | 91.02 | 91.80 |
+| Reacher | coin | 93.75 | 94.14 | 94.53 |
+| Reacher | blind | 80.86 | 81.05 | 81.05 |
+
+Realised coin call ratios: PushT 0.718--0.739 (specified 0.6735/0.6803/0.6790),
+Reacher 0.716--0.741 (specified 0.6608/0.6625/0.6570) — the ~6pp over-realisation
+recorded in the engagement check above, present in every coin cell.
+
+### Verdicts against the frozen predictions
+
+* **P-DRIFT-2 (the control): HOLDS on PushT, REFUTED on Reacher.** PushT
+  `rho=0`: test 96.39 vs coin 96.58, a 0.19pp tie. Reacher `rho=0`: test 91.21
+  vs coin 93.75, **2.54pp**, outside the frozen 2.0pp band. Per the frozen
+  rule, the Reacher comparison is invalidated and **P-DRIFT-1 is not scored on
+  Reacher**. The direction is exactly the recorded bias: the coin over-drafts,
+  and on Reacher more drafting helps (Extension A: `d=1` +6.5 to +9.4pp).
+* **P-DRIFT-1 (the claim): REFUTED on PushT**, the only environment with a
+  valid comparison. The test never beats the coin at any `rho`; it trails by
+  0.19/0.69/1.86pp at `rho=0/0.9/0.99`, and it is the **coin** that improves
+  with correlation (96.58 -> 97.07). The PushT refutation is *conservative*:
+  on PushT extra drafting hurts at this horizon (`d=1` trails the adaptive arm
+  by 2.34pp at `t=100`), so the coin's over-realisation biased it downward and
+  it won anyway.
+* **P-DRIFT-3 (the dose): REFUTED.** The test-minus-coin margin is monotone
+  *decreasing* in `rho` on PushT (-0.19/-0.69/-1.86). Moot given P-DRIFT-1.
+
+### Consequences applied
+
+The P-DRIFT-1-refuted rule fires on the PushT evidence: the "verification's
+value is against autocorrelated divergence, not white noise" sentence is
+deleted from `sec:results-cert`, and the limitation is stated. Applied to
+`main_workshop_final.tex` with the scope the data licenses: the claim is
+stated **on PushT only**, with the realised-rate caveat reported per the
+stage-2 decision above, and the Reacher leg reported as failing its `rho=0`
+control and unscored. An incidental observation, reported not claimed: under
+injected corruption on Reacher, blind consumption collapses (~81 vs ~91-95 for
+test/coin), so *some* re-anchoring policy is load-bearing there; *which*
+boundaries re-anchor is not.
+
+### Follow-up registered
+
+`2026-08-13_drift_coin_rematch.md` freezes a realised-rate-matched Reacher
+coin re-run (control hygiene, not a rescue: the test arm is untouched) to
+decide whether the Reacher leg can be scored at all.
