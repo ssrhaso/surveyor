@@ -85,6 +85,68 @@ negative at `k=8` on both**. *Refuted if the sign tracks population at fixed
 No cell is excluded after the fact. A run producing no SR line is re-run once
 with the identical command and otherwise reported missing.
 
-## Outcome
+## Outcome (job 2334817, 64/64 cells, 2026-08-13)
 
-*(appended after the runs)*
+**P-KPOP-0 FAILS, and the reason is the finding.** Per the frozen rule,
+P-KPOP-1 is therefore not scored.
+
+| population | `k` | `t` | every-step | accept | accept $-$ every |
+|---|---|---|---|---|---|
+| spine | 4 | 100 | 98.44 | 96.09 | **-2.35** |
+| spine | 4 | 150 | 96.68 | 95.50 | **-1.18** |
+| spine | 8 | 100 | 97.66 | 94.72 | **-2.93** |
+| spine | 8 | 150 | 95.12 | 93.56 | **-1.56** |
+| c2222 | 4 | 100 | 95.12 | 94.73 | -0.39 |
+| c2222 | 4 | 150 | 94.14 | 92.97 | **-1.17** |
+| c2222 | 8 | 100 | 93.94 | 91.02 | **-2.93** |
+| c2222 | 8 | 150 | 92.38 | 92.58 | +0.20 |
+
+The gate failed on one cell of four: every-step at `t=100` on the spine
+population read `98.44` against the banked `94.5`, `+3.94`pp outside the
+`2.0`pp band. The **accept** arm reproduced on both cells (`96.09` vs `95.5`,
+`95.50` vs `95.7`), so this is not a general failure to reproduce.
+
+**Diagnosis, from the run logs rather than inference.** `tab:spine`(c) is
+**not `k`-matched**. Its every-step row (`reacher_hz150_s10gdm_*`) ran at
+`ddim/50-steps`, the evaluator's default, never overridden; the accept row it
+is compared against (`reacher_hz150k4_s10spec_*`) ran at `k=4`. The table
+labels the accept row "`k{=}4`" and the every-step row only "`S{=}10`", so
+nothing is misstated in the table itself, but the two arms do not share a
+sampler budget and the prose in `sec:results-headline` reads them as a
+like-for-like comparison.
+
+The direction is against us. This paper's own "spread is load-bearing" result
+means more denoising steps narrow the drafted distribution, and Reacher is the
+environment where the `k`-rule "shows no step at any `k`". So `k=50` is the
+**weaker** setting, and the banked comparison gave every-step the weak `k` and
+the accept rule the strong one. Matching `k` on that same population reverses
+the sign: `+1.0/+0.6`pp in favour of the accept rule becomes `-2.35/-1.18`
+against it.
+
+**What the grid says once `k` is matched.** The accept rule trails every-step
+drafting in **7 of 8 cells**, on both populations and at both `k`, by up to
+`2.93`pp; the single exception is `c2222`/`k=8`/`t=150` at `+0.20`pp. Neither
+`k` nor population rescues it, which is why P-KPOP-1's "the sign is set by `k`"
+is refuted in substance as well as unscored by rule: the sign is essentially
+constant and negative.
+
+P-KPOP-2 holds in 3 of 4 comparisons (the accept rule trails less at `k=4` than
+at `k=8`), consistent with `k=4` being closer to its derived operating point,
+but it does not change the sign anywhere.
+
+**Consequences applied.**
+
+1. `sec:results-headline`'s "leads by `+0.6` to `+2.3`pp on long-range Reacher"
+   is **retracted**. Under matched `k` on the same population the accept rule
+   trails. The Reacher parity claim against every-step drafting does not hold.
+2. `tab:spine`(c) gains an explicit note that its every-step row is at `k=50`
+   and is therefore not `k`-matched to the accept row.
+3. This is the fourth independent line pointing the same way (rate-matched
+   coin, fixed rate, fixed depth, and now matched-`k` every-step). The paper's
+   position is unchanged in kind and firmer in evidence: at the `\tau` we serve,
+   the accept rule buys drafter cost and an auditable certificate, not
+   closed-loop success. PushT parity (`\pm1.1`pp) is unaffected and was
+   separately measured.
+
+No cell was excluded. The banked cells themselves remain valid at their own
+`k=50`; what fails is the comparison drawn across them.
