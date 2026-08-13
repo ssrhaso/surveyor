@@ -134,6 +134,35 @@ P-KPOP-2 holds in 3 of 4 comparisons (the accept rule trails less at `k=4` than
 at `k=8`), consistent with `k=4` being closer to its derived operating point,
 but it does not change the sign anywhere.
 
+**The cost side, which the SR table alone understates.** Reading drafter cost
+next to success makes the matched-`k` result a trade rather than a loss:
+
+| population | `k` | `t` | every-step SR/NFE | accept SR/NFE | $\Delta$SR | cost |
+|---|---|---|---|---|---|---|
+| spine | 4 | 100 | 98.44 / 4.00 | 96.09 / 2.54 | -2.35 | $1.57\times$ |
+| spine | 4 | 150 | 96.68 / 4.00 | 95.50 / 2.58 | -1.18 | $1.55\times$ |
+| spine | 8 | 100 | 97.66 / 8.00 | 94.72 / 5.10 | -2.93 | $1.57\times$ |
+| spine | 8 | 150 | 95.12 / 8.00 | 93.56 / 5.02 | -1.56 | $1.59\times$ |
+| c2222 | 4 | 100 | 95.12 / 4.00 | 94.73 / 2.63 | -0.39 | $1.52\times$ |
+| c2222 | 4 | 150 | 94.14 / 4.00 | 92.97 / 2.57 | -1.17 | $1.56\times$ |
+| c2222 | 8 | 100 | 93.94 / 8.00 | 91.02 / 5.13 | -2.93 | $1.56\times$ |
+| c2222 | 8 | 150 | 92.38 / 8.00 | 92.58 / 5.04 | +0.20 | $1.59\times$ |
+
+At matched `k` the accept rule buys `1.52`--`1.59`$\times$ fewer drafter
+evaluations for `0.4`--`2.9`pp of success. The saving is exactly what
+`eq:cost` predicts from a call ratio near `0.63` ($1/0.63 = 1.59$), so the
+mechanism is behaving as derived; what is new is that on Reacher it is **not
+free**.
+
+This also locates where the headline `26\times` comes from. The banked
+comparison set every-step at `k=50` against the accept rule at `k=4`, so most
+of that factor is the `k` gap (12$\times$) rather than verified consumption
+(1.6$\times$). `tab:headline2` is not affected: it carries an explicit
+NFE/replan column ($50$ vs $1.9$), so its asymmetry is disclosed and is the
+point of the table rather than a hidden confound. `sec:results-headline`
+already separates the two factors correctly ("removing ${\sim}40\%$ of calls at
+matched `k`"); the error was calling that second factor SR-neutral on Reacher.
+
 **Consequences applied.**
 
 1. `sec:results-headline`'s "leads by `+0.6` to `+2.3`pp on long-range Reacher"
