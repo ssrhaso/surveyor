@@ -116,6 +116,40 @@ runner now fails loudly if its dataset is absent.
   population we can still run, which is enough to require the paper to stop
   asserting it without qualification.
 
-## Outcome
+## Outcome (job 2335553, 20/20 cells, harvested 2026-08-13)
 
-*(appended after the runs)*
+Means over eval seeds 42--45, `pusht_c2222` population, `n=256`/cell, 20deg
+criterion. No cell excluded, no seed dropped, no re-run needed.
+
+| `t` | every `k=3` | spec `k=3` | delta | every `k=50` | spec `k=50` | delta |
+|---|---|---|---|---|---|---|
+| 25 | 99.12 | 99.12 | 0.00 | 98.93 | 98.93 | 0.00 |
+| 50 | 95.90 | 96.48 | +0.59 | 97.76 | 97.66 | -0.10 |
+| 75 | 95.60 | 97.07 | +1.47 | 96.58 | 97.95 | +1.37 |
+| 100 | 94.53 | 97.07 | +2.54 | 96.58 | 96.88 | +0.29 |
+| 150 | 98.24 | 97.95 | -0.29 | 98.83 | 99.12 | +0.29 |
+
+### Verdicts against the frozen predictions
+
+* **P-PK-0: withdrawn as unrunnable** per the amendment above (dataset gone);
+  the `c2222` numbers are consistent with `tab:grand`'s cells on the same
+  population, as expected for a different population than `tab:spine`(a).
+* **P-PK-1 (the claim): HOLDS, decisively.** At matched `k`, at both `k=3`
+  and `k=50`, the accept rule never trails every-step by more than **0.29pp**
+  at any horizon, against the frozen 2.0pp bar, and *leads* in six of ten
+  cells (by up to +2.54 at `k=3`, `t=100`).
+* **P-PK-2: moot** (only scored on a P-PK-1 refutation).
+
+One mechanism observation, reported not claimed: every-step improves from
+`k=3` to `k=50` (e.g. 94.53 -> 96.58 at `t=100`) while the accept rule is
+nearly `k`-invariant (97.07 vs 96.88), consistent with the verifier absorbing
+noisier `k=3` drafts by re-anchoring more often, which is the same telemetry
+seen when the derived `k=3` was first served.
+
+### Consequence applied (the P-PK-1-holds rule)
+
+PushT parity is genuine and `k`-matched. In `main_workshop_final.tex`:
+`sec:results-headline`'s parity sentence gains the matched-`k` clause ("at
+worst 0.3pp behind, ahead in six of ten cells"), the `tab:spine` caption's
+disclosure notes that a `k`-matched re-test passes the frozen bar, and the
+Reacher retraction stands as environment-specific rather than general.
