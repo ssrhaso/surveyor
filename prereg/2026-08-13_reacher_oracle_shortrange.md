@@ -87,6 +87,43 @@ with the identical command and otherwise reported missing.
 
 `batch/isca/run_reacher_oracle_short.sbatch` (array 0-5).
 
+## Amendment: a builder artifact voids the first `t=25` oracle cell (2026-08-13, recorded before any fix ran)
+
+Job 2335860 completed all six cells. Harvest (means, seeds 42-45):
+
+| arm | `t=25` | `t=50` |
+|---|---|---|
+| oracle `S=10` | 33.40 | 99.22 |
+| flat RH2 | 95.70 | 86.53 |
+| flat RH5 | 82.81 | 92.97 |
+
+The `t=25` oracle number is an artifact, and the evidence is the builder, not
+the SR. `build_oracle_table` sizes the table as
+`n_sg = goal_offset // stride + 1` frames at `start + k*stride`, so at
+`t=25`, `stride=10` it encodes `[start, +10, +20]` and **never encodes the
+goal frame at +25**; the arm's log prints `K = 3` against `t=50`'s `K = 6`
+(which ends on `+50 = goal` because 50 divides evenly). `OracleSubgoalSource`
+clamps its index to the last row, so the `t=25` arm parks on the exploratory
+state at `+20` for the rest of the episode and is never given the goal as a
+target. Its 33.40 measures how often `qpos(+20)` happens to sit within 0.05
+rad of `qpos(+25)`, not decomposition.
+
+**Stated against ourselves, before the corrected run:** the voided cell was
+*adverse* to the frozen Reading-A prediction, so voiding it favours our own
+prediction. That is why the invalidation rests on the builder line and the
+`K` print rather than on the result, and why the corrected cell may still
+refute Reading A, in which case it does and is scored as such.
+
+**The fix, and why it touches nothing banked.** `build_oracle_table` gains a
+conditional append of the goal frame when `goal_offset % stride != 0`. Every
+banked oracle cell used divisible pairs (PushT stride 25 at `t=25/75/150`),
+where the append is a no-op by construction; the `t=50` cell here is likewise
+divisible, byte-unaffected, and is not re-run.
+
+**Gate for the corrected run, fixed now:** the re-run `t=25` oracle log must
+print `K = 4`; otherwise the cell is void again. Bars and consequence rules
+above are unchanged.
+
 ## Outcome
 
-*(appended after the runs)*
+*(appended after the corrected run)*
