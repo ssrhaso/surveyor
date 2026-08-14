@@ -124,6 +124,43 @@ divisible, byte-unaffected, and is not re-run.
 print `K = 4`; otherwise the cell is void again. Bars and consequence rules
 above are unchanged.
 
-## Outcome
+## Outcome (corrected run, job 2335868; K=4 gate PASSED)
 
-*(appended after the corrected run)*
+Corrected `t=25` oracle cell, seeds 42-45: 98.44/97.66/99.22/97.66, mean
+**98.24**. Full picture on identical episodes (`t=25` / `t=50`):
+
+| arm | `t=25` | `t=50` |
+|---|---|---|
+| oracle `S=10` (goal-terminated) | **98.24** | **99.22** |
+| flat RH2 | 95.70 | 86.53 |
+| flat RH5 | 82.81 | 92.97 |
+| every-step drafted, `d=1` (banked) | 65.04 | 87.69 |
+| accept rule `tau=0.20` (banked) | 55.66 | 79.49 |
+
+### Verdicts against the frozen predictions
+
+* **P-ORC-0: PASSES** (strongest in-batch flat leads the banked adaptive arm
+  by 40.0pp at `t=25`).
+* **P-ORC-1: HOLDS, Reading A, stronger than predicted.** Oracle waypoints do
+  not merely land within 2.0pp of the strongest flat arm; they lead it, by
+  +2.54pp at `t=25` and +6.25pp at `t=50`. Ground-truth waypoints cost
+  nothing at short range.
+* **P-ORC-2: moot.**
+
+One mechanism note, reported not claimed: the oracle's edge over flat is
+expected from hindsight-goal structure (the goal is the endpoint of the very
+trajectory whose waypoints the oracle serves, so tracking them is a
+guaranteed route given budget); the arm uses privileged future frames and is
+a bound, not a deployable policy.
+
+### Consequence applied (Reading A)
+
+The short-range Reacher collapse is **draft noise, not waypoint structure**:
+perfect waypoints at the same `S=10` beat flat while sampled drafts collapse
+by 30-40pp, with the transferred `tau` adding ~9pp of under-re-anchoring on
+top (P-TAU / Extension A). This matches the PushT tax cell (ground-truth
+waypoints tie flat, 84.2 vs 84.0), so the regime-map account is now measured
+on both dev environments. Applied to `main_workshop_final.tex`: the regime
+map's tax parenthesis gains the Reacher numbers, `sec:results-executor` names
+the tax as draft noise, and `app:negatives` gains the full table with the
+voided-cell disclosure. The routing remedy is unchanged.
