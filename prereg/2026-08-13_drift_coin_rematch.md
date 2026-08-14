@@ -97,6 +97,42 @@ shrink the coin's lead toward a tie, not flip it by >= 2pp.
 `batch/isca/run_drift_rematch.sbatch` (3 tasks) with the calibrated `q`
 values filled in and echoed into the log header before scoring.
 
-## Outcome
+## Outcome (jobs 2335658/2335670 calibration, 2335673 scored, 2026-08-13)
 
-*(appended after the runs)*
+**Calibration trail** (seed 41, never scored). Two-point smoke:
+`q=0.570 -> realised 0.669/0.673/0.664`, `q=0.615 -> 0.695/0.693/0.698` at
+`rho=0/0.9/0.99`. Per-rho interpolation to the targets gave
+`q = 0.5558/0.5464/0.5607`; the `rho=0.9` value fell more than 0.02 outside
+the bracket, triggering the one allowed further iteration, which validated all
+three at seed 41 (realised 0.660/0.659/0.659).
+
+**Scored cells** (seeds 42-45, `n=128`, means; realised ratio pooled over
+seeds):
+
+| `rho` | coin SR | coin realised | target | gate (0.015) | test SR (stage 1) | test - coin |
+|---|---|---|---|---|---|---|
+| 0.0 | 92.97 | 0.652 | 0.6608 | pass (0.009) | 91.21 | -1.76 |
+| 0.9 | 92.97 | 0.643 | 0.6625 | **FAIL (0.019)** | 91.02 | (-1.95, not scored) |
+| 0.99 | 91.41 | 0.654 | 0.6570 | pass (0.003) | 91.80 | +0.39 |
+
+### Verdicts against the frozen predictions
+
+* **P-REMATCH-0: 2 of 3 cells valid.** The `rho=0.9` cell misses the 0.015
+  gate by 0.004 (its seed-41 validation read 0.659; seed-to-seed drift) and is
+  invalid per the frozen rule. Not all cells missed, so the unmatchable clause
+  does not fire.
+* **P-REMATCH-1 (the re-tested control): HOLDS.** At `rho=0` the matched coin
+  leads by 1.76pp, inside the 2.0pp band. The Reacher comparison is now valid.
+* **P-REMATCH-2 (the re-tested claim): REFUTED, as expected.** On the valid
+  `rho=0.99` cell the test leads the matched coin by only 0.39pp, far short of
+  the 2.0pp bar; a tie. The invalid `rho=0.9` cell reads the same way (coin
+  +1.95, reported not scored).
+
+### Consequence applied (the holds-and-refuted rule)
+
+The Reacher leg is scorable and refuting: at matched realised rate the coin
+ties or beats the accept test at every valid `rho` in **both** environments.
+`sec:results-cert` now says so, with the stage-2 mismatch (the failed `rho=0`
+control) disclosed in the same sentence and the full trail in this document.
+The provenance constraint was not needed: the expected refutation is what
+happened, so nothing here upgrades any claim.
