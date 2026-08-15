@@ -179,3 +179,14 @@ matched `k`"); the error was calling that second factor SR-neutral on Reacher.
 
 No cell was excluded. The banked cells themselves remain valid at their own
 `k=50`; what fails is the comparison drawn across them.
+
+### Pooled update (seed battery 2, 2026-08-15): 7/8 becomes **8/8**
+
+Seeds 46-49 pooled with 42-45 (`2026-08-14_seed_extension_battery2.md`).
+The lone exception cell (`c2222`/`k=8`/`t=150`, +0.20 at 4 seeds) flips to
+**-2.05** on the pool: the accept rule trails every-step drafting in all
+8 matched-`k` cells, for **0.4-3.8pp** (was 0.4-2.9) at an unchanged
+1.5-1.6x call saving. P-KPOP-2 is now 4/4. The P-KPOP-0 gate cell re-reads
+98.44 +/- 0.33 SE at n=8, confirming the banked 94.5 non-reproduction
+harder; the k-mismatch diagnosis is unchanged. Paper sentences re-quoted
+accordingly (three sites).

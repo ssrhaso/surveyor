@@ -151,3 +151,14 @@ Licensed: the statement that a *transferred* tau costs real success (up to
 Not licensed: re-quoting any Reacher cell at 0.106. Per the design section
 above, that requires re-running the whole grid at per-environment tau; no
 mixed-tau table is permitted.
+
+### Pooled update (seed battery 2, 2026-08-15): verdicts unchanged, numbers re-quoted
+
+Seeds 46-49 pooled with 42-45 (`2026-08-14_seed_extension_battery2.md`).
+Reacher tau=0.106 vs served 0.20: **+4.88/+4.59/+3.23/+1.76** at
+t=25/50/100/150 (the 4-seed +6.64 at t=25 was partly seed luck; still
+positive everywhere, still shrinking with horizon). Vs the pooled best
+coin: -4.20/-1.47/-1.07/-0.39 — t=25 still past the 2pp band, so
+**P-TAU-1 stays refuted**, slightly harder. P-TAU-2: call ratio higher at
+4/4 (0.80-0.83 vs 0.61-0.65) — supported. P-TAU-3: PushT moves at most
++0.73pp — supported; the paper's "<=0.5pp" is re-quoted as "<=0.8pp".

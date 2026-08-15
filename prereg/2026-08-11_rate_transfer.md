@@ -266,3 +266,21 @@ horizon of both environments.
 
 Completed and already reported: two further PushT training seeds move SR by at
 most 1.8pp, against 8.5pp for GC-IDM. In the paper's limitations paragraph.
+
+### Pooled update (seed battery 2, 2026-08-15): **P-RATE-2 is REFUTED on the 8-seed pool**
+
+Seeds 46-49 (`2026-08-14_seed_extension_battery2.md`) pooled with 42-45
+without selection. The 4-seed "holds by the letter" verdict above rested on
+one cell — `d=2` at Reacher `t=50`, `-3.32`pp — which pools to **`-0.98`**
+(a seed effect, config-fingerprint-verified). On the pool `d=2` is within
+the frozen 2.0pp band at **every horizon of both environments** at a lower
+call ratio, and `d=1` qualifies too under the same one-sided scoring
+(PushT worst `-1.66`, all-positive Reacher, now `+2.3` to `+9.9`pp).
+P-RATE-2's refutation consequence is applied to the live tex: "no single
+depth is safe everywhere" is retracted; the surviving asymmetry is
+provenance (the safe depth is read off the closed-loop sweep itself,
+tau/k are derived offline). The main-sweep and 1c sentences also re-quote
+on the pool: every `p` within 2pp in *both* environments now, p=0.9's
+t=25 lead `+9.08` (was `+9.96`), and the adaptive arm trails the per-cell
+best coin at **all four** Reacher horizons (`-9.08/-6.05/-4.30/-2.15`).
+Full pooled tables in the battery-2 document's Outcome.
