@@ -136,3 +136,15 @@ ties or beats the accept test at every valid `rho` in **both** environments.
 control) disclosed in the same sentence and the full trail in this document.
 The provenance constraint was not needed: the expected refutation is what
 happened, so nothing here upgrades any claim.
+
+### 8-seed extension addendum (2026-08-14)
+
+Seeds 46--49 were added under the seed-extension battery
+(`2026-08-13_seed_extension_battery.md`). The first extension array ran at
+`S=25` from a dropped runner line and was voided; the corrected array (job
+2336226) passed its config gate in all 12 logs. Pooled: the `rho=0` control
+tightens to a dead tie (test +0.29pp), the `rho=0.99` claim cell stays
+refuted (test +0.49pp vs the 2.0pp bar), and the `rho=0.9` gate cell misses
+*more* decisively (0.0239 vs the 0.015 gate, from 0.0193). All three
+verdicts above are unchanged in kind and stronger in `n`; full tables in the
+battery document.
