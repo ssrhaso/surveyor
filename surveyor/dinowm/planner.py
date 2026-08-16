@@ -1,31 +1,25 @@
 """Surveyor on the DINO-WM stack (PushT).
 
-SurveyorMPCPlanner subclasses their MPCPlanner with an identical outer loop, except
-that each MPC iteration serves a DRAFTED subgoal latent (a (P+1, D) grid of P
-DINOv2 patch tokens plus 1 proprio token) as the sub-planner's goal instead of
-the final goal, verifying against reality at every replan boundary. The CEM
-sub-planner, world model, and evaluator are untouched; cem.py has a 5-line
-guarded branch accepting pre-encoded latent goals.
+SurveyorMPCPlanner subclasses their MPCPlanner with an identical outer loop,
+except each MPC iteration serves a drafted subgoal latent (a (P+1, D) grid of
+P DINOv2 patch tokens plus one proprio token) as the sub-planner's goal
+instead of the final goal, verifying against reality at every replan boundary.
+The CEM sub-planner, world model, and evaluator are untouched; cem.py has a
+5-line guarded branch accepting pre-encoded latent goals.
 
-Verification metric, which MUST match the pre-registered gap space
-(prereg/2026-07-26_dinowm_instrument.md): rel L2 between POOLED VISUAL tokens, the mean over
-patch tokens only, excluding the proprio token as the gap statistic does.
+Verification metric, which must match the pre-registered gap space
+(prereg/2026-07-26_dinowm_instrument.md): rel L2 between pooled visual tokens,
+the mean over patch tokens only, excluding proprio as the gap statistic does.
 
-ARRIVAL GATE (added 2026-07-28). The first battery collapsed: flat climbed and
-plateaued (0.06 -> 0.74 over MPC iterations) while spec rose to 0.16 by iter 5
-and then DECLINED to 0.10. Rising-then-falling against a plateauing baseline is
-the overshoot tax, the same failure diagnosed on Cube and on Reacher at short
-horizon, where the arrival gate was worth +32pp: the drafter keeps proposing
-"keep going" waypoints after the agent has arrived and nothing tells it to stop.
-LeWM PushT hid this because its episodes END at the goal, whereas DINO-WM takes
-the goal from mid-trajectory (goal_source=dset), so arrival is not terminal and
-the gate is required. It was implemented twice on the LeWM stack and never
-ported here.
-
-Gate semantics, one-way and matching CstarRetireSource: once the achieved latent
-verifies against the FINAL GOAL, that env retires and serves the goal latent for
-the rest of the episode at zero drafter cost. Off by default, so every
-previously recorded arm reproduces exactly.
+Arrival gate (added 2026-07-28): without it spec rose then declined while flat
+plateaued, the overshoot tax also diagnosed on Cube and short-horizon Reacher
+(worth +32pp there): the drafter keeps proposing onward waypoints after the
+agent has arrived. LeWM PushT hid this because its episodes end at the goal;
+DINO-WM takes the goal from mid-trajectory (goal_source=dset), so arrival is
+not terminal and the gate is required. Semantics are one-way and match
+CstarRetireSource: once the achieved latent verifies against the final goal,
+the env retires and serves the goal latent at zero drafter cost. Off by
+default, so every previously recorded arm reproduces exactly.
 """
 import os
 import sys
