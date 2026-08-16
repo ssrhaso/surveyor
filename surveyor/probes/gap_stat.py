@@ -1,9 +1,9 @@
 """The verification-gap statistic: Surveyor's preflight applicability probe.
 
-The verifier compares the ACHIEVED latent against the TARGET it pursued for one
+The verifier compares the achieved latent against the target it pursued for one
 subgoal interval. Arrival puts that distance at the criterion-equivalence noise
-scale (adjacent states, task tolerance); failure to move leaves it at one full
-hop. tau must separate the two, so the applicability gap is
+scale; failure to move leaves it at one full hop. tau must separate the two, so
+the applicability gap is
 
     EQUIV p90  <  tau  <  HOP p10
 
@@ -15,9 +15,9 @@ hop. tau must separate the two, so the applicability gap is
 
 An empty or inverted interval means no tau exists and verification cannot
 operate. It fails in two directions: the EQUIV bulk above any usable tau
-(TwoRoom, where even physically-arrived states read ~sqrt(2), corroborated by
-voracle advances=14/113), or the HOP bulk below tau, the degenerate-accept case
-where everything verifies (DROID at tau=0.20, hop p50 ~ 0.10).
+(TwoRoom, where even physically-arrived states read ~sqrt(2)), or the HOP bulk
+below tau, the degenerate-accept case where everything verifies (DROID at
+tau=0.20, hop p50 ~ 0.10).
 
 Inputs: either a LeWM-stack subgoals .pt (latents/lengths/offsets) or a glob
 of lat_*.npz|npy episode files (V-JEPA 2 tokens; pooled over the token axis).

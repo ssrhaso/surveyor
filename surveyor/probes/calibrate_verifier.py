@@ -5,10 +5,10 @@ Self-contained per env:
      and encode them through the SAME path the verifier reads (native LeWM
      latents, or the pooled DINOv2 half for tworoom's paired verifier);
   2. fit a ridge probe latent -> state and report held-out R^2 against the
-     frozen 0.90 quality gate on the criterion-relevant dims, declaring the
-     env's row unavailable below the gate rather than fudging it;
+     frozen 0.90 quality gate on the criterion-relevant dims; below the gate
+     the env's row is declared unavailable;
   3. load the calibration event lists dumped by the trace-collection runs, one
-     (env, rel, accepted, z_achieved, target) per VERIFICATION event, and read
+     (env, rel, accepted, z_achieved, target) per verification event, and read
      the probe-state distance between the achieved state and the pursued
      waypoint's decoded state;
   4. report the frozen readouts: accept-vs-reject separation, Spearman
