@@ -1,11 +1,11 @@
 """GC-IDM: goal-conditioned inverse dynamics model (arXiv 2605.08732).
 
 Reimplementation of the amortised controller from "Latent Geometry Beyond
-Search", built to the paper's stated spec so it anchors against its published
+Search", built to the paper's stated spec and anchored against its published
 cells before being quoted. It replaces search entirely: one MLP forward maps
 (current latent, goal latent, remaining horizon) to the next action.
 
-Spec followed, verbatim from the paper:
+Spec, verbatim from the paper:
   * input  : z_t || z_goal, each 192-d from the FROZEN LeWM encoder
   * trunk  : 3-layer MLP, hidden 512, LayerNorm, GELU, dropout 0.1
   * horizon: h = min(steps_remaining, H_max) / H_max in [0,1], sinusoidal

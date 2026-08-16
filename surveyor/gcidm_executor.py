@@ -4,22 +4,22 @@ SURVEYOR's consumption layer with the CEM solver replaced by the amortised
 GC-IDM controller (gcidm.py): the drafter proposes a block of N waypoint
 latents, GC-IDM tracks the current waypoint at one MLP forward per step, and at
 every subgoal boundary (S env steps) the accept rule verifies the achieved
-latent against the waypoint just pursued -- within tau the next pre-drafted
+latent against the waypoint just pursued: within tau the next pre-drafted
 waypoint is served free, otherwise the block is re-drafted from reality.
 
 Mechanism bet (prereg/2026-08-07_composite_and_executor.md, P-EXEC-1, passed):
-GC-IDM degrades with goal DISTANCE (its paper's Table 2), and the drafter's job
-is manufacturing NEAR goals -- a 10-step hop sits mid-distribution for the
-H_max=50 checkpoint. The accept rule never inspects the executor, so tau, k and
-S carry unchanged; no CEM runs in the bare arm.
+GC-IDM degrades with goal distance (its paper's Table 2) while the drafter
+manufactures near goals; a 10-step hop sits mid-distribution for the H_max=50
+checkpoint. The accept rule never inspects the executor, so tau, k and S carry
+unchanged, and no CEM runs in the bare arm.
 
-cstar_route=True adds the certified scope (P-EXEC-6): at each env's FIRST
+cstar_route=True adds the certified scope (P-EXEC-6): at each env's first
 boundary one flat CEM probe reads c* = rel(z_hat_H, z_goal), the planner's own
-self-assessment (the paper's certificate, same tau); c* <= tau routes the
-episode to plain GC-IDM (goal served directly, zero drafter calls). Drafting
-envs carry an ARRIVAL GATE at every boundary -- rel(z, z_goal) <= tau retires
-the drafter one-way (Cube's gate, no new constant). Cost: exactly one batched
-CEM solve per episode; execution stays fully amortised.
+certificate at the same tau; c* <= tau routes the episode to plain GC-IDM
+(goal served directly, zero drafter calls). Drafting envs carry an arrival
+gate at every boundary: rel(z, z_goal) <= tau retires the drafter one-way
+(Cube's gate, no new constant). Cost: one batched CEM solve per episode;
+execution stays fully amortised.
 """
 
 from __future__ import annotations
