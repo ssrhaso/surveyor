@@ -98,14 +98,13 @@ class OracleSubgoalSource:
 
 
 class VerifiedOracleSource:
-    """TRUE demo waypoints consumed the way Surveyor consumes drafts.
+    """True demo waypoints consumed under the accept rule.
 
-    Advances to the next waypoint only when the ACHIEVED latent verifies
-    against the current one (rel L2 <= tau), re-anchored at every replan, so
-    this is the clean subgoal-serving ceiling. OracleSubgoalSource instead
-    advances on a schedule regardless of achievement and goes stale, making its
-    SR a contaminated lower bound. ptr starts at 1: table[0] is the start frame,
-    not a target."""
+    Advances only when the achieved latent verifies against the current
+    waypoint (rel L2 <= tau): the clean subgoal-serving ceiling.
+    OracleSubgoalSource advances on a schedule instead and goes stale, so its
+    SR is a contaminated lower bound. ptr starts at 1: table[0] is the start
+    frame, not a target."""
 
     needs_obs = True
     needs_goal = False
@@ -265,9 +264,9 @@ class SurveyorSource:
         self.record = record
         self.trace = []
         # calibration event log (prereg/2026-07-31_certification.md M1), record-gated:
-        # one (env, rel, accepted, z_achieved, target) per VERIFICATION event, so
-        # accepts are logged too (the draft-only trace cannot reconstruct the
-        # achieved latent of an accepted replan).
+        # one (env, rel, accepted, z_achieved, target) per verification event,
+        # accepts included (the draft-only trace cannot reconstruct an accepted
+        # replan's achieved latent).
         self.cal = []
         # corruption sweep (prereg/2026-07-31_certification.md): displace every drafted
         # waypoint w by draft_noise * ||w|| along a random unit direction, at
@@ -275,22 +274,16 @@ class SurveyorSource:
         # Verification and traces see the corrupted, served block.
         self.draft_noise = float(draft_noise)
         # AUTOCORRELATED corruption (prereg/2026-08-11_autocorrelated_divergence.md).
-        # The draw above is white by construction: a fresh direction every draft,
-        # so consecutive corruptions cancel in expectation and any consumption
-        # policy averages them out. That is why SR stayed flat under the
-        # certification sweep, and it leaves the paper's "verification's value is
-        # against autocorrelated divergence" sentence untested.
-        #
-        # Here one unit drift vector per env persists across re-drafts,
+        # The white draw above takes a fresh direction every draft, so
+        # consecutive corruptions cancel in expectation (why SR stayed flat in
+        # the certification sweep). Here one unit drift vector per env persists
+        # across re-drafts,
         #   d <- rho*d + sqrt(1-rho^2)*u,  renormalised,
-        # and is shared across the N waypoints of a block, so at rho->1 the
-        # corruption is a slowly turning bias rather than noise. rho=0 is the
-        # control: an uncorrelated draw, still shared within a block, so rho is
-        # the ONLY quantity that varies across arms and the dose-response of
-        # P-DRIFT-3 is unconfounded. (The frozen document also calls rho=0 "the
-        # existing draw exactly"; that is true of its statistics but not of its
-        # per-waypoint structure, and the unconfounded reading was chosen and
-        # recorded in the prereg's Outcome section before any cell was run.)
+        # shared across the N waypoints of a block: rho->1 is a slowly turning
+        # bias, rho=0 the uncorrelated control with identical per-block
+        # structure, so rho is the only quantity varying across arms (the
+        # unconfounded reading, recorded in the prereg Outcome before any cell
+        # ran).
         self.draft_noise_rho = float(draft_noise_rho)
         self._drift = None   # (n_envs, dim) unit vectors, lazily initialised
         self.drift_log = []  # [(env_rows, unit dirs)] per draft, for the smoke gate
@@ -870,21 +863,20 @@ def make_ffjepa_policy(base_cls):
             self.t_cem = 0.0
             self._timed_steps = 0
             # optional per-env frame capture for the random-init visual sanity
-            # check, a few numpy copies per step when opted in. The FIRST
-            # info_dict['pixels']/['goal'] per env is the raw reset frame, since
-            # get_action runs before env.step at t=0. _frame_last is refreshed
-            # every call, so its final value is the true terminal frame: the env
-            # freezes once terminated flips under reset_mode='wait'.
+            # check. The first pixels/goal per env is the raw reset frame
+            # (get_action runs before env.step at t=0); _frame_last refreshes
+            # every call, so its final value is the true terminal frame (envs
+            # freeze once terminated under reset_mode='wait').
             self.dump_frames = dump_frames
             self._frame_start = None
             self._frame_goal = None
             self._frame_last = None
             self._captured_start = None
-            # per-replan frame capture for qualitative filmstrips. dump_strip =
-            # M > 0 captures, for envs 0..M-1, the raw frame at EVERY replan
-            # boundary (the achieved state the verifier sees), tagged with the
-            # replan ordinal. The k-th strip frame of env i matches the k-th
-            # current() event of env i: both append exactly once per replan.
+            # per-replan frame capture for filmstrips: dump_strip = M > 0
+            # captures the raw frame (the achieved state the verifier reads) at
+            # every replan boundary for envs 0..M-1. The k-th strip frame of
+            # env i matches its k-th current() event: both append once per
+            # replan.
             self.dump_strip = int(dump_strip)
             self._strip = None
 
