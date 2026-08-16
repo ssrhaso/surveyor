@@ -1,26 +1,19 @@
-"""Paired-latent Surveyor: plan in the world model's space, CERTIFY in another.
+"""Paired-latent Surveyor: plan in the world model's space, certify in another.
 
-Motivation (TwoRoom, measured). LeWM's TwoRoom encoder is metrically
-degenerate: consecutive frames sit at rel L2 p50 0.876 while unrelated frames
-sit at 1.456, and equiv p90 (1.393) exceeds hop p10 (1.018), so no threshold
-separates "arrived" from "not arrived" (Results/gap_stat/gap_tworoom*.json).
-Flat CEM planning never consults that metric and still reaches 68 percent at
-t=25, so only the VERIFIER is blocked.
-
-The fix is to decouple the two roles: the planner keeps consuming LeWM latents
-while the verifier certifies arrival in a space where the gap is open (frozen
-DINOv2). Both halves of a waypoint must describe the SAME imagined future, so a
-single drafter emits the concatenation
+LeWM's TwoRoom encoder is metrically degenerate (consecutive frames at rel L2
+p50 0.876 vs 1.456 for unrelated; equiv p90 1.393 above hop p10 1.018,
+Results/gap_stat/gap_tworoom*.json), so no threshold separates arrived from
+not-arrived, while flat CEM planning never consults that metric and still
+succeeds at short range: only the verifier is blocked. The fix decouples the
+roles: the planner keeps consuming LeWM latents and the verifier certifies
+arrival in frozen DINOv2, where the gap is open. One drafter emits the
+concatenation
 
     z = [ z_lewm (192) | z_dino (384) ]
 
-which is split at serving, the LeWM half going to SubgoalCostModel and the
-DINOv2 half to the accept test. Drafting the halves independently would let them
-disagree about which future they mean.
-
-This generalizes the lens (learn_readout), which already certifies in a learned
-readout of the planner's space rather than the space itself. Here the readout is
-a frozen general-purpose encoder instead of a trained one.
+split at serving (LeWM half to SubgoalCostModel, DINOv2 half to the accept
+test), so both halves describe the same imagined future. This generalizes the
+learned lens (learn_readout) to a frozen general-purpose readout.
 """
 
 from __future__ import annotations

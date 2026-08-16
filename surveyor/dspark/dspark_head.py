@@ -1,19 +1,17 @@
 """DSpark refinement head: residual refiner for a block of N drafted subgoals.
 
-Torch-only, so it ports unchanged to other planners. Maps a raw draft block
+Torch-only, so it ports unchanged across planners. Maps a raw draft block
 (B, N, D) plus the conditioning latent (B, D) to a refined block in the same
-native latent space:
+native space:
 
     z_refined_i = z_draft_i + MLP([z_cond, z_draft_i, cond_prev, pos_emb_i])
 
-Weights are shared across positions and a sinusoidal position embedding gives
-arbitrary-N generalization. The final linear is zero-initialized (adaLN-Zero
-convention) so training starts as identity pass-through; inputs are per-dim
-standardized and outputs inverted. mode='causal' feeds the previously refined
-latent as cond_prev (sequential unroll), mode='noncausal' uses the raw previous
-draft plus a block summary and is fully parallel. Trained only on real
-frozen-drafter chains (build_real_chains.py), never on ground-truth prefixes or
-injected noise.
+Weights are shared across positions; a sinusoidal position embedding gives
+arbitrary-N generalization; the final linear is zero-initialized (adaLN-Zero)
+so training starts as identity. Inputs are per-dim standardized, outputs
+inverted. mode='causal' feeds the previously refined latent as cond_prev;
+mode='noncausal' uses the raw previous draft plus a block summary, fully
+parallel. Trained only on real frozen-drafter chains (build_real_chains.py).
 """
 
 from __future__ import annotations
