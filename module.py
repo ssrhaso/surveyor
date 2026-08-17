@@ -4,11 +4,11 @@ import torch.nn.functional as F
 from einops import rearrange
 
 def modulate(x, shift, scale):
-    """AdaLN-zero modulation"""
+    """AdaLN-Zero modulation."""
     return x * (1 + scale) + shift
 
 class SIGReg(torch.nn.Module):
-    """Sketch Isotropic Gaussian Regularizer (single-GPU!)"""
+    """Sketched isotropic Gaussian regularizer (single-GPU implementation)."""
 
     def __init__(self, knots=17, num_proj=1024):
         super().__init__()
@@ -23,9 +23,7 @@ class SIGReg(torch.nn.Module):
         self.register_buffer("weights", weights * window)
 
     def forward(self, proj):
-        """
-        proj: (T, B, D)
-        """
+        """Epps-Pulley statistic over random projections; proj: (T, B, D)."""
         # sample random projections
         A = torch.randn(proj.size(-1), self.num_proj, device=proj.device)
         A = A.div_(A.norm(p=2, dim=0))
@@ -36,7 +34,7 @@ class SIGReg(torch.nn.Module):
         return statistic.mean() # average over projections and time
     
 class FeedForward(nn.Module):
-    """FeedForward network used in Transformers"""
+    """Pre-norm transformer feed-forward block."""
 
     def __init__(self, dim, hidden_dim, dropout=0.0):
         super().__init__()
@@ -54,7 +52,7 @@ class FeedForward(nn.Module):
 
 
 class Attention(nn.Module):
-    """Scaled dot-product attention with causal masking"""
+    """Scaled dot-product attention with optional causal masking."""
 
     def __init__(self, dim, heads=8, dim_head=64, dropout=0.0):
         super().__init__()
@@ -73,9 +71,7 @@ class Attention(nn.Module):
         )
 
     def forward(self, x, causal=True):
-        """
-        x : (B, T, D)
-        """
+        """x: (B, T, D)."""
         x = self.norm(x)
         drop = self.dropout if self.training else 0.0
         qkv = self.to_qkv(x).chunk(3, dim=-1)  # q, k, v: (B, heads, T, dim_head)
@@ -86,7 +82,7 @@ class Attention(nn.Module):
 
 
 class ConditionalBlock(nn.Module):
-    """Transformer block with AdaLN-zero conditioning"""
+    """Transformer block with AdaLN-Zero conditioning."""
 
     def __init__(self, dim, heads, dim_head, mlp_dim, dropout=0.0):
         super().__init__()
@@ -112,7 +108,7 @@ class ConditionalBlock(nn.Module):
 
 
 class Block(nn.Module):
-    """Standard Transformer block"""
+    """Standard pre-norm transformer block."""
 
     def __init__(self, dim, heads, dim_head, mlp_dim, dropout=0.0):
         super().__init__()
@@ -129,7 +125,7 @@ class Block(nn.Module):
 
 
 class Transformer(nn.Module):
-    """Standard Transformer with support for AdaLN-zero blocks"""
+    """Transformer stack, composable from standard or AdaLN-Zero blocks."""
 
     def __init__(
         self,
