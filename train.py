@@ -1,3 +1,5 @@
+"""LeWM training entry point (Lightning + Hydra)."""
+
 import os
 from functools import partial
 from pathlib import Path
@@ -15,7 +17,7 @@ from utils import get_column_normalizer, get_img_preprocessor, SaveCkptCallback
 
 
 def lejepa_forward(self, batch, stage, cfg):
-    """encode observations, predict next states, compute losses."""
+    """Encode observations, predict future states, and compute the training losses."""
 
     ctx_len = cfg.wm.history_size
     n_preds = cfg.wm.num_preds

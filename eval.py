@@ -1,3 +1,5 @@
+"""LeWM evaluation entry point: CEM planning rollouts through the stable_worldmodel harness."""
+
 import os
 
 os.environ["MUJOCO_GL"] = "egl"
@@ -48,7 +50,7 @@ def get_dataset(cfg, dataset_name):
 
 @hydra.main(version_base=None, config_path="./config/eval", config_name="pusht")
 def run(cfg: DictConfig):
-    """Run evaluation of dinowm vs random policy."""
+    """Run the CEM planning evaluation over the configured episode set."""
     assert (
         cfg.plan_config.horizon * cfg.plan_config.action_block <= cfg.eval.eval_budget
     ), "Planning horizon must be smaller than or equal to eval_budget"

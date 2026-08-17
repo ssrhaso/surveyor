@@ -11,8 +11,11 @@ def get_img_preprocessor(source: str, target: str, img_size: int = 224):
 
 
 class ZScoreNormalizer:
-    """Picklable z-score normalizer, uses a class instead of a closure so it
-    survives pickle when DataLoader workers are spawned (required by LanceDataset)."""
+    """Picklable z-score normalizer.
+
+    A class rather than a closure so it survives pickling when DataLoader
+    workers are spawned (required by LanceDataset).
+    """
 
     def __init__(self, mean, std):
         self.mean = mean
@@ -23,7 +26,7 @@ class ZScoreNormalizer:
 
 
 def get_column_normalizer(dataset, source: str, target: str):
-    """Get normalizer for a specific column in the dataset."""
+    """Build a z-score normalizer from a dataset column's statistics."""
     col_data = dataset.get_col_data(source)
     data = torch.from_numpy(np.array(col_data))
     data = data[~torch.isnan(data).any(dim=1)]
@@ -32,7 +35,7 @@ def get_column_normalizer(dataset, source: str, target: str):
     return dt.transforms.WrapTorchTransform(ZScoreNormalizer(mean, std), source=source, target=target)
 
 class SaveCkptCallback(Callback):
-    """Callback to save model checkpoint after each epoch using save_pretrained."""
+    """Save a model checkpoint every `epoch_interval` epochs via save_pretrained."""
 
     def __init__(self, run_name, cfg, epoch_interval: int = 1):
         super().__init__()
