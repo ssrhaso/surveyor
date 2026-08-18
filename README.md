@@ -22,9 +22,8 @@ pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
 pip install -r requirements.txt
 ```
 
-The dependency list was validated by a clean-room rebuild
-(`prereg/2026-08-01_repro_smoke.md`). Run everything from the repository root,
-which is what puts `surveyor` on the import path.
+The dependency list was validated by a clean-room rebuild. Run everything from
+the repository root, which is what puts `surveyor` on the import path.
 
 ## Data and checkpoints
 
@@ -153,7 +152,6 @@ surveyor/envs/       per-environment eval drivers and dataset builders
 surveyor/dinowm/     the DINO-WM transplant (second architecture)
 surveyor/vjepa2/     the V-JEPA 2 transplant (foundation scale)
 surveyor/dspark/     the ported DSpark head, kept as a negative result
-prereg/              frozen pre-registration documents, one per claim
 config/, *.py        the LeWM training and evaluation entry points, upstream
 ```
 
@@ -161,10 +159,12 @@ config/, *.py        the LeWM training and evaluation entry points, upstream
 
 ## Pre-registration
 
-Every quantitative claim traces to a document in `prereg/` that fixes the
-definitions, populations, thresholds and pass bars before the runs, and is
+Every quantitative claim traces to a pre-registration document that fixed the
+definitions, populations, thresholds and pass bars before the runs, and was
 amended only by appending the outcome, including the outcomes that missed.
-`prereg/README.md` indexes them.
+Those documents are held with the manuscript rather than in this repository;
+the identifiers cited in the source (`P-EXEC-1`, `M1`, and the rest) name
+them.
 
 ## Attribution
 

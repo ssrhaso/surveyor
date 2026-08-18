@@ -20,7 +20,7 @@ without a GPU, the frozen LeWM encoder, an h5, or stable_worldmodel, and it
 covers the accounting for both env drivers, which construct this same
 env-agnostic source with the same arguments.
 
-See prereg/2026-08-11_rate_transfer.md, Extension A and "voided run".
+See the rate-transfer pre-registration, Extension A and its voided run.
 """
 
 from __future__ import annotations

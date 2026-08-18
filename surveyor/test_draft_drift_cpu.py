@@ -1,6 +1,6 @@
 """CPU engagement gate for autocorrelated draft corruption (--draft-noise-rho).
 
-prereg/2026-08-11_autocorrelated_divergence.md fixes this criterion in the
+The autocorrelated-divergence pre-registration fixes this criterion in the
 document, before any cell:
 
     at sigma=0.2, rho=0.99 must produce a materially higher cosine similarity

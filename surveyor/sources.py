@@ -263,17 +263,17 @@ class SurveyorSource:
         self._gen.manual_seed(int(seed))
         self.record = record
         self.trace = []
-        # calibration event log (prereg/2026-07-31_certification.md M1), record-gated:
+        # calibration event log (pre-registered as M1), record-gated:
         # one (env, rel, accepted, z_achieved, target) per verification event,
         # accepts included (the draft-only trace cannot reconstruct an accepted
         # replan's achieved latent).
         self.cal = []
-        # corruption sweep (prereg/2026-07-31_certification.md): displace every drafted
+        # corruption sweep (pre-registered): displace every drafted
         # waypoint w by draft_noise * ||w|| along a random unit direction, at
         # EVERY draft including re-drafts (deployed semantics). 0.0 = off.
         # Verification and traces see the corrupted, served block.
         self.draft_noise = float(draft_noise)
-        # AUTOCORRELATED corruption (prereg/2026-08-11_autocorrelated_divergence.md).
+        # AUTOCORRELATED corruption (pre-registered autocorrelated divergence).
         # The white draw above takes a fresh direction every draft, so
         # consecutive corruptions cancel in expectation (why SR stayed flat in
         # the certification sweep). Here one unit drift vector per env persists
@@ -287,7 +287,7 @@ class SurveyorSource:
         self.draft_noise_rho = float(draft_noise_rho)
         self._drift = None   # (n_envs, dim) unit vectors, lazily initialised
         self.drift_log = []  # [(env_rows, unit dirs)] per draft, for the smoke gate
-        # matched-rate random-rejection control (prereg/2026-08-01_random_rejection.md):
+        # matched-rate random-rejection control (pre-registered):
         # reject every verification event with this probability, drawn from a
         # DEDICATED coin generator so the draft-sampling stream matches a normal
         # spec run at the same seed.

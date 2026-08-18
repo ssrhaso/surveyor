@@ -1,7 +1,7 @@
 # Dependency specification for the LeWM-substrate experiments (PushT, Reacher,
 # Cube, Two-Room). Validated by a clean-room rebuild into a fresh virtual
 # environment, which is what caught the four packages below that had previously
-# been installed ad hoc: see prereg/2026-08-01_repro_smoke.md.
+# been installed ad hoc: validated by a clean-room rebuild.
 #
 #   python -m venv .venv && . .venv/bin/activate
 #   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121

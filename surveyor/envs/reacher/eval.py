@@ -91,7 +91,7 @@ def parse_args():
                    help="AR(1) autocorrelation of the corruption direction across "
                         "re-drafts. 0 = uncorrelated control; ->1 = persistent drift.")
     p.add_argument("--random-reject", type=float, default=None,
-                   help="decision-content control (prereg/2026-08-01_random_rejection.md): "
+                   help="decision-content control (pre-registered): "
                         "replace the accept test with an i.i.d. coin rejecting "
                         "at this matched probability; all other mechanics "
                         "identical to the banked spec arm")

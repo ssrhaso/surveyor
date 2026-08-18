@@ -7,7 +7,7 @@ every subgoal boundary (S env steps) the accept rule verifies the achieved
 latent against the waypoint just pursued: within tau the next pre-drafted
 waypoint is served free, otherwise the block is re-drafted from reality.
 
-Mechanism bet (prereg/2026-08-07_composite_and_executor.md, P-EXEC-1, passed):
+Mechanism bet (pre-registered as P-EXEC-1, passed):
 GC-IDM degrades with goal distance (its paper's Table 2) while the drafter
 manufactures near goals; a 10-step hop sits mid-distribution for the H_max=50
 checkpoint. The accept rule never inspects the executor, so tau, k and S carry

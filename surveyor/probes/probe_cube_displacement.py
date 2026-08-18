@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Cube start-to-goal displacement under LeWM's Fig. 6 protocol vs ours.
 
-Pre-registered as P-DISP-1 in prereg/2026-08-07_baselines.md. Offline: reads
+Pre-registered as P-DISP-1 before the run. Offline: reads
 cached privileged cube positions, runs no policy and loads no model.
 
 WHY. LeWM Fig. 6 reports Random at 48% on OGBench-Cube; whether that column can
@@ -166,7 +166,6 @@ def main():
     print(f"[P-DISP-1] {verdict}")
     results["prereg"] = {
         "id": "P-DISP-1",
-        "file": "prereg/2026-08-07_baselines.md",
         "confirm_at": 0.30, "refute_below": 0.10,
         "measured_frac_below_radius": frac,
         "verdict": verdict.split(":")[0],

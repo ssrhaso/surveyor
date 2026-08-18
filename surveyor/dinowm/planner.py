@@ -8,7 +8,7 @@ The CEM sub-planner, world model, and evaluator are untouched; cem.py has a
 5-line guarded branch accepting pre-encoded latent goals.
 
 Verification metric, which must match the pre-registered gap space
-(prereg/2026-07-26_dinowm_instrument.md): rel L2 between pooled visual tokens,
+of the DINO-WM instrument: rel L2 between pooled visual tokens,
 the mean over patch tokens only, excluding proprio as the gap statistic does.
 
 Arrival gate (added 2026-07-28): without it spec rose then declined while flat
@@ -202,7 +202,7 @@ class SurveyorMPCPlanner(MPCPlanner):
             self.readout_tau = float(readout_tau if readout_tau is not None
                                      else ck["tau_derived"])
             print(f"[spec] lens={readout_ckpt} lens_tau={self.readout_tau:.3f}")
-        # ---- autopsy serve modes (prereg/2026-07-26_dinowm_instrument.md AUTOPSY REGISTRATION):
+        # ---- autopsy serve modes (pre-registered under AUTOPSY REGISTRATION):
         # draft = production path | goal = D1 tautology (serve the goal grid
         # through the same latent-goal branch) | snap = D2 draft-and-snap
         # (every drafted grid replaced by its nearest REAL cached train grid,

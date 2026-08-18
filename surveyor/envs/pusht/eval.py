@@ -96,7 +96,7 @@ def parse_args():
                         "->1 = a persistent drift the accept test can see but a "
                         "fixed-rate coin structurally cannot.")
     p.add_argument("--random-reject", type=float, default=None,
-                   help="decision-content control (prereg/2026-08-01_random_rejection.md): "
+                   help="decision-content control (pre-registered): "
                         "replace the accept test with an i.i.d. coin rejecting "
                         "at this matched probability; all other mechanics "
                         "identical to the banked spec arm")

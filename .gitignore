@@ -43,7 +43,7 @@ __pycache__/
 *.blg
 *.synctex.gz
 
-# Working notes, superseded by the manuscript and by prereg/.
+# Working notes, superseded by the manuscript.
 PLAN.md
 DIRECTION_*.md
 RESULTS_*.md
