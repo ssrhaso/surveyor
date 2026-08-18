@@ -1,3 +1,5 @@
+"""Training helpers: image preprocessing, column normalization, and checkpointing."""
+
 import numpy as np
 import torch
 from stable_pretraining import data as dt

@@ -1,3 +1,9 @@
+"""Neural building blocks: the SIGReg regularizer and the Transformer stack.
+
+Shared by the JEPA encoder and predictor; the conditional blocks carry
+AdaLN-Zero modulation, the plain blocks do not.
+"""
+
 import torch
 from torch import nn
 import torch.nn.functional as F
@@ -32,7 +38,7 @@ class SIGReg(torch.nn.Module):
         err = (x_t.cos().mean(-3) - self.phi).square() + x_t.sin().mean(-3).square()
         statistic = (err @ self.weights) * proj.size(-2)
         return statistic.mean() # average over projections and time
-    
+
 class FeedForward(nn.Module):
     """Pre-norm transformer feed-forward block."""
 
