@@ -14,11 +14,11 @@ un-anchored substrate). Four checks:
 
 Exit code 0 only if R and D pass at tolerance; the battery scripts depend on it.
 """
+import os
 import sys
 
 REPO = os.environ.get("DINOWM_REPO", os.path.expanduser("~/dino_wm"))
 sys.path.insert(0, REPO)
-import os  # noqa: E402
 
 os.chdir(REPO)
 

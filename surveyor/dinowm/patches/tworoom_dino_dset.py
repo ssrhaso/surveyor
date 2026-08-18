@@ -2,8 +2,8 @@
 # for DINO-WM world-model training (the encoder-swap recovery leg). Mirrors
 # PushTDataset's contract; pixels stay in the h5 (flat layout, ep_offset +
 # ep_len boundaries) and the file handle opens lazily per worker process.
+import os
 import pickle  # noqa: F401  (parity with sibling dsets)
-from pathlib import Path
 from typing import Callable, Optional
 
 import hdf5plugin  # noqa: F401  (registers HDF5 compression filters)
