@@ -124,7 +124,7 @@ def main():
                                  figsize=(1.35 * ncols, 1.65 * len(eps)),
                                  squeeze=False)
         for row, i in enumerate(eps):
-            n = render_row(axes[row], z, i, args.max_cols)
+            render_row(axes[row], z, i, args.max_cols)
             ok = "" if succ is None else ("  success" if succ[i] else "  FAILURE")
             axes[row][0].set_ylabel(f"ep{i}{ok}", fontsize=8, color="#333333")
         arm = meta.get("subgoal", "?")

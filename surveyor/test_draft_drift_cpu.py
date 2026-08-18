@@ -95,7 +95,7 @@ def test_drift_is_monotone_in_rho():
     cs = [(_mean_consecutive_cos(r)[0], r) for r in (0.0, 0.9, 0.99)]
     vals = [c for c, _ in cs]
     assert vals[0] < vals[1] < vals[2], f"cos not monotone in rho: {cs}"
-    print(f"[drift] monotone in rho: " +
+    print("[drift] monotone in rho: " +
           ", ".join(f"rho={r} -> {c:+.3f}" for c, r in cs))
 
 

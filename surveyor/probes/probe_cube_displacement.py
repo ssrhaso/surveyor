@@ -135,7 +135,7 @@ def main():
     nf_eps = np.nonzero(valid_nofloor)[0]
     d_ours_nf = disp_for(nf_eps, ep_len[nf_eps] - 1 - off_o, off_o)
     results["ours_population_no_episode_floor"] = summarise(
-        d_ours_nf, args.radius, f"our protocol, all episodes (no --episode-min)")
+        d_ours_nf, args.radius, "our protocol, all episodes (no --episode-min)")
 
     # ---- readout
     print()

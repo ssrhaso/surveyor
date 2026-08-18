@@ -110,7 +110,7 @@ def main():
         if bias[k][50] < args.floor:
             kstar = k
             break
-    print(f"\n==== verdict ====")
+    print("\n==== verdict ====")
     print(f"criterion floor p50 = {args.floor}")
     print(f"derived k* = {kstar}  (smallest k with bias-to-k{ref} p50 below the floor;"
           f" more steps cannot change an accept decision)")

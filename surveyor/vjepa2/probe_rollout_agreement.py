@@ -148,7 +148,6 @@ def main():
                     plan = flat_plan(wm, z_cur, p_cur, tgt, cem_args=cem_args)
                     reps, acts, poses = rollout_block(wm, reps, acts, poses, plan)
                 secs = time.perf_counter() - t0
-                sim = poses[0, -(K + 1):, :3].cpu() if poses.shape[1] >= K + 1 else None
                 # poses window may be trimmed; rebuild full xyz path is overkill -
                 # score net displacement + final pose (always available) + rmse
                 # over the retained tail aligned from the end

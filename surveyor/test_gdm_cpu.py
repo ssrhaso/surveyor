@@ -173,7 +173,7 @@ def test_subgoal_source_closedloop():
     z2 = src.current(np.full(n_envs, 2, dtype=np.int64), obs_latent=obs2, replan_idx=[0, 2])
     assert torch.allclose(z2[1], z1[1]) and torch.allclose(z2[3], z1[3])
     assert not torch.allclose(z2[0], z1[0])
-    print(f"[5] GDMSubgoalSource closed-loop: zeros->fill->hold->partial-replan OK")
+    print("[5] GDMSubgoalSource closed-loop: zeros->fill->hold->partial-replan OK")
 
 
 def test_v_param_x0_identity():
@@ -378,7 +378,7 @@ def test_ckpt_roundtrip():
         zc, n_steps=10, generator=torch.Generator(device=DEV).manual_seed(0))
     assert torch.allclose(a, ref, atol=1e-5), "loaded planner sample != in-memory"
     assert planner.cfg.n_future == N and planner.cfg.wg == 1
-    print(f"[6] save_gdm/load_gdm_planner round-trip: samples match (atol 1e-5) OK")
+    print("[6] save_gdm/load_gdm_planner round-trip: samples match (atol 1e-5) OK")
 
 
 if __name__ == "__main__":
