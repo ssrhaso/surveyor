@@ -9,12 +9,11 @@ from __future__ import annotations
 import argparse
 import json
 
-import hdf5plugin  # noqa: F401; registers the dynamically-loaded filter plugin
-                    # this h5's `pixels` dataset uses (~10x compression); without
-                    # this import, reading pixels fails with "Can't open directory
-                    # (/usr/local/lib/plugin)". Other scripts don't need this
-                    # explicit import because they always import stable_worldmodel
-                    # first, which imports hdf5plugin as a side effect.
+# hdf5plugin registers the dynamically-loaded filter plugin this h5's `pixels`
+# dataset uses (~10x compression); without it, reading pixels fails with "Can't
+# open directory (/usr/local/lib/plugin)". Other scripts do not need the explicit
+# import because they always import stable_worldmodel first, which pulls it in.
+import hdf5plugin  # noqa: F401
 import h5py
 import numpy as np
 

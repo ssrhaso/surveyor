@@ -34,7 +34,6 @@ except ImportError:
     pass
 import h5py
 import numpy as np
-import torch
 
 from surveyor import encoder, paired
 

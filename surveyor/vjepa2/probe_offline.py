@@ -37,7 +37,7 @@ import torch
 
 from .planner import cstar, flat_plan
 from .sources import CstarRetireTokenSource, LerpBlockDrafter
-from .wm import UPSTREAM, VJEPA2WM, ensure_upstream_on_path, pool
+from .wm import UPSTREAM, VJEPA2WM, pool
 
 
 def rel_pooled(a: torch.Tensor, b: torch.Tensor) -> float:

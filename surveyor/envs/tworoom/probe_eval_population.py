@@ -28,7 +28,7 @@ import numpy as np
 
 from surveyor import encoder
 from surveyor.envs.tworoom.eval import (
-    cross_room_mask, sample_long, sample_short, tworoom_success_mask,
+    cross_room_mask, sample_long, tworoom_success_mask,
 )
 
 AGENT_SPEED = 5.0

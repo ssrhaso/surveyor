@@ -160,7 +160,7 @@ def main():
 
     gdm_planner = None
     if args.subgoal in ("ffjepa", "surveyor", "router+surveyor", "gcidm+surveyor"):
-        from surveyor.drafter import load_gdm_planner, count_params
+        from surveyor.drafter import load_gdm_planner
         gdm_planner = load_gdm_planner(args.gdm_ckpt, device=args.device)
         print(f"[gdm] planner from {args.gdm_ckpt}: "
               f"N={gdm_planner.cfg.n_future} goal_cond={gdm_planner.goal_cond} "

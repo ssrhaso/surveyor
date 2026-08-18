@@ -25,7 +25,7 @@ from surveyor.arms import canonical_arm
 from surveyor.drafter import load_gdm_planner
 from surveyor.probes.horizon_gate import make_latent_lookup
 from surveyor.probes.horizon_gate_cem import flat_plan_c_star
-from surveyor.probes.probe_floor import dist_stats, rel
+from surveyor.probes.probe_floor import rel
 from surveyor.sources import SubgoalCostModel
 from surveyor import encoder
 
