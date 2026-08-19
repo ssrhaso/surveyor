@@ -76,7 +76,7 @@ def test_retire_source():
                                  n_envs=1, tau=0.2, k=0)
     z = torch.randn(1, T_TOK, D)
     pose = torch.zeros(1, 1, 7)
-    for step in range(4):
+    for _step in range(4):
         t = src.current(z, pose, [0], goal)
     assert src.c_first[0] == 0.9 and not (src.c_first[0] <= 0.2), "router fire test"
     assert src._retired[0] and src.retire_replan[0] == 2, src.retire_replan

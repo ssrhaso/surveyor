@@ -82,10 +82,10 @@ def main():
     for j in range(1, N + 1):
         g = np.mean(stats["gdm"][j]["rel"])
         gc = np.mean(stats["gdm"][j]["cos"])
-        l = np.mean(stats["lerp"][j]["rel"])
+        lp = np.mean(stats["lerp"][j]["rel"])
         lc = np.mean(stats["lerp"][j]["cos"])
         o = np.mean(stats["noop"][j]["rel"])
-        print(f"  m+{j}  | {g:8.4f} {gc:6.3f} | {l:8.4f} {lc:6.3f} | {o:8.4f} | "
+        print(f"  m+{j}  | {g:8.4f} {gc:6.3f} | {lp:8.4f} {lc:6.3f} | {o:8.4f} | "
               f"{o / max(g, 1e-8):8.2f}x")
     print("(LeWM-stack reference: gdm rel 0.159/0.229/0.318, noop/gdm 7.2/6.2/4.5x; "
           "a drafter that loses to lerp or noop is not yet usable)")

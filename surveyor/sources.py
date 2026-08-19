@@ -789,7 +789,7 @@ class DSparkSubgoalSource:
                     self.n_redraft += 1
                     self.commit_depths.append(int(k))
             # consume one committed subgoal per replan env (clamp at last if exhausted)
-            for r, i in enumerate(replan_idx):
+            for _r, i in enumerate(replan_idx):
                 q = self._queue[i]
                 k = min(self._ptr[i], q.shape[0] - 1)
                 self._cache[i] = q[k]

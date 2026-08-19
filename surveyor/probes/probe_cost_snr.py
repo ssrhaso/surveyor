@@ -99,7 +99,7 @@ def main():
         # encode E(t), E(t+5), E(t+25) per window (t end-anchored)
         starts = {e: off + (L - 1 - RUNWAY) for e, off, L in windows}
         rows = []
-        for e, off, L in windows:
+        for e, _off, _L in windows:
             t = starts[e]
             rows += [t, t + 5, t + 25]
         rows = np.array(rows)
@@ -117,7 +117,7 @@ def main():
             return a.reshape(n_steps // ACTION_BLOCK, ACTION_BLOCK * 2)  # (T, 10)
 
         true_blocks, decoy_blocks = [], []
-        for e, off, L in windows:
+        for e, _off, _L in windows:
             true_blocks.append(read_blocks(starts[e], 25))
             dec = []
             while len(dec) < args.n_decoys:

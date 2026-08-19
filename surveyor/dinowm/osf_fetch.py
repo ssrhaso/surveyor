@@ -57,7 +57,7 @@ if __name__ == "__main__":
     mode = sys.argv[1]
     if mode == "list":
         tot = 0
-        for rel, path, size in walk():
+        for rel, _path, size in walk():
             tot += size
             print(f"{size / 1e6:10.1f} MB  {rel}")
         print(f"TOTAL {tot / 1e9:.2f} GB")

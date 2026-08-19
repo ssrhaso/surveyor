@@ -87,7 +87,7 @@ def main():
     halves = (("lewm", LEWM_DIM), ("dino", DINO_DIM)) if is_paired else (("all", pl.cfg.latent_dim),)
 
     print("\n=== NORMS (drafted vs true) ===")
-    for which, d in halves:
+    for which, _d in halves:
         dn = half(blk[:, 0], which).norm(dim=-1).cpu().numpy()
         tn = half(z_true[:, 0], which).norm(dim=-1).cpu().numpy()
         cn = half(z_cond, which).norm(dim=-1).cpu().numpy()

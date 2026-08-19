@@ -78,7 +78,7 @@ def test_qsample_and_loss_drops():
     opt = torch.optim.Adam(model.parameters(), lr=1e-3)
     torch.manual_seed(2)
     losses = []
-    for step in range(200):
+    for _step in range(200):
         # fixed (t, noise) per step would be ideal but random is fine over 200 steps
         loss = diff.p_losses(model, tgt, cond)
         opt.zero_grad(); loss.backward(); opt.step()

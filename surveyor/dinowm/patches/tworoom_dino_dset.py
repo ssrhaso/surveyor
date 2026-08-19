@@ -41,7 +41,7 @@ class TwoRoomDINODataset(TrajDataset):
         act = torch.nan_to_num(act, nan=0.0)
         self.ep_off = off[ep_indices]
         self.ep_len = ln[ep_indices]
-        self.seq_lengths = [int(l) for l in self.ep_len]
+        self.seq_lengths = [int(n) for n in self.ep_len]
         self.flat_actions = act
         self.flat_proprios = agent
         self.flat_states = torch.cat([agent, target], dim=-1)
@@ -80,8 +80,8 @@ class TwoRoomDINODataset(TrajDataset):
     def get_all_actions(self):
         result = []
         for i in range(len(self.ep_off)):
-            o, l = int(self.ep_off[i]), int(self.ep_len[i])
-            result.append(self.flat_actions[o:o + l])
+            o, n = int(self.ep_off[i]), int(self.ep_len[i])
+            result.append(self.flat_actions[o:o + n])
         return torch.cat(result, dim=0)
 
     def get_frames(self, idx, frames):

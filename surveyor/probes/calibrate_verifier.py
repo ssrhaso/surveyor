@@ -197,7 +197,7 @@ def main():
                 else list(rec.get("records", {}).values()))   # pusht wraps per score/angle
         got = 0
         for r in recs:
-            for (i, rel, acc, z_now, tgt) in r.get("cal", []):
+            for (_i, rel, acc, z_now, tgt) in r.get("cal", []):
                 events.append((float(rel), bool(acc),
                                z_now.numpy().astype(np.float64),
                                tgt.numpy().astype(np.float64)))
