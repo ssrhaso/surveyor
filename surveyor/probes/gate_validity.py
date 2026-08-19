@@ -96,7 +96,8 @@ def pop_label(eps, starts, t):
     for f, name in [("reacher_horizon.ep.t0.json", "max100"),
                     ("reacher_horizon150.ep.t0.json", "max150")]:
         if os.path.exists(f):
-            pl = json.load(open(f))["episodes"]
+            with open(f) as fh:
+                pl = json.load(fh)["episodes"]
             if (len(pl) == len(eps)
                     and all(p[0] == e and p[1] == s
                             for p, e, s in zip(pl, eps, starts))):
