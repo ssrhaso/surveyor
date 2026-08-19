@@ -14,6 +14,8 @@ from einops import rearrange
 
 from .traj_dset import TrajDataset, TrajSlicerDataset
 
+DEFAULT_H5 = os.path.expanduser("~/data/tworoom/tworoom.h5")
+
 
 class TwoRoomDINODataset(TrajDataset):
     def __init__(
@@ -105,8 +107,7 @@ class TwoRoomDINODataset(TrajDataset):
 
 def load_tworoom_dino_slice_train_val(
     transform,
-    data_path=os.environ.get("TWOROOM_H5",
-                             os.path.expanduser("~/data/tworoom/tworoom.h5")),
+    data_path=None,
     n_rollout=None,
     normalize_action=True,
     split_ratio=0.9,
@@ -114,6 +115,8 @@ def load_tworoom_dino_slice_train_val(
     num_pred=0,
     frameskip=0,
 ):
+    if data_path is None:
+        data_path = os.environ.get("TWOROOM_H5", DEFAULT_H5)
     with h5py.File(data_path, "r") as f:
         n_total = len(f["ep_offset"])
     if n_rollout:
