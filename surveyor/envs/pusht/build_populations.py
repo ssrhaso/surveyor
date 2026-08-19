@@ -24,7 +24,7 @@ H5 = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser(
 N, LAST, SEED = 256, 150, 42
 
 episodes_idx, start_steps = sample_long(H5, N, LAST, SEED)
-pairs = [[int(e), int(s)] for e, s in zip(episodes_idx, start_steps)]
+pairs = [[int(e), int(s)] for e, s in zip(episodes_idx, start_steps, strict=True)]
 base = {"goal_offset": LAST, "seed": SEED, "eval_filter": None,
         "note": "regenerated: sample_long(n=256, last_n=150, seed=42), "
                 "driver-default eligibility", "episodes": pairs}

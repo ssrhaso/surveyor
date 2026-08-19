@@ -220,7 +220,7 @@ def main():
     if args.dump_events:
         with open(args.dump_events, "w") as fo:
             fo.write("rel,accepted,state_dist\n")
-            for rel_i, acc_i, d_i in zip(rels, accs, d):
+            for rel_i, acc_i, d_i in zip(rels, accs, d, strict=True):
                 fo.write(f"{rel_i:.6f},{int(acc_i)},{d_i:.6f}\n")
         print(f"[cal] dumped {len(rels)} events -> {args.dump_events}", flush=True)
 

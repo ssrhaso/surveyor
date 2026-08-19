@@ -68,7 +68,7 @@ def main():
         zc, zn = per_env_series(rec["trace"], n_envs, dim)
 
         # goal latents (cache by (ep, start))
-        need = [(int(e), int(s)) for e, s in zip(eps, starts)
+        need = [(int(e), int(s)) for e, s in zip(eps, starts, strict=True)
                 if (int(e), int(s)) not in goal_cache]
         if need:
             with h5py.File(args.h5, "r") as f:
@@ -84,7 +84,7 @@ def main():
                 lat = encoder.encode_frames(model, px[rws[order]], device=args.device)
                 out = torch.empty_like(lat)
                 out[order] = lat
-            for (key, g) in zip(need, out):
+            for (key, g) in zip(need, out, strict=True):
                 goal_cache[key] = g
 
         for i in range(n_envs):

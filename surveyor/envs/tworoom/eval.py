@@ -510,7 +510,7 @@ def main():
             _len = _f["ep_len"][:]
             _st = _f["state"][:]
         cross = []
-        for _e, _s in zip(episodes_idx, start_steps):
+        for _e, _s in zip(episodes_idx, start_steps, strict=True):
             _b, _L = int(_off[_e]), int(_len[_e])
             _i0 = _b + int(_s)
             _ig = _b + min(int(_s) + goal_offset, _L - 1)

@@ -66,7 +66,7 @@ def _mean_consecutive_cos(rho, n_envs=4, n_drafts=12, seed=42):
             per_env[int(e)].append(dirs[j])
     cos = []
     for e, seq in per_env.items():
-        for a, b_ in zip(seq[:-1], seq[1:]):
+        for a, b_ in zip(seq[:-1], seq[1:], strict=True):
             cos.append(float(torch.dot(a, b_) / (a.norm() * b_.norm() + 1e-12)))
     assert cos, "fewer than two drafts per env; cannot measure autocorrelation"
     return float(np.mean(cos)), len(cos)

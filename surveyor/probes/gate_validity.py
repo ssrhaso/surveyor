@@ -100,7 +100,7 @@ def pop_label(eps, starts, t):
                 pl = json.load(fh)["episodes"]
             if (len(pl) == len(eps)
                     and all(p[0] == e and p[1] == s
-                            for p, e, s in zip(pl, eps, starts))):
+                            for p, e, s in zip(pl, eps, starts, strict=True))):
                 return f"{name}_t{t}"
     return f"native_t{t}"
 

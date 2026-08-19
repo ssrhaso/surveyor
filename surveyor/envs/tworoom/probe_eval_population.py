@@ -69,7 +69,7 @@ def main():
             # every cell in this battery ran with --start final
             eps_idx, starts = sample_long(args.h5, args.num_eval, off, seed,
                                           ep_mask=ep_mask)
-            for e, s in zip(eps_idx, starts):
+            for e, s in zip(eps_idx, starts, strict=True):
                 base, L = int(ep_off[e]), int(ep_len[e])
                 i0 = base + int(s)
                 ig = base + min(int(s) + off, L - 1)

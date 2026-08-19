@@ -59,7 +59,7 @@ def episode_events(z, i):
     m = z["ev_env"] == i
     kinds = [k if isinstance(k, str) else k.decode() if isinstance(k, bytes) else str(k)
              for k in z["ev_kind"][m]]
-    return list(zip(kinds, z["ev_rel"][m].tolist()))
+    return list(zip(kinds, z["ev_rel"][m].tolist(), strict=True))
 
 
 def render_row(ax_row, z, i, max_cols):
@@ -81,7 +81,7 @@ def render_row(ax_row, z, i, max_cols):
     if f"ep{i}_goal" in z:
         cells.append((z[f"ep{i}_goal"], "GOAL", "goal"))
 
-    for ax, (img, lab, kind) in zip(ax_row, cells):
+    for ax, (img, lab, kind) in zip(ax_row, cells, strict=False):
         ax.imshow(np.asarray(img))
         ax.set_xticks([])
         ax.set_yticks([])

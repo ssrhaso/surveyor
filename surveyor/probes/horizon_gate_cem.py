@@ -208,7 +208,7 @@ def main():
                       f"shifted, excluded from the verdict")
         med = [(int(t), c["p50"])
                for t, c in sorted(cells.items(), key=lambda kv: int(kv[0]))]
-        mono = all(a[1] <= b[1] for a, b in zip(med, med[1:]))
+        mono = all(a[1] <= b[1] for a, b in zip(med, med[1:], strict=False))
         print(f"{label} c* p50 across t: "
               + " ".join(f"{t}:{m:.3f}" for t, m in med)
               + f"  (monotone increasing: {mono})")

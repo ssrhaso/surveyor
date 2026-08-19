@@ -814,7 +814,7 @@ def build_oracle_table(h5_path, model, episodes_idx, start_steps, goal_offset,
         # gather all rows (per env: n_sg frames), clamped to last valid demo frame
         per_env_rows = []
         flat_rows = []
-        for ep, start in zip(episodes_idx, start_steps):
+        for ep, start in zip(episodes_idx, start_steps, strict=True):
             base = int(ep_off[ep]); last = base + int(ep_len[ep]) - 1
             rows = [min(base + int(start) + k * stride, last) for k in range(n_sg)]
             per_env_rows.append(rows)

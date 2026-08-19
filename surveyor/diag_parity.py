@@ -74,7 +74,7 @@ def main():
         ep_off = f["ep_offset"][:]; pixels = f["pixels"]
         diffs = []
         first = {}
-        for i, (ep, st) in enumerate(zip(eps, starts)):
+        for i, (ep, st) in enumerate(zip(eps, starts, strict=True)):
             gf = pixels[int(ep_off[ep]) + st + 25]
             z_oracle = encoder.encode_frames(model, gf[None], device=dev)[0]  # (192,)
             z_harness = harness_encode(gf)[0]                                  # (192,)

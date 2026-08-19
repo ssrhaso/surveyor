@@ -101,7 +101,7 @@ def main():
     print(f"[done] wrote {args.out}")
 
     for goff, (eps, starts) in conditions.items():
-        remapped = [[orig_to_new[int(e)], int(s)] for e, s in zip(eps, starts)]
+        remapped = [[orig_to_new[int(e)], int(s)] for e, s in zip(eps, starts, strict=True)]
         outpath = args.out.rsplit(".", 1)[0] + f".episodes{goff}.json"
         with open(outpath, "w") as f:
             json.dump({"goal_offset": goff, "seed": args.seed, "eval_filter": args.eval_filter,

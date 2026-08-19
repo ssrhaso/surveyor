@@ -188,7 +188,7 @@ def main():
     with h5py.File(args.h5, "r") as f:
         ep_off = f["ep_offset"][:]; ep_len = f["ep_len"][:]; pixels = f["pixels"]
         cond_rows, true_rows, fin_rows = [], [], []
-        for ep, st in zip(episodes_idx, start_steps):
+        for ep, st in zip(episodes_idx, start_steps, strict=True):
             base = int(ep_off[ep]); last = base + int(ep_len[ep]) - 1
             cond_rows.append(base + int(st))
             true_rows.append(min(base + int(st) + args.stride, last))

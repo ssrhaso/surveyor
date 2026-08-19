@@ -76,7 +76,7 @@ def main():
 
     # ---- within-episode pairs: (i, i+Delta), Delta ~ U{1..hmax} -----------
     rels, dists, ees = [], [], []
-    for p, s in zip(pools, states):
+    for p, s in zip(pools, states, strict=True):
         T = p.shape[0]
         for _ in range(args.pairs_per_ep):
             d = int(rng.integers(1, args.hmax + 1))
@@ -147,7 +147,7 @@ def main():
         json.dump(out, f, indent=2)
     with open(args.out_csv, "w") as f:
         f.write("rel,accepted,ee_dist\n")
-        for r_, a_, d_ in zip(rels, accs, dists):
+        for r_, a_, d_ in zip(rels, accs, dists, strict=True):
             f.write(f"{r_:.6f},{int(a_)},{d_:.6f}\n")
     print(json.dumps(out, indent=2), flush=True)
     print(f"[fm] saved {args.out_json} + {args.out_csv}", flush=True)

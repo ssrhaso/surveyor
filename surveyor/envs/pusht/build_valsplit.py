@@ -23,7 +23,7 @@ with open("pusht.episodes150.json") as f:
     test_eps = {int(e) for e, _ in json.load(f)["episodes"]}
 
 episodes_idx, start_steps = sample_long(H5, 4 * N, LAST, 777)
-pairs = [[int(e), int(s)] for e, s in zip(episodes_idx, start_steps)
+pairs = [[int(e), int(s)] for e, s in zip(episodes_idx, start_steps, strict=True)
          if int(e) not in test_eps][:N]
 assert len(pairs) == N, f"only {len(pairs)} disjoint pairs available"
 assert not ({e for e, _ in pairs} & test_eps)
