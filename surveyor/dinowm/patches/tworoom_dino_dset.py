@@ -1,7 +1,10 @@
-# Deployed as dino_wm/datasets/tworoom_dino_dset.py: h5-backed TwoRoom dataset
-# for DINO-WM world-model training (the encoder-swap recovery leg). Mirrors
-# PushTDataset's contract; pixels stay in the h5 (flat layout, ep_offset +
-# ep_len boundaries) and the file handle opens lazily per worker process.
+"""Deployed as dino_wm/datasets/tworoom_dino_dset.py.
+
+h5-backed TwoRoom dataset for DINO-WM world-model training, the encoder-swap
+recovery leg. Mirrors PushTDataset's contract: pixels stay in the h5 under a
+flat layout with ep_offset and ep_len boundaries, and the file handle opens
+lazily so each worker process gets its own.
+"""
 import os
 import pickle  # noqa: F401  (parity with sibling dsets)
 from typing import Callable, Optional
@@ -18,6 +21,13 @@ DEFAULT_H5 = os.path.expanduser("~/data/tworoom/tworoom.h5")
 
 
 class TwoRoomDINODataset(TrajDataset):
+    """One contiguous block of TwoRoom episodes, addressed by episode index.
+
+    Actions and proprioception are normalized once at construction and held in
+    memory; pixels stay on disk. Each episode's final action row is NaN, since
+    no action follows the last state, so those rows are excluded from the
+    statistics and then zero-filled.
+    """
     def __init__(
         self,
         h5_path: str,
@@ -75,9 +85,11 @@ class TwoRoomDINODataset(TrajDataset):
         return self._f
 
     def get_seq_length(self, idx):
+        """Number of frames in episode `idx`."""
         return self.seq_lengths[idx]
 
     def get_all_actions(self):
+        """Every episode's actions concatenated, for dataset-level statistics."""
         result = []
         for i in range(len(self.ep_off)):
             o, n = int(self.ep_off[i]), int(self.ep_len[i])
@@ -85,6 +97,11 @@ class TwoRoomDINODataset(TrajDataset):
         return torch.cat(result, dim=0)
 
     def get_frames(self, idx, frames):
+        """Frames `frames` of episode `idx` -> (obs, action, state, meta).
+
+        Pixels are read from the h5 on demand and converted to CTHW floats in
+        [0,1] before `transform`.
+        """
         o = int(self.ep_off[idx])
         sel = [o + int(fr) for fr in frames]
         image = torch.from_numpy(self._file()["pixels"][sel]).float()  # THWC
@@ -115,6 +132,13 @@ def load_tworoom_dino_slice_train_val(
     num_pred=0,
     frameskip=0,
 ):
+    """Build the train and val datasets from one h5, split by episode.
+
+    The split is contiguous rather than shuffled, so an episode never appears
+    in both halves. Returns the sliced datasets, whose windows are
+    num_hist + num_pred frames taken at `frameskip`, alongside the unsliced
+    trajectory datasets.
+    """
     if data_path is None:
         data_path = os.environ.get("TWOROOM_H5", DEFAULT_H5)
     with h5py.File(data_path, "r") as f:

@@ -54,6 +54,11 @@ ENV_ACTION_DIM = 2
 
 
 class TwoRoomEnvWrapper(gym.Env):
+    """TwoRoom under the vector-env contract dino_wm's planner expects.
+
+    A dependency-free re-implementation, so the closed-loop battery runs
+    without stable_worldmodel installed alongside dino_wm.
+    """
     metadata = {"render_modes": ["rgb_array"], "render.modes": ["rgb_array"]}
     reward_range = (0.0, 0.0)
 
@@ -77,6 +82,12 @@ class TwoRoomEnvWrapper(gym.Env):
     # ---------------- dino_wm vector-env contract ----------------
 
     def seed(self, seed=None):
+        """Store a seeded RNG and return `[seed]`, as gym's contract expects.
+
+        Nothing reads the stored RNG: sample_random_init_goal_states builds
+        its own from the seed it is handed, so seeding is per call rather
+        than stateful.
+        """
         self._rng = np.random.RandomState(None if seed is None else int(seed))
         return [seed]
 
@@ -86,6 +97,7 @@ class TwoRoomEnvWrapper(gym.Env):
         return
 
     def eval_state(self, goal_state, cur_state):
+        """Success and agent-to-goal distance, on the env's own 16px radius."""
         goal_state = np.asarray(goal_state, dtype=np.float32).reshape(-1)
         cur_state = np.asarray(cur_state, dtype=np.float32).reshape(-1)
         state_dist = float(np.linalg.norm(goal_state[:2] - cur_state[:2]))
@@ -115,6 +127,11 @@ class TwoRoomEnvWrapper(gym.Env):
         return obs, self._get_state()
 
     def step(self, action):
+        """Apply one clipped action and return (obs, reward, done, info).
+
+        Reward is always 0 and done always False: the planner scores episodes
+        through eval_state, not the env's own signal.
+        """
         action_t = torch.as_tensor(np.asarray(action, dtype=np.float32),
                                    dtype=torch.float32)
         action_t = torch.clamp(action_t, -1.0, 1.0)
@@ -131,6 +148,7 @@ class TwoRoomEnvWrapper(gym.Env):
         return obs, 0.0, False, info
 
     def step_multiple(self, actions):
+        """Apply a sequence of actions, returning each step's output stacked."""
         obses, rewards, dones, infos = [], [], [], []
         for action in actions:
             o, r, d, info = self.step(action)
@@ -155,6 +173,7 @@ class TwoRoomEnvWrapper(gym.Env):
         return obses, np.stack(states)
 
     def render(self):
+        """Render the current agent position to an rgb_array frame."""
         return self._render_agent(self.agent_position)
 
     # ---------------- internals ----------------

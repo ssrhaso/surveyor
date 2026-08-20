@@ -14,6 +14,7 @@ BASE = "https://files.us.osf.io/v1/resources/bmw48/providers/osfstorage"
 
 
 def api(url):
+    """GET `url` as JSON, retrying five times with a widening backoff."""
     for attempt in range(5):
         try:
             with urllib.request.urlopen(url, timeout=60) as r:
@@ -25,6 +26,7 @@ def api(url):
 
 
 def walk(folder_path="/", prefix=""):
+    """Walk the OSF storage tree, yielding (relative name, path, size) per file."""
     sep = "" if folder_path.endswith("/") else "/"
     for item in api(f"{BASE}{folder_path}{sep}?view_only={VIEW}")["data"]:
         a = item["attributes"]
@@ -35,6 +37,7 @@ def walk(folder_path="/", prefix=""):
 
 
 def fetch(rel, path, size, outdir):
+    """Download one file into `outdir`, skipping it when the size already matches."""
     dst = os.path.join(outdir, rel)
     os.makedirs(os.path.dirname(dst), exist_ok=True)
     if os.path.exists(dst) and os.path.getsize(dst) == size:

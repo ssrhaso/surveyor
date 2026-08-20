@@ -162,6 +162,7 @@ class SurveyorGridSource:
         return torch.stack(out)
 
     def stats(self):
+        """One-line accounting of redrafts, accepts and the resulting call ratio."""
         cr = self.re_drafts / max(self.steps, 1)
         g = (f" gated_serves={self.gated} retired={sum(self.retired)}/{self.n}"
              if self.goal_gate else "")
@@ -298,6 +299,12 @@ class SurveyorMPCPlanner(MPCPlanner):
         return {"z_visual": z_vis, "z_proprio": z_goal_pro}
 
     def plan(self, obs_0, obs_g, actions=None):
+        """Plan every episode to its goal and record success and action length.
+
+        The drafted block is consumed under the accept rule, so the planner calls
+        the drafter only on rejection or exhaustion; the every-step baseline is
+        the call_ratio 1.000 that `stats` prints against.
+        """
         n_evals = obs_0["visual"].shape[0]
         self.is_success = np.zeros(n_evals, dtype=bool)
         self.action_len = np.full(n_evals, np.inf)

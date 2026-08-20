@@ -1,6 +1,10 @@
-# Patch of dino_wm/env/__init__.py: guard the eager pointmaze import
-# (pulls gym.envs.mujoco -> mujoco_py, not installed here). PushT-only port;
-# registration entry_points stay lazy, so the other envs remain registered.
+"""Deployed as dino_wm/env/__init__.py.
+
+Guards the eager pointmaze import, which pulls gym.envs.mujoco and so
+mujoco_py, not installed for this PushT-only port. Every registration
+entry_point stays lazy, so the other envs remain registered and importable
+on a host that does have them.
+"""
 from gym.envs.registration import register
 
 register(
