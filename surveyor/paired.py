@@ -67,6 +67,7 @@ class PairedEncoder:
 
     @torch.no_grad()
     def encode(self, frames, batch_size=128):
+        """Frames -> (..., 576) paired latents, the LeWM half first."""
         zl = encoder.encode_frames(self.lewm, frames, device=self.device,
                                    batch_size=batch_size)
         zd = encode_frames_dino(self.dino, frames, device=self.device,
@@ -269,6 +270,13 @@ class SurveyorPairedSource:
     @torch.no_grad()
     def current(self, sg_steps, obs_latent=None, replan_idx=None, goal_latent=None,
                 frames=None, goal_frames=None) -> torch.Tensor:
+        """Verify in the certifying half, then serve or redraft the paired block.
+
+        Same accept semantics as SurveyorSource, but the test reads `verify_half`
+        of the paired latent while the LeWM half is what gets served to the cost
+        model. Raw `frames` are required because the DINOv2 half cannot be
+        recovered from the policy's LeWM encode.
+        """
         if replan_idx is None or len(replan_idx) == 0 or frames is None:
             return self._cache.clone()
 
@@ -391,6 +399,7 @@ class SurveyorPairedSource:
         return self._cache.clone()
 
     def stats(self, tau=None):
+        """One-line accounting of redrafts, accepts and the space verification used."""
         total = self.n_redraft + self.n_advance
         rels = np.asarray(self.rels) if self.rels else np.array([0.0])
         space = ("dino384-lens" if self.readout is not None

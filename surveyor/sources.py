@@ -35,6 +35,7 @@ class SubgoalCostModel(nn.Module):
 
     @property
     def device(self):
+        """Device of the frozen LeWM parameters."""
         return next(self.lewm.parameters()).device
 
     @property
@@ -90,6 +91,11 @@ class OracleSubgoalSource:
         self.dim = table[0].shape[1]
 
     def current(self, sg_steps, obs_latent=None, replan_idx=None, goal_latent=None) -> torch.Tensor:
+        """Row i is the demo waypoint at `sg_steps[i]`, clamped to the last one.
+
+        Precomputed, so `obs_latent` is ignored: the table never re-anchors to
+        the achieved state and goes stale once an episode takes several hops.
+        """
         rows = []
         for i in range(self.n_envs):
             k = int(np.clip(sg_steps[i], 0, self.table[i].shape[0] - 1))
@@ -121,6 +127,11 @@ class VerifiedOracleSource:
 
     @torch.no_grad()
     def current(self, sg_steps, obs_latent=None, replan_idx=None, goal_latent=None) -> torch.Tensor:
+        """Advance past the waypoints already reached, then serve the next.
+
+        The test is the accept rule's own relative L2, so a held pointer means
+        the achieved latent is still outside tau of the current waypoint.
+        """
         if replan_idx is not None and len(replan_idx) > 0 and obs_latent is not None:
             z_now = obs_latent.to(self.device)
             for r, i in enumerate(replan_idx):
@@ -167,6 +178,11 @@ class GDMSubgoalSource:
 
     @torch.no_grad()
     def current(self, sg_steps, obs_latent=None, replan_idx=None, goal_latent=None) -> torch.Tensor:
+        """Sample a fresh z_{m+1} for every replanning env and cache it.
+
+        One diffusion call per replan boundary. Envs that are not replanning
+        keep the subgoal they were already driving toward.
+        """
         if replan_idx is not None and len(replan_idx) > 0 and obs_latent is not None:
             z_cond = obs_latent.to(self.planner.device)            # (R, dim) native E-space
             z_goal = (goal_latent.to(self.planner.device)
@@ -210,6 +226,11 @@ class RegressorSubgoalSource:
 
     @torch.no_grad()
     def current(self, sg_steps, obs_latent=None, replan_idx=None, goal_latent=None) -> torch.Tensor:
+        """Predict the m+1 subgoal for every replanning env in one forward pass.
+
+        Standardization is undone before serving, so the cache holds native
+        encoder latents like every other source.
+        """
         if replan_idx is not None and len(replan_idx) > 0 and obs_latent is not None:
             z_cond = obs_latent.to(self.device)
             z_std = (z_cond - self.mean) / self.std
@@ -306,6 +327,14 @@ class SurveyorSource:
 
     @torch.no_grad()
     def current(self, sg_steps, obs_latent=None, replan_idx=None, goal_latent=None) -> torch.Tensor:
+        """Verify the waypoint just pursued against reality, then serve or redraft.
+
+        Within tau the next block position is served with no diffusion call. On
+        rejection, on block exhaustion and on an env's first call the block is
+        redrafted from the achieved latent. Under `goal_gate` a waypoint that
+        fails the goal-progress test is replaced by the goal latent until a
+        later position passes.
+        """
         if replan_idx is not None and len(replan_idx) > 0 and obs_latent is not None:
             z_now = obs_latent.to(self.device)               # (R, dim) achieved latents
             z_goal_rows = (goal_latent.to(self.device)
@@ -455,6 +484,12 @@ class LerpSubgoalSource:
 
     @torch.no_grad()
     def current(self, sg_steps, obs_latent=None, replan_idx=None, goal_latent=None) -> torch.Tensor:
+        """Serve a point `frac` of the way from the achieved to the goal latent.
+
+        Re-anchored every replan. The cache is sized on the first call from
+        whichever latent is available, since the source carries no drafter to
+        take a dimension from.
+        """
         if self._cache is None:
             ref = obs_latent if obs_latent is not None else goal_latent
             if ref is None:
@@ -554,6 +589,12 @@ class CstarRetireSource:
 
     @torch.no_grad()
     def current(self, sg_steps, obs_latent=None, replan_idx=None, goal_latent=None) -> torch.Tensor:
+        """Re-read c* on unretired envs, then serve the goal or defer to Surveyor.
+
+        Retirement is one-way: from the first replan at which c* <= tau that env
+        serves the goal latent for the rest of the episode and never calls the
+        drafter again.
+        """
         if replan_idx is not None and len(replan_idx) > 0 \
                 and obs_latent is not None and goal_latent is not None:
             replan_idx = list(replan_idx)
@@ -640,6 +681,12 @@ class HorizonGatedSource:
 
     @torch.no_grad()
     def current(self, sg_steps, obs_latent=None, replan_idx=None, goal_latent=None) -> torch.Tensor:
+        """Route each env on its first replan, then honour that decision.
+
+        Fired envs serve the goal latent for the whole episode; the rest run on
+        the internal SurveyorSource. One batched solve covers every env still
+        undecided, and the choice is never revisited.
+        """
         if replan_idx is not None and len(replan_idx) > 0 \
                 and obs_latent is not None and goal_latent is not None:
             replan_idx = list(replan_idx)
@@ -760,6 +807,12 @@ class DSparkSubgoalSource:
 
     @torch.no_grad()
     def current(self, sg_steps, obs_latent=None, replan_idx=None, goal_latent=None) -> torch.Tensor:
+        """Serve the next committed subgoal, redrafting once the block is spent.
+
+        A redraft samples a block, optionally refines it, and lets the
+        confidence head set the commit depth. Those k subgoals are then consumed
+        one per replan, so the diffusion cost amortizes over the depth.
+        """
         if replan_idx is not None and len(replan_idx) > 0 and obs_latent is not None:
             replan_idx = list(replan_idx)
             # replan envs whose committed block is empty/exhausted -> need a re-draft
@@ -846,6 +899,13 @@ def make_ffjepa_policy(base_cls):
     """Return an FFJEPAPolicy class subclassing `base_cls` (WorldModelPolicy)."""
 
     class _FFJEPAPolicy(base_cls):
+        """WorldModelPolicy that plans against an injected subgoal latent.
+
+        At every replan boundary the achieved frame is encoded with the frozen E
+        and handed to the subgoal source, whose latent is written into
+        info_dict for SubgoalCostModel to score against. Sources that certify
+        outside the LeWM latent space also receive the raw frames.
+        """
         def __init__(self, *, cost_model, subgoal_source, time_instrument=False,
                     dump_frames=False, dump_strip=0, **wmp_kwargs):
             # base WorldModelPolicy.__init__(solver, config, process, transform, ...)
@@ -881,6 +941,7 @@ def make_ffjepa_policy(base_cls):
             self._strip = None
 
         def set_env(self, env):
+            """Bind the vector env and allocate the per-env subgoal and capture state."""
             super().set_env(env)
             n = getattr(env, "num_envs", 1)
             self._sg_step = np.zeros(n, dtype=np.int64)
@@ -893,6 +954,7 @@ def make_ffjepa_policy(base_cls):
                 self._strip = [[] for _ in range(min(self.dump_strip, n))]
 
         def reset_subgoals(self):
+            """Rewind every env's subgoal index, for reuse across eval populations."""
             if self._sg_step is not None:
                 self._sg_step[:] = 0
 
@@ -905,6 +967,13 @@ def make_ffjepa_policy(base_cls):
             return {"frames": frames, "goal_frames": gframes}
 
         def get_action(self, info_dict, **kwargs):
+            """Inject the current subgoal, then defer to the base CEM solve.
+
+            Replan detection mirrors the base class. Closed-loop sources get the
+            achieved frame latent, and goal-conditioned ones the goal latent, both
+            through the same frozen encoder path. The timed branch is the same logic
+            wrapped at the drafter and CEM boundary, CUDA-synced before each stamp.
+            """
             assert hasattr(self, "env"), "Environment not set for the policy"
             n = self.env.num_envs
             # mirror base replan detection (dataset eval: mode='wait', no needs_flush)

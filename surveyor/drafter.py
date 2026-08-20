@@ -30,7 +30,7 @@ def timestep_embedding(t: torch.Tensor, dim: int, max_period: int = 10000) -> to
 
 
 def modulate(x: torch.Tensor, shift: torch.Tensor, scale: torch.Tensor) -> torch.Tensor:
-    # x: (B,N,D); shift/scale: (B,D) -> broadcast over the N tokens
+    """x: (B,N,D); shift/scale: (B,D) -> adaLN modulation, broadcast over N."""
     return x * (1 + scale.unsqueeze(1)) + shift.unsqueeze(1)
 
 
@@ -51,6 +51,7 @@ class DiTBlock(nn.Module):
         self.adaLN = nn.Sequential(nn.SiLU(), nn.Linear(hidden, 6 * hidden))
 
     def forward(self, x: torch.Tensor, c: torch.Tensor) -> torch.Tensor:
+        """x: (B,N,D) tokens, c: (B,hidden) conditioning -> (B,N,D)."""
         shift_msa, scale_msa, gate_msa, shift_mlp, scale_mlp, gate_mlp = \
             self.adaLN(c).chunk(6, dim=-1)
         h = modulate(self.norm1(x), shift_msa, scale_msa)
@@ -71,12 +72,18 @@ class FinalLayer(nn.Module):
         self.adaLN = nn.Sequential(nn.SiLU(), nn.Linear(hidden, 2 * hidden))
 
     def forward(self, x: torch.Tensor, c: torch.Tensor) -> torch.Tensor:
+        """x: (B,N,hidden), c: (B,hidden) conditioning -> (B,N,out_dim)."""
         shift, scale = self.adaLN(c).chunk(2, dim=-1)
         return self.linear(modulate(self.norm(x), shift, scale))
 
 
 @dataclass
 class GDMConfig:
+    """Drafter architecture and conditioning, stored in every checkpoint.
+
+    The defaults are the configuration the paper reports. `goal_cond` is the
+    ablation that also conditions the denoiser on the episode goal latent.
+    """
     latent_dim: int = 192
     n_future: int = 3      # N: number of future subgoals predicted
     wg: int = 1            # context window (conditioning subgoals); paper uses WG=1
@@ -132,6 +139,10 @@ class GDM(nn.Module):
 
     def forward(self, x_noised: torch.Tensor, cond: torch.Tensor, t: torch.Tensor,
                 goal: torch.Tensor | None = None) -> torch.Tensor:
+        """Predict the noise in `x_noised` from the context latent and timestep.
+
+        `goal` is read only when the config sets goal_cond, and is required then.
+        """
         if cond.ndim == 3:                      # (B, wg, D) -> (B, wg*D)
             cond = cond.reshape(cond.shape[0], -1)
         x = self.x_embed(x_noised) + self.pos_embed
@@ -198,6 +209,7 @@ class GaussianDiffusion:
         self.device = device
 
     def to(self, device):
+        """Move the schedule buffers to `device` and return self."""
         for k in ("betas", "alphas", "alphas_cumprod", "alphas_cumprod_prev",
                   "sqrt_acp", "sqrt_one_minus_acp"):
             setattr(self, k, getattr(self, k).to(device))
@@ -347,6 +359,11 @@ class GDMPlanner:
         self.goal_cond = getattr(model.cfg, "goal_cond", False)
 
     def standardize(self, z_native: torch.Tensor) -> torch.Tensor:
+        """Native encoder latents -> the normalized space the model trains in.
+
+        Follows the checkpoint's `normalization`: per-dim standardize, or minmax
+        onto [-1, 1].
+        """
         z = z_native.to(self.device)
         if self.normalization == "minmax":
             rng = (self.stat_b - self.stat_a).clamp_min(1e-6)
@@ -354,6 +371,7 @@ class GDMPlanner:
         return (z - self.stat_a) / self.stat_b
 
     def unstandardize(self, z_std: torch.Tensor) -> torch.Tensor:
+        """Inverse of `standardize`, returning native encoder latents."""
         if self.normalization == "minmax":
             return (z_std + 1.0) / 2.0 * (self.stat_b - self.stat_a) + self.stat_a
         return z_std * self.stat_b + self.stat_a
@@ -414,6 +432,12 @@ def save_gdm(path, model: GDM, diffusion: GaussianDiffusion, stat_a: torch.Tenso
 
 
 def load_gdm_planner(path, device="cpu") -> GDMPlanner:
+    """Load a `save_gdm` checkpoint into a ready GDMPlanner on `device`.
+
+    Diffusion knobs and normalization stats that older checkpoints predate
+    fall back to the eps/linear/no-SNR/DDIM standardize settings they were
+    trained under.
+    """
     ckpt = torch.load(path, map_location="cpu", weights_only=False)
     cfg = GDMConfig(**ckpt["gdm_config"])
     model = GDM(cfg)
@@ -433,4 +457,5 @@ def load_gdm_planner(path, device="cpu") -> GDMPlanner:
 
 
 def count_params(model: nn.Module) -> int:
+    """Total number of parameters in `model`."""
     return sum(p.numel() for p in model.parameters())

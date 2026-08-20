@@ -86,6 +86,7 @@ class SurveyorGCIDMPolicy:
         self.events = []     # (env, kind, rel) per boundary, filmstrip contract
 
     def set_env(self, env):
+        """Bind the vector env and allocate the per-env block, pointer and route state."""
         self.env = env
         n = getattr(env, "num_envs", 1)
         self._t = np.zeros(n, dtype=np.int64)
@@ -122,6 +123,13 @@ class SurveyorGCIDMPolicy:
 
     @torch.no_grad()
     def get_action(self, info_dict, **kwargs):
+        """Serve one GC-IDM action per env, verifying and redrafting at boundaries.
+
+        Between boundaries this is plain GC-IDM tracking the current waypoint. On
+        a boundary the achieved latent is verified against that waypoint, and the
+        block is served on or redrafted. With `cstar_route` the first step also
+        runs the flat CEM probe that decides the episode's scope.
+        """
         t0 = time.perf_counter()
         n = self.env.num_envs
         frames = self._latest(info_dict["pixels"])

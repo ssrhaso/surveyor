@@ -118,6 +118,7 @@ def _load_local(local_dir: str):
     action_encoder = Embedder(input_dim=ac["input_dim"], emb_dim=ac["emb_dim"])
 
     def mk_mlp(d):
+        """Build one LeWM MLP head from its config block."""
         return MLP(input_dim=d["input_dim"], hidden_dim=d["hidden_dim"],
                    output_dim=d["output_dim"], norm_fn=torch.nn.BatchNorm1d)
 

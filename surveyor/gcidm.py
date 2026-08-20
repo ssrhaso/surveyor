@@ -46,6 +46,11 @@ def sinusoidal_embedding(h: torch.Tensor, dim: int = 64) -> torch.Tensor:
 
 
 class GCIDM(nn.Module):
+    """The paper's network: (z_t, z_goal) trunk, AdaLN-Zero horizon modulation.
+
+    The horizon path is zero-initialised, so training starts from the
+    horizon-agnostic model and learns the modulation from there.
+    """
     def __init__(self, latent_dim: int = 192, action_dim: int = 2, hidden: int = 512,
                  depth: int = 3, dropout: float = 0.1, horizon_dim: int = 64,
                  h_max: int = 50):
@@ -102,10 +107,12 @@ class GCIDM(nn.Module):
 
 
 def count_params(m: nn.Module) -> int:
+    """Total number of parameters in `m`."""
     return sum(p.numel() for p in m.parameters())
 
 
 def save_gcidm(path, model: GCIDM, action_scaler=None, meta=None):
+    """Write weights, architecture config and the action scaler to `path`."""
     torch.save({
         "state": model.state_dict(),
         "cfg": {"latent_dim": model.latent_dim, "action_dim": model.action_dim,
@@ -121,6 +128,7 @@ def save_gcidm(path, model: GCIDM, action_scaler=None, meta=None):
 
 
 def load_gcidm(path, device="cuda"):
+    """Load a `save_gcidm` checkpoint -> (frozen model, action scaler, meta)."""
     ck = torch.load(path, map_location="cpu", weights_only=False)
     cfg = ck["cfg"]
     model = GCIDM(latent_dim=cfg["latent_dim"], action_dim=cfg["action_dim"],
@@ -153,6 +161,7 @@ class GCIDMPolicy:
         self.n_calls = 0          # forward passes = decisions, for the cost column
 
     def set_env(self, env):
+        """Bind the vector env and reset the per-env step counters."""
         self.env = env
         n = getattr(env, "num_envs", 1)
         self._t = np.zeros(n, dtype=np.int64)
@@ -165,6 +174,11 @@ class GCIDMPolicy:
 
     @torch.no_grad()
     def get_action(self, info_dict, **kwargs):
+        """Encode frames and goals, then emit one action per env.
+
+        The only clock the controller reads is steps remaining, clamped at H_max
+        and normalised exactly as in training.
+        """
         n = self.env.num_envs
         frames = self._latest(info_dict["pixels"])
         goals = self._latest(info_dict["goal"])

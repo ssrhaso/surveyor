@@ -149,6 +149,12 @@ class ConfidenceHead(nn.Module):
         return (z - self.mean) / self.std
 
     def logits(self, refined, draft, cond):
+        """Unnormalised per-position confidence, (B,N).
+
+        Scored from the refined and draft blocks, the conditioning latent, their
+        residual and a position embedding, so the head can tell how far into the
+        block each position sits.
+        """
         B, N, D = refined.shape
         r_std = self._std(refined); d_std = self._std(draft)
         c_std = self._std(cond.unsqueeze(1)).expand(B, N, D)
@@ -159,6 +165,11 @@ class ConfidenceHead(nn.Module):
         return self.out(self.trunk(feat)).squeeze(-1)   # (B,N)
 
     def forward(self, refined, draft, cond, temperature=None):
+        """Per-position confidence in [0,1], (B,N).
+
+        `temperature` is a per-position vector, applied to the logits before the
+        sigmoid.
+        """
         lg = self.logits(refined, draft, cond)
         if temperature is not None:
             t = temperature if torch.is_tensor(temperature) else torch.as_tensor(
