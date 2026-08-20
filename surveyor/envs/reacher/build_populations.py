@@ -19,6 +19,7 @@ import h5py
 
 
 def main():
+    """Sample the fixed (episode, start) set and write the episodes file."""
     p = argparse.ArgumentParser()
     p.add_argument("--h5", required=True)
     p.add_argument("--out", required=True)

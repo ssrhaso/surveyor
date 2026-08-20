@@ -33,6 +33,7 @@ def parse_args():
 
 
 def main():
+    """Sample the fixed (episode, start) set and write the episodes file."""
     a = parse_args()
     rng = np.random.default_rng(a.seed)
     max_off = max(a.offsets)

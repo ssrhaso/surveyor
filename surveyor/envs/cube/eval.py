@@ -97,6 +97,7 @@ def parse_args():
 
 
 def img_transform():
+    """ImageNet-normalized 224px transform, from stable_pretraining's stats."""
     import stable_pretraining as spt
     from torchvision.transforms import v2 as transforms
     return transforms.Compose([
@@ -108,6 +109,10 @@ def img_transform():
 
 
 def img_transform_fallback():
+    """`img_transform` without stable_pretraining, for CPU-only hosts.
+
+    The ImageNet constants are inlined, so the two paths normalize alike.
+    """
     from torchvision.transforms import v2 as transforms
     return transforms.Compose([
         transforms.ToImage(),
@@ -118,6 +123,11 @@ def img_transform_fallback():
 
 
 def build_process(dataset, keys):
+    """Fit one StandardScaler per non-pixel column of `dataset`.
+
+    Goal columns reuse their observation's scaler, so a state and the goal it
+    is scored against land in the same units. `action` has no goal twin.
+    """
     from sklearn import preprocessing
     process = {}
     for col in keys:
@@ -134,6 +144,12 @@ def build_process(dataset, keys):
 
 
 def main():
+    """Run one evaluation cell and print its summary.
+
+    The final line is the cell's success rate as a pooled numerator over
+    denominator, so runs that combine seeds sum the counts rather than
+    averaging percentages.
+    """
     args = parse_args()
     if args.subgoal in ("ffjepa", "surveyor", "router+surveyor") and not args.gdm_ckpt:
         raise ValueError(f"--subgoal {args.subgoal} requires --gdm-ckpt")

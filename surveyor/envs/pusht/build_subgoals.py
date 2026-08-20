@@ -50,6 +50,12 @@ def parse_args():
 
 
 def select_episodes(n_total, max_episodes, mode, seed):
+    """Episode indices to encode: all of them, or `max_episodes` under `mode`.
+
+    'head' takes the first, 'spread' an even sweep of the range, 'random' a
+    seeded sample. Subsetting is for smoke runs; the default encodes every
+    episode.
+    """
     if max_episodes is None or max_episodes >= n_total:
         return np.arange(n_total)
     if mode == "head":
@@ -63,6 +69,7 @@ def select_episodes(n_total, max_episodes, mode, seed):
 
 
 def main():
+    """Encode the selected episodes and write the packed subgoal file."""
     args = parse_args()
     t0 = time.time()
 

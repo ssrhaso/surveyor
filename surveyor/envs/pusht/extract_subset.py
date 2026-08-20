@@ -34,6 +34,7 @@ def parse_args():
 
 
 def main():
+    """Copy the selected episodes into a compact h5 and write its episode files."""
     args = parse_args()
     ep_mask = None
     if args.eval_filter != "none":
