@@ -84,8 +84,12 @@ def main():
 
     pool = torch.cat([conds_tr, tgts_tr.reshape(-1, D)], dim=0)
     mean, std = pool.mean(0), pool.std(0).clamp_min(1e-6)
-    stdz = lambda z: (z - mean.to(z.device)) / std.to(z.device)
-    unstd = lambda z: z * std.to(z.device) + mean.to(z.device)
+
+    def stdz(z):
+        return (z - mean.to(z.device)) / std.to(z.device)
+
+    def unstd(z):
+        return z * std.to(z.device) + mean.to(z.device)
 
     model = BlockRegressor(D, args.n_future, args.hid).to(dev)
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr,

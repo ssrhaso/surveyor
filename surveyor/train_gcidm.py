@@ -165,8 +165,10 @@ def main():
         h_norm = torch.clamp(h.float(), max=float(args.h_max)) / float(args.h_max)
         return z_t, z_g, h_norm, a_t
 
-    gen = torch.Generator(device=dev); gen.manual_seed(args.seed)
-    vgen = torch.Generator(device=dev); vgen.manual_seed(args.seed + 1)
+    gen = torch.Generator(device=dev)
+    gen.manual_seed(args.seed)
+    vgen = torch.Generator(device=dev)
+    vgen.manual_seed(args.seed + 1)
     train_pool = torch.from_numpy(train_eps).to(dev)
     val_pool = torch.from_numpy(val_eps).to(dev)
 

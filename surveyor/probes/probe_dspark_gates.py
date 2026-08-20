@@ -100,7 +100,8 @@ def main():
         pixels = f["pixels"]
         rows = []
         for ep, st in pairs:
-            base = int(ep_off[ep]); last = base + int(ep_len[ep]) - 1
+            base = int(ep_off[ep])
+            last = base + int(ep_len[ep]) - 1
             for h in range(H + 1):
                 r = base + int(st) + h * args.stride
                 assert r <= last, f"episode {ep} shorter than its {RUNWAY} runway?"
@@ -122,7 +123,8 @@ def main():
     Z = out.reshape(B, H + 1, D).to(dev)
     print(f"[encode] Z: {tuple(Z.shape)}")
 
-    gen = lambda s: torch.Generator(device=planner.device).manual_seed(int(s))
+    def gen(s):
+        return torch.Generator(device=planner.device).manual_seed(int(s))
     z_cond, z_true = Z[:, 0], Z[:, 1]
     results = {"config": {"ckpt": args.gdm_ckpt, "stride": args.stride, "N": N,
                           "hops": H, "n": B, "seed": args.seed}}
@@ -176,7 +178,8 @@ def main():
         for tau in args.taus:
             h0 = np.zeros(B, dtype=int)          # hop the active block was drafted at
             drafts_used = np.ones(B)
-            pos_seen = np.zeros(N); pos_acc = np.zeros(N)
+            pos_seen = np.zeros(N)
+            pos_acc = np.zeros(N)
             consumed = []
             for h in range(H):
                 j = h - h0                        # 0-based position consumed this hop
@@ -186,7 +189,8 @@ def main():
                 accept = err <= tau
                 for p in range(N):
                     m = (j == p)
-                    pos_seen[p] += m.sum(); pos_acc[p] += (accept & m).sum()
+                    pos_seen[p] += m.sum()
+                    pos_acc[p] += (accept & m).sum()
                 exhausted = (j + 1) >= N
                 redraft = (~accept) | exhausted
                 if h + 1 < H:

@@ -5,8 +5,11 @@ from the DSpark head's training episodes, at a given goal_offset
 (start = ep_len - 1 - offset, matching sample_long). Writes an
 --episodes-file JSON for the PushT eval driver.
 """
-import argparse, json
-import numpy as np, torch, h5py
+import argparse
+import json
+import numpy as np
+import torch
+import h5py
 
 p = argparse.ArgumentParser()
 p.add_argument("--chains", default="real_chains_n3.pt")

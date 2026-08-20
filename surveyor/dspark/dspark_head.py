@@ -143,7 +143,8 @@ class ConfidenceHead(nn.Module):
         self.out = nn.Linear(hidden, 1)
         for m in self.modules():
             if isinstance(m, nn.Linear):
-                nn.init.xavier_uniform_(m.weight); nn.init.zeros_(m.bias)
+                nn.init.xavier_uniform_(m.weight)
+                nn.init.zeros_(m.bias)
 
     def _std(self, z):
         return (z - self.mean) / self.std
@@ -156,7 +157,8 @@ class ConfidenceHead(nn.Module):
         block each position sits.
         """
         B, N, D = refined.shape
-        r_std = self._std(refined); d_std = self._std(draft)
+        r_std = self._std(refined)
+        d_std = self._std(draft)
         c_std = self._std(cond.unsqueeze(1)).expand(B, N, D)
         resid = r_std - d_std
         pos = torch.arange(N, device=refined.device)

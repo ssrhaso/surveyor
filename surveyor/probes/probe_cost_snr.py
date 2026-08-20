@@ -144,7 +144,8 @@ def main():
             sl = slice(i, i + args.batch_windows)
             zT = rollout_terminal(model, z_cond[sl], cands[sl], args.device)  # (b, K+2, D)
             c = ((zT - z_sg[S][sl].unsqueeze(1)) ** 2).sum(-1)               # (b, K+2)
-            costs.append(c); terms.append(zT)
+            costs.append(c)
+            terms.append(zT)
         cost = torch.cat(costs)   # (B, K+2)
         zT = torch.cat(terms)     # (B, K+2, D)
 

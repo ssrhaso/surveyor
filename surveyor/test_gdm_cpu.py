@@ -81,7 +81,9 @@ def test_qsample_and_loss_drops():
     for _step in range(200):
         # fixed (t, noise) per step would be ideal but random is fine over 200 steps
         loss = diff.p_losses(model, tgt, cond)
-        opt.zero_grad(); loss.backward(); opt.step()
+        opt.zero_grad()
+        loss.backward()
+        opt.step()
         losses.append(loss.detach().item())
     first = np.mean(losses[:10])
     last = np.mean(losses[-10:])
@@ -213,7 +215,9 @@ def test_v_param_trains_and_samples():
     losses = []
     for _ in range(200):
         loss = diff.p_losses(model, tgt, cond)
-        opt.zero_grad(); loss.backward(); opt.step()
+        opt.zero_grad()
+        loss.backward()
+        opt.step()
         losses.append(loss.item())
     assert np.mean(losses[-10:]) < np.mean(losses[:10]), "v-loss did not drop"
     model.eval()
@@ -237,7 +241,8 @@ def test_cosine_schedule_and_min_snr():
     cfg = GDMConfig(latent_dim=D, n_future=N, wg=1, hidden=64, depth=2, heads=4)
     model = GDM(cfg)
     torch.manual_seed(3)
-    cond = torch.randn(32, D); tgt = torch.randn(32, N, D)
+    cond = torch.randn(32, D)
+    tgt = torch.randn(32, N, D)
     for param in ("eps", "v"):
         d = GaussianDiffusion(timesteps=1000, parameterization=param,
                               min_snr_gamma=5.0, device=DEV)

@@ -63,7 +63,8 @@ def main():
         pixels = f["pixels"]
         cond_rows, target_rows = [], [[] for _ in range(N)]
         for ep, st in pairs:
-            base = int(ep_off[ep]); last = base + int(ep_len[ep]) - 1
+            base = int(ep_off[ep])
+            last = base + int(ep_len[ep]) - 1
             cond_rows.append(base + int(st))
             for k in range(N):
                 row = base + int(st) + (k + 1) * args.stride

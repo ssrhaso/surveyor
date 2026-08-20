@@ -67,7 +67,8 @@ def load_traces(pattern):
         t = a.get("goal_offset")
         if a.get("eval_budget") != 2 * t:      # 2t regime only (b50 = other paper axis)
             continue
-        eps = tuple(r["episodes_idx"]); starts = tuple(r["start_steps"])
+        eps = tuple(r["episodes_idx"])
+        starts = tuple(r["start_steps"])
         key = (hash((eps, starts)), t)
         succ = np.asarray(r["successes"], dtype=float)
         arm = None
@@ -157,7 +158,8 @@ def main():
         z_goal = z_at(eps, starts + t)
         h = rel(z0, z_goal)
         c_star, _ = flat_plan_c_star(lewm, cost_model, z0, z_goal, args)
-        gen = torch.Generator(device=planner.device); gen.manual_seed(42)
+        gen = torch.Generator(device=planner.device)
+        gen.manual_seed(42)
         block = planner.sample_sequence(z0.to(planner.device), n_steps=args.gdm_steps,
                                         generator=gen,
                                         z_goal_native=z_goal.to(planner.device))

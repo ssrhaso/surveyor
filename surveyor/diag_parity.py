@@ -33,9 +33,11 @@ def main():
     model = encoder.load_lewm(source=args.source, encoder_id=args.encoder_id,
                               local_dir=args.local_dir, swm_src=args.swm_src, device=dev)
     try:
-        tf = img_transform(); print("[tf] stable_pretraining ImageNet stats")
+        tf = img_transform()
+        print("[tf] stable_pretraining ImageNet stats")
     except Exception:
-        tf = img_transform_fallback(); print("[tf] fallback ImageNet stats")
+        tf = img_transform_fallback()
+        print("[tf] fallback ImageNet stats")
 
     # decisive: do the harness (spt) stats match encode_frames' hardcoded stats?
     print(f"[stats] encode_frames mean={encoder._IMAGENET_MEAN.flatten().tolist()} "
@@ -57,7 +59,9 @@ def main():
 
     # (0) sampling-identity check vs baseline eval.py
     with h5py.File(args.h5, "r") as f:
-        episode_idx = f["episode_idx"][:]; step_idx = f["step_idx"][:]; ep_len = f["ep_len"][:]
+        episode_idx = f["episode_idx"][:]
+        step_idx = f["step_idx"][:]
+        ep_len = f["ep_len"][:]
     max_start_per_row = ep_len[episode_idx] - 25 - 1
     valid_indices = np.nonzero(step_idx <= max_start_per_row)[0]
     g = np.random.default_rng(args.seed)
@@ -71,7 +75,8 @@ def main():
 
     # (1) latent parity over all eval goal frames
     with h5py.File(args.h5, "r") as f:
-        ep_off = f["ep_offset"][:]; pixels = f["pixels"]
+        ep_off = f["ep_offset"][:]
+        pixels = f["pixels"]
         diffs = []
         first = {}
         for i, (ep, st) in enumerate(zip(eps, starts, strict=True)):
@@ -109,7 +114,8 @@ def main():
         print(f"   cost_mine[:4]={[round(x,4) for x in cm[:4].tolist()]}")
         print(f"   max|diff|={(cb - cm).abs().max().item():.3e}  argsort_match={order_match}")
     except Exception as e:
-        import traceback; traceback.print_exc()
+        import traceback
+        traceback.print_exc()
         print("[COST parity] installed get_cost raised (expected on the broken source checkout):", repr(e))
 
 

@@ -10,11 +10,13 @@ DATA = os.environ.get("DINOWM_DATA", os.path.expanduser("~/data/dinowm"))
 sys.path.insert(0, REPO)
 os.chdir(REPO)
 
-import numpy as np
-import torch
-from omegaconf import OmegaConf
-from pathlib import Path
-import hydra
+# Below sys.path/chdir on purpose: hydra and the repo's own modules only
+# resolve once REPO is on the path and is the working directory.
+import numpy as np  # noqa: E402
+import torch  # noqa: E402
+from omegaconf import OmegaConf  # noqa: E402
+from pathlib import Path  # noqa: E402
+import hydra  # noqa: E402
 
 torch.hub.load("facebookresearch/dinov2", "dinov2_vits14")
 

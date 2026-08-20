@@ -726,9 +726,11 @@ def load_dspark_heads(path, device):
     ck = torch.load(path, map_location="cpu", weights_only=False)
     D = ck["dim"]
     head = DSparkHead(D, ck["mean"], ck["std"], mode=ck.get("mode", "causal"))
-    head.load_state_dict(ck["head_state"]); head.to(device).eval()
+    head.load_state_dict(ck["head_state"])
+    head.to(device).eval()
     conf = ConfidenceHead(D, ck["mean"], ck["std"])
-    conf.load_state_dict(ck["conf_state"]); conf.to(device).eval()
+    conf.load_state_dict(ck["conf_state"])
+    conf.to(device).eval()
     return head, conf, ck
 
 
@@ -802,7 +804,8 @@ class DSparkSubgoalSource:
             blk = self.planner.sample_sequence(cond, n_steps=self.n_steps,
                                                generator=self._gen,
                                                z_goal_native=z_goal)
-            blocks.append(blk); cond = blk[:, -1]
+            blocks.append(blk)
+            cond = blk[:, -1]
         return torch.cat(blocks, dim=1)[:, :self.block_n]
 
     @torch.no_grad()
@@ -868,7 +871,8 @@ def build_oracle_table(h5_path, model, episodes_idx, start_steps, goal_offset,
         per_env_rows = []
         flat_rows = []
         for ep, start in zip(episodes_idx, start_steps, strict=True):
-            base = int(ep_off[ep]); last = base + int(ep_len[ep]) - 1
+            base = int(ep_off[ep])
+            last = base + int(ep_len[ep]) - 1
             rows = [min(base + int(start) + k * stride, last) for k in range(n_sg)]
             per_env_rows.append(rows)
             flat_rows.extend(rows)

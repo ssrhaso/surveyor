@@ -120,7 +120,9 @@ def teacher_forced(planner, cond_native, tgt_native, ts, gen_fn):
 def sample_short(h5, num_eval, goal_offset, seed):
     import h5py
     with h5py.File(h5, "r") as f:
-        episode_idx = f["episode_idx"][:]; step_idx = f["step_idx"][:]; ep_len = f["ep_len"][:]
+        episode_idx = f["episode_idx"][:]
+        step_idx = f["step_idx"][:]
+        ep_len = f["ep_len"][:]
     ep_len_per_row = ep_len[episode_idx]
     valid = np.nonzero(step_idx <= ep_len_per_row - goal_offset - 1)[0]
     g = np.random.default_rng(seed)
@@ -145,12 +147,15 @@ def main():
           f"head={sum(p.numel() for p in planner.model.parameters())/1e6:.1f}M")
     print("[GATE] A = teacher-forced x0_relerr (math check only). "
           "B = SAMPLED Probe B rel_err/cos_move (the fidelity arbiter).")
-    gen = lambda: torch.Generator(device=planner.device).manual_seed(args.seed)
+
+    def gen():
+        return torch.Generator(device=planner.device).manual_seed(args.seed)
 
     # ---- Probe A: in-distribution (stride-aligned training conditions) ----
     blob = torch.load(args.subgoals, map_location="cpu", weights_only=False)
     latents = blob["latents"].float()
-    lengths = blob["lengths"].numpy(); offsets = blob["offsets"].numpy()
+    lengths = blob["lengths"].numpy()
+    offsets = blob["offsets"].numpy()
     mask = blob["in_5deg"].numpy().astype(bool) if args.mask == "5" else np.ones(len(lengths), bool)
     rng = np.random.default_rng(args.seed)
     N = planner.cfg.n_future
@@ -163,7 +168,8 @@ def main():
         m = int(rng.integers(0, L - 1))                   # m in [0, L-2]
         idx = [off + min(m + k * args.subgoal_step, last)  # clamp (== train_gdm)
                for k in range(1, N + 1)]
-        conds_a.append(latents[off + m]); tgts_a.append(latents[idx])
+        conds_a.append(latents[off + m])
+        tgts_a.append(latents[idx])
     cond_a = torch.stack(conds_a).to(args.device)          # (M, D)
     tgt_a = torch.stack(tgts_a).to(args.device)            # (M, N, D)
     true_a = tgt_a[:, 0]                                    # immediate-next subgoal
@@ -186,17 +192,21 @@ def main():
                               local_dir=args.local_dir, swm_src=args.swm_src, device=args.device)
     episodes_idx, start_steps = sample_short(args.h5, args.n_probe, args.stride, args.seed)
     with h5py.File(args.h5, "r") as f:
-        ep_off = f["ep_offset"][:]; ep_len = f["ep_len"][:]; pixels = f["pixels"]
+        ep_off = f["ep_offset"][:]
+        ep_len = f["ep_len"][:]
+        pixels = f["pixels"]
         cond_rows, true_rows, fin_rows = [], [], []
         for ep, st in zip(episodes_idx, start_steps, strict=True):
-            base = int(ep_off[ep]); last = base + int(ep_len[ep]) - 1
+            base = int(ep_off[ep])
+            last = base + int(ep_len[ep]) - 1
             cond_rows.append(base + int(st))
             true_rows.append(min(base + int(st) + args.stride, last))
             fin_rows.append(last)
         allr = np.array(cond_rows + true_rows)
         order = np.argsort(allr, kind="stable")
         lat = encoder.encode_frames(model, pixels[allr[order]], device=args.device)
-        out = torch.empty_like(lat); out[order] = lat
+        out = torch.empty_like(lat)
+        out[order] = lat
         # h5py fancy indexing needs STRICTLY increasing rows; fin_rows has
         # duplicates when the same episode is drawn twice (different starts).
         fin_rows = np.array(fin_rows)
