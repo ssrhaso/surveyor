@@ -3,6 +3,11 @@
 Code for *SURVEYOR: Certified Speculative Plan Consumption for Latent
 World-Model Planning*.
 
+<p align="center">
+  <img src="docs/media/surveyor_overview.gif" width="900"
+       alt="Animated overview of SURVEYOR: draft a subgoal block once, verify achieved latents against the plan, reuse aligned waypoints for free, and re-draft from reality on divergence.">
+</p>
+
 A drafter proposes a block of `N` subgoal latents once. At every replan
 boundary the achieved latent is verified against the waypoint just pursued:
 within a relative distance `tau` the next pre-drafted waypoint is served at no

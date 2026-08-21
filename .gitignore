@@ -47,7 +47,9 @@ __pycache__/
 PLAN.md
 DIRECTION_*.md
 RESULTS_*.md
-/docs/
+/docs/*
+!/docs/media/
+!/docs/media/*
 
 # V-JEPA 2 scratch: the upstream clone, its job wrappers and encoded latents.
 /vjepa2/
