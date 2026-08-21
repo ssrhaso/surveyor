@@ -1,14 +1,7 @@
-# Dependency specification for the LeWM-substrate experiments (PushT, Reacher,
-# Cube, Two-Room). Validated by a clean-room rebuild into a fresh virtual
-# environment, which is what caught the four packages below that had previously
-# been installed ad hoc: validated by a clean-room rebuild.
-#
-#   python -m venv .venv && . .venv/bin/activate
+# LeWM-substrate experiments (PushT, Reacher, Cube, Two-Room); validated by a
+# clean-room rebuild. Install torch and torchvision first from the wheel index
+# matching the local CUDA version (unpinned here so this file stays portable):
 #   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
-#   pip install -r requirements.txt
-#
-# Install torch and torchvision first from the wheel index matching the local
-# CUDA version; they are listed here unpinned so this file stays portable.
 torch
 torchvision
 
@@ -22,8 +15,8 @@ h5py
 hdf5plugin
 scikit-learn
 
-# environments: dm_control and mujoco for Reacher, pygame/pymunk/shapely for
-# PushT, ogbench for Cube. Two-Room ships with stable-worldmodel.
+# environments: dm_control/mujoco (Reacher), pygame/pymunk/shapely (PushT),
+# ogbench (Cube); Two-Room ships with stable-worldmodel
 dm_control
 mujoco
 pygame
@@ -31,13 +24,13 @@ pymunk
 shapely
 ogbench
 
-# rendering for the qualitative figures
+# qualitative figures and README media
 imageio
 imageio-ffmpeg
+Pillow
 
-# stable-worldmodel pulls in opencv-python, which needs a display; on a headless
-# machine replace it after installing the above:
-#   pip uninstall -y opencv-python && pip install --force-reinstall opencv-python-headless
+# stable-worldmodel pulls in opencv-python, which needs a display; on a
+# headless machine force-reinstall opencv-python-headless after installing
 opencv-python-headless
 
 # The DINO-WM and V-JEPA 2 transplants (surveyor/dinowm, surveyor/vjepa2) run
