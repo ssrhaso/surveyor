@@ -1,12 +1,11 @@
 """Render the animated SURVEYOR overview used in the README.
 
-Four acts: a title card, an animated run of the mechanism (the drafted plan
-drawn as a dashed line inside a shaded tolerance tube of half-width tau;
-reality traces a solid path inside it, waypoints are served free while the
-path stays in the tube, and the one excursion beyond tau triggers a
-re-draft anchored where reality actually is), a calibration/routing card,
-and a results card. Colors are the paper's figure palette so the README and
-the paper read as one hand.
+Four acts: a title card, an animated run of the mechanism (the drafted plan is
+a dashed line inside a shaded tolerance tube of half-width tau, reality traces
+a solid path inside it, waypoints are served free while the path stays in the
+tube, and the one excursion beyond tau triggers a re-draft anchored where
+reality actually is), a calibration/routing card and a results card. Colors are
+the paper's figure palette so the README and the paper read as one hand.
 
 Run from the repository root:
 
@@ -47,9 +46,8 @@ _FONT_DIR = Path(__file__).with_name("fonts")
 
 
 def _font_candidates(bold: bool) -> list[str]:
-    # TeX Gyre Heros (vendored beside this script) is the free Helvetica:
-    # URW Nimbus Sans, metrically Helvetica-compatible, GUST license. The
-    # system faces below are fallbacks only.
+    # TeX Gyre Heros (vendored beside this script) is the free Helvetica: URW
+    # Nimbus Sans, metrically compatible, GUST license. The rest are fallbacks.
     return (
         [
             str(_FONT_DIR / "texgyreheros-bold.otf"),
@@ -179,9 +177,7 @@ def dashed_path(draw, pts, color, width=1.6, dash=9.0, gap=6.5, alpha=1.0):
                 pen_down = not pen_down
 
 
-# ======================================================================
-# Act 1 / title card
-# ======================================================================
+# ---- Act 1 / title card ----
 
 def title_slide(visible: float) -> Image.Image:
     image, draw = canvas("OVERVIEW")
@@ -224,9 +220,7 @@ def title_slide(visible: float) -> Image.Image:
     return image
 
 
-# ======================================================================
-# Act 2 / the mechanism: a tolerance tube around the drafted plan
-# ======================================================================
+# ---- Act 2 / the mechanism: a tolerance tube around the drafted plan ----
 
 PLAN_Y = 385          # nominal plan height
 TUBE = 50             # tau, in pixels: tube half-width
@@ -573,9 +567,7 @@ def mechanism_frames() -> tuple[list[Image.Image], list[int]]:
     return frames, durations
 
 
-# ======================================================================
-# Act 3 / measured constants + the router
-# ======================================================================
+# ---- Act 3 / measured constants + the router ----
 
 def constants_slide(visible: float) -> Image.Image:
     image, draw = canvas("CALIBRATION  +  ROUTING")
@@ -614,9 +606,7 @@ def constants_slide(visible: float) -> Image.Image:
     return image
 
 
-# ======================================================================
-# Act 4 / results card
-# ======================================================================
+# ---- Act 4 / results card ----
 
 def results_slide(visible: float) -> Image.Image:
     image, draw = canvas("RESULTS")
@@ -640,9 +630,7 @@ def results_slide(visible: float) -> Image.Image:
     return image
 
 
-# ======================================================================
-# assembly
-# ======================================================================
+# ---- assembly ----
 
 SlideRenderer = Callable[[float], Image.Image]
 

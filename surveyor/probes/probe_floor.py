@@ -78,11 +78,10 @@ def dist_stats(x: np.ndarray) -> dict:
 def encode_rows(model, pixels, rows, device, batch_size, encode_fn=None):
     """Encode h5 pixel rows (any order, duplicates ok); returns (len(rows), D).
 
-    h5py fancy indexing requires STRICTLY increasing indices: unique-ify,
-    encode each row once, scatter back through the inverse map.
-    encode_fn defaults to the LeWM path; --verify-space dino passes
-    paired.encode_frames_dino so floors are measured in the paired
-    verifier's exact serving space."""
+    h5py fancy indexing requires STRICTLY increasing indices: unique-ify, encode
+    each row once, scatter back through the inverse map. encode_fn defaults to
+    the LeWM path; --verify-space dino passes paired.encode_frames_dino so
+    floors are measured in the paired verifier's serving space."""
     fn = encode_fn or encoder.encode_frames
     rows = np.asarray(rows)
     uniq, inv = np.unique(rows, return_inverse=True)
@@ -108,12 +107,10 @@ def load_states(f, env):
     if env == "cube":
         # FULL-SCENE criterion-equivalence. The benchmark scores only the cube
         # (<=0.04 m, cube_env._compute_successes), but the LeWM encoder sees the
-        # whole arm, so matching on the cube ALONE pairs visually different frames
-        # (cube fixed, arm anywhere) and inflates the measured floor ~10x. We
-        # instead require the cube AND the end-effector (the visually dominant,
-        # task-relevant arm state) to match, both at the benchmark's 0.04 m scale,
-        # so equivalent frames actually look alike; the floor then measures
-        # encoder resolution, not task-irrelevant arm variation.
+        # whole arm, so matching on the cube ALONE pairs visually different
+        # frames and inflates the measured floor ~10x. Requiring the cube AND
+        # the end-effector to match, both at the benchmark's 0.04 m scale, makes
+        # the floor measure encoder resolution rather than arm variation.
         assert "privileged_block_0_pos" in f and "proprio_effector_pos" in f, \
             f"cube needs block+effector pos (keys: {list(f.keys())})"
         blk = f["privileged_block_0_pos"][:]        # (N,3)

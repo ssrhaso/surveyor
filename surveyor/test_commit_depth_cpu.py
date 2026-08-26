@@ -1,24 +1,21 @@
 """CPU test for blind fixed-depth commitment: does --commit-k actually engage?
 
-This exists because of a real failure. Job 2331836 swept `d in {1,2,3}` by
-passing `--commit fixed --commit-k D` alongside `--subgoal specaccept`, but
-those flags are read only by DSparkSubgoalSource, which is built only under
-`--subgoal dspark`. They were silently ignored: all fifteen tasks ran the plain
-accept rule and reported call ratios of .605/.608/.611 where depth 1 must be
-1.000 and depth 3 about 1/3. Fifteen tasks were three mislabelled replicas of
-one configuration, and nothing failed loudly. It was caught only by noticing
-that the ratio did not move across settings.
+This exists because of a real failure. Job 2331836 swept `d in {1,2,3}` with
+`--commit fixed --commit-k D` alongside `--subgoal specaccept`, but those flags
+are read only by DSparkSubgoalSource, built only under `--subgoal dspark`. All
+fifteen tasks silently ran the plain accept rule and reported call ratios near
+.61 where depth 1 must be 1.000 and depth 3 about 1/3: three mislabelled
+replicas of one configuration, caught only by noticing the ratio never moved.
 
 The invariant that would have caught it immediately: under fixed-depth
 commitment, one draft serves exactly d boundaries, so
 
     redraft / advance  ==  1 / d      and      mean_commit_depth == d
 
-exactly, with no dependence on the environment, the drafter's quality, or the
-episode population. That is asserted here on synthetic tensors, so it runs
-without a GPU, the frozen LeWM encoder, an h5, or stable_worldmodel, and it
-covers the accounting for both env drivers, which construct this same
-env-agnostic source with the same arguments.
+exactly, independent of environment, drafter quality and episode population.
+It is asserted here on synthetic tensors, so it runs without a GPU, the frozen
+LeWM encoder, an h5 or stable_worldmodel, and it covers the accounting for both
+env drivers, which build this same env-agnostic source the same way.
 
 See the rate-transfer pre-registration, Extension A and its voided run.
 """
@@ -67,11 +64,10 @@ def test_goal_conditioned_drafter_is_served_a_goal():
     """Reacher's drafter is goal-conditioned where PushT's is goal-free, and the
     drafter asserts outright if goal_cond=True and no goal latent reaches it.
     This source hardcoded needs_goal=False, so the Reacher fixed-depth sweep
-    died on `goal_cond=True but no goal latent passed` at the first draft.
+    died at the first draft.
 
-    Pins both halves of the fix: needs_goal now follows the planner, and the
-    goal actually reaches sample_sequence (a goal-conditioned draft must run at
-    all, and must still obey the depth accounting)."""
+    Pins both halves of the fix: needs_goal follows the planner, and the goal
+    actually reaches sample_sequence while the depth accounting still holds."""
     n_envs, n_bounds, d = 4, 9, 3
     p = _planner(goal_cond=True)
     assert p.goal_cond is True

@@ -80,16 +80,13 @@ def teacher_forced(planner, cond_native, tgt_native, ts, gen_fn):
     parameterization, and measure recovery. Isolates the model+schedule math
     from the sampling chain.
 
-    cond_native: (M,D); tgt_native: (M,N,D) (the true future subgoal sequence).
-    Reports, per t: pred_mse (model-space residual: eps_mse for eps, v_mse for v;
-    -> 0 = perfect, predict-zero baseline = 1.0) and x0 rel_err over the full
-    N-seq AND the immediate-next subgoal [:,0].
+    cond_native: (M,D); tgt_native: (M,N,D). Reports, per t: pred_mse (eps_mse
+    for eps, v_mse for v; 0 = perfect, predict-zero baseline = 1.0) and x0
+    rel_err over the full N-seq AND the immediate-next subgoal [:,0].
 
-    GATE A caveat: for the v parameterization the x0 <- (x_t, v) map uses bounded
-    coefficients, so a flat-low x0_relerr across ALL t is TRUE BY CONSTRUCTION
-    once the v_mse is small; it only confirms the math is wired correctly, NOT
-    that sampled fidelity improved. The arbiter for "did it help" is GATE B
-    (SAMPLED Probe B rel_err / cos_move below), never this curve.
+    This curve is GATE A only: under v, flat-low x0_relerr is true by
+    construction once v_mse is small, so it confirms the math is wired, not that
+    sampled fidelity improved. GATE B (sampled Probe B below) is the arbiter.
     """
     diff = planner.diffusion
     cond_s = planner.standardize(cond_native)              # (M,D)

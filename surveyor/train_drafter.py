@@ -112,22 +112,22 @@ def parse_args():
 def build_pairs(latents, lengths, offsets, mask, n_future, window_rule, step=1,
                 goal_rule="final", goal_gap=None, goal_gap_max=None):
     """Build (condition, target) index pairs across all masked episodes:
-    condition z[m], targets [z[m+step], ..., z[m+N*step]]. On a dense file a
-    stride-size step gives sliding conditions with full phase coverage, which
-    is what the closed loop feeds. goal_rule (goal-conditioned training only):
-    "final" uses the episode's last latent; "window" uses a hindsight goal at
-    m+gap with targets clamped at the goal (gap sampled per pair when
-    goal_gap_max is set; deterministic per seed). Returns float32 conds (M,D)
+    condition z[m], targets [z[m+step], ..., z[m+N*step]].
+
+    On a dense file a stride-size step gives sliding conditions with full phase
+    coverage, which is what the closed loop feeds. goal_rule (goal-conditioned
+    training only): "final" uses the episode's last latent, "window" a hindsight
+    goal at m+gap with targets clamped at the goal (gap sampled per pair when
+    goal_gap_max is set, deterministic per seed). Returns float32 conds (M,D)
     and targets (M,N,D) in native encoder space.
     """
     D = latents.shape[1]
     gap = goal_gap if goal_gap is not None else n_future * step
-    # Two-pass, preallocated build. The original append-and-stack version held
-    # ~1.5M small tensors plus full-size stacks simultaneously, which blew the
-    # 20GB per-session cgroup cap on shared boxes when trainers ran in
-    # parallel. Pass 1 counts pairs (consuming NO RNG, so the per-pair sampled
-    # gaps in pass 2 replay in exactly the order the original produced);
-    # pass 2 fills preallocated tensors in place. Identical outputs.
+    # Two-pass, preallocated build. Append-and-stack held ~1.5M small tensors
+    # plus full-size stacks at once and blew the 20GB per-session cgroup cap
+    # when trainers ran in parallel. Pass 1 counts pairs consuming NO RNG, so
+    # pass 2's sampled gaps replay in the original order; pass 2 fills
+    # preallocated tensors in place. Identical outputs.
     n_eps_used = 0
     M = 0
     for i in range(len(lengths)):
@@ -287,10 +287,9 @@ def main():
         print(f"[sched] warmup_cosine: total_steps={total_steps} warmup={warmup_steps} "
               f"peak_lr={args.lr:.1e} -> 0 (eta_min)")
     # EMA of weights. Cache live references to the float tensors once and update
-    # them with fused _foreach ops; the old per-iter `model.state_dict()` loop
-    # launched ~2 kernels per tensor (hundreds/iter), which dwarfed the tiny
-    # batch-8 forward/backward. GDM has no non-float buffers, so float-only EMA
-    # is exact (math identical to ema*decay + param*(1-decay)).
+    # them with fused _foreach ops; the per-iter `model.state_dict()` loop it
+    # replaced launched ~2 kernels per tensor, dwarfing the batch-8
+    # forward/backward. GDM has no non-float buffers, so float-only EMA is exact.
     ema = None
     if args.ema_decay and args.ema_decay > 0:
         ema = {k: v.detach().clone() for k, v in model.state_dict().items()}
