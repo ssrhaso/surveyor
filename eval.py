@@ -83,7 +83,7 @@ def run(cfg: DictConfig):
         if col != "action":
             process[f"goal_{col}"] = process[col]
 
-    # -- run evaluation
+    # run evaluation
     policy = cfg.get("policy", "random")
 
     if policy != "random":

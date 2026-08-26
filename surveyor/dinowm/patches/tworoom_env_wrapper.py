@@ -17,7 +17,7 @@ renderer and dynamics against the recorded pixels before any battery runs.
 GOAL SEMANTICS. The env never renders the target (measured: zero green pixels
 in the data), which is what made TwoRoom ill-posed for goal-free drafting on
 LeWM. DINO-WM plans toward a goal IMAGE, and under goal_source='random_state'
-that image is this env rendered with the AGENT AT the goal position -- so the
+that image is this env rendered with the AGENT AT the goal position, so the
 destination is fully observable in obs_g and the task is well posed here. The
 init/goal pair is drawn in OPPOSITE rooms, matching the dataset (the env's own
 _constrain_target_by_min_steps encodes the same intent).
@@ -257,7 +257,7 @@ class TwoRoomEnvWrapper(gym.Env):
         return img
 
     def _render_agent(self, agent_pos):
-        """(H, W, C) uint8 -- the format dino_wm's Preprocessor expects."""
+        """(H, W, C) uint8, the format dino_wm's Preprocessor expects."""
         alpha = self._gaussian_dot(agent_pos, AGENT_RADIUS).clamp(0, 1)
         out = self._base_img.to(torch.float32)
         for c in range(3):

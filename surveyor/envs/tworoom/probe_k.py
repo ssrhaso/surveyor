@@ -11,7 +11,7 @@ DINOv2 half, where tau lives):
 
 DERIVATION RULE (same as pusht 3 / reacher 8 / cube 3): k* = the smallest k
 whose bias-to-k50 p50 is below the criterion floor p50 (0.098 here, from the
-gap probe) -- i.e. the sampler's remaining bias is below what the verifier
+gap probe): the sampler's remaining bias is then below what the verifier
 can resolve, so more steps cannot change any accept decision. Deriving k
 changes NFE/draft, not SR; a confirm run at k* completes the faithful row.
 """

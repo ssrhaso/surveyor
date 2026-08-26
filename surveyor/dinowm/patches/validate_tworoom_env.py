@@ -4,13 +4,13 @@ Anchors the vendored TwoRoom eval env against the recorded dataset BEFORE any
 closed-loop cell runs (the cube lesson: never trust a number from an
 un-anchored substrate). Four checks:
 
-  R  renderer   -- render at each recorded agent position, compare pixel-wise
-                   against the stored frame from tworoom.h5
-  D  dynamics   -- (pos_t, action_t) -> pos_{t+1} must reproduce the recording,
-                   including wall/door collisions and border clamping
-  A  actions    -- recorded action range (confirms the [-1,1] x speed contract)
-  P  population -- opposite-room fraction and door-routed path length in the
-                   data, which is what sample_random_init_goal_states must match
+  R  renderer   : render at each recorded agent position, compare pixel-wise
+                  against the stored frame from tworoom.h5
+  D  dynamics   : (pos_t, action_t) -> pos_{t+1} must reproduce the recording,
+                  including wall/door collisions and border clamping
+  A  actions    : recorded action range (confirms the [-1,1] x speed contract)
+  P  population : opposite-room fraction and door-routed path length in the
+                  data, which is what sample_random_init_goal_states must match
 
 Exit code 0 only if R and D pass at tolerance; the battery scripts depend on it.
 """

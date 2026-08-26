@@ -1,8 +1,8 @@
 """Filmstrip renderer for --dump-strip npz files (qualitative figures).
 
 One row per episode: [start] [replan frames ...] [final] | [goal].
-Each replan frame shows the achieved state AT that replan boundary -- exactly
-what the verifier saw -- bordered and labeled by the verifier's decision there:
+Each replan frame shows the achieved state AT that replan boundary (exactly
+what the verifier saw), bordered and labeled by the verifier's decision there:
 
     advance  (green  #0ca30c)  waypoint verified, next block position served
     redraft  (red    #d03b3b)  verification rejected (or no block yet)

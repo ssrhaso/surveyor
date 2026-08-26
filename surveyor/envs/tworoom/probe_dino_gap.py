@@ -3,8 +3,8 @@
 Derives the accept threshold for surveyor.paired BEFORE any closed-loop cell,
 in the exact space the verifier will use (encode_frames_dino: ImageNet
 preprocessing, pooled patch tokens). A tau lifted from another encode pass or
-another pooling would not be the same number, so this probe -- not the DINO-WM
-lens checkpoint -- is what the TwoRoom paired arm is calibrated from.
+another pooling would not be the same number, so this probe (not the DINO-WM
+lens checkpoint) is what the TwoRoom paired arm is calibrated from.
 
 Three distance populations, all within cross-room SUCCESSFUL episodes (the
 drafter's own training population) and restricted to the TRAINING episode range

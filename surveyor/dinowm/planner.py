@@ -204,8 +204,8 @@ class SurveyorMPCPlanner(MPCPlanner):
         # draft = production path | goal = D1 tautology (serve the goal grid
         # through the same latent-goal branch) | snap = D2 draft-and-snap
         # (every drafted grid replaced by its nearest REAL cached train grid,
-        # matched in pooled-visual rel L2 -- the TwoRoom snap-bank mechanism,
-        # no new constant)
+        # matched in pooled-visual rel L2, the TwoRoom snap-bank mechanism,
+        # adding no new constant)
         self.spec_serve = str(spec_serve)
         assert self.spec_serve in ("draft", "goal", "snap"), self.spec_serve
         self.bank_grids = None
