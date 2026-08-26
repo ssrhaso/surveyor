@@ -51,7 +51,7 @@ def canonical_target_for(final_state):
     """Build the 7-D canonical goal_state for an episode's final state.
 
     The block pose becomes the canonical target and the agent terms are copied
-    from final_state so they contribute zero, which gives the block-only success
+    from final_state so they contribute zero, giving the block-only success
     criterion under the exact env math."""
     final_state = np.asarray(final_state, dtype=np.float64)
     target = final_state.copy()
@@ -118,7 +118,6 @@ def _load_local(local_dir: str):
     action_encoder = Embedder(input_dim=ac["input_dim"], emb_dim=ac["emb_dim"])
 
     def mk_mlp(d):
-        """Build one LeWM MLP head from its config block."""
         return MLP(input_dim=d["input_dim"], hidden_dim=d["hidden_dim"],
                    output_dim=d["output_dim"], norm_fn=torch.nn.BatchNorm1d)
 

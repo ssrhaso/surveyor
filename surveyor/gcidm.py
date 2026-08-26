@@ -32,10 +32,10 @@ from surveyor import encoder
 
 
 def sinusoidal_embedding(h: torch.Tensor, dim: int = 64) -> torch.Tensor:
-    """Standard sinusoidal features for the scalar normalised horizon in [0,1].
+    """h (B,) in [0,1] -> (B, dim) sinusoidal features.
 
-    h is (B,); returns (B, dim). Scaled by 1000 before the frequency ladder so a
-    quantity confined to the unit interval still spans the spectrum.
+    Scaled by 1000 before the frequency ladder so a quantity confined to the
+    unit interval still spans the spectrum.
     """
     half = dim // 2
     freqs = torch.exp(
@@ -46,11 +46,7 @@ def sinusoidal_embedding(h: torch.Tensor, dim: int = 64) -> torch.Tensor:
 
 
 class GCIDM(nn.Module):
-    """The paper's network: (z_t, z_goal) trunk, AdaLN-Zero horizon modulation.
-
-    The horizon path is zero-initialised, so training starts from the
-    horizon-agnostic model and learns the modulation from there.
-    """
+    """The paper's network: (z_t, z_goal) trunk, AdaLN-Zero horizon modulation."""
     def __init__(self, latent_dim: int = 192, action_dim: int = 2, hidden: int = 512,
                  depth: int = 3, dropout: float = 0.1, horizon_dim: int = 64,
                  h_max: int = 50):
@@ -70,7 +66,7 @@ class GCIDM(nn.Module):
             nn.Linear(horizon_dim, hidden), nn.GELU(), nn.Linear(hidden, hidden),
         )
         # AdaLN-Zero: one projection to (gamma, beta), zero-initialised so the
-        # network begins as the horizon-agnostic model and learns modulation.
+        # network begins as the horizon-agnostic model.
         self.adaln = nn.Linear(hidden, 2 * hidden)
         nn.init.zeros_(self.adaln.weight)
         nn.init.zeros_(self.adaln.bias)
@@ -80,7 +76,7 @@ class GCIDM(nn.Module):
 
         # Paper Appendix F: "Weights are initialized with Kaiming normal; the
         # output head uses a small initialization (sigma=0.01) to start near
-        # zero." The AdaLN projection stays zero-init (that is its own rule).
+        # zero." The AdaLN projection keeps its own zero-init rule.
         for m in self.trunk:
             if isinstance(m, nn.Linear):
                 nn.init.kaiming_normal_(m.weight, nonlinearity="relu")
@@ -174,11 +170,7 @@ class GCIDMPolicy:
 
     @torch.no_grad()
     def get_action(self, info_dict, **kwargs):
-        """Encode frames and goals, then emit one action per env.
-
-        The only clock the controller reads is steps remaining, clamped at H_max
-        and normalised exactly as in training.
-        """
+        """Encode frames and goals, then emit one action per env."""
         n = self.env.num_envs
         frames = self._latest(info_dict["pixels"])
         goals = self._latest(info_dict["goal"])

@@ -15,7 +15,6 @@ from torch import nn
 import torch.nn.functional as F
 
 
-# Sinusoidal diffusion-timestep embedding
 def timestep_embedding(t: torch.Tensor, dim: int, max_period: int = 10000) -> torch.Tensor:
     """t: (B,) int/float -> (B, dim) sinusoidal embedding (Vaswani/DDPM style)."""
     half = dim // 2
@@ -159,10 +158,9 @@ class GDM(nn.Module):
 
 # Gaussian diffusion (DDPM training / DDIM sampling)
 def _cosine_alphas_cumprod(timesteps: int, s: float = 0.008) -> torch.Tensor:
-    """Nichol & Dhariwal (2021) cosine bar-alpha schedule, computed in float64.
+    """Nichol & Dhariwal (2021) cosine bar-alpha schedule, in float64.
 
-    Returns a strictly decreasing length-`timesteps` alphas_cumprod in (0,1],
-    with less mass at extreme high-t than a linear beta schedule."""
+    Returns a strictly decreasing length-`timesteps` alphas_cumprod in (0,1]."""
     steps = torch.arange(timesteps + 1, dtype=torch.float64)
     f = torch.cos(((steps / timesteps) + s) / (1 + s) * math.pi / 2) ** 2
     acp = f / f[0]
@@ -174,8 +172,8 @@ class GaussianDiffusion:
 
     Flag-gated knobs: parameterization ("eps" or "v"), schedule ("linear" or
     "cosine"), and optional Min-SNR loss weighting. pred_from_model is the only
-    place the parameterization is decoded, so loss, sampling, and diagnostics
-    stay consistent by construction.
+    place the parameterization is decoded, so loss, sampling and diagnostics
+    cannot disagree.
     """
 
     def __init__(self, timesteps: int = 1000, beta_start: float = 1e-4,
@@ -236,8 +234,7 @@ class GaussianDiffusion:
 
     def pred_from_model(self, model_out: torch.Tensor, x_t: torch.Tensor,
                         t: torch.Tensor):
-        """Decode a model output to (x0_hat, eps_hat) under the active
-        parameterization. The only place eps/v is interpreted."""
+        """Model output -> (x0_hat, eps_hat). The only place eps/v is decoded."""
         a, b = self._ab(t, x_t.ndim)
         if self.parameterization == "eps":
             eps = model_out
@@ -337,9 +334,8 @@ class GaussianDiffusion:
 
 # Standardization (native E-space <-> DM space) + checkpoint bundle
 class GDMPlanner:
-    """Trained GDM, diffusion process, and standardization stats in one object:
-    takes native encoder-space latents in, samples, and inverts back out.
-    sample_next returns the immediately next subgoal z_{m+1} in native space.
+    """Trained GDM, diffusion process and standardization stats in one object:
+    native encoder-space latents in, sampled latents back out.
     """
 
     def __init__(self, model: GDM, diffusion: GaussianDiffusion,
@@ -359,11 +355,8 @@ class GDMPlanner:
         self.goal_cond = getattr(model.cfg, "goal_cond", False)
 
     def standardize(self, z_native: torch.Tensor) -> torch.Tensor:
-        """Native encoder latents -> the normalized space the model trains in.
-
-        Follows the checkpoint's `normalization`: per-dim standardize, or minmax
-        onto [-1, 1].
-        """
+        """Native encoder latents -> the normalized space the model trains in,
+        per the checkpoint's `normalization` (per-dim standardize or minmax)."""
         z = z_native.to(self.device)
         if self.normalization == "minmax":
             rng = (self.stat_b - self.stat_a).clamp_min(1e-6)
@@ -434,9 +427,8 @@ def save_gdm(path, model: GDM, diffusion: GaussianDiffusion, stat_a: torch.Tenso
 def load_gdm_planner(path, device="cpu") -> GDMPlanner:
     """Load a `save_gdm` checkpoint into a ready GDMPlanner on `device`.
 
-    Diffusion knobs and normalization stats that older checkpoints predate
-    fall back to the eps/linear/no-SNR/DDIM standardize settings they were
-    trained under.
+    Knobs older checkpoints predate fall back to the eps/linear/no-SNR/DDIM
+    standardize settings they were trained under.
     """
     ckpt = torch.load(path, map_location="cpu", weights_only=False)
     cfg = GDMConfig(**ckpt["gdm_config"])

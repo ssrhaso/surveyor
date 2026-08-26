@@ -7,19 +7,17 @@ instead of the final goal, verifying against reality at every replan boundary.
 The CEM sub-planner, world model, and evaluator are untouched; cem.py has a
 5-line guarded branch accepting pre-encoded latent goals.
 
-Verification metric, which must match the pre-registered gap space
-of the DINO-WM instrument: rel L2 between pooled visual tokens,
-the mean over patch tokens only, excluding proprio as the gap statistic does.
+Verification metric, matching the pre-registered gap space of the DINO-WM
+instrument: rel L2 between pooled visual tokens, the mean over patch tokens
+only, excluding proprio as the gap statistic does.
 
 Arrival gate (added 2026-07-28): without it spec rose then declined while flat
-plateaued, the overshoot tax also diagnosed on Cube and short-horizon Reacher
-(worth +32pp there): the drafter keeps proposing onward waypoints after the
-agent has arrived. LeWM PushT hid this because its episodes end at the goal;
-DINO-WM takes the goal from mid-trajectory (goal_source=dset), so arrival is
-not terminal and the gate is required. Semantics are one-way and match
-CstarRetireSource: once the achieved latent verifies against the final goal,
-the env retires and serves the goal latent at zero drafter cost. Off by
-default, so every previously recorded arm reproduces exactly.
+plateaued, the overshoot tax also diagnosed on Cube and short-horizon Reacher,
+where the drafter keeps proposing onward waypoints after the agent has arrived.
+LeWM PushT hid this because its episodes end at the goal; DINO-WM takes the goal
+from mid-trajectory (goal_source=dset), so arrival is not terminal and the gate
+is required. Semantics are one-way and match CstarRetireSource. Off by default,
+so every previously recorded arm reproduces exactly.
 """
 import os
 import sys
@@ -38,9 +36,9 @@ from surveyor.vjepa2.drafter import load_token_gdm
 
 
 def pooled_visual(grid):
-    """(B, P+1, D) -> (B, D): mean over the P visual tokens only (the last
-    token is proprio; the gap statistic space excludes it). P is derived from
-    the grid, NOT hardcoded: pusht runs at img_size 196 -> 196 patches."""
+    """(B, P+1, D) -> (B, D): mean over the P visual tokens only (the last token
+    is proprio, which the gap statistic space excludes). P comes from the grid,
+    NOT hardcoded: pusht runs at img_size 196 -> 196 patches."""
     return grid[:, :-1].mean(dim=1)
 
 
@@ -51,14 +49,13 @@ def pooled_all(grid):
 
 class SurveyorGridSource:
     """Per-env verify/advance/re-draft state machine over drafted grid blocks.
+
     LeWM-faithful semantics: draft a block of N subgoal grids; at each replan
     verify the pursued target in pooled-visual rel L2 (<= tau = arrived ->
-    advance); on rejection or block exhaustion re-draft from the current
-    state. Serves the currently-pursued grid.
-
+    advance); on rejection or block exhaustion re-draft from the current state.
     With goal_gate=True an env that has verifiably ARRIVED at the final goal
-    retires and serves the goal thereafter, which is what stops the drafter
-    walking the agent back off the target."""
+    retires and serves the goal thereafter, which stops the drafter walking the
+    agent back off the target."""
 
     def __init__(self, planner, n_envs, tau, k, device, seed=0,
                  readout=None, readout_tau=None, goal_gate=False,

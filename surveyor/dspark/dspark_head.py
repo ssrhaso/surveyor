@@ -38,13 +38,8 @@ def sinusoidal_pos_emb(positions: torch.Tensor, dim: int, max_period: int = 128)
 class DSparkHead(nn.Module):
     """First-order-conditioned residual refiner over a block of N draft latents.
 
-    Args:
-        dim: latent dimensionality D.
-        mean, std: (D,) per-dim standardization stats (native <-> standardized).
-        hidden: MLP hidden width.
-        pos_dim: sinusoidal position-embedding width.
-        mode: 'causal' or 'noncausal'.
-        n_layers: number of hidden layers (>=1).
+    mean/std are the (D,) per-dim stats mapping native <-> standardized space;
+    the remaining arguments size the MLP and pick the conditioning mode.
     """
 
     def __init__(self, dim: int, mean: torch.Tensor, std: torch.Tensor,
@@ -124,8 +119,7 @@ class ConfidenceHead(nn.Module):
     A single model, no ensemble, costing one drafter sample to deploy. Predicts
     P(rel_err of refined subgoal k < tau_k) from (refined_k, draft_k, cond,
     residual_k, pos). At deploy time the cumulative product over c_1..c_k sets
-    the commit depth k* = max{k : prod(c_1..c_k) > theta}, the
-    confidence-scheduled speculative-decoding rule on continuous latents.
+    the commit depth k* = max{k : prod(c_1..c_k) > theta}.
     """
 
     def __init__(self, dim: int, mean: torch.Tensor, std: torch.Tensor,

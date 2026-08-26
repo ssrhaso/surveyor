@@ -7,19 +7,19 @@ every subgoal boundary (S env steps) the accept rule verifies the achieved
 latent against the waypoint just pursued: within tau the next pre-drafted
 waypoint is served free, otherwise the block is re-drafted from reality.
 
-Mechanism bet (pre-registered as P-EXEC-1, passed):
-GC-IDM degrades with goal distance (its paper's Table 2) while the drafter
-manufactures near goals; a 10-step hop sits mid-distribution for the H_max=50
-checkpoint. The accept rule never inspects the executor, so tau, k and S carry
-unchanged, and no CEM runs in the bare arm.
+Mechanism bet (prereg P-EXEC-1, passed): GC-IDM degrades with goal distance
+(its paper's Table 2) while the drafter manufactures near goals, and a 10-step
+hop sits mid-distribution for the H_max=50 checkpoint. The accept rule never
+inspects the executor, so tau, k and S carry unchanged and no CEM runs in the
+bare arm.
 
 cstar_route=True adds the certified scope (P-EXEC-6): at each env's first
 boundary one flat CEM probe reads c* = rel(z_hat_H, z_goal), the planner's own
-certificate at the same tau; c* <= tau routes the episode to plain GC-IDM
-(goal served directly, zero drafter calls). Drafting envs carry an arrival
-gate at every boundary: rel(z, z_goal) <= tau retires the drafter one-way
-(Cube's gate, no new constant). Cost: one batched CEM solve per episode;
-execution stays fully amortised.
+certificate at the same tau, and c* <= tau routes the episode to plain GC-IDM
+(goal served directly, zero drafter calls). Drafting envs carry an arrival gate
+at every boundary: rel(z, z_goal) <= tau retires the drafter one-way (Cube's
+gate, no new constant). Cost is one batched CEM solve per episode; execution
+stays fully amortised.
 """
 
 from __future__ import annotations
@@ -54,8 +54,8 @@ class SurveyorGCIDMPolicy:
         self.goal_cond = getattr(planner, "goal_cond", False)
         self.cstar_route = bool(cstar_route)
         # goal_gate=True enables the arrival gate WITHOUT the c* route (no CEM
-        # probe, no cost model): the drafting-env gate below fires on either
-        # flag. Cube's confirmed CEM arm is gated, so its executor twin must be.
+        # probe, no cost model); the gate below fires on either flag. Cube's
+        # confirmed CEM arm is gated, so its executor twin must be.
         self.goal_gate = bool(goal_gate)
         # goal frames must be encoded if the drafter is goal-conditioned OR the
         # certificate / arrival gate needs the goal latent
@@ -125,8 +125,8 @@ class SurveyorGCIDMPolicy:
     def get_action(self, info_dict, **kwargs):
         """Serve one GC-IDM action per env, verifying and redrafting at boundaries.
 
-        Between boundaries this is plain GC-IDM tracking the current waypoint. On
-        a boundary the achieved latent is verified against that waypoint, and the
+        Between boundaries this is plain GC-IDM tracking the current waypoint; on
+        a boundary the achieved latent is verified against that waypoint and the
         block is served on or redrafted. With `cstar_route` the first step also
         runs the flat CEM probe that decides the episode's scope.
         """
@@ -156,7 +156,7 @@ class SurveyorGCIDMPolicy:
         drafting = ~self._direct
         need = list(np.nonzero(boundary & drafting & ~self._has_target)[0])
         for i in np.nonzero(boundary & drafting & self._has_target)[0]:
-            # arrival gate (certificate's replan scope, zero new constants):
+            # arrival gate (certificate's replan scope, no new constants):
             # verified arrival at the FINAL goal retires the drafter one-way
             if self.cstar_route or self.goal_gate:
                 relg = float((z_t[i] - z_goal[i]).norm()
