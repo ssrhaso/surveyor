@@ -96,7 +96,9 @@ class JEPA(nn.Module):
             next_act = act_future[:, t : t + 1, :]  # (BS, 1, action_dim)
             act = torch.cat([act, next_act], dim=1)  # (BS, T+1, action_dim)
 
-        # predict the last state
+        # the loop predicts from the actions already in `act` and only then
+        # appends the next one, so the final action has no successor state yet;
+        # this call supplies it.
         act_emb = self.action_encoder(act)  # (BS, T, A_emb)
         emb_trunc = emb[:, -HS:]  # (BS, HS, D)
         act_trunc = act_emb[:, -HS:]  # (BS, HS, A_emb)

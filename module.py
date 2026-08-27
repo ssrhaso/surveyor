@@ -18,6 +18,11 @@ class SIGReg(torch.nn.Module):
 
     def __init__(self, knots=17, num_proj=1024):
         super().__init__()
+        # Quadrature for the Epps-Pulley integral over t in [0, 3]: trapezoid
+        # weights (halved at the endpoints) times phi(t) = exp(-t^2/2), the
+        # standard normal characteristic function. phi serves twice, as the
+        # reference the empirical CF is compared against and as the measure
+        # that damps the tail of the integral.
         self.num_proj = num_proj
         t = torch.linspace(0, 3, knots, dtype=torch.float32)
         dt = 3 / (knots - 1)
