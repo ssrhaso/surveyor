@@ -42,6 +42,8 @@ __pycache__/
 *.bbl
 *.blg
 *.synctex.gz
+*.fls
+*.fdb_latexmk
 
 # Working notes, superseded by the manuscript.
 PLAN.md
@@ -50,6 +52,9 @@ RESULTS_*.md
 /docs/*
 !/docs/media/
 !/docs/media/*
+
+# Editor and script backups, kept out of the re-included media directory.
+*.bak
 
 # V-JEPA 2 scratch: the upstream clone, its job wrappers and encoded latents.
 /vjepa2/
