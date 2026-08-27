@@ -200,7 +200,6 @@ def img_transform():
 
 
 def img_transform_fallback():
-    # used when stable_pretraining isn't installed (CPU only): identical ImageNet stats
     """`img_transform` without stable_pretraining, for CPU-only hosts.
 
     The ImageNet constants are inlined, so the two paths normalize alike.
@@ -393,11 +392,11 @@ def main():
     process = build_process(dataset, keys)
 
     # ---- episode sampling
-    #   paper FF-JEPA protocol (default): the final `goal_offset` steps of each
-    #   episode with the LAST frame as the goal, for short (25) and long (75)
-    #   alike. `--start random` falls back to eval.py's common 25-step setting
-    #   (random valid start, goal = start+goal_offset). random_init samples no
-    #   episode at all, see the world.evaluate(episodes=...) branch below.
+    #   default (paper FF-JEPA protocol): the final `goal_offset` steps, goal =
+    #   last frame, for short (25) and long (75) alike. `--start random` gives
+    #   eval.py's 25-step setting instead (random valid start, goal =
+    #   start+goal_offset). random_init samples no episode at all; see the
+    #   world.evaluate(episodes=...) branch below.
     use_final = (args.mode == "long") or (args.start == "final")
     episodes_idx = start_steps = None
     random_init_goals = None
@@ -583,12 +582,10 @@ def main():
                 options = [{"goal_state": gv} for gv in random_init_goals]
                 eval_kwargs = {}
                 if args.dump_frames_dir:
-                    # episodic eval defaults to reset_mode='auto', which restarts
-                    # finished envs until `episodes` complete and so can reuse an
-                    # env slot for a second, DIFFERENT episode. That would desync
-                    # the frame capture (start frame from episode 1, last frame
-                    # from episode 2). 'wait' freezes each env after its own first
-                    # episode, guaranteeing one episode per env slot.
+                    # reset_mode='auto' restarts finished envs until `episodes`
+                    # complete, so one slot can run two episodes and the capture
+                    # desyncs (start frame from the first, last frame from the
+                    # second). 'wait' freezes each env after its own episode.
                     eval_kwargs["reset_mode"] = "wait"
                 metrics = world.evaluate(episodes=args.num_eval, seed=cem_seed,
                                          options=options, **eval_kwargs)
@@ -620,11 +617,10 @@ def main():
                 outdir = Path(args.dump_frames_dir) / f"{score_mode}_{angle:g}"
                 outdir.mkdir(parents=True, exist_ok=True)
                 # world.terminateds is in env_idx order and, under
-                # reset_mode='wait', every env terminates exactly once before
-                # evaluate() returns, so it is the per-episode success flag
-                # aligned with the frames captured at the SAME env index.
-                # metrics['episode_successes'] follows COMPLETION order instead,
-                # so it cannot be used here.
+                # reset_mode='wait', each env terminates exactly once, so it
+                # aligns with the frames captured at the same env index.
+                # metrics['episode_successes'] follows COMPLETION order and
+                # cannot be used here.
                 term = np.asarray(world.terminateds).astype(bool)
                 manifest = []
                 for i in range(args.num_eval):

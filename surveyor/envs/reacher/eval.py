@@ -43,11 +43,9 @@ def parse_args():
                    default="oracle")
     # Blind fixed-depth commitment (--subgoal dspark --no-refine), the Reacher
     # analogue of the PushT sweep: serve --commit-k waypoints per draft, then
-    # re-draft unconditionally. Ported 2026-08-12 for prereg
-    # 2026-08-11_rate_transfer.md Extension A, whose Reacher leg could not run
-    # because these flags existed only in the PushT driver. Same argument names,
-    # same defaults and the same env-agnostic DSparkSubgoalSource as PushT, so
-    # the two legs are directly comparable.
+    # re-draft unconditionally. Added for prereg 2026-08-11_rate_transfer.md
+    # Extension A, with PushT's argument names, defaults and source, so the two
+    # legs are directly comparable.
     p.add_argument("--dspark-ckpt", default=None, help="train_dspark_head.py checkpoint")
     p.add_argument("--commit", choices=["adaptive", "fixed"], default="adaptive",
                    help="commit-depth policy: adaptive (confidence k*=max{k:Pi c_i>theta}) or fixed")
@@ -81,9 +79,8 @@ def parse_args():
                         "probe at each env's first boundary routes the episode to "
                         "plain GC-IDM when c* <= tau (arbiter window 2x5); drafting "
                         "envs carry the tau arrival gate. One CEM solve/episode.")
-    # Corruption sweep. PushT has carried --draft-noise since the certification
-    # prereg; Reacher never needed it until P-DRIFT
-    # (2026-08-11_autocorrelated_divergence.md) made it a two-environment test.
+    # Corruption sweep, matching PushT's: P-DRIFT
+    # (2026-08-11_autocorrelated_divergence.md) is a two-environment test.
     p.add_argument("--draft-noise", type=float, default=0.0,
                    help="displace every drafted waypoint by this relative-norm "
                         "sigma, every draft incl. re-drafts")
