@@ -129,7 +129,7 @@ def ease(t: float) -> float:
     return t * t * (3 - 2 * t)
 
 
-def canvas(section: str) -> tuple[Image.Image, ImageDraw.ImageDraw]:
+def canvas() -> tuple[Image.Image, ImageDraw.ImageDraw]:
     image = Image.new("RGBA", (WIDTH * SCALE, HEIGHT * SCALE), rgba(PAPER))
     draw = ImageDraw.Draw(image)
     draw.rounded_rectangle(
@@ -138,7 +138,6 @@ def canvas(section: str) -> tuple[Image.Image, ImageDraw.ImageDraw]:
         outline=rgba(BORDER),
         width=s(1.3),
     )
-    text(draw, (58, 50), f"SURVEYOR  /  {section}", 14, MUTED, anchor="lm")
     return image, draw
 
 
@@ -180,7 +179,7 @@ def dashed_path(draw, pts, color, width=1.6, dash=9.0, gap=6.5, alpha=1.0):
 # ---- Act 1 / title card ----
 
 def title_slide(visible: float) -> Image.Image:
-    image, draw = canvas("OVERVIEW")
+    image, draw = canvas()
     text(draw, (WIDTH / 2, 195), "SURVEYOR", 62, INK, bold=True, anchor="mm")
     text(
         draw,
@@ -328,7 +327,7 @@ def mech_frame(
     goal_reached: bool = False,
     footer_alpha: float = 0.0,
 ) -> Image.Image:
-    image, draw = canvas("MECHANISM")
+    image, draw = canvas()
     heading(draw, "Draft once. Verify against reality.",
             "The drafted plan carries a measured tolerance \u03c4; "
             "reality is verified against it at every replan boundary.")
@@ -570,7 +569,7 @@ def mechanism_frames() -> tuple[list[Image.Image], list[int]]:
 # ---- Act 3 / measured constants + the router ----
 
 def constants_slide(visible: float) -> Image.Image:
-    image, draw = canvas("CALIBRATION  +  ROUTING")
+    image, draw = canvas()
     heading(draw, "Measured, not tuned",
             "Every constant is read off the frozen stack offline; the planner routes itself.")
 
@@ -609,7 +608,7 @@ def constants_slide(visible: float) -> Image.Image:
 # ---- Act 4 / results card ----
 
 def results_slide(visible: float) -> Image.Image:
-    image, draw = canvas("RESULTS")
+    image, draw = canvas()
     heading(draw, "Measured outcomes",
             "Lower drafter cost without sacrificing success.")
 
