@@ -567,27 +567,27 @@ def mechanism_frames() -> tuple[list[Image.Image], list[int]]:
 def constants_slide(visible: float) -> Image.Image:
     image, draw = canvas()
     heading(draw, "Measured, not tuned",
-            "Every constant is read off the frozen stack offline; the planner routes itself.")
+            "Both constants are read off the frozen stack offline.")
 
     lx, rx = 175, 680
     text(draw, (lx, 262), "\u03c4", 30, AMBER, bold=True,
          alpha=alpha_for(visible, 0))
-    text(draw, (lx + 48, 268), "the criterion floor: the latent distance the task", 21,
+    text(draw, (lx + 48, 268), "the criterion floor: the latent distance", 21,
          INK, alpha=alpha_for(visible, 0))
-    text(draw, (lx + 48, 298), "itself cannot distinguish", 21, INK,
+    text(draw, (lx + 48, 298), "the task cannot distinguish", 21, INK,
          alpha=alpha_for(visible, 0))
     text(draw, (rx, 262), "k", 30, AMBER, bold=True,
          alpha=alpha_for(visible, 1))
-    text(draw, (rx + 48, 268), "the sampler's measured convergence", 21, INK,
+    text(draw, (rx + 48, 268), "the sampler's convergence point:", 21, INK,
          alpha=alpha_for(visible, 1))
-    text(draw, (rx + 48, 298), "point: smallest budget past it", 21, INK,
+    text(draw, (rx + 48, 298), "the smallest budget past it", 21, INK,
          alpha=alpha_for(visible, 1))
 
     draw.line((s(120), s(372), s(WIDTH - 120), s(372)),
               fill=rgba(tint(INK, 0.18)), width=s(1))
 
     text(draw, (WIDTH / 2, 420),
-         "and whether to draft at all is the planner's own call:", 21, MUTED,
+         "whether to draft at all is the planner's own call:", 21, MUTED,
          anchor="mm", alpha=alpha_for(visible, 2))
     text(draw, (WIDTH / 2, 468), "c*  \u2264  \u03c4  ?", 30, INK, bold=True,
          anchor="mm", alpha=alpha_for(visible, 2))
@@ -606,12 +606,12 @@ def constants_slide(visible: float) -> Image.Image:
 def results_slide(visible: float) -> Image.Image:
     image, draw = canvas()
     heading(draw, "Measured outcomes",
-            "Lower drafter cost without sacrificing success.")
+            "Fewer drafter calls at matched success.")
 
     rows = [
-        ("1.8 vs 50", AMBER, "drafter calls per replan, at matched success"),
-        ("10 / 10", TEAL, "pre-registered cells meet or beat the strongest flat baseline"),
-        ("65.6 \u2192 93.0", TEAL, "transplant repairs an amortized executor's long-horizon collapse"),
+        ("1.8 vs 50", AMBER, "drafter calls per replan"),
+        ("10 / 10", TEAL, "pre-registered cells meet or beat the best flat baseline"),
+        ("65.6 \u2192 93.0", TEAL, "the same rule, transplanted onto a GC-IDM executor"),
         ("0", TEAL, "learned parameters added"),
     ]
     for index, (stat, color, label) in enumerate(rows):
