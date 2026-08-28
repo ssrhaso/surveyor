@@ -301,7 +301,7 @@ def draw_pills(draw, st: MechState) -> None:
     """Per-serve cost tally, top right: amber dot = paid draft, teal = free."""
     x1 = WIDTH - 74
     y = 112
-    text(draw, (x1, 82), "cost per served target", 14, MUTED, anchor="rm")
+    text(draw, (x1, 82), "cost per target", 14, MUTED, anchor="rm")
     n = len(st.pills)
     for i, kind in enumerate(st.pills):
         cx = x1 - DOT_R - (n - 1 - i) * DOT_PITCH
@@ -329,8 +329,8 @@ def mech_frame(
 ) -> Image.Image:
     image, draw = canvas()
     heading(draw, "Draft once. Verify against reality.",
-            "The drafted plan carries a measured tolerance \u03c4; "
-            "reality is verified against it at every replan boundary.")
+            "Each replan boundary checks the achieved state "
+            "against the plan's tolerance \u03c4.")
     draw_pills(draw, st)
 
     # episode axis: a quiet full-width ground line from start to goal,
@@ -416,7 +416,7 @@ def mech_frame(
                  PLAN_Y) - TUBE - 42
         pop = 0.8 + 0.2 * ease(min(1.0, badge_pulse * 2))
         color = TEAL if badge_ok else CORAL
-        label = "serve free" if badge_ok else "rel > \u03c4"
+        label = "free" if badge_ok else "re-draft"
         lw = get_font(16, bold=True).getlength(label) / SCALE
         w = lw + 48
         draw.rounded_rectangle(
@@ -446,7 +446,7 @@ def mech_frame(
     if footer_alpha > 0:
         text(draw, (WIDTH / 2, 612),
              "7 targets served \u00b7 2 drafter calls \u00b7 "
-             "every-step drafting would have paid 7",
+             "flat planning pays 7",
              20, INK, anchor="mm", alpha=footer_alpha)
     return image
 
@@ -478,8 +478,8 @@ def mechanism_frames() -> tuple[list[Image.Image], list[int]]:
     st.plan = 1
     st.pills.append("draft")
     st.show_tau = True
-    st.caption = "draft a block of subgoals once: one paid call, " \
-                 "a plan with a measured tolerance \u03c4"
+    st.caption = "one drafter call: a block of subgoals, " \
+                 "with a measured tolerance \u03c4"
     st.caption_color = AMBER
     dissolve_to(mech_frame(st, X_START), steps=6, ms=80)
     for f in range(6):
@@ -500,12 +500,10 @@ def mechanism_frames() -> tuple[list[Image.Image], list[int]]:
                         badge_pulse=0.4), 105)
         # the caption swaps under its own small dissolve
         if ok:
-            st.caption = ("inside the tube \u2192 next waypoint "
-                          "served free, no drafter call")
+            st.caption = "inside \u03c4: the next waypoint is served free"
             st.caption_color = TEAL
         else:
-            st.caption = ("outside the tube \u2192 the plan no "
-                          "longer matches reality")
+            st.caption = "outside \u03c4: the plan no longer holds"
             st.caption_color = CORAL
         dissolve_to(mech_frame(st, BXS[i], badge_at=i, badge_ok=ok,
                                badge_pulse=0.6), steps=3, ms=70)
@@ -519,8 +517,7 @@ def mechanism_frames() -> tuple[list[Image.Image], list[int]]:
                         badge_pulse=1.0), 1050)
         dissolve_to(mech_frame(st, BXS[i]), steps=4, ms=70)
 
-    st.caption = "the executor acts; reality (the solid path) stays " \
-                 "inside the tube"
+    st.caption = "the executor acts, and the achieved state stays inside \u03c4"
     st.caption_color = MUTED
     dissolve_to(mech_frame(st, X_START), steps=3, ms=70)
     travel(X_START, BXS[0])
@@ -529,7 +526,7 @@ def mechanism_frames() -> tuple[list[Image.Image], list[int]]:
     verify(1, True)
 
     # divergence into b3
-    st.caption = "then reality drifts: the executor cannot hold the plan"
+    st.caption = "the executor drifts off the plan"
     st.caption_color = CORAL
     dissolve_to(mech_frame(st, BXS[1]), steps=3, ms=70)
     travel(BXS[1], BXS[2], n=13)
@@ -538,8 +535,7 @@ def mechanism_frames() -> tuple[list[Image.Image], list[int]]:
     # re-draft: second tube grows from reality's actual position
     st.plan = 2
     st.pills.append("draft")
-    st.caption = "re-draft from the achieved state: the new plan is " \
-                 "anchored to reality, one more call"
+    st.caption = "re-draft from the achieved state: one more call"
     st.caption_color = AMBER
     dissolve_to(mech_frame(st, BXS[2], plan2_alpha=0.0), steps=3, ms=70)
     for f in range(8):
