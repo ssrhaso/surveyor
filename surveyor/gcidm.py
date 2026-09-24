@@ -126,6 +126,10 @@ def save_gcidm(path, model: GCIDM, action_scaler=None, meta=None):
 def load_gcidm(path, device="cuda"):
     """Load a `save_gcidm` checkpoint -> (frozen model, action scaler, meta)."""
     ck = torch.load(path, map_location="cpu", weights_only=False)
+    if "model_state_dict" in ck and "config" in ck and "cfg" not in ck:
+        # the authors' train_idm.py payload -> served through the same contract
+        from surveyor.gcidm_official import load_official_gcidm
+        return load_official_gcidm(ck, device)
     cfg = ck["cfg"]
     model = GCIDM(latent_dim=cfg["latent_dim"], action_dim=cfg["action_dim"],
                   hidden=cfg["hidden"], h_max=cfg["h_max"],

@@ -1,16 +1,15 @@
-"""SURVEYOR: certified speculative plan consumption for latent world models.
+"""SURVEYOR: training-free decomposition for long-range latent world-model planning.
 
-Speculative Use of Reality-Verified Execution, Yielding On-demand Redrafts. A
-diffusion drafter proposes a block of N subgoal latents once; at every replan
+A diffusion drafter proposes a block of N subgoal latents once; at every replan
 boundary the achieved latent is verified against the waypoint just pursued, and
 within a relative distance tau the next pre-drafted waypoint is served free,
 otherwise the block is redrafted from reality. There is nothing to train: tau
 comes from the encoder's criterion floor and k from the sampler's convergence
 point, both measured offline.
 
-The substrate is a frozen LeWM JEPA encoder with a CEM controller; the same rule
-is served through a GC-IDM executor, a DINO-WM encoder and V-JEPA 2 without
-modification.
+The layer runs unchanged over a frozen LeWM world model and the CEM, iCEM, MPPI,
+gradient, GC-IDM and LeFlow executors; an arbiter (the c* probe) decides when an
+episode needs no decomposition.
 
     encoder.py           frozen LeWM encoder IO (load, encode_frames)
     drafter.py           GDM: DiT eps-prediction diffusion drafter, GDMPlanner

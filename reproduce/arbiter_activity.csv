@@ -1,0 +1,86 @@
+executor,arm,env,t,n_seeds,routed_pct,retired_later_pct
+CEM (LeWM),router,pusht,25,8,62.8,15.8
+CEM (LeWM),router,pusht,50,8,0.9,36.2
+CEM (LeWM),router,pusht,75,8,0.8,28.5
+CEM (LeWM),router,pusht,100,8,1.1,22.7
+CEM (LeWM),router,pusht,150,8,0.0,13.3
+CEM (LeWM),router,reacher,25,8,91.2,8.0
+CEM (LeWM),router,reacher,50,8,77.6,20.9
+CEM (LeWM),router,reacher,100,8,49.8,48.8
+CEM (LeWM),router,reacher,150,8,38.8,60.5
+CEM (LeWM),router,cube,25,8,84.8,12.5
+CEM (LeWM),router,cube,50,8,57.9,32.1
+CEM (LeWM),router,cube,75,8,41.2,41.8
+CEM (LeWM),router,cube,100,8,41.8,45.7
+CEM (LeWM),router,cube,150,8,17.5,68.3
+CEM (LeWM),router,tworoom,25,8,72.3,19.3
+CEM (LeWM),router,tworoom,50,8,50.8,38.9
+CEM (LeWM),router,tworoom,75,8,34.0,56.2
+GC-IDM (released code),gcrouter_off_s42,pusht,25,8,62.8,0.0
+GC-IDM (released code),gcrouter_off_s42,pusht,50,8,0.9,0.0
+GC-IDM (released code),gcrouter_off_s42,pusht,75,8,0.8,0.0
+GC-IDM (released code),gcrouter_off_s42,pusht,100,8,1.1,0.0
+GC-IDM (released code),gcrouter_off_s42,pusht,150,8,0.0,0.0
+GC-IDM (released code),gcrouter_off_s42,reacher,25,8,91.2,1.1
+GC-IDM (released code),gcrouter_off_s42,reacher,50,8,77.6,3.8
+GC-IDM (released code),gcrouter_off_s42,reacher,100,8,49.8,9.7
+GC-IDM (released code),gcrouter_off_s42,reacher,150,8,38.8,15.2
+GC-IDM (released code),gcrouter_off_s42,cube,25,8,84.0,8.6
+GC-IDM (released code),gcrouter_off_s42,cube,50,8,56.9,15.2
+GC-IDM (released code),gcrouter_off_s42,cube,75,8,40.2,16.6
+GC-IDM (released code),gcrouter_off_s42,cube,100,8,38.7,36.1
+GC-IDM (released code),gcrouter_off_s42,cube,150,8,14.6,38.3
+GC-IDM (released code),gcrouter_off_s42,tworoom,25,8,72.3,27.7
+GC-IDM (released code),gcrouter_off_s42,tworoom,50,8,50.8,49.2
+GC-IDM (released code),gcrouter_off_s42,tworoom,75,8,34.0,66.0
+iCEM,icem_router,pusht,25,8,62.8,15.4
+iCEM,icem_router,pusht,50,8,0.9,35.7
+iCEM,icem_router,pusht,75,8,0.8,28.3
+iCEM,icem_router,pusht,100,8,1.1,25.4
+iCEM,icem_router,pusht,150,8,0.0,13.6
+iCEM,icem_router,reacher,25,8,91.2,8.1
+iCEM,icem_router,reacher,50,8,77.6,21.5
+iCEM,icem_router,reacher,100,8,49.8,49.5
+iCEM,icem_router,reacher,150,8,38.8,60.4
+iCEM,icem_router,cube,25,8,84.8,12.7
+iCEM,icem_router,cube,50,8,57.9,29.8
+iCEM,icem_router,cube,75,8,41.2,40.3
+iCEM,icem_router,cube,100,8,41.8,40.2
+iCEM,icem_router,cube,150,8,17.5,65.2
+iCEM,icem_router,tworoom,25,8,72.3,20.9
+iCEM,icem_router,tworoom,50,8,50.8,41.2
+iCEM,icem_router,tworoom,75,8,34.0,61.5
+MPPI,mppi_router,pusht,25,8,62.8,15.5
+MPPI,mppi_router,pusht,50,8,0.9,31.7
+MPPI,mppi_router,pusht,75,8,0.8,25.6
+MPPI,mppi_router,pusht,100,8,1.1,23.5
+MPPI,mppi_router,pusht,150,8,0.0,12.9
+MPPI,mppi_router,reacher,25,8,91.2,8.5
+MPPI,mppi_router,reacher,50,8,77.6,22.0
+MPPI,mppi_router,reacher,100,8,49.8,49.5
+MPPI,mppi_router,reacher,150,8,38.8,60.7
+MPPI,mppi_router,cube,25,8,84.8,11.9
+MPPI,mppi_router,cube,50,8,57.9,29.5
+MPPI,mppi_router,cube,75,8,41.2,41.8
+MPPI,mppi_router,cube,100,8,41.8,47.7
+MPPI,mppi_router,cube,150,8,17.5,68.1
+MPPI,mppi_router,tworoom,25,8,72.3,18.8
+MPPI,mppi_router,tworoom,50,8,50.8,35.9
+MPPI,mppi_router,tworoom,75,8,34.0,51.0
+Gradient (AdamW),gd_router,pusht,25,8,62.8,15.0
+Gradient (AdamW),gd_router,pusht,50,8,0.9,34.7
+Gradient (AdamW),gd_router,pusht,75,8,0.8,28.8
+Gradient (AdamW),gd_router,pusht,100,8,1.1,21.8
+Gradient (AdamW),gd_router,pusht,150,8,0.0,12.0
+Gradient (AdamW),gd_router,reacher,25,8,91.2,8.5
+Gradient (AdamW),gd_router,reacher,50,8,77.6,21.8
+Gradient (AdamW),gd_router,reacher,100,8,49.8,49.5
+Gradient (AdamW),gd_router,reacher,150,8,38.8,60.7
+Gradient (AdamW),gd_router,cube,25,8,84.8,13.2
+Gradient (AdamW),gd_router,cube,50,8,57.9,32.2
+Gradient (AdamW),gd_router,cube,75,8,41.2,42.3
+Gradient (AdamW),gd_router,cube,100,8,41.8,43.4
+Gradient (AdamW),gd_router,cube,150,8,17.5,69.3
+Gradient (AdamW),gd_router,tworoom,25,8,72.3,22.9
+Gradient (AdamW),gd_router,tworoom,50,8,50.8,41.0
+Gradient (AdamW),gd_router,tworoom,75,8,34.0,58.0

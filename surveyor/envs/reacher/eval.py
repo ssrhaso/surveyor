@@ -15,6 +15,7 @@ import numpy as np
 import torch
 
 from surveyor import encoder
+from surveyor.solvers import add_solver_arg, make_solver
 from surveyor.envs.pusht.eval import sample_short, sample_long
 from surveyor.sources import (SubgoalCostModel, OracleSubgoalSource,
                                     GDMSubgoalSource, DSparkSubgoalSource,
@@ -39,13 +40,12 @@ def parse_args():
                         "each replan); frac=1.0 degenerates to flat planning")
     p.add_argument("--subgoal", choices=["oracle", "ffjepa", "flat", "dspark", "surveyor",
                                          "lerp", "horizon_gated", "router+surveyor", "random", "gcidm",
-                                         "gcidm+surveyor"],
+                                         "gcidm+surveyor", "leflow", "leflow+surveyor"],
                    default="oracle")
     # Blind fixed-depth commitment (--subgoal dspark --no-refine), the Reacher
     # analogue of the PushT sweep: serve --commit-k waypoints per draft, then
-    # re-draft unconditionally. Added for prereg 2026-08-11_rate_transfer.md
-    # Extension A, with PushT's argument names, defaults and source, so the two
-    # legs are directly comparable.
+    # re-draft unconditionally. Same argument names, defaults and source as
+    # PushT, so the two legs are directly comparable.
     p.add_argument("--dspark-ckpt", default=None, help="train_dspark_head.py checkpoint")
     p.add_argument("--commit", choices=["adaptive", "fixed"], default="adaptive",
                    help="commit-depth policy: adaptive (confidence k*=max{k:Pi c_i>theta}) or fixed")
@@ -75,7 +75,7 @@ def parse_args():
                    help="gcidm+surveyor: subgoal spacing S in env steps; accept test at "
                         "every S-step boundary, executor horizon clock counts to it")
     p.add_argument("--cstar-route", action="store_true",
-                   help="gcidm+surveyor: certified scope (P-EXEC-6). One flat-CEM c* "
+                   help="gcidm+surveyor: certified scope. One flat-CEM c* "
                         "probe at each env's first boundary routes the episode to "
                         "plain GC-IDM when c* <= tau (arbiter window 2x5); drafting "
                         "envs carry the tau arrival gate. One CEM solve/episode.")
@@ -87,8 +87,21 @@ def parse_args():
     p.add_argument("--draft-noise-rho", type=float, default=0.0,
                    help="AR(1) autocorrelation of the corruption direction across "
                         "re-drafts. 0 = uncorrelated control; ->1 = persistent drift.")
+    p.add_argument("--leflow-ckpt", default=None,
+                   help="LeFlow planner payload (leflow/<env>/latent_planner.pt)")
+    p.add_argument("--leflow-stats", default=None,
+                   help="action mean/std json next to the LeFlow checkpoint")
+    p.add_argument("--leflow-receding", type=int, default=25,
+                   help="raw steps between LeFlow replans for the alone arm (their protocol 25)")
+    p.add_argument("--leflow-samples", type=int, default=64)
+    p.add_argument("--leflow-flow-steps", type=int, default=16)
+    p.add_argument("--accept-imagine", action="store_true",
+                   help="imagination-check control: the accept test (and the arrival "
+                        "gate) read the frozen predictor's forecast of the boundary "
+                        "latent instead of the achieved one; reality is consulted "
+                        "only to re-anchor a redraft")
     p.add_argument("--random-reject", type=float, default=None,
-                   help="decision-content control (pre-registered): "
+                   help="decision-content control: "
                         "replace the accept test with an i.i.d. coin rejecting "
                         "at this matched probability; all other mechanics "
                         "identical to the banked spec arm")
@@ -110,7 +123,7 @@ def parse_args():
     p.add_argument("--episode-max", type=int, default=None,
                    help="restrict eval to episode indices < this (exclusive)")
     p.add_argument("--episodes-file", default=None,
-                   help="JSON from batch/build_reacher_horizon_episodes.py with "
+                   help="JSON from surveyor/envs/reacher/build_populations.py (episodes/ holds the ones used) with "
                         "precomputed [episode, start] pairs. Bypasses sampling entirely "
                         "-- the fixed-population horizon sweep reuses ONE file at every "
                         "--goal-offset (starts are valid for the largest offset), so the "
@@ -124,6 +137,11 @@ def parse_args():
     p.add_argument("--horizon", type=int, default=5)
     p.add_argument("--receding-horizon", type=int, default=5)
     p.add_argument("--action-block", type=int, default=5)
+    add_solver_arg(p)
+    p.add_argument("--probe-solver", choices=("cem", "match", "latent"), default="cem",
+                   help="c* probe solver for router+surveyor: cem (default) or match = --solver")
+    p.add_argument("--retire-tau", type=float, default=None,
+                   help="router+surveyor retirement threshold on c* (default: --accept-tau)")
     p.add_argument("--num-samples", type=int, default=300)
     p.add_argument("--n-steps", type=int, default=30)
     p.add_argument("--topk", type=int, default=30)
@@ -200,7 +218,7 @@ def main():
     averaging percentages.
     """
     args = parse_args()
-    if args.subgoal in ("ffjepa", "surveyor", "horizon_gated", "router+surveyor", "gcidm+surveyor") and not args.gdm_ckpt:
+    if args.subgoal in ("ffjepa", "surveyor", "horizon_gated", "router+surveyor", "gcidm+surveyor", "leflow+surveyor") and not args.gdm_ckpt:
         raise ValueError(f"--subgoal {args.subgoal} requires --gdm-ckpt")
     if args.subgoal == "gcidm+surveyor" and not args.gcidm_ckpt:
         raise ValueError("--subgoal gcidm+surveyor requires --gcidm-ckpt (amortised executor)")
@@ -226,13 +244,15 @@ def main():
     is_random = args.subgoal == "random"
     is_gcidm = args.subgoal == "gcidm"
     is_gcidm_surveyor = args.subgoal == "gcidm+surveyor"
-    is_baseline = args.subgoal in ("flat", "random", "gcidm", "gcidm+surveyor")
+    is_leflow = args.subgoal == "leflow"
+    is_leflow_surveyor = args.subgoal == "leflow+surveyor"
+    is_baseline = args.subgoal in ("flat", "random", "gcidm", "gcidm+surveyor", "leflow", "leflow+surveyor")
     cost_model = model if is_baseline else SubgoalCostModel(model)
     print(f"[model] frozen LeWM ({sum(p.numel() for p in model.parameters())/1e6:.2f}M), "
           f"device={args.device}, training={model.training}, subgoal={args.subgoal}")
 
     gdm_planner = None
-    if args.subgoal in ("ffjepa", "dspark", "surveyor", "horizon_gated", "router+surveyor", "gcidm+surveyor"):
+    if args.subgoal in ("ffjepa", "dspark", "surveyor", "horizon_gated", "router+surveyor", "gcidm+surveyor", "leflow+surveyor"):
         from surveyor.drafter import load_gdm_planner, count_params
         gdm_planner = load_gdm_planner(args.gdm_ckpt, device=args.device)
         d = gdm_planner.diffusion
@@ -319,10 +339,9 @@ def main():
         for e in world.envs.envs:
             e.unwrapped.env.task.qpos_threshold = float(args.qpos_threshold)
         print(f"[pin] qpos_threshold overridden to {args.qpos_threshold:g} rad/joint")
-    solver = swm.solver.CEMSolver(model=cost_model, batch_size=1,
-                                  num_samples=args.num_samples, var_scale=args.var_scale,
-                                  n_steps=args.n_steps, topk=args.topk,
-                                  device=args.device, seed=cem_seed)
+    solver = make_solver(getattr(args, "solver", "cem"), cost_model, num_samples=args.num_samples,
+                                 var_scale=args.var_scale, n_steps=args.n_steps, topk=args.topk,
+                                 device=args.device, seed=cem_seed)
     if is_random:
         # seeded via set_policy() from .seed, deterministic at cem_seed like every arm
         policy = swm.policy.RandomPolicy(seed=cem_seed)
@@ -343,17 +362,46 @@ def main():
                                  n_steps=args.gdm_steps, seed=cem_seed,
                                  device=args.device, action_scaler=ascaler,
                                  budget=eval_budget,
-                                 cstar_route=args.cstar_route,
+                                 cstar_route=args.cstar_route, probe_solver=args.probe_solver, retire_tau=args.retire_tau,
                                  cem=dict(horizon=2, action_block=5,
                                           num_samples=args.num_samples,
                                           n_steps=args.n_steps, topk=args.topk,
                                           var_scale=args.var_scale,
                                           seed=cem_seed),
-                                 adim=2)
+                                 adim=2, random_reject=args.random_reject,
+                                 imagine=args.accept_imagine, action_proc=process.get("action"))
         print(f"[gcidm+surveyor] executor={args.gcidm_ckpt} (H_max={gci.h_max}) "
               f"drafter={args.gdm_ckpt} S={args.sg_steps} tau={args.accept_tau} "
               f"k={args.gdm_steps} cstar_route={args.cstar_route} "
               f"(accept rule unchanged)")
+    elif is_leflow or is_leflow_surveyor:
+        from surveyor.leflow_executor import (LeFlowPlanner, LeFlowPolicy, SurveyorLeFlowPolicy,
+                                              load_leflow, load_action_stats)
+        if not args.leflow_ckpt or not args.leflow_stats:
+            raise ValueError("--leflow-ckpt and --leflow-stats are required for the LeFlow arms")
+        lf_rt = load_leflow(args.leflow_ckpt, device=args.device)
+        lf_stats = load_action_stats(args.leflow_stats)
+        lf_planner = LeFlowPlanner(lf_rt, horizon=5, num_samples=args.leflow_samples,
+                                   flow_steps=args.leflow_flow_steps, seed=cem_seed)
+        if is_leflow:
+            policy = LeFlowPolicy(lf_planner, model, budget=eval_budget, action_stats=lf_stats,
+                                  receding_steps=args.leflow_receding, device=args.device)
+            print(f"[leflow] {args.leflow_ckpt} H=5 action_block={lf_rt.action_block} "
+                  f"samples={args.leflow_samples} flow_steps={args.leflow_flow_steps} "
+                  f"replan every {args.leflow_receding} raw steps (no CEM)")
+        else:
+            policy = SurveyorLeFlowPolicy(lf_planner, gdm_planner, model, sg_steps=args.sg_steps,
+                                          tau=args.accept_tau, n_steps=args.gdm_steps, seed=cem_seed,
+                                          device=args.device, action_stats=lf_stats, budget=eval_budget,
+                                          random_reject=args.random_reject,
+                cstar_route=args.cstar_route, goal_gate=getattr(args, 'goal_gate', False),
+                cem=dict(horizon=2, action_block=5, num_samples=args.num_samples,
+                         n_steps=args.n_steps, topk=args.topk, var_scale=args.var_scale,
+                         seed=cem_seed), adim=2,
+                                 imagine=args.accept_imagine, action_proc=process.get("action"))
+            print(f"[leflow+surveyor] executor={args.leflow_ckpt} drafter={args.gdm_ckpt} "
+                  f"S={args.sg_steps} tau={args.accept_tau} k={args.gdm_steps} "
+                  f"cstar_route={args.cstar_route} (accept rule unchanged)")
     elif is_baseline:
         policy = swm.policy.WorldModelPolicy(
             solver=solver, config=config, process=process, transform=transform)
@@ -394,7 +442,8 @@ def main():
                                              draft_noise=args.draft_noise,
                                              draft_noise_rho=args.draft_noise_rho,
                                              random_reject=args.random_reject,
-                                             record=bool(args.dump_traces))
+                                             record=bool(args.dump_traces),
+                                 imagine=args.accept_imagine)
             if args.random_reject is not None:
                 print(f"[randreject] coin control p={args.random_reject} "
                       f"(matched-rate; latent test overridden)")
@@ -413,6 +462,8 @@ def main():
                   f"fired episodes run flat on the goal latent, others surveyor")
         elif args.subgoal == "router+surveyor":
             source = CstarRetireSource(gdm_planner, model, n_envs=args.num_eval,
+                                       probe_solver=(args.solver if args.probe_solver == "match" else args.probe_solver),
+                                       retire_tau=args.retire_tau,
                                        device=args.device, n_steps=args.gdm_steps,
                                        seed=cem_seed, tau=args.accept_tau,
                                        horizon=args.horizon,
@@ -445,8 +496,22 @@ def main():
               f"total={policy.n_calls} (1 MLP forward each, no solver)")
     sr = metrics["success_rate"]
     n_succ = int(metrics["episode_successes"].sum())
+    if getattr(args, "accept_imagine", False):
+        from surveyor.sources import imagine_summary
+        _io = policy if hasattr(policy, "imag_log") else getattr(policy, "subgoal_source", None)
+        print(imagine_summary(_io))
     world.close()
 
+    if is_leflow:
+        print(f"[leflow cost] plans={policy.planner.n_plans} decisions={policy.n_calls} "
+              f"plan_s={policy.planner.t_plan:.2f} exec_s={policy.t_exec:.2f}")
+    if is_leflow_surveyor:
+        b = policy.n_redraft + policy.n_advance
+        print(f"[leflow+surveyor cost] plans={policy.planner.n_plans} decisions={policy.n_calls} "
+              f"redrafts={policy.n_redraft} advances={policy.n_advance} "
+              f"rejects={policy.n_reject} call_ratio={policy.n_redraft / max(b, 1):.3f} "
+              f"routed={policy.n_routed} arrived={policy.n_arrive} "
+              f"draft_s={policy.t_draft:.2f} plan_s={policy.planner.t_plan:.2f} exec_s={policy.t_exec:.2f}")
     if is_gcidm_surveyor:
         b = policy.n_redraft + policy.n_advance
         print(f"[gcidm+surveyor cost] exec_forwards={policy.n_calls} "
@@ -482,8 +547,7 @@ def main():
     if args.subgoal == "dspark":
         # The engagement check for the fixed-depth sweep: redraft/advance must
         # read 1.000 at --commit-k 1 and about 1/N at full block depth. A run
-        # where every depth reports the same ratio means the knob is inert
-        # (prereg 2026-08-11_rate_transfer.md, "voided run").
+        # where every depth reports the same ratio means the knob is inert.
         cd = source.commit_depths
         ratio = source.n_redraft / max(source.n_advance, 1)
         print(f"[dspark] commit={args.commit} theta={args.commit_theta} "

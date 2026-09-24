@@ -108,6 +108,16 @@ def main():
             json.dump({"goal_offset": goff, "seed": args.seed, "eval_filter": args.eval_filter,
                       "episodes": remapped}, f)
         print(f"[done] wrote {outpath} ({len(remapped)} entries)")
+        # The same pairs in FULL-dataset indices, so trainers that read the full
+        # h5 (train_gcidm --exclude-episodes, the drafter holdout mask) can hold
+        # these eval episodes out. The remapped file above indexes the subset h5
+        # and must never be used for exclusion against the full dataset.
+        srcpath = args.out.rsplit(".", 1)[0] + f".source_episodes{goff}.json"
+        with open(srcpath, "w") as f:
+            json.dump({"goal_offset": goff, "seed": args.seed, "eval_filter": args.eval_filter,
+                       "source_h5": args.h5, "note": "full-dataset episode indices",
+                       "episodes": [[int(e), int(s)] for e, s in zip(eps, starts, strict=True)]}, f)
+        print(f"[done] wrote {srcpath} (full-dataset indices, for holdout)")
 
 
 if __name__ == "__main__":

@@ -260,7 +260,7 @@ class SurveyorSource:
     def __init__(self, planner, n_envs, device="cpu", n_steps=50, seed=42,
                  tau=0.2, record=False, goal_gate=False,
                  readout=None, readout_tau=None, draft_noise=0.0,
-                 draft_noise_rho=0.0, random_reject=None):
+                 draft_noise_rho=0.0, random_reject=None, imagine=False):
         # readout: optional gap-maximizing verification lens (learn_readout.py).
         # Verification-side ONLY, so drafting/cost/planner stay in native space:
         # accept iff ||r(z_now) - r(tgt)|| <= readout_tau (unit-norm distance).
@@ -283,15 +283,15 @@ class SurveyorSource:
         self._gen.manual_seed(int(seed))
         self.record = record
         self.trace = []
-        # calibration log (prereg M1), record-gated: one (env, rel, accepted,
+        # calibration log, record-gated: one (env, rel, accepted,
         # z_achieved, target) per verification event, accepts included (the
         # draft-only trace cannot reconstruct an accepted replan's latent).
         self.cal = []
-        # corruption sweep (prereg): displace every drafted waypoint w by
+        # corruption sweep: displace every drafted waypoint w by
         # draft_noise * ||w|| along a random unit direction at EVERY draft,
         # re-drafts included. 0.0 = off; verification sees the served block.
         self.draft_noise = float(draft_noise)
-        # AUTOCORRELATED corruption (prereg). The white draw above takes a fresh
+        # AUTOCORRELATED corruption. The white draw above takes a fresh
         # direction every draft, so consecutive corruptions cancel in expectation
         # and SR stayed flat. Here one unit drift vector per env persists across
         # re-drafts,
@@ -302,7 +302,7 @@ class SurveyorSource:
         self.draft_noise_rho = float(draft_noise_rho)
         self._drift = None   # (n_envs, dim) unit vectors, lazily initialised
         self.drift_log = []  # [(env_rows, unit dirs)] per draft, for the smoke gate
-        # matched-rate random-rejection control (prereg): reject every
+        # matched-rate random-rejection control: reject every
         # verification event with this probability, drawn from a DEDICATED coin
         # generator so the draft stream matches a normal spec run at that seed.
         self.random_reject = None if random_reject is None else float(random_reject)
@@ -317,6 +317,20 @@ class SurveyorSource:
         # env per current() call, so env i's k-th event aligns with its k-th
         # captured strip frame.
         self.events = []
+        # imagination-check control: when set, verification reads the
+        # predictor's forecast of this replan's latent (written by the policy
+        # after each solve, see set_imagined) instead of the achieved one.
+        self.imagine = bool(imagine)
+        self._imag = None            # (n_envs, dim) forecasts, NaN = none yet
+        self.imag_log = []           # (rel_imagined, rel_achieved) per event
+
+    def set_imagined(self, envs, zhat):
+        """Store the predictor's forecast of the next replan latent for `envs`."""
+        if self._imag is None:
+            self._imag = torch.full((self.n_envs, self.dim), float('nan'),
+                                    device=self.device)
+        self._imag[torch.as_tensor(list(envs), dtype=torch.long,
+                                   device=self.device)] = zhat.to(self.device)
 
     @torch.no_grad()
     def current(self, sg_steps, obs_latent=None, replan_idx=None, goal_latent=None) -> torch.Tensor:
@@ -367,13 +381,22 @@ class SurveyorSource:
                 accept = False
                 rel = float("nan")
                 if q is not None and tgt is not None:
+                    z_ver = z_now[r]
+                    if (self.imagine and self._imag is not None
+                            and bool(torch.isfinite(self._imag[i]).all())):
+                        # imagination check: the predictor's forecast of this
+                        # replan's latent stands in for the achieved one
+                        z_ver = self._imag[i].to(z_now.device)
+                        self.imag_log.append((
+                            float((z_ver - tgt).norm() / z_ver.norm().clamp_min(1e-8)),
+                            float((z_now[r] - tgt).norm() / z_now[r].norm().clamp_min(1e-8))))
                     if self.readout is not None:
-                        d = float((self.readout(z_now[r]) - self.readout(tgt)).norm())
+                        d = float((self.readout(z_ver) - self.readout(tgt)).norm())
                         verified = d <= self.readout_tau
                         rel = d
                     else:
-                        rel = float((z_now[r] - tgt).norm()
-                                    / z_now[r].norm().clamp_min(1e-8))
+                        rel = float((z_ver - tgt).norm()
+                                    / z_ver.norm().clamp_min(1e-8))
                         verified = rel <= self.tau
                     if self.random_reject is not None:
                         # coin control: the coin decides, not the latent test.
@@ -498,7 +521,7 @@ class LerpSubgoalSource:
 
 
 @torch.no_grad()
-def cem_flat_cstar(lewm, cost_model, z0, z_goal, cem, adim=2):
+def cem_flat_cstar(lewm, cost_model, z0, z_goal, cem, adim=2, probe_solver="cem"):
     """One flat CEM plan per row -> predicted terminal rel to the goal.
 
     The exact replan-0 call the flat policy would execute, with emb pre-injected
@@ -515,7 +538,8 @@ def cem_flat_cstar(lewm, cost_model, z0, z_goal, cem, adim=2):
     # the validated 128x300 envelope (128x600 and 256x300 both raise CUDA
     # invalid-configuration); CEMSolver chunks n_envs by batch_size internally.
     batch = max(1, min(n, 38400 // int(cem["num_samples"])))
-    solver = swm.solver.CEMSolver(model=cost_model, batch_size=batch,
+    from surveyor.solvers import solver_class
+    solver = solver_class(probe_solver)(model=cost_model, batch_size=batch,
                                   num_samples=cem["num_samples"],
                                   var_scale=cem["var_scale"],
                                   n_steps=cem["n_steps"],
@@ -536,6 +560,58 @@ def cem_flat_cstar(lewm, cost_model, z0, z_goal, cem, adim=2):
     return ((z_hat - zgd).norm(dim=-1)
             / z_hat.norm(dim=-1).clamp_min(1e-8)).cpu().numpy()
 
+@torch.no_grad()
+def imagine_terminal(lewm, z0, plan):
+    """Predicted latent after executing `plan` from `z0` through the frozen
+    predictor: z0 (n, D), plan (n, H, block*adim) in the world model's action
+    space -> (n, D). The imagination-check control reads this in place of the
+    achieved latent; it is the c* probe's terminal read on one candidate."""
+    dev = next(lewm.parameters()).device
+    z0d = z0.to(dev)
+    p = torch.as_tensor(plan).to(dev)
+    n = z0d.shape[0]
+    roll = {"pixels": torch.zeros(n, 1, 1, 1, 1, 1, device=dev),
+            "emb": z0d[:, None, None, :]}
+    roll = lewm.rollout(roll, p.unsqueeze(1))          # S=1 candidate
+    return roll["predicted_emb"][:, 0, -1, :].to(z0.device)
+
+
+def imagine_summary(obj):
+    """One diagnostic line for the imagination-check control: imagined vs
+    achieved rel to the pursued waypoint over every verification event, and
+    how often the two tests agree at tau."""
+    log = getattr(obj, "imag_log", None) or []
+    if not log:
+        return "[imagine] events=0 (no verification event carried a forecast)"
+    a = np.asarray(log, dtype=np.float64)              # (n, 2): imagined, achieved
+    tau = float(getattr(obj, "tau", float("nan")))
+    ia, ra = a[:, 0] <= tau, a[:, 1] <= tau
+    return (f"[imagine] events={len(a)} rel_imag_mean={a[:, 0].mean():.3f} "
+            f"rel_real_mean={a[:, 1].mean():.3f} imag_accept={ia.mean():.3f} "
+            f"real_accept={ra.mean():.3f} agree={(ia == ra).mean():.3f} "
+            f"gap_mean={(a[:, 0] - a[:, 1]).mean():+.3f} tau={tau}")
+
+
+class _RecordingSolver:
+    """Transparent proxy over a swm solver that keeps the last solve's full
+    action plan, so the imagination-check control can roll the predictor over
+    the block about to be executed. Everything else forwards to the solver."""
+
+    def __init__(self, solver):
+        object.__setattr__(self, "_solver", solver)
+        object.__setattr__(self, "last_actions", None)
+
+    def __call__(self, *args, **kwargs):
+        out = self._solver(*args, **kwargs)
+        object.__setattr__(self, "last_actions", out["actions"])
+        return out
+
+    def __getattr__(self, name):
+        return getattr(self._solver, name)
+
+    def __setattr__(self, name, value):
+        setattr(self._solver, name, value)
+
 
 class CstarRetireSource:
     """Routed Surveyor: draft only while the planner certifies the goal is
@@ -553,17 +629,29 @@ class CstarRetireSource:
 
     def __init__(self, planner, lewm, n_envs, device="cpu", n_steps=50, seed=42,
                  tau=0.2, horizon=2, action_block=5, num_samples=300,
-                 cem_steps=30, topk=30, var_scale=1.0, adim=2, record=False):
-        self.spec = SurveyorSource(planner, n_envs, device=device,
-                                            n_steps=n_steps, seed=seed, tau=tau,
-                                            record=record)  # latent goal_gate OFF by design
+                 cem_steps=30, topk=30, var_scale=1.0, adim=2,
+                 spec=None, record=False, probe_solver="cem", retire_tau=None):
+        self.spec = spec if spec is not None else SurveyorSource(
+            planner, n_envs, device=device, n_steps=n_steps, seed=seed, tau=tau,
+            record=record)  # latent goal_gate OFF by design
+        # a paired spec (Two-Room) verifies in the DINOv2 half and serves the
+        # LeWM half, so the cache is LeWM-sized and frames must be forwarded
+        self.wants_frames = bool(getattr(self.spec, "wants_frames", False))
         self.lewm = lewm
         self.cost_model = SubgoalCostModel(lewm)
-        self.dim = int(planner.cfg.latent_dim)
+        if self.wants_frames:
+            from surveyor.paired import LEWM_DIM
+            self.dim = int(LEWM_DIM)
+        else:
+            self.dim = int(planner.cfg.latent_dim)
         self.device = device
         self.n_envs = n_envs
         self.tau = float(tau)
         self.adim = int(adim)
+        self.probe_solver = str(probe_solver)
+        self.retire_tau = float(tau if retire_tau is None else retire_tau)
+        print(f"[router+surveyor] c* probe solver={self.probe_solver} "
+              f"retire_tau={self.retire_tau:g} (verifier tau={self.tau:g})")
         self.cem = dict(horizon=int(horizon), action_block=int(action_block),
                         num_samples=int(num_samples), n_steps=int(cem_steps),
                         topk=int(topk), var_scale=float(var_scale), seed=int(seed))
@@ -579,7 +667,8 @@ class CstarRetireSource:
                       "spec": self.spec.trace}
 
     @torch.no_grad()
-    def current(self, sg_steps, obs_latent=None, replan_idx=None, goal_latent=None) -> torch.Tensor:
+    def current(self, sg_steps, obs_latent=None, replan_idx=None, goal_latent=None,
+                frames=None, goal_frames=None) -> torch.Tensor:
         """Re-read c* on unretired envs, then serve the goal or defer to Surveyor.
 
         Retirement is one-way: from the first replan at which c* <= tau that env
@@ -594,16 +683,24 @@ class CstarRetireSource:
             # per-replan retirement check, batched over unretired rows
             live = [r for r, i in enumerate(replan_idx) if not self._retired[i]]
             if live:
-                cs = cem_flat_cstar(self.lewm, self.cost_model,
-                                    obs_latent[live], goal_latent[live],
-                                    self.cem, adim=self.adim)
+                if self.probe_solver == "latent":
+                    # plan-free router (patch S): the probe is the discrepancy between the
+                    # current and goal latents, rel(z_t, z_goal), with no plan
+                    zl = obs_latent[live].to(self.device)
+                    gl = goal_latent[live].to(self.device)
+                    cs = ((zl - gl).norm(dim=-1) / zl.norm(dim=-1).clamp_min(1e-8)).cpu().numpy()
+                else:
+                    cs = cem_flat_cstar(self.lewm, self.cost_model,
+                                        obs_latent[live], goal_latent[live],
+                                        self.cem, adim=self.adim,
+                                        probe_solver=self.probe_solver)
                 for j, r in enumerate(live):
                     i = replan_idx[r]
                     self.c_last[i] = cs[j]
                     if not self._seen[i]:
                         self.c_first[i] = cs[j]
                         self._seen[i] = True
-                    if cs[j] <= self.tau:
+                    if cs[j] <= self.retire_tau:
                         self._retired[i] = True
                         self.retire_replan[i] = self._replans[i]
 
@@ -618,9 +715,15 @@ class CstarRetireSource:
             if sub:
                 rows = [r for r, _ in sub]
                 envs = [i for _, i in sub]
+                kw = {}
+                if self.wants_frames:
+                    import numpy as _np
+                    kw["frames"] = _np.asarray(frames)[rows]
+                    kw["goal_frames"] = (_np.asarray(goal_frames)[rows]
+                                         if goal_frames is not None else None)
                 out = self.spec.current(sg_steps, obs_latent=obs_latent[rows],
                                         replan_idx=envs,
-                                        goal_latent=goal_latent[rows])
+                                        goal_latent=goal_latent[rows], **kw)
                 for i in envs:
                     self._cache[i] = out[i]
         return self._cache.clone()
@@ -905,6 +1008,9 @@ def make_ffjepa_policy(base_cls):
             # base WorldModelPolicy.__init__(solver, config, process, transform, ...)
             super().__init__(**wmp_kwargs)
             self.type = "ffjepa"
+            if getattr(subgoal_source, "imagine", False):
+                # imagination check: see the committed plan after each solve
+                self.solver = _RecordingSolver(self.solver)
             self.cost_model = cost_model
             self.subgoal_source = subgoal_source
             self._sg_step = None  # per-env subgoal index, init in set_env
@@ -932,6 +1038,20 @@ def make_ffjepa_policy(base_cls):
             # its k-th current() event: both append once per replan.
             self.dump_strip = int(dump_strip)
             self._strip = None
+
+        def _after_solve(self, replan, obs_latent):
+            """Imagination check: forecast the latent at the next replan from the
+            achieved one and the receding-horizon block just committed, and hand
+            it to the source for its next verification."""
+            src = self.subgoal_source
+            if not getattr(src, "imagine", False) or not replan or obs_latent is None:
+                return
+            acts = getattr(self.solver, "last_actions", None)
+            if acts is None:
+                return
+            rh = int(self.cfg.receding_horizon)
+            zhat = imagine_terminal(self.cost_model.lewm, obs_latent, acts[:, :rh])
+            src.set_imagined(replan, zhat)
 
         def set_env(self, env):
             """Bind the vector env and allocate the per-env subgoal and capture state."""
@@ -1030,7 +1150,9 @@ def make_ffjepa_policy(base_cls):
                                                 replan_idx=replan, goal_latent=goal_latent,
                                                 **self._frame_kwargs(frames, gframes))  # (n,192)
                 info_dict = {**info_dict, SubgoalCostModel.SUBGOAL_KEY: z}
-                return super().get_action(info_dict, **kwargs)
+                result = super().get_action(info_dict, **kwargs)
+                self._after_solve(replan, obs_latent)
+                return result
 
             # timed path (--time-instrument): identical logic, wrapped with
             # perf_counter() at the drafter/CEM boundary, CUDA-synced first.
@@ -1065,6 +1187,7 @@ def make_ffjepa_policy(base_cls):
             self.t_drafter += _t1 - _t0
 
             result = super().get_action(info_dict, **kwargs)
+            self._after_solve(replan, obs_latent)
 
             if torch.cuda.is_available():
                 torch.cuda.synchronize()

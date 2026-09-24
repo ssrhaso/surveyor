@@ -9,7 +9,7 @@ episodes' rows, in episode order. Compression and chunking are mirrored from the
 source so readability is identical.
 
 Usage (on the machine holding the full file):
-  python batch/make_holdout_subset.py --src data/reacher/reacher.h5 \
+  python surveyor/envs/reacher/make_holdout_subset.py --src data/reacher/reacher.h5 \
       --out reacher_holdout.h5 --ep-min 8000
 """
 import argparse

@@ -16,6 +16,7 @@ import numpy as np
 import torch
 
 from surveyor import encoder
+from surveyor.solvers import add_solver_arg, make_solver
 from surveyor.envs.pusht.eval import sample_short, sample_long
 from surveyor.sources import (SubgoalCostModel, OracleSubgoalSource,
                                     GDMSubgoalSource, SurveyorSource,
@@ -34,11 +35,29 @@ def parse_args():
     # what to evaluate
     p.add_argument("--subgoal", choices=["oracle", "voracle", "ffjepa", "flat",
                                          "surveyor", "paired+surveyor", "router+surveyor", "lerp",
-                                         "random", "gcidm"],
+                                         "random", "gcidm", "gcidm+surveyor",
+                                         "leflow", "leflow+surveyor"],
                    default="oracle")
     p.add_argument("--gcidm-ckpt", default=None,
                    help="GC-IDM checkpoint (arXiv 2605.08732 comparator); amortised "
                         "controller, one MLP forward per step and no solver")
+    p.add_argument("--sg-steps", type=int, default=10,
+                   help="gcidm+surveyor / leflow+surveyor: subgoal spacing S the executor tracks")
+    p.add_argument("--random-reject", type=float, default=None,
+                   help="coin control over the amortized executor: reject with this "
+                        "probability instead of the latent test (rate-matched offline)")
+    p.add_argument("--cstar-route", action="store_true",
+                   help="gcidm+surveyor / leflow+surveyor: certified scope. One flat-CEM "
+                        "c* probe at t=0 routes the episode to the executor alone when "
+                        "c* <= tau; drafting envs carry the tau arrival gate.")
+    p.add_argument("--leflow-ckpt", default=None,
+                   help="LeFlow latent planner checkpoint (leflow/<env>/latent_planner.pt)")
+    p.add_argument("--leflow-stats", default=None,
+                   help="LeFlow action normaliser stats (leflow/<env>/action_stats.json)")
+    p.add_argument("--leflow-receding", type=int, default=25,
+                   help="leflow alone: replan toward the goal every this many raw steps")
+    p.add_argument("--leflow-samples", type=int, default=64)
+    p.add_argument("--leflow-flow-steps", type=int, default=16)
     p.add_argument("--lerp-frac", type=float, default=0.5,
                    help="lerp diagnostic source: fraction along current->goal "
                         "(1.0 = instrumented-flat tautology)")
@@ -124,8 +143,7 @@ def parse_args():
                         "goal_{col} keys. Those derived keys resolve to "
                         "column-at-goal-frame and SHADOW the raw column, so both "
                         "--goal-from-proprio settings serve the same hindsight value "
-                        "(state==proprio in this h5); see prereg "
-                        "2026-08-07_composite_and_executor.md section D. The goal "
+                        "(state==proprio in this h5). The goal "
                         "IMAGE the policy sees is unchanged (target unrendered).")
     p.add_argument("--require-cross-room", action="store_true",
                    help="restrict eval episodes to ones whose agent and target START in "
@@ -158,6 +176,11 @@ def parse_args():
     p.add_argument("--horizon", type=int, default=5)
     p.add_argument("--receding-horizon", type=int, default=5)
     p.add_argument("--action-block", type=int, default=5)
+    add_solver_arg(p)
+    p.add_argument("--probe-solver", choices=("cem", "match", "latent"), default="cem",
+                   help="c* probe solver for router+surveyor: cem (default) or match = --solver")
+    p.add_argument("--retire-tau", type=float, default=None,
+                   help="router+surveyor retirement threshold on c* (default: --accept-tau)")
     p.add_argument("--num-samples", type=int, default=300)
     p.add_argument("--n-steps", type=int, default=30)
     p.add_argument("--topk", type=int, default=30)
@@ -284,13 +307,18 @@ def main():
     # plans nothing and takes the plain cost model like baseline.
     is_random = args.subgoal == "random"
     is_gcidm = args.subgoal == "gcidm"
+    is_gcidm_surveyor = args.subgoal == "gcidm+surveyor"
+    is_leflow = args.subgoal == "leflow"
+    is_leflow_surveyor = args.subgoal == "leflow+surveyor"
     is_baseline = args.subgoal in ("flat", "random", "gcidm")
     cost_model = model if is_baseline else SubgoalCostModel(model)
+    source = None
     print(f"[model] frozen LeWM ({sum(p.numel() for p in model.parameters())/1e6:.2f}M), "
           f"device={args.device}, training={model.training}, subgoal={args.subgoal}")
 
     gdm_planner = None
-    if args.subgoal in ("ffjepa", "surveyor", "paired+surveyor", "router+surveyor"):
+    if args.subgoal in ("ffjepa", "surveyor", "paired+surveyor", "router+surveyor",
+                        "gcidm+surveyor", "leflow+surveyor"):
         from surveyor.drafter import load_gdm_planner, count_params
         gdm_planner = load_gdm_planner(args.gdm_ckpt, device=args.device)
         d = gdm_planner.diffusion
@@ -395,10 +423,9 @@ def main():
             _env._set_goal_state = (
                 lambda goal_state, _f=_orig, _r=raw[_i]: _f(_r.copy()))
         print(f"[protocol] {args.num_eval} env setters patched with raw fixed targets")
-    solver = swm.solver.CEMSolver(model=cost_model, batch_size=1,
-                                  num_samples=args.num_samples, var_scale=args.var_scale,
-                                  n_steps=args.n_steps, topk=args.topk,
-                                  device=args.device, seed=cem_seed)
+    solver = make_solver(getattr(args, "solver", "cem"), cost_model, num_samples=args.num_samples,
+                                 var_scale=args.var_scale, n_steps=args.n_steps, topk=args.topk,
+                                 device=args.device, seed=cem_seed)
     if is_random:
         # seeded via set_policy() from .seed, deterministic at cem_seed like every arm
         policy = swm.policy.RandomPolicy(seed=cem_seed)
@@ -410,6 +437,59 @@ def main():
         print(f"[gcidm] {args.gcidm_ckpt}: H_max={gci.h_max} "
               f"params={sum(p.numel() for p in gci.parameters())/1e6:.2f}M "
               f"budget={eval_budget} (1 forward/step, no solver)")
+    elif is_gcidm_surveyor or is_leflow or is_leflow_surveyor:
+        # amortized executors on Two-Room: the paired drafter proposes 576-d
+        # [lewm | dino] waypoints; the executor tracks the LeWM half, the accept
+        # test and the arrival gate read the DINOv2 half at the DINO tau
+        from surveyor.paired import PairedEncoder, load_dinov2
+        penc = PairedEncoder(model, load_dinov2(device=args.device), device=args.device)
+        if is_gcidm_surveyor:
+            from surveyor.gcidm import load_gcidm
+            from surveyor.gcidm_executor import SurveyorGCIDMPolicy
+            gci, ascaler, gmeta = load_gcidm(args.gcidm_ckpt, device=args.device)
+            policy = SurveyorGCIDMPolicy(gci, gdm_planner, model,
+                                     sg_steps=args.sg_steps, tau=args.accept_tau,
+                                     n_steps=args.gdm_steps, seed=cem_seed,
+                                     device=args.device, action_scaler=ascaler,
+                                     budget=eval_budget, cstar_route=args.cstar_route, probe_solver=args.probe_solver, retire_tau=args.retire_tau, action_proc=process.get("action"),
+                                     cem=dict(horizon=args.horizon, action_block=args.action_block,
+                                              num_samples=args.num_samples, n_steps=args.n_steps,
+                                              topk=args.topk, var_scale=args.var_scale,
+                                              seed=cem_seed),
+                                     adim=2, goal_gate=args.goal_gate,
+                                     random_reject=args.random_reject, paired_encoder=penc)
+            print(f"[gcidm+surveyor] executor={args.gcidm_ckpt} (H_max={gci.h_max}) "
+                  f"drafter={args.gdm_ckpt} S={args.sg_steps} tau={args.accept_tau} (dino half) "
+                  f"k={args.gdm_steps} cstar_route={args.cstar_route} goal_gate={args.goal_gate} "
+                  f"(accept rule unchanged, paired)")
+        else:
+            from surveyor.leflow_executor import (LeFlowPlanner, LeFlowPolicy, SurveyorLeFlowPolicy,
+                                                  load_leflow, load_action_stats)
+            if not args.leflow_ckpt or not args.leflow_stats:
+                raise ValueError("--leflow-ckpt and --leflow-stats are required for the LeFlow arms")
+            lf_rt = load_leflow(args.leflow_ckpt, device=args.device)
+            lf_stats = load_action_stats(args.leflow_stats)
+            lf_planner = LeFlowPlanner(lf_rt, horizon=5, num_samples=args.leflow_samples,
+                                       flow_steps=args.leflow_flow_steps, seed=cem_seed)
+            if is_leflow:
+                policy = LeFlowPolicy(lf_planner, model, budget=eval_budget, action_stats=lf_stats,
+                                      receding_steps=args.leflow_receding, device=args.device)
+                print(f"[leflow] {args.leflow_ckpt} H=5 action_block={lf_rt.action_block} "
+                      f"samples={args.leflow_samples} flow_steps={args.leflow_flow_steps} "
+                      f"replan every {args.leflow_receding} raw steps (no CEM)")
+            else:
+                policy = SurveyorLeFlowPolicy(lf_planner, gdm_planner, model, sg_steps=args.sg_steps,
+                                              tau=args.accept_tau, n_steps=args.gdm_steps, seed=cem_seed,
+                                              device=args.device, action_stats=lf_stats, budget=eval_budget,
+                                              random_reject=args.random_reject, paired_encoder=penc, 
+                                              cstar_route=args.cstar_route, goal_gate=args.goal_gate,
+                                              cem=dict(horizon=args.horizon, action_block=args.action_block,
+                                                       num_samples=args.num_samples, n_steps=args.n_steps,
+                                                       topk=args.topk, var_scale=args.var_scale,
+                                                       seed=cem_seed), adim=2)
+                print(f"[leflow+surveyor] executor={args.leflow_ckpt} drafter={args.gdm_ckpt} "
+                      f"S={args.sg_steps} tau={args.accept_tau} k={args.gdm_steps} "
+                      f"cstar_route={args.cstar_route} paired (accept rule unchanged)")
     elif is_baseline:
         policy = swm.policy.WorldModelPolicy(
             solver=solver, config=config, process=process, transform=transform)
@@ -485,7 +565,14 @@ def main():
             print(f"[voracle] achievement-verified oracle: tau={args.accept_tau}, "
                   f"advance only when the achieved latent reaches the waypoint")
         elif args.subgoal == "router+surveyor":
+            # Two-Room drafts are paired (576-d): the retire logic wraps the
+            # paired source (verify DINOv2 half, serve LeWM half) at the DINO
+            # tau; c* itself is read by the flat-CEM probe in LeWM space.
+            from surveyor.paired import PairedEncoder, SurveyorPairedSource, load_dinov2
+            penc = PairedEncoder(model, load_dinov2(device=args.device), device=args.device)
             source = CstarRetireSource(gdm_planner, model, n_envs=args.num_eval,
+                                       probe_solver=(args.solver if args.probe_solver == "match" else args.probe_solver),
+                                       retire_tau=args.retire_tau,
                                        device=args.device, n_steps=args.gdm_steps,
                                        seed=cem_seed, tau=args.accept_tau,
                                        horizon=args.horizon,
@@ -493,7 +580,14 @@ def main():
                                        num_samples=args.num_samples,
                                        cem_steps=args.n_steps, topk=args.topk,
                                        var_scale=args.var_scale, adim=2,
+                                       spec=SurveyorPairedSource(
+                                           gdm_planner, penc, n_envs=args.num_eval,
+                                           device=args.device, n_steps=args.gdm_steps,
+                                           seed=cem_seed, tau=args.accept_tau,
+                                           record=bool(args.dump_traces),
+                                           goal_gate=args.goal_gate),
                                        record=bool(args.dump_traces))
+            print("[router+surveyor] paired spec: verify-space=dino384, LeWM half served")
             print(f"[router+surveyor] c*-retire surveyor: tau={args.accept_tau}, "
                   f"retire window={args.horizon * args.action_block} steps; "
                   f"drafting only while the goal is out of certified reach")
@@ -550,6 +644,23 @@ def main():
               f"(every-step=1.000; lower = fewer diffusion calls)")
     if args.subgoal == "paired+surveyor":
         print(source.stats())
+    if is_gcidm_surveyor:
+        b = policy.n_redraft + policy.n_advance
+        print(f"[gcidm+surveyor cost] exec_forwards={policy.n_calls} "
+              f"redrafts={policy.n_redraft} advances={policy.n_advance} "
+              f"rejects={policy.n_reject} call_ratio={policy.n_redraft / max(b, 1):.3f} "
+              f"routed={policy.n_routed} arrived={policy.n_arrive} "
+              f"draft_s={policy.t_draft:.2f} exec_s={policy.t_exec:.2f} probe_s={policy.t_probe:.2f}")
+    if is_leflow:
+        print(f"[leflow cost] plans={policy.planner.n_plans} decisions={policy.n_calls} "
+              f"plan_s={policy.planner.t_plan:.2f} exec_s={policy.t_exec:.2f}")
+    if is_leflow_surveyor:
+        b = policy.n_redraft + policy.n_advance
+        print(f"[leflow+surveyor cost] plans={policy.planner.n_plans} decisions={policy.n_calls} "
+              f"redrafts={policy.n_redraft} advances={policy.n_advance} "
+              f"rejects={policy.n_reject} call_ratio={policy.n_redraft / max(b, 1):.3f} "
+              f"routed={policy.n_routed} arrived={policy.n_arrive} "
+              f"draft_s={policy.t_draft:.2f} plan_s={policy.planner.t_plan:.2f} exec_s={policy.t_exec:.2f}")
     if args.subgoal == "voracle":
         pt = source._ptr
         print(f"[voracle] tau={source.tau} advances={source.n_advance} holds={source.n_hold} "
@@ -559,7 +670,7 @@ def main():
     if args.subgoal == "router+surveyor":
         seen = source._seen
         retired = int(source._retired.sum())
-        fire0 = int((source.c_first[seen] <= source.tau).sum())
+        fire0 = int((source.c_first[seen] <= getattr(source, "retire_tau", source.tau)).sum())
         rr = source.retire_replan[source.retire_replan >= 0]
         cf = source.c_first[seen]
         sp = source.spec

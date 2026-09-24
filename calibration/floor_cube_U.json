@@ -1,0 +1,65 @@
+{
+ "args": {
+  "env": "cube",
+  "h5": "cube_single_expert.h5",
+  "source": "pretrained",
+  "encoder_id": "quentinll/lewm-cube",
+  "local_dir": null,
+  "swm_src": null,
+  "gdm_ckpt": null,
+  "device": "cuda",
+  "batch_size": 256,
+  "n_anchors": 512,
+  "pair_pool": 120000,
+  "n_cond": 128,
+  "n_draws": 8,
+  "ks": [
+   1,
+   2,
+   4,
+   8,
+   16,
+   50
+  ],
+  "stride": 10,
+  "goal_gap": 100,
+  "episode_min": 0,
+  "pos_thresh": 20.0,
+  "qpos_tol": 0.05,
+  "cube_tol": 0.04,
+  "tau": 0.2,
+  "verify_space": "lewm",
+  "seed": 42,
+  "json_out": "Results/floor_cube_U.json"
+ },
+ "env": "cube",
+ "verify_space": "lewm",
+ "temporal_floor_disp1": {
+  "mean": 0.11297595415089745,
+  "std": 0.0887669252324457,
+  "p10": 0.04334166124463081,
+  "p50": 0.08689139038324356,
+  "p90": 0.2170630708336832,
+  "n": 512
+ },
+ "disp_S10": {
+  "mean": 0.7196795259733335,
+  "std": 0.34478059404844125,
+  "p10": 0.34039310812950135,
+  "p50": 0.657075971364975,
+  "p90": 1.307013511657715,
+  "n": 512
+ },
+ "criterion_floor_cube": {
+  "mean": 0.7840694438637001,
+  "std": 0.2783168105062611,
+  "p10": 0.41758993268013,
+  "p50": 0.7935295403003693,
+  "p90": 1.1636946797370913,
+  "n": 512,
+  "p50_ci95": [
+   0.7590484619140625,
+   0.8259861767292023
+  ]
+ }
+}

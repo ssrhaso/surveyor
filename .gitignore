@@ -1,6 +1,7 @@
-# This repository tracks code, configuration and pre-registration documents.
-# Everything below is produced by that code, downloaded by it, or is narrative
-# about it, and stays local.
+# This repository tracks code, configuration, the fixed evaluation populations (episodes/), the tolerance-probe
+# outputs (calibration/) and the pipeline that rebuilds the paper's tables and figures from the harvested results
+# (reproduce/). Pre-registration documents are not part of it. Everything below is produced by that code, downloaded
+# by it, or is narrative about it, and stays local.
 
 # Python
 __pycache__/
@@ -19,6 +20,8 @@ __pycache__/
 /encoder_reacher/
 /encoder_tworoom/
 /vjepa2/upstream/
+# local copies of the evaluation populations; the tracked ones are in episodes/
+/*.json
 
 # Cluster job scripts: thin SLURM wrappers around the commands the README
 # documents, carrying site-specific accounts, paths and queue names.
@@ -30,6 +33,7 @@ __pycache__/
 /strips/
 /cld/
 /archive/
+/logs/
 
 # Manuscript sources, figures and build artifacts. The code tree stands alone.
 /paper/
@@ -45,16 +49,34 @@ __pycache__/
 *.fls
 *.fdb_latexmk
 
-# Working notes, superseded by the manuscript.
+# Working notes and pre-registration documents, not released.
 PLAN.md
 DIRECTION_*.md
 RESULTS_*.md
+/prereg/
 /docs/*
 !/docs/media/
 !/docs/media/*
 
 # Editor and script backups, kept out of the re-included media directory.
 *.bak
+*.bak-*
+*.bak_*
+
+# Development drivers that no reported result uses.
+/surveyor/proj_oracle.py
+/surveyor/envs/*/eval_proj.py
+
+# External code is cloned at the pinned commits of external/README.md, not vendored.
+/external/*
+!/external/README.md
 
 # V-JEPA 2 scratch: the upstream clone, its job wrappers and encoded latents.
 /vjepa2/
+
+# The reproducibility package, re-included after the patterns above (episode files match *.episodes*.json, the array
+# runner matches *.sbatch); the builders' default output directory stays local.
+!/episodes/*.json
+!/calibration/*.json
+!/reproduce/*.sbatch
+/reproduce/out/

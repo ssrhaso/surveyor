@@ -52,6 +52,12 @@ def parse_args():
     p.add_argument("--wall-center", type=float, default=112.0)
     p.add_argument("--pairs-per-pop", type=int, default=6000)
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--match-target", action="store_true",
+                   help="full-scene equivalence: the episode target, which is drawn in the frame, must also lie within "
+                        "--pos-thresh (automatic for same-episode pairs, whose target is fixed)")
+    p.add_argument("--pairing", choices=["same", "different"], default="same",
+                   help="episodes the criterion-equivalent pairs come from. 'same' is how 0.098 was measured in "
+                        "July; 'different' is the rule of Section 3.5 and of probes/probe_floor.py (2026-09-19)")
     p.add_argument("--dump-latents", default=None,
                    help="directory to write per-episode lat_tworoom_paired_*.npz "
                         "(key 'tokens'), the input format learn_readout --lat-glob "
@@ -65,6 +71,16 @@ def pct(x):
             "p10": float(np.percentile(x, 10)),
             "p50": float(np.percentile(x, 50)),
             "p90": float(np.percentile(x, 90))}
+
+
+def median_ci(x, seed, n_boot=10000, chunk=500):
+    """95% percentile-bootstrap interval of the median (own generator, so the pair draws above are unchanged);
+    same procedure as surveyor.probes.probe_floor.median_ci, chunked because this population is larger."""
+    x = np.asarray(x, dtype=np.float64)
+    boot = np.random.default_rng(seed + 1)
+    meds = np.concatenate([np.median(x[boot.integers(0, len(x), size=(chunk, len(x)))], axis=1)
+                           for _ in range(n_boot // chunk)])
+    return [float(np.percentile(meds, 2.5)), float(np.percentile(meds, 97.5))]
 
 
 def rel(a, b):
@@ -111,7 +127,7 @@ def main():
         if dump:
             dump.mkdir(parents=True, exist_ok=True)
 
-        lat, pos, epid = [], [], []
+        lat, pos, epid, tgt = [], [], [], []
         for k, e in enumerate(eps):
             off, L = int(ep_off[e]), int(ep_len[e])
             z = paired.encode_frames_dino(dino, pixels[off:off + L], device=dev)
@@ -119,6 +135,7 @@ def main():
             lat.append(zn)
             pos.append(np.asarray(state[off:off + L], dtype=np.float32))
             epid.append(np.full(L, k, dtype=np.int64))
+            tgt.append(np.asarray(goal_state[off:off + L], dtype=np.float32))
             if dump:
                 np.savez(dump / f"lat_tworoom_paired_{k:04d}.npz", tokens=zn,
                          state=np.asarray(state[off:off + L], dtype=np.float32))
@@ -127,17 +144,37 @@ def main():
 
     Z = np.concatenate(lat, 0)
     P = np.concatenate(pos, 0)
+    G = np.concatenate(tgt, 0)
     E = np.concatenate(epid, 0)
     print(f"[probe] {Z.shape[0]} frames, dim={Z.shape[1]}")
 
-    # ---- equiv_criterion: same-episode pairs within the success radius -------
+    # ---- equiv_criterion: pairs within the success radius (--pairing: same or different episodes) ----
     eq_c = []
     tries = 0
+    if args.match_target and args.pairing == "different":
+        # full-scene pairs across episodes, enumerated instead of rejection-sampled (they are rare): episode pairs
+        # whose targets agree, then every frame pair of theirs whose agents agree; a uniform sample of those
+        ids = np.unique(E)
+        rows = [np.flatnonzero(E == k) for k in ids]
+        tg = np.stack([G[r[0]] for r in rows])
+        cand = []
+        for a in range(len(ids)):
+            near = np.flatnonzero(np.linalg.norm(tg[a + 1:] - tg[a], axis=1) < args.pos_thresh) + a + 1
+            for b in near:
+                d = np.linalg.norm(P[rows[a]][:, None, :] - P[rows[b]][None, :, :], axis=2)
+                ii, jj = np.nonzero(d < args.pos_thresh)
+                cand += list(zip(rows[a][ii], rows[b][jj]))
+        print(f"[probe] full-scene cross-episode pairs available: {len(cand)}")
+        pick = rng.choice(len(cand), size=min(args.pairs_per_pop, len(cand)), replace=False)
+        eq_c = [rel(Z[cand[k][0]], Z[cand[k][1]]) for k in pick]
+        tries = 10 ** 12   # skip the rejection sampler below
     while len(eq_c) < args.pairs_per_pop and tries < args.pairs_per_pop * 200:
         tries += 1
         i = rng.integers(0, Z.shape[0])
         j = rng.integers(0, Z.shape[0])
-        if E[i] != E[j] or i == j:
+        if i == j or (E[i] == E[j]) != (args.pairing == "same"):
+            continue
+        if args.match_target and np.linalg.norm(G[i] - G[j]) >= args.pos_thresh:
             continue
         if np.linalg.norm(P[i] - P[j]) < args.pos_thresh:
             eq_c.append(rel(Z[i], Z[j]))
@@ -161,7 +198,9 @@ def main():
     out = {"name": "tworoom-paired-dino384", "h5": args.h5,
            "episodes": int(len(eps)), "frames": int(Z.shape[0]),
            "pos_thresh": args.pos_thresh,
-           "equiv_criterion": pct(eq_c), "equiv_temporal": pct(eq_t),
+           "equiv_criterion": {**pct(eq_c), "p50_ci95": median_ci(eq_c, args.seed), "pairing": args.pairing,
+                               "match_target": bool(args.match_target)},
+           "equiv_temporal": pct(eq_t),
            "cross": pct(cr), "hops": {}}
 
     print("\nequiv_criterion (within %.0f px)  p10/p50/p90 = %.4f / %.4f / %.4f"

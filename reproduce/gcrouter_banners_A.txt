@@ -1,0 +1,216 @@
+rbI_cube_gcrouter_off_s42_t100_seed42.log	[gcidm+surveyor cost] exec_forwards=128 redrafts=0 advances=0 rejects=0 call_ratio=0.000 routed=128 arrived=0 draft_s=0.00 exec_s=0.87
+rbI_cube_gcrouter_off_s42_t100_seed43.log	[gcidm+surveyor cost] exec_forwards=128 redrafts=0 advances=0 rejects=0 call_ratio=0.000 routed=128 arrived=0 draft_s=0.00 exec_s=0.34
+rbI_cube_gcrouter_off_s42_t100_seed44.log	[gcidm+surveyor cost] exec_forwards=128 redrafts=0 advances=0 rejects=0 call_ratio=0.000 routed=128 arrived=0 draft_s=0.00 exec_s=0.34
+rbI_cube_gcrouter_off_s42_t100_seed45.log	[gcidm+surveyor cost] exec_forwards=128 redrafts=1 advances=0 rejects=0 call_ratio=1.000 routed=127 arrived=0 draft_s=0.03 exec_s=0.33
+rbI_cube_gcrouter_off_s42_t100_seed46.log	[gcidm+surveyor cost] exec_forwards=128 redrafts=0 advances=0 rejects=0 call_ratio=0.000 routed=128 arrived=0 draft_s=0.00 exec_s=0.34
+rbI_cube_gcrouter_off_s42_t100_seed47.log	[gcidm+surveyor cost] exec_forwards=128 redrafts=2 advances=0 rejects=0 call_ratio=1.000 routed=126 arrived=0 draft_s=0.03 exec_s=0.32
+rbI_cube_gcrouter_off_s42_t100_seed48.log	[gcidm+surveyor cost] exec_forwards=128 redrafts=0 advances=0 rejects=0 call_ratio=0.000 routed=128 arrived=0 draft_s=0.00 exec_s=0.34
+rbI_cube_gcrouter_off_s42_t100_seed49.log	[gcidm+surveyor cost] exec_forwards=128 redrafts=0 advances=0 rejects=0 call_ratio=0.000 routed=128 arrived=0 draft_s=0.00 exec_s=0.41
+rbI_cube_gcrouter_off_s42_t150_seed42.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=1543 advances=99 rejects=1486 call_ratio=0.940 routed=73 arrived=1 draft_s=0.45 exec_s=50.81
+rbI_cube_gcrouter_off_s42_t150_seed43.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=1678 advances=62 rejects=1616 call_ratio=0.964 routed=70 arrived=0 draft_s=0.46 exec_s=51.55
+rbI_cube_gcrouter_off_s42_t150_seed44.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=1525 advances=95 rejects=1467 call_ratio=0.941 routed=74 arrived=0 draft_s=0.45 exec_s=51.29
+rbI_cube_gcrouter_off_s42_t150_seed45.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=1712 advances=89 rejects=1646 call_ratio=0.951 routed=67 arrived=2 draft_s=0.46 exec_s=51.68
+rbI_cube_gcrouter_off_s42_t150_seed46.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=1817 advances=73 rejects=1750 call_ratio=0.961 routed=65 arrived=0 draft_s=0.45 exec_s=50.59
+rbI_cube_gcrouter_off_s42_t150_seed47.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=1978 advances=95 rejects=1907 call_ratio=0.954 routed=58 arrived=1 draft_s=0.46 exec_s=51.51
+rbI_cube_gcrouter_off_s42_t150_seed48.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=1905 advances=58 rejects=1838 call_ratio=0.970 routed=62 arrived=1 draft_s=0.45 exec_s=50.70
+rbI_cube_gcrouter_off_s42_t150_seed49.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=2012 advances=96 rejects=1937 call_ratio=0.954 routed=57 arrived=1 draft_s=0.45 exec_s=51.09
+rbI_cube_gcrouter_off_s42_t25_seed42.log	[gcidm+surveyor cost] exec_forwards=128 redrafts=5 advances=0 rejects=0 call_ratio=1.000 routed=123 arrived=0 draft_s=0.03 exec_s=0.28
+rbI_cube_gcrouter_off_s42_t25_seed43.log	[gcidm+surveyor cost] exec_forwards=128 redrafts=7 advances=0 rejects=0 call_ratio=1.000 routed=121 arrived=0 draft_s=0.03 exec_s=0.28
+rbI_cube_gcrouter_off_s42_t25_seed44.log	[gcidm+surveyor cost] exec_forwards=128 redrafts=7 advances=0 rejects=0 call_ratio=1.000 routed=121 arrived=0 draft_s=0.03 exec_s=0.29
+rbI_cube_gcrouter_off_s42_t25_seed45.log	[gcidm+surveyor cost] exec_forwards=128 redrafts=5 advances=0 rejects=0 call_ratio=1.000 routed=123 arrived=0 draft_s=0.03 exec_s=0.31
+rbI_cube_gcrouter_off_s42_t25_seed46.log	[gcidm+surveyor cost] exec_forwards=128 redrafts=4 advances=0 rejects=0 call_ratio=1.000 routed=124 arrived=0 draft_s=0.03 exec_s=0.29
+rbI_cube_gcrouter_off_s42_t25_seed47.log	[gcidm+surveyor cost] exec_forwards=128 redrafts=3 advances=0 rejects=0 call_ratio=1.000 routed=125 arrived=0 draft_s=0.03 exec_s=0.33
+rbI_cube_gcrouter_off_s42_t25_seed48.log	[gcidm+surveyor cost] exec_forwards=128 redrafts=6 advances=0 rejects=0 call_ratio=1.000 routed=122 arrived=0 draft_s=0.03 exec_s=0.32
+rbI_cube_gcrouter_off_s42_t25_seed49.log	[gcidm+surveyor cost] exec_forwards=128 redrafts=7 advances=0 rejects=0 call_ratio=1.000 routed=121 arrived=0 draft_s=0.03 exec_s=0.29
+rbI_cube_gcrouter_off_s42_t50_seed42.log	[gcidm+surveyor cost] exec_forwards=512 redrafts=0 advances=0 rejects=0 call_ratio=0.000 routed=128 arrived=0 draft_s=0.00 exec_s=0.85
+rbI_cube_gcrouter_off_s42_t50_seed43.log	[gcidm+surveyor cost] exec_forwards=640 redrafts=0 advances=0 rejects=0 call_ratio=0.000 routed=128 arrived=0 draft_s=0.00 exec_s=0.97
+rbI_cube_gcrouter_off_s42_t50_seed44.log	[gcidm+surveyor cost] exec_forwards=1792 redrafts=2 advances=0 rejects=1 call_ratio=1.000 routed=127 arrived=0 draft_s=0.05 exec_s=2.60
+rbI_cube_gcrouter_off_s42_t50_seed45.log	[gcidm+surveyor cost] exec_forwards=640 redrafts=0 advances=0 rejects=0 call_ratio=0.000 routed=128 arrived=0 draft_s=0.00 exec_s=1.02
+rbI_cube_gcrouter_off_s42_t50_seed46.log	[gcidm+surveyor cost] exec_forwards=640 redrafts=1 advances=0 rejects=0 call_ratio=1.000 routed=127 arrived=0 draft_s=0.03 exec_s=0.96
+rbI_cube_gcrouter_off_s42_t50_seed47.log	[gcidm+surveyor cost] exec_forwards=768 redrafts=0 advances=0 rejects=0 call_ratio=0.000 routed=128 arrived=0 draft_s=0.00 exec_s=1.19
+rbI_cube_gcrouter_off_s42_t50_seed48.log	[gcidm+surveyor cost] exec_forwards=768 redrafts=0 advances=0 rejects=0 call_ratio=0.000 routed=128 arrived=0 draft_s=0.00 exec_s=1.20
+rbI_cube_gcrouter_off_s42_t50_seed49.log	[gcidm+surveyor cost] exec_forwards=640 redrafts=0 advances=0 rejects=0 call_ratio=0.000 routed=128 arrived=0 draft_s=0.00 exec_s=1.13
+rbI_cube_gcrouter_off_s42_t75_seed42.log	[gcidm+surveyor cost] exec_forwards=19200 redrafts=0 advances=0 rejects=0 call_ratio=0.000 routed=128 arrived=0 draft_s=0.00 exec_s=26.49
+rbI_cube_gcrouter_off_s42_t75_seed43.log	[gcidm+surveyor cost] exec_forwards=19200 redrafts=15 advances=0 rejects=14 call_ratio=1.000 routed=127 arrived=0 draft_s=0.22 exec_s=25.40
+rbI_cube_gcrouter_off_s42_t75_seed44.log	[gcidm+surveyor cost] exec_forwards=19200 redrafts=15 advances=0 rejects=14 call_ratio=1.000 routed=127 arrived=0 draft_s=0.22 exec_s=25.56
+rbI_cube_gcrouter_off_s42_t75_seed45.log	[gcidm+surveyor cost] exec_forwards=19200 redrafts=15 advances=0 rejects=14 call_ratio=1.000 routed=127 arrived=0 draft_s=0.23 exec_s=25.78
+rbI_cube_gcrouter_off_s42_t75_seed46.log	[gcidm+surveyor cost] exec_forwards=19200 redrafts=0 advances=0 rejects=0 call_ratio=0.000 routed=128 arrived=0 draft_s=0.00 exec_s=26.37
+rbI_cube_gcrouter_off_s42_t75_seed47.log	[gcidm+surveyor cost] exec_forwards=19200 redrafts=15 advances=0 rejects=14 call_ratio=1.000 routed=127 arrived=0 draft_s=0.22 exec_s=25.55
+rbI_cube_gcrouter_off_s42_t75_seed48.log	[gcidm+surveyor cost] exec_forwards=19200 redrafts=0 advances=0 rejects=0 call_ratio=0.000 routed=128 arrived=0 draft_s=0.00 exec_s=25.36
+rbI_cube_gcrouter_off_s42_t75_seed49.log	[gcidm+surveyor cost] exec_forwards=19200 redrafts=0 advances=0 rejects=0 call_ratio=0.000 routed=128 arrived=0 draft_s=0.00 exec_s=25.77
+rbI_pusht_gcrouter_off_s42_t100_seed42.log	[gcidm+surveyor cost] exec_forwards=51200 redrafts=4072 advances=1028 rejects=3625 call_ratio=0.798 routed=1 arrived=0 draft_s=0.43 exec_s=60.13 probe_s=33.93
+rbI_pusht_gcrouter_off_s42_t100_seed42.log	[gcidm+surveyor cost] exec_forwards=51200 redrafts=3835 advances=1265 rejects=3333 call_ratio=0.752 routed=1 arrived=0 draft_s=0.40 exec_s=59.86 probe_s=33.89
+rbI_pusht_gcrouter_off_s42_t100_seed43.log	[gcidm+surveyor cost] exec_forwards=51200 redrafts=4033 advances=1047 rejects=3590 call_ratio=0.794 routed=2 arrived=0 draft_s=0.43 exec_s=59.83 probe_s=33.76
+rbI_pusht_gcrouter_off_s42_t100_seed43.log	[gcidm+surveyor cost] exec_forwards=51200 redrafts=3817 advances=1263 rejects=3335 call_ratio=0.751 routed=2 arrived=0 draft_s=0.40 exec_s=59.81 probe_s=33.76
+rbI_pusht_gcrouter_off_s42_t100_seed44.log	[gcidm+surveyor cost] exec_forwards=51200 redrafts=4087 advances=1013 rejects=3675 call_ratio=0.801 routed=1 arrived=0 draft_s=0.43 exec_s=59.67 probe_s=33.98
+rbI_pusht_gcrouter_off_s42_t100_seed44.log	[gcidm+surveyor cost] exec_forwards=51200 redrafts=3871 advances=1229 rejects=3412 call_ratio=0.759 routed=1 arrived=0 draft_s=0.40 exec_s=59.55 probe_s=33.91
+rbI_pusht_gcrouter_off_s42_t100_seed45.log	[gcidm+surveyor cost] exec_forwards=51200 redrafts=4084 advances=1016 rejects=3653 call_ratio=0.801 routed=1 arrived=0 draft_s=0.43 exec_s=59.79 probe_s=33.78
+rbI_pusht_gcrouter_off_s42_t100_seed45.log	[gcidm+surveyor cost] exec_forwards=51200 redrafts=3819 advances=1281 rejects=3319 call_ratio=0.749 routed=1 arrived=0 draft_s=0.40 exec_s=59.40 probe_s=33.77
+rbI_pusht_gcrouter_off_s42_t100_seed46.log	[gcidm+surveyor cost] exec_forwards=51200 redrafts=4087 advances=1013 rejects=3673 call_ratio=0.801 routed=1 arrived=0 draft_s=0.43 exec_s=59.96 probe_s=33.84
+rbI_pusht_gcrouter_off_s42_t100_seed46.log	[gcidm+surveyor cost] exec_forwards=51200 redrafts=3865 advances=1235 rejects=3402 call_ratio=0.758 routed=1 arrived=0 draft_s=0.41 exec_s=59.88 probe_s=33.84
+rbI_pusht_gcrouter_off_s42_t100_seed47.log	[gcidm+surveyor cost] exec_forwards=51200 redrafts=4091 advances=989 rejects=3668 call_ratio=0.805 routed=2 arrived=0 draft_s=0.43 exec_s=59.50 probe_s=33.83
+rbI_pusht_gcrouter_off_s42_t100_seed47.log	[gcidm+surveyor cost] exec_forwards=51200 redrafts=3854 advances=1226 rejects=3366 call_ratio=0.759 routed=2 arrived=0 draft_s=0.41 exec_s=59.62 probe_s=33.88
+rbI_pusht_gcrouter_off_s42_t100_seed48.log	[gcidm+surveyor cost] exec_forwards=51200 redrafts=4036 advances=1044 rejects=3599 call_ratio=0.794 routed=2 arrived=0 draft_s=0.43 exec_s=59.88 probe_s=33.77
+rbI_pusht_gcrouter_off_s42_t100_seed48.log	[gcidm+surveyor cost] exec_forwards=51200 redrafts=3853 advances=1227 rejects=3360 call_ratio=0.758 routed=2 arrived=0 draft_s=0.40 exec_s=59.90 probe_s=33.75
+rbI_pusht_gcrouter_off_s42_t100_seed49.log	[gcidm+surveyor cost] exec_forwards=51200 redrafts=4025 advances=1055 rejects=3587 call_ratio=0.792 routed=2 arrived=0 draft_s=0.42 exec_s=59.49 probe_s=33.74
+rbI_pusht_gcrouter_off_s42_t100_seed49.log	[gcidm+surveyor cost] exec_forwards=51200 redrafts=3887 advances=1193 rejects=3400 call_ratio=0.765 routed=2 arrived=0 draft_s=0.40 exec_s=59.32 probe_s=33.72
+rbI_pusht_gcrouter_off_s42_t150_seed42.log	[gcidm+surveyor cost] exec_forwards=76800 redrafts=6255 advances=1425 rejects=5750 call_ratio=0.814 routed=0 arrived=0 draft_s=0.64 exec_s=90.10 probe_s=34.14
+rbI_pusht_gcrouter_off_s42_t150_seed42.log	[gcidm+surveyor cost] exec_forwards=76800 redrafts=5903 advances=1777 rejects=5320 call_ratio=0.769 routed=0 arrived=0 draft_s=0.61 exec_s=90.02 probe_s=34.17
+rbI_pusht_gcrouter_off_s42_t150_seed43.log	[gcidm+surveyor cost] exec_forwards=76800 redrafts=6185 advances=1495 rejects=5679 call_ratio=0.805 routed=0 arrived=0 draft_s=0.64 exec_s=90.24 probe_s=33.76
+rbI_pusht_gcrouter_off_s42_t150_seed43.log	[gcidm+surveyor cost] exec_forwards=76800 redrafts=5861 advances=1819 rejects=5263 call_ratio=0.763 routed=0 arrived=0 draft_s=0.61 exec_s=88.83 probe_s=33.79
+rbI_pusht_gcrouter_off_s42_t150_seed44.log	[gcidm+surveyor cost] exec_forwards=76800 redrafts=6313 advances=1367 rejects=5825 call_ratio=0.822 routed=0 arrived=0 draft_s=0.64 exec_s=89.80 probe_s=33.84
+rbI_pusht_gcrouter_off_s42_t150_seed44.log	[gcidm+surveyor cost] exec_forwards=76800 redrafts=5972 advances=1708 rejects=5392 call_ratio=0.778 routed=0 arrived=0 draft_s=0.61 exec_s=89.37 probe_s=33.91
+rbI_pusht_gcrouter_off_s42_t150_seed45.log	[gcidm+surveyor cost] exec_forwards=76800 redrafts=6202 advances=1478 rejects=5656 call_ratio=0.808 routed=0 arrived=0 draft_s=0.64 exec_s=89.04 probe_s=33.71
+rbI_pusht_gcrouter_off_s42_t150_seed45.log	[gcidm+surveyor cost] exec_forwards=76800 redrafts=5981 advances=1699 rejects=5420 call_ratio=0.779 routed=0 arrived=0 draft_s=0.61 exec_s=88.95 probe_s=33.73
+rbI_pusht_gcrouter_off_s42_t150_seed46.log	[gcidm+surveyor cost] exec_forwards=76800 redrafts=6240 advances=1440 rejects=5741 call_ratio=0.812 routed=0 arrived=0 draft_s=0.64 exec_s=89.66 probe_s=33.94
+rbI_pusht_gcrouter_off_s42_t150_seed46.log	[gcidm+surveyor cost] exec_forwards=76800 redrafts=5862 advances=1818 rejects=5260 call_ratio=0.763 routed=0 arrived=0 draft_s=0.60 exec_s=89.35 probe_s=33.90
+rbI_pusht_gcrouter_off_s42_t150_seed47.log	[gcidm+surveyor cost] exec_forwards=76800 redrafts=6232 advances=1448 rejects=5692 call_ratio=0.811 routed=0 arrived=0 draft_s=0.64 exec_s=89.56 probe_s=33.73
+rbI_pusht_gcrouter_off_s42_t150_seed47.log	[gcidm+surveyor cost] exec_forwards=76800 redrafts=5997 advances=1683 rejects=5428 call_ratio=0.781 routed=0 arrived=0 draft_s=0.61 exec_s=89.42 probe_s=33.67
+rbI_pusht_gcrouter_off_s42_t150_seed48.log	[gcidm+surveyor cost] exec_forwards=76800 redrafts=6203 advances=1477 rejects=5682 call_ratio=0.808 routed=0 arrived=0 draft_s=0.64 exec_s=89.66 probe_s=33.73
+rbI_pusht_gcrouter_off_s42_t150_seed48.log	[gcidm+surveyor cost] exec_forwards=76800 redrafts=5898 advances=1782 rejects=5292 call_ratio=0.768 routed=0 arrived=0 draft_s=0.61 exec_s=89.18 probe_s=33.70
+rbI_pusht_gcrouter_off_s42_t150_seed49.log	[gcidm+surveyor cost] exec_forwards=76800 redrafts=6292 advances=1388 rejects=5800 call_ratio=0.819 routed=0 arrived=0 draft_s=0.64 exec_s=89.53 probe_s=33.80
+rbI_pusht_gcrouter_off_s42_t150_seed49.log	[gcidm+surveyor cost] exec_forwards=76800 redrafts=5944 advances=1736 rejects=5370 call_ratio=0.774 routed=0 arrived=0 draft_s=0.61 exec_s=88.82 probe_s=33.83
+rbI_pusht_gcrouter_off_s42_t25_seed42.log	[gcidm+surveyor cost] exec_forwards=12288 redrafts=532 advances=68 rejects=412 call_ratio=0.887 routed=136 arrived=0 draft_s=0.09 exec_s=14.43 probe_s=33.79
+rbI_pusht_gcrouter_off_s42_t25_seed42.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=521 advances=79 rejects=398 call_ratio=0.868 routed=136 arrived=0 draft_s=0.08 exec_s=15.02 probe_s=33.85
+rbI_pusht_gcrouter_off_s42_t25_seed43.log	[gcidm+surveyor cost] exec_forwards=12288 redrafts=524 advances=61 rejects=406 call_ratio=0.896 routed=139 arrived=0 draft_s=0.09 exec_s=14.36 probe_s=33.64
+rbI_pusht_gcrouter_off_s42_t25_seed43.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=511 advances=74 rejects=390 call_ratio=0.874 routed=139 arrived=0 draft_s=0.08 exec_s=14.87 probe_s=33.76
+rbI_pusht_gcrouter_off_s42_t25_seed44.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=529 advances=61 rejects=411 call_ratio=0.897 routed=138 arrived=0 draft_s=0.09 exec_s=15.00 probe_s=33.62
+rbI_pusht_gcrouter_off_s42_t25_seed44.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=513 advances=77 rejects=392 call_ratio=0.869 routed=138 arrived=0 draft_s=0.08 exec_s=15.12 probe_s=33.70
+rbI_pusht_gcrouter_off_s42_t25_seed45.log	[gcidm+surveyor cost] exec_forwards=12288 redrafts=498 advances=62 rejects=385 call_ratio=0.889 routed=144 arrived=0 draft_s=0.09 exec_s=14.27 probe_s=33.60
+rbI_pusht_gcrouter_off_s42_t25_seed45.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=488 advances=72 rejects=375 call_ratio=0.871 routed=144 arrived=0 draft_s=0.08 exec_s=14.85 probe_s=33.72
+rbI_pusht_gcrouter_off_s42_t25_seed46.log	[gcidm+surveyor cost] exec_forwards=12288 redrafts=539 advances=66 rejects=417 call_ratio=0.891 routed=135 arrived=0 draft_s=0.10 exec_s=14.41 probe_s=33.67
+rbI_pusht_gcrouter_off_s42_t25_seed46.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=526 advances=79 rejects=400 call_ratio=0.869 routed=135 arrived=0 draft_s=0.08 exec_s=14.97 probe_s=33.81
+rbI_pusht_gcrouter_off_s42_t25_seed47.log	[gcidm+surveyor cost] exec_forwards=12288 redrafts=527 advances=68 rejects=406 call_ratio=0.886 routed=137 arrived=0 draft_s=0.09 exec_s=14.36 probe_s=33.86
+rbI_pusht_gcrouter_off_s42_t25_seed47.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=508 advances=87 rejects=385 call_ratio=0.854 routed=137 arrived=0 draft_s=0.08 exec_s=14.89 probe_s=33.91
+rbI_pusht_gcrouter_off_s42_t25_seed48.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=525 advances=70 rejects=404 call_ratio=0.882 routed=137 arrived=0 draft_s=0.10 exec_s=14.98 probe_s=33.84
+rbI_pusht_gcrouter_off_s42_t25_seed48.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=513 advances=82 rejects=389 call_ratio=0.862 routed=137 arrived=0 draft_s=0.08 exec_s=14.96 probe_s=33.92
+rbI_pusht_gcrouter_off_s42_t25_seed49.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=526 advances=64 rejects=408 call_ratio=0.892 routed=138 arrived=0 draft_s=0.09 exec_s=15.10 probe_s=34.40
+rbI_pusht_gcrouter_off_s42_t25_seed49.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=506 advances=84 rejects=384 call_ratio=0.858 routed=138 arrived=0 draft_s=0.08 exec_s=15.05 probe_s=34.54
+rbI_pusht_gcrouter_off_s42_t50_seed42.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=2128 advances=422 rejects=1821 call_ratio=0.835 routed=1 arrived=0 draft_s=0.23 exec_s=30.18 probe_s=34.00
+rbI_pusht_gcrouter_off_s42_t50_seed42.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=1993 advances=557 rejects=1662 call_ratio=0.782 routed=1 arrived=0 draft_s=0.21 exec_s=29.94 probe_s=33.99
+rbI_pusht_gcrouter_off_s42_t50_seed43.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=2123 advances=427 rejects=1821 call_ratio=0.833 routed=1 arrived=0 draft_s=0.23 exec_s=30.33 probe_s=34.29
+rbI_pusht_gcrouter_off_s42_t50_seed43.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=2004 advances=546 rejects=1673 call_ratio=0.786 routed=1 arrived=0 draft_s=0.21 exec_s=30.23 probe_s=34.36
+rbI_pusht_gcrouter_off_s42_t50_seed44.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=2099 advances=441 rejects=1797 call_ratio=0.826 routed=2 arrived=0 draft_s=0.22 exec_s=29.79 probe_s=33.67
+rbI_pusht_gcrouter_off_s42_t50_seed44.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=1989 advances=551 rejects=1661 call_ratio=0.783 routed=2 arrived=0 draft_s=0.20 exec_s=29.78 probe_s=33.70
+rbI_pusht_gcrouter_off_s42_t50_seed45.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=2129 advances=421 rejects=1833 call_ratio=0.835 routed=1 arrived=0 draft_s=0.22 exec_s=29.77 probe_s=33.81
+rbI_pusht_gcrouter_off_s42_t50_seed45.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=2027 advances=523 rejects=1713 call_ratio=0.795 routed=1 arrived=0 draft_s=0.21 exec_s=29.84 probe_s=33.85
+rbI_pusht_gcrouter_off_s42_t50_seed46.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=2127 advances=423 rejects=1829 call_ratio=0.834 routed=1 arrived=0 draft_s=0.23 exec_s=30.03 probe_s=33.92
+rbI_pusht_gcrouter_off_s42_t50_seed46.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=1992 advances=558 rejects=1663 call_ratio=0.781 routed=1 arrived=0 draft_s=0.20 exec_s=29.93 probe_s=33.93
+rbI_pusht_gcrouter_off_s42_t50_seed47.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=2124 advances=426 rejects=1831 call_ratio=0.833 routed=1 arrived=0 draft_s=0.23 exec_s=29.64 probe_s=33.80
+rbI_pusht_gcrouter_off_s42_t50_seed47.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=2007 advances=543 rejects=1690 call_ratio=0.787 routed=1 arrived=0 draft_s=0.20 exec_s=29.79 probe_s=33.85
+rbI_pusht_gcrouter_off_s42_t50_seed48.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=2117 advances=433 rejects=1815 call_ratio=0.830 routed=1 arrived=0 draft_s=0.22 exec_s=29.67 probe_s=33.86
+rbI_pusht_gcrouter_off_s42_t50_seed48.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=1988 advances=562 rejects=1662 call_ratio=0.780 routed=1 arrived=0 draft_s=0.20 exec_s=29.75 probe_s=33.90
+rbI_pusht_gcrouter_off_s42_t50_seed49.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=2125 advances=425 rejects=1829 call_ratio=0.833 routed=1 arrived=0 draft_s=0.23 exec_s=29.87 probe_s=33.65
+rbI_pusht_gcrouter_off_s42_t50_seed49.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=2001 advances=549 rejects=1676 call_ratio=0.785 routed=1 arrived=0 draft_s=0.20 exec_s=29.79 probe_s=33.71
+rbI_pusht_gcrouter_off_s42_t75_seed42.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=3060 advances=750 rejects=2687 call_ratio=0.803 routed=2 arrived=0 draft_s=0.32 exec_s=46.42 probe_s=34.02
+rbI_pusht_gcrouter_off_s42_t75_seed42.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=2844 advances=966 rejects=2418 call_ratio=0.746 routed=2 arrived=0 draft_s=0.30 exec_s=45.17 probe_s=33.83
+rbI_pusht_gcrouter_off_s42_t75_seed43.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=3073 advances=737 rejects=2708 call_ratio=0.807 routed=2 arrived=0 draft_s=0.33 exec_s=45.02 probe_s=33.77
+rbI_pusht_gcrouter_off_s42_t75_seed43.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=2871 advances=939 rejects=2462 call_ratio=0.754 routed=2 arrived=0 draft_s=0.30 exec_s=44.93 probe_s=33.78
+rbI_pusht_gcrouter_off_s42_t75_seed44.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=3097 advances=713 rejects=2739 call_ratio=0.813 routed=2 arrived=0 draft_s=0.33 exec_s=44.92 probe_s=33.93
+rbI_pusht_gcrouter_off_s42_t75_seed44.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=2922 advances=888 rejects=2516 call_ratio=0.767 routed=2 arrived=0 draft_s=0.31 exec_s=44.99 probe_s=33.93
+rbI_pusht_gcrouter_off_s42_t75_seed45.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=3106 advances=704 rejects=2748 call_ratio=0.815 routed=2 arrived=0 draft_s=0.33 exec_s=44.88 probe_s=33.77
+rbI_pusht_gcrouter_off_s42_t75_seed45.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=2946 advances=864 rejects=2558 call_ratio=0.773 routed=2 arrived=0 draft_s=0.30 exec_s=44.68 probe_s=33.76
+rbI_pusht_gcrouter_off_s42_t75_seed46.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=3102 advances=708 rejects=2743 call_ratio=0.814 routed=2 arrived=0 draft_s=0.33 exec_s=45.02 probe_s=33.95
+rbI_pusht_gcrouter_off_s42_t75_seed46.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=2921 advances=889 rejects=2532 call_ratio=0.767 routed=2 arrived=0 draft_s=0.30 exec_s=44.93 probe_s=33.91
+rbI_pusht_gcrouter_off_s42_t75_seed47.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=3093 advances=717 rejects=2751 call_ratio=0.812 routed=2 arrived=0 draft_s=0.33 exec_s=44.84 probe_s=33.68
+rbI_pusht_gcrouter_off_s42_t75_seed47.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=2878 advances=932 rejects=2491 call_ratio=0.755 routed=2 arrived=0 draft_s=0.30 exec_s=44.70 probe_s=33.74
+rbI_pusht_gcrouter_off_s42_t75_seed48.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=3079 advances=731 rejects=2717 call_ratio=0.808 routed=2 arrived=0 draft_s=0.33 exec_s=44.96 probe_s=33.97
+rbI_pusht_gcrouter_off_s42_t75_seed48.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=2883 advances=927 rejects=2490 call_ratio=0.757 routed=2 arrived=0 draft_s=0.30 exec_s=44.82 probe_s=33.91
+rbI_pusht_gcrouter_off_s42_t75_seed49.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=3041 advances=769 rejects=2671 call_ratio=0.798 routed=2 arrived=0 draft_s=0.32 exec_s=45.09 probe_s=33.76
+rbI_pusht_gcrouter_off_s42_t75_seed49.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=2890 advances=920 rejects=2497 call_ratio=0.759 routed=2 arrived=0 draft_s=0.30 exec_s=45.06 probe_s=33.76
+rbI_reacher_gcrouter_off_s42_t100_seed42.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=274 advances=336 rejects=84 call_ratio=0.449 routed=71 arrived=51 draft_s=0.37 exec_s=33.70 probe_s=16.82
+rbI_reacher_gcrouter_off_s42_t100_seed43.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=279 advances=341 rejects=98 call_ratio=0.450 routed=73 arrived=49 draft_s=0.38 exec_s=33.87 probe_s=16.87
+rbI_reacher_gcrouter_off_s42_t100_seed44.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=313 advances=406 rejects=105 call_ratio=0.435 routed=70 arrived=46 draft_s=0.38 exec_s=33.70 probe_s=16.88
+rbI_reacher_gcrouter_off_s42_t100_seed45.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=247 advances=298 rejects=93 call_ratio=0.453 routed=73 arrived=51 draft_s=0.38 exec_s=33.62 probe_s=16.85
+rbI_reacher_gcrouter_off_s42_t100_seed46.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=264 advances=320 rejects=85 call_ratio=0.452 routed=73 arrived=51 draft_s=0.38 exec_s=33.85 probe_s=16.89
+rbI_reacher_gcrouter_off_s42_t100_seed47.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=284 advances=359 rejects=89 call_ratio=0.442 routed=71 arrived=52 draft_s=0.37 exec_s=34.10 probe_s=17.01
+rbI_reacher_gcrouter_off_s42_t100_seed48.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=285 advances=382 rejects=78 call_ratio=0.427 routed=72 arrived=52 draft_s=0.38 exec_s=33.53 probe_s=16.85
+rbI_reacher_gcrouter_off_s42_t100_seed49.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=246 advances=297 rejects=83 call_ratio=0.453 routed=73 arrived=52 draft_s=0.64 exec_s=33.98 probe_s=16.87
+rbI_reacher_gcrouter_off_s42_t150_seed42.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=446 advances=550 rejects=175 call_ratio=0.448 routed=52 arrived=72 draft_s=0.54 exec_s=50.46 probe_s=16.86
+rbI_reacher_gcrouter_off_s42_t150_seed43.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=427 advances=511 rejects=164 call_ratio=0.455 routed=52 arrived=75 draft_s=0.53 exec_s=50.73 probe_s=16.94
+rbI_reacher_gcrouter_off_s42_t150_seed44.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=425 advances=495 rejects=170 call_ratio=0.462 routed=51 arrived=76 draft_s=0.51 exec_s=50.55 probe_s=16.91
+rbI_reacher_gcrouter_off_s42_t150_seed45.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=423 advances=496 rejects=171 call_ratio=0.460 routed=54 arrived=72 draft_s=0.54 exec_s=50.73 probe_s=16.90
+rbI_reacher_gcrouter_off_s42_t150_seed46.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=440 advances=540 rejects=157 call_ratio=0.449 routed=51 arrived=77 draft_s=0.53 exec_s=50.83 probe_s=16.87
+rbI_reacher_gcrouter_off_s42_t150_seed47.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=392 advances=471 rejects=145 call_ratio=0.454 routed=54 arrived=72 draft_s=0.51 exec_s=51.32 probe_s=16.89
+rbI_reacher_gcrouter_off_s42_t150_seed48.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=459 advances=549 rejects=173 call_ratio=0.455 routed=53 arrived=73 draft_s=0.50 exec_s=50.86 probe_s=16.90
+rbI_reacher_gcrouter_off_s42_t150_seed49.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=462 advances=575 rejects=170 call_ratio=0.446 routed=52 arrived=71 draft_s=0.58 exec_s=50.69 probe_s=16.87
+rbI_reacher_gcrouter_off_s42_t25_seed42.log	[gcidm+surveyor cost] exec_forwards=6400 redrafts=11 advances=12 rejects=3 call_ratio=0.478 routed=123 arrived=2 draft_s=0.76 exec_s=8.52 probe_s=16.86
+rbI_reacher_gcrouter_off_s42_t25_seed43.log	[gcidm+surveyor cost] exec_forwards=6400 redrafts=13 advances=16 rejects=2 call_ratio=0.448 routed=122 arrived=1 draft_s=0.11 exec_s=8.73 probe_s=16.86
+rbI_reacher_gcrouter_off_s42_t25_seed44.log	[gcidm+surveyor cost] exec_forwards=6400 redrafts=12 advances=13 rejects=2 call_ratio=0.480 routed=122 arrived=2 draft_s=0.09 exec_s=8.60 probe_s=16.86
+rbI_reacher_gcrouter_off_s42_t25_seed45.log	[gcidm+surveyor cost] exec_forwards=6400 redrafts=10 advances=11 rejects=2 call_ratio=0.476 routed=123 arrived=2 draft_s=0.19 exec_s=8.74 probe_s=17.08
+rbI_reacher_gcrouter_off_s42_t25_seed46.log	[gcidm+surveyor cost] exec_forwards=6400 redrafts=13 advances=17 rejects=2 call_ratio=0.433 routed=122 arrived=0 draft_s=0.07 exec_s=8.51 probe_s=16.87
+rbI_reacher_gcrouter_off_s42_t25_seed47.log	[gcidm+surveyor cost] exec_forwards=6400 redrafts=9 advances=9 rejects=3 call_ratio=0.500 routed=124 arrived=1 draft_s=0.08 exec_s=8.60 probe_s=16.86
+rbI_reacher_gcrouter_off_s42_t25_seed48.log	[gcidm+surveyor cost] exec_forwards=6400 redrafts=11 advances=12 rejects=2 call_ratio=0.478 routed=122 arrived=3 draft_s=0.09 exec_s=8.52 probe_s=16.95
+rbI_reacher_gcrouter_off_s42_t25_seed49.log	[gcidm+surveyor cost] exec_forwards=6400 redrafts=11 advances=14 rejects=2 call_ratio=0.440 routed=123 arrived=0 draft_s=0.10 exec_s=8.55 probe_s=16.82
+rbI_reacher_gcrouter_off_s42_t50_seed42.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=94 advances=112 rejects=26 call_ratio=0.456 routed=105 arrived=9 draft_s=0.19 exec_s=16.99 probe_s=16.88
+rbI_reacher_gcrouter_off_s42_t50_seed43.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=96 advances=104 rejects=33 call_ratio=0.480 routed=103 arrived=12 draft_s=0.20 exec_s=16.95 probe_s=16.82
+rbI_reacher_gcrouter_off_s42_t50_seed44.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=84 advances=102 rejects=22 call_ratio=0.452 routed=104 arrived=14 draft_s=0.20 exec_s=17.16 probe_s=16.85
+rbI_reacher_gcrouter_off_s42_t50_seed45.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=72 advances=84 rejects=16 call_ratio=0.462 routed=107 arrived=13 draft_s=0.20 exec_s=16.97 probe_s=16.89
+rbI_reacher_gcrouter_off_s42_t50_seed46.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=81 advances=106 rejects=21 call_ratio=0.433 routed=104 arrived=15 draft_s=0.19 exec_s=17.71 probe_s=16.95
+rbI_reacher_gcrouter_off_s42_t50_seed47.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=86 advances=112 rejects=23 call_ratio=0.434 routed=104 arrived=10 draft_s=0.19 exec_s=16.98 probe_s=16.97
+rbI_reacher_gcrouter_off_s42_t50_seed48.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=90 advances=100 rejects=30 call_ratio=0.474 routed=105 arrived=12 draft_s=0.19 exec_s=16.94 probe_s=16.88
+rbI_reacher_gcrouter_off_s42_t50_seed49.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=88 advances=108 rejects=26 call_ratio=0.449 routed=106 arrived=8 draft_s=0.19 exec_s=16.99 probe_s=16.87
+rbI_tworoom_gcrouter_off_s42_t25_seed42.log	[gcidm+surveyor cost] exec_forwards=3200 redrafts=190 advances=30 rejects=123 call_ratio=0.864 routed=0 arrived=29 draft_s=1.09 exec_s=12.15 probe_s=25.20
+rbI_tworoom_gcrouter_off_s42_t25_seed43.log	[gcidm+surveyor cost] exec_forwards=3200 redrafts=170 advances=41 rejects=100 call_ratio=0.806 routed=0 arrived=31 draft_s=1.10 exec_s=12.07 probe_s=25.29
+rbI_tworoom_gcrouter_off_s42_t25_seed44.log	[gcidm+surveyor cost] exec_forwards=2432 redrafts=145 advances=17 rejects=78 call_ratio=0.895 routed=0 arrived=34 draft_s=0.88 exec_s=9.18 probe_s=25.22
+rbI_tworoom_gcrouter_off_s42_t25_seed45.log	[gcidm+surveyor cost] exec_forwards=3200 redrafts=177 advances=22 rejects=109 call_ratio=0.889 routed=0 arrived=32 draft_s=1.16 exec_s=12.13 probe_s=25.34
+rbI_tworoom_gcrouter_off_s42_t25_seed46.log	[gcidm+surveyor cost] exec_forwards=3200 redrafts=133 advances=33 rejects=61 call_ratio=0.801 routed=0 arrived=43 draft_s=1.09 exec_s=12.01 probe_s=25.24
+rbI_tworoom_gcrouter_off_s42_t25_seed47.log	[gcidm+surveyor cost] exec_forwards=2496 redrafts=163 advances=20 rejects=96 call_ratio=0.891 routed=0 arrived=28 draft_s=0.88 exec_s=9.38 probe_s=25.19
+rbI_tworoom_gcrouter_off_s42_t25_seed48.log	[gcidm+surveyor cost] exec_forwards=3072 redrafts=183 advances=32 rejects=112 call_ratio=0.851 routed=0 arrived=33 draft_s=1.09 exec_s=11.58 probe_s=25.31
+rbI_tworoom_gcrouter_off_s42_t25_seed49.log	[gcidm+surveyor cost] exec_forwards=3200 redrafts=167 advances=35 rejects=99 call_ratio=0.827 routed=0 arrived=35 draft_s=1.09 exec_s=12.06 probe_s=25.24
+rbI_tworoom_gcrouter_off_s42_t50_seed42.log	[gcidm+surveyor cost] exec_forwards=5568 redrafts=256 advances=94 rejects=164 call_ratio=0.731 routed=0 arrived=39 draft_s=1.97 exec_s=20.77 probe_s=25.28
+rbI_tworoom_gcrouter_off_s42_t50_seed43.log	[gcidm+surveyor cost] exec_forwards=6400 redrafts=307 advances=120 rejects=207 call_ratio=0.719 routed=0 arrived=33 draft_s=2.27 exec_s=24.31 probe_s=25.41
+rbI_tworoom_gcrouter_off_s42_t50_seed44.log	[gcidm+surveyor cost] exec_forwards=6016 redrafts=337 advances=78 rejects=251 call_ratio=0.812 routed=0 arrived=33 draft_s=2.28 exec_s=22.61 probe_s=25.36
+rbI_tworoom_gcrouter_off_s42_t50_seed45.log	[gcidm+surveyor cost] exec_forwards=5952 redrafts=292 advances=93 rejects=197 call_ratio=0.758 routed=0 arrived=36 draft_s=2.28 exec_s=22.84 probe_s=25.34
+rbI_tworoom_gcrouter_off_s42_t50_seed46.log	[gcidm+surveyor cost] exec_forwards=6400 redrafts=332 advances=93 rejects=236 call_ratio=0.781 routed=0 arrived=31 draft_s=2.16 exec_s=23.97 probe_s=25.46
+rbI_tworoom_gcrouter_off_s42_t50_seed47.log	[gcidm+surveyor cost] exec_forwards=5696 redrafts=293 advances=80 rejects=212 call_ratio=0.786 routed=0 arrived=33 draft_s=2.13 exec_s=21.91 probe_s=25.33
+rbI_tworoom_gcrouter_off_s42_t50_seed48.log	[gcidm+surveyor cost] exec_forwards=6400 redrafts=328 advances=94 rejects=240 call_ratio=0.777 routed=0 arrived=32 draft_s=2.16 exec_s=24.11 probe_s=25.51
+rbI_tworoom_gcrouter_off_s42_t50_seed49.log	[gcidm+surveyor cost] exec_forwards=5568 redrafts=308 advances=83 rejects=223 call_ratio=0.788 routed=0 arrived=32 draft_s=1.95 exec_s=20.91 probe_s=25.16
+rbI_tworoom_gcrouter_off_s42_t75_seed42.log	[gcidm+surveyor cost] exec_forwards=9088 redrafts=528 advances=174 rejects=410 call_ratio=0.752 routed=0 arrived=27 draft_s=3.23 exec_s=34.22 probe_s=25.59
+rbI_tworoom_gcrouter_off_s42_t75_seed43.log	[gcidm+surveyor cost] exec_forwards=9408 redrafts=411 advances=142 rejects=300 call_ratio=0.743 routed=0 arrived=39 draft_s=3.23 exec_s=35.37 probe_s=25.85
+rbI_tworoom_gcrouter_off_s42_t75_seed44.log	[gcidm+surveyor cost] exec_forwards=9088 redrafts=481 advances=133 rejects=379 call_ratio=0.783 routed=0 arrived=33 draft_s=3.23 exec_s=33.78 probe_s=25.28
+rbI_tworoom_gcrouter_off_s42_t75_seed45.log	[gcidm+surveyor cost] exec_forwards=9024 redrafts=533 advances=136 rejects=416 call_ratio=0.797 routed=0 arrived=28 draft_s=3.24 exec_s=33.70 probe_s=25.31
+rbI_tworoom_gcrouter_off_s42_t75_seed46.log	[gcidm+surveyor cost] exec_forwards=9600 redrafts=534 advances=187 rejects=407 call_ratio=0.741 routed=0 arrived=25 draft_s=3.24 exec_s=35.93 probe_s=25.55
+rbI_tworoom_gcrouter_off_s42_t75_seed47.log	[gcidm+surveyor cost] exec_forwards=8896 redrafts=498 advances=138 rejects=390 call_ratio=0.783 routed=0 arrived=27 draft_s=3.37 exec_s=33.88 probe_s=25.32
+rbI_tworoom_gcrouter_off_s42_t75_seed48.log	[gcidm+surveyor cost] exec_forwards=9088 redrafts=470 advances=178 rejects=353 call_ratio=0.725 routed=0 arrived=31 draft_s=3.34 exec_s=33.97 probe_s=25.29
+rbI_tworoom_gcrouter_off_s42_t75_seed49.log	[gcidm+surveyor cost] exec_forwards=9600 redrafts=496 advances=181 rejects=371 call_ratio=0.733 routed=0 arrived=29 draft_s=3.28 exec_s=36.10 probe_s=25.36
+rbK_cube_gcrouter_off_s42_t100_seed42.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=1630 advances=91 rejects=1540 call_ratio=0.947 routed=41 arrived=1 draft_s=0.31 exec_s=33.93
+rbK_cube_gcrouter_off_s42_t100_seed43.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=1590 advances=82 rejects=1504 call_ratio=0.951 routed=43 arrived=2 draft_s=0.31 exec_s=34.40
+rbK_cube_gcrouter_off_s42_t100_seed44.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=1610 advances=94 rejects=1515 call_ratio=0.945 routed=41 arrived=2 draft_s=0.30 exec_s=33.81
+rbK_cube_gcrouter_off_s42_t100_seed45.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=1609 advances=93 rejects=1517 call_ratio=0.945 routed=42 arrived=2 draft_s=0.30 exec_s=34.13
+rbK_cube_gcrouter_off_s42_t100_seed46.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=1538 advances=103 rejects=1448 call_ratio=0.937 routed=44 arrived=3 draft_s=0.31 exec_s=34.05
+rbK_cube_gcrouter_off_s42_t100_seed47.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=1648 advances=78 rejects=1557 call_ratio=0.955 routed=40 arrived=2 draft_s=0.31 exec_s=33.70
+rbK_cube_gcrouter_off_s42_t100_seed48.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=1660 advances=90 rejects=1568 call_ratio=0.949 routed=39 arrived=2 draft_s=0.31 exec_s=34.13
+rbK_cube_gcrouter_off_s42_t100_seed49.log	[gcidm+surveyor cost] exec_forwards=25600 redrafts=1591 advances=112 rejects=1495 call_ratio=0.934 routed=41 arrived=2 draft_s=0.32 exec_s=34.45
+rbK_cube_gcrouter_off_s42_t150_seed42.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=3498 advances=192 rejects=3372 call_ratio=0.948 routed=5 arrived=0 draft_s=0.50 exec_s=51.00
+rbK_cube_gcrouter_off_s42_t150_seed43.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=3409 advances=237 rejects=3278 call_ratio=0.935 routed=6 arrived=1 draft_s=0.49 exec_s=50.73
+rbK_cube_gcrouter_off_s42_t150_seed44.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=3386 advances=214 rejects=3263 call_ratio=0.941 routed=8 arrived=0 draft_s=0.49 exec_s=50.72
+rbK_cube_gcrouter_off_s42_t150_seed45.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=3459 advances=167 rejects=3336 call_ratio=0.954 routed=7 arrived=1 draft_s=0.50 exec_s=50.65
+rbK_cube_gcrouter_off_s42_t150_seed46.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=3448 advances=182 rejects=3323 call_ratio=0.950 routed=7 arrived=0 draft_s=0.50 exec_s=51.31
+rbK_cube_gcrouter_off_s42_t150_seed47.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=3408 advances=222 rejects=3284 call_ratio=0.939 routed=7 arrived=0 draft_s=0.49 exec_s=50.94
+rbK_cube_gcrouter_off_s42_t150_seed48.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=3412 advances=182 rejects=3285 call_ratio=0.949 routed=8 arrived=1 draft_s=0.49 exec_s=50.72
+rbK_cube_gcrouter_off_s42_t150_seed49.log	[gcidm+surveyor cost] exec_forwards=38400 redrafts=3464 advances=196 rejects=3336 call_ratio=0.946 routed=6 arrived=0 draft_s=0.50 exec_s=50.60
+rbK_cube_gcrouter_off_s42_t25_seed42.log	[gcidm+surveyor cost] exec_forwards=6400 redrafts=130 advances=15 rejects=100 call_ratio=0.897 routed=99 arrived=0 draft_s=0.08 exec_s=8.60
+rbK_cube_gcrouter_off_s42_t25_seed43.log	[gcidm+surveyor cost] exec_forwards=6400 redrafts=119 advances=11 rejects=93 call_ratio=0.915 routed=102 arrived=0 draft_s=0.09 exec_s=8.63
+rbK_cube_gcrouter_off_s42_t25_seed44.log	[gcidm+surveyor cost] exec_forwards=6400 redrafts=136 advances=19 rejects=105 call_ratio=0.877 routed=97 arrived=0 draft_s=0.09 exec_s=8.64
+rbK_cube_gcrouter_off_s42_t25_seed45.log	[gcidm+surveyor cost] exec_forwards=6400 redrafts=143 advances=17 rejects=110 call_ratio=0.894 routed=96 arrived=0 draft_s=0.09 exec_s=8.54
+rbK_cube_gcrouter_off_s42_t25_seed46.log	[gcidm+surveyor cost] exec_forwards=6400 redrafts=129 advances=11 rejects=99 call_ratio=0.921 routed=100 arrived=0 draft_s=0.09 exec_s=8.57
+rbK_cube_gcrouter_off_s42_t25_seed47.log	[gcidm+surveyor cost] exec_forwards=6400 redrafts=127 advances=18 rejects=98 call_ratio=0.876 routed=99 arrived=0 draft_s=0.09 exec_s=8.57
+rbK_cube_gcrouter_off_s42_t25_seed48.log	[gcidm+surveyor cost] exec_forwards=6400 redrafts=127 advances=13 rejects=99 call_ratio=0.907 routed=100 arrived=0 draft_s=0.08 exec_s=8.63
+rbK_cube_gcrouter_off_s42_t25_seed49.log	[gcidm+surveyor cost] exec_forwards=6400 redrafts=140 advances=20 rejects=106 call_ratio=0.875 routed=96 arrived=0 draft_s=0.09 exec_s=8.68
+rbK_cube_gcrouter_off_s42_t50_seed42.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=753 advances=66 rejects=666 call_ratio=0.919 routed=46 arrived=1 draft_s=0.16 exec_s=17.16
+rbK_cube_gcrouter_off_s42_t50_seed43.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=761 advances=52 rejects=677 call_ratio=0.936 routed=46 arrived=1 draft_s=0.16 exec_s=17.15
+rbK_cube_gcrouter_off_s42_t50_seed44.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=742 advances=68 rejects=655 call_ratio=0.916 routed=47 arrived=0 draft_s=0.17 exec_s=17.29
+rbK_cube_gcrouter_off_s42_t50_seed45.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=762 advances=58 rejects=672 call_ratio=0.929 routed=46 arrived=0 draft_s=0.16 exec_s=17.04
+rbK_cube_gcrouter_off_s42_t50_seed46.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=753 advances=55 rejects=670 call_ratio=0.932 routed=47 arrived=1 draft_s=0.16 exec_s=17.08
+rbK_cube_gcrouter_off_s42_t50_seed47.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=758 advances=72 rejects=671 call_ratio=0.913 routed=45 arrived=0 draft_s=0.17 exec_s=17.15
+rbK_cube_gcrouter_off_s42_t50_seed48.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=758 advances=46 rejects=672 call_ratio=0.943 routed=47 arrived=1 draft_s=0.16 exec_s=17.10
+rbK_cube_gcrouter_off_s42_t50_seed49.log	[gcidm+surveyor cost] exec_forwards=12800 redrafts=751 advances=73 rejects=659 call_ratio=0.911 routed=45 arrived=1 draft_s=0.16 exec_s=17.06
+rbK_cube_gcrouter_off_s42_t75_seed42.log	[gcidm+surveyor cost] exec_forwards=19200 redrafts=1132 advances=55 rejects=1048 call_ratio=0.954 routed=48 arrived=1 draft_s=0.24 exec_s=25.62
+rbK_cube_gcrouter_off_s42_t75_seed43.log	[gcidm+surveyor cost] exec_forwards=19200 redrafts=1144 advances=58 rejects=1057 call_ratio=0.952 routed=47 arrived=1 draft_s=0.24 exec_s=25.81
+rbK_cube_gcrouter_off_s42_t75_seed44.log	[gcidm+surveyor cost] exec_forwards=19200 redrafts=1132 advances=55 rejects=1052 call_ratio=0.954 routed=48 arrived=1 draft_s=0.24 exec_s=25.51
+rbK_cube_gcrouter_off_s42_t75_seed45.log	[gcidm+surveyor cost] exec_forwards=19200 redrafts=1143 advances=57 rejects=1059 call_ratio=0.953 routed=48 arrived=0 draft_s=0.28 exec_s=25.70
+rbK_cube_gcrouter_off_s42_t75_seed46.log	[gcidm+surveyor cost] exec_forwards=19200 redrafts=1130 advances=57 rejects=1046 call_ratio=0.952 routed=48 arrived=1 draft_s=0.25 exec_s=25.71
+rbK_cube_gcrouter_off_s42_t75_seed47.log	[gcidm+surveyor cost] exec_forwards=19200 redrafts=1122 advances=63 rejects=1041 call_ratio=0.947 routed=49 arrived=0 draft_s=0.24 exec_s=25.65
+rbK_cube_gcrouter_off_s42_t75_seed48.log	[gcidm+surveyor cost] exec_forwards=19200 redrafts=1114 advances=88 rejects=1027 call_ratio=0.927 routed=47 arrived=1 draft_s=0.23 exec_s=25.89
+rbK_cube_gcrouter_off_s42_t75_seed49.log	[gcidm+surveyor cost] exec_forwards=19200 redrafts=1149 advances=51 rejects=1066 call_ratio=0.958 routed=48 arrived=0 draft_s=0.24 exec_s=25.79

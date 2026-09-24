@@ -1,1 +1,3 @@
 * text=auto
+# not part of the supplementary archive (git archive): presentation media only
+docs/media export-ignore

@@ -6,8 +6,8 @@ torch
 torchvision
 
 # world model, harness and training stack
-stable-worldmodel[train]
-stable-pretraining
+stable-worldmodel[train]==0.1.1
+stable-pretraining==0.1.8
 transformers==4.57.1
 
 # datasets and numerics

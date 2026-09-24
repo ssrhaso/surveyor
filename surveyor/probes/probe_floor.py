@@ -75,6 +75,15 @@ def dist_stats(x: np.ndarray) -> dict:
             "p90": float(np.percentile(x, 90)), "n": int(len(x))}
 
 
+def median_ci(x: np.ndarray, seed: int, n_boot: int = 10000) -> list:
+    """95% percentile-bootstrap interval of the median. Own generator, so the
+    pair-selection stream (and therefore p50) is unchanged by this call."""
+    x = np.asarray(x, dtype=np.float64)
+    boot = np.random.default_rng(seed + 1)
+    meds = np.median(x[boot.integers(0, len(x), size=(n_boot, len(x)))], axis=1)
+    return [float(np.percentile(meds, 2.5)), float(np.percentile(meds, 97.5))]
+
+
 def encode_rows(model, pixels, rows, device, batch_size, encode_fn=None):
     """Encode h5 pixel rows (any order, duplicates ok); returns (len(rows), D).
 
@@ -208,7 +217,9 @@ def main():
             za = encode_rows(model, pixels, pa, args.device, args.batch_size, EF)
             zb = encode_rows(model, pixels, pb, args.device, args.batch_size, EF)
             key = ("criterion_floor_%gdeg" % ang) if ang else f"criterion_floor_{args.env}"
-            out[key] = dist_stats(rel(za, zb))
+            d = rel(za, zb)
+            out[key] = dist_stats(d)
+            out[key]["p50_ci95"] = median_ci(d, args.seed)
             print(f"[B] {key}: {out[key]}")
 
         # ---- C. sampler dispersion per k ----
