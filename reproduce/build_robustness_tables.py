@@ -137,12 +137,15 @@ def table_tolsens(cells):
     spec = {"pusht": [("0.173", "rbZ", "$5^\\circ$ test"), ("0.207", "rbX", "lower end"), ("0.233", None, "measured"), ("0.268", "rbX", "upper end")],
             "reacher": [("0.102", "rbX", "lower end"), ("0.106", None, "measured"), ("0.111", "rbX", "upper end")],
             "cube": [("0.759", "rbX", "lower end"), ("0.794", None, "measured"), ("0.826", "rbX", "upper end"), ("0.967", "rbZ", "block only")],
-            "tworoom": [("0.098", "served", "same episode"), ("0.127", None, "measured"), ("0.142", "rbZ", "agent only")]}
+            # Two-Room: the arbiter's LeWM-space tolerance (battery TR at 1.323, battery TR2 at the two other readings),
+            # accept rule at 0.127 throughout
+            "tworoom": [("1.160", "rbTR2arb", "same episode"), ("1.323", "rbTR", "measured"), ("1.364", "rbTR2arb", "agent only")]}
     L = []
     for i, (env, cols) in enumerate(spec.items()):
         ts = (b.T[env][0], b.T[env][-1])
+        sym = "\\tau_{\\mathrm{r}}" if env == "tworoom" else "\\tau"
         L += ["\\begin{tabular}{@{}ll" + "r" * len(cols) + "@{}}", "\\toprule",
-              f"{ENV_NAME[env]} & $t$ & " + " & ".join(f"$\\tau{{=}}{v}$" for v, _, _ in cols) + " \\\\",
+              f"{ENV_NAME[env]} & $t$ & " + " & ".join(f"${sym}{{=}}{v}$" for v, _, _ in cols) + " \\\\",
               " & & " + " & ".join(f"{{\\scriptsize {lab}}}" for _, _, lab in cols) + " \\\\", "\\midrule"]
         for name, pre in EXECS:
             for j, t in enumerate(ts):
@@ -153,6 +156,10 @@ def table_tolsens(cells):
                         c = own(cells, env, arm, t)
                     elif src == "served":
                         c = served(cells, env, arm, t)
+                    elif src == "rbTR":
+                        c = raw(cells, "rbTR", env, f"{arm}_tauown_lewmarb", t)
+                    elif src == "rbTR2arb":
+                        c = raw(cells, "rbTR2", env, f"{arm}_tauown_lewmarb_arb{v}", t)
                     else:
                         c = raw(cells, src, env, f"{arm}_tau{v}", t)
                     vals.append(sr_cr(c))

@@ -71,7 +71,8 @@ JOBS = {"2382688": "battery_A.tsv", "2388190": "battery_A.tsv", "2388058": "batt
         # battery Ug: the shortest-distance rows on cluster B (GH200s), a second, self-contained timing set
         "6720059": "battery_Ug.tsv", "6720532": "battery_Ug.tsv", "6720533": "battery_Ug.tsv",
         # battery TR (cluster A, A100): smoke row 96, the 120-row array, and its sweeper pass over unbanked rows
-        "2506709": "battery_TR.tsv", "2506711": "battery_TR.tsv", "2506817": "battery_TR.tsv"}
+        "2506709": "battery_TR.tsv", "2506711": "battery_TR.tsv", "2506817": "battery_TR.tsv",
+        "2507389": "battery_TR2.tsv"}
 
 
 def S(*arms):
@@ -170,9 +171,11 @@ def get(cells, env, arm, t):
     """first full-seed cell in the env's battery order, else the one with most seeds;
     the own-tolerance run of the arm wins when it exists with all eight seeds"""
     if env == "tworoom" and TR_ON:
-        c = cells.get((TR_PREF, env, arm + TR_SUFFIX, t))
-        if c is not None and c[1] >= 8:
-            return c
+        # battery TR: the full layer; battery TR2: the executor-as-probe variant (arms *_mp), same LeWM-space arbiter
+        for p in (TR_PREF, "rbTR2"):
+            c = cells.get((p, env, arm + TR_SUFFIX, t))
+            if c is not None and c[1] >= 8:
+                return c
     for p in OWN_PREFS:
         c = cells.get((p, env, arm + OWN_SUFFIX, t))
         if c is not None and c[1] >= 8:
