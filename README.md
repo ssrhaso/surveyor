@@ -2,6 +2,11 @@
 
 Code for *SURVEYOR: Training-Free Decomposition for Long-Range Latent World-Model Planning*.
 
+<p align="center">
+  <img src="docs/media/surveyor_overview.gif" width="900"
+       alt="Animated overview of SURVEYOR: a drafter proposes latent subgoals, the accept rule reuses them while the achieved state stays within the tolerance and re-drafts when it leaves it, and the arbiter decides whether to draft at all.">
+</p>
+
 SURVEYOR is a training-free layer between an executor (a planner or policy) and a frozen LeWM world model. A drafter
 proposes latent subgoals a fixed number of steps ahead. The accept rule reuses the remaining draft while the achieved
 latent stays within a tolerance of the subgoal just pursued, and re-drafts otherwise. The arbiter plans flat toward the

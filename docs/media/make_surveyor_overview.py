@@ -184,7 +184,7 @@ def title_slide(visible: float) -> Image.Image:
     text(
         draw,
         (WIDTH / 2, 257),
-        "Certified Speculative Plan Consumption for Latent World-Model Planning",
+        "Training-Free Decomposition for Long-Range Latent World-Model Planning",
         23,
         MUTED,
         anchor="mm",
@@ -446,7 +446,7 @@ def mech_frame(
     if footer_alpha > 0:
         text(draw, (WIDTH / 2, 612),
              "7 targets served \u00b7 2 drafter calls \u00b7 "
-             "flat planning pays 7",
+             "every-step drafting pays 7",
              20, INK, anchor="mm", alpha=footer_alpha)
     return image
 
@@ -567,27 +567,27 @@ def mechanism_frames() -> tuple[list[Image.Image], list[int]]:
 def constants_slide(visible: float) -> Image.Image:
     image, draw = canvas()
     heading(draw, "Measured, not tuned",
-            "Both constants are read off the frozen stack offline.")
+            "Both constants are measured offline, before any closed-loop run.")
 
     lx, rx = 175, 680
     text(draw, (lx, 262), "\u03c4", 30, AMBER, bold=True,
          alpha=alpha_for(visible, 0))
-    text(draw, (lx + 48, 268), "the criterion floor: the latent distance", 21,
+    text(draw, (lx + 48, 268), "the median latent distance between", 21,
          INK, alpha=alpha_for(visible, 0))
-    text(draw, (lx + 48, 298), "the task cannot distinguish", 21, INK,
+    text(draw, (lx + 48, 298), "states the task counts as equal", 21, INK,
          alpha=alpha_for(visible, 0))
     text(draw, (rx, 262), "k", 30, AMBER, bold=True,
          alpha=alpha_for(visible, 1))
-    text(draw, (rx + 48, 268), "the sampler's convergence point:", 21, INK,
+    text(draw, (rx + 48, 268), "where repeated drafts stop changing:", 21, INK,
          alpha=alpha_for(visible, 1))
-    text(draw, (rx + 48, 298), "the smallest budget past it", 21, INK,
+    text(draw, (rx + 48, 298), "the smallest budget at that point", 21, INK,
          alpha=alpha_for(visible, 1))
 
     draw.line((s(120), s(372), s(WIDTH - 120), s(372)),
               fill=rgba(tint(INK, 0.18)), width=s(1))
 
     text(draw, (WIDTH / 2, 420),
-         "whether to draft at all is the planner's own call:", 21, MUTED,
+         "whether to draft at all is read from a flat plan:", 21, MUTED,
          anchor="mm", alpha=alpha_for(visible, 2))
     text(draw, (WIDTH / 2, 468), "c*  \u2264  \u03c4  ?", 30, INK, bold=True,
          anchor="mm", alpha=alpha_for(visible, 2))
@@ -596,7 +596,7 @@ def constants_slide(visible: float) -> Image.Image:
     text(draw, (880, 530), "no \u2192 draft and verify", 22, AMBER,
          anchor="mm", alpha=alpha_for(visible, 3))
     text(draw, (WIDTH / 2, 590),
-         "same \u03c4, no new constant \u00b7 first crossing retires the drafter", 19,
+         "the same calibration rule \u00b7 the first crossing retires the drafter", 19,
          MUTED, anchor="mm", alpha=alpha_for(visible, 4))
     return image
 
@@ -606,12 +606,12 @@ def constants_slide(visible: float) -> Image.Image:
 def results_slide(visible: float) -> Image.Image:
     image, draw = canvas()
     heading(draw, "Measured outcomes",
-            "Fewer drafter calls at matched success.")
+            "Five executors, four environments, eight seeds each.")
 
     rows = [
-        ("1.8 vs 50", AMBER, "drafter calls per replan"),
-        ("10 / 10", TEAL, "pre-registered cells meet or beat the best flat baseline"),
-        ("65.6 \u2192 93.0", TEAL, "the same rule, transplanted onto a GC-IDM executor"),
+        ("<10 \u2192 >92", AMBER, "% success at the longest PushT goal, every search executor"),
+        ("62.7 \u2192 94.2", TEAL, "the same layer over the amortized GC-IDM executor"),
+        ("0.58 to 0.73", TEAL, "drafter calls per replan, against 1 for every-step drafting"),
         ("0", TEAL, "learned parameters added"),
     ]
     for index, (stat, color, label) in enumerate(rows):
